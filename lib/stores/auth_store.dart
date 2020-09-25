@@ -1,4 +1,6 @@
+import 'package:bapp/helpers/helper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:mobx/mobx.dart';
 
 part 'auth_store.g.dart';
@@ -13,12 +15,15 @@ abstract class _AuthStore with Store {
 
   @action
   Future init() async {
-    var auth = FirebaseAuth.static();
-
+    await Firebase.initializeApp();
+    var auth = FirebaseAuth.instance;
+    ///listen for user updates
     auth.userChanges().listen((u) {
       status = AuthStatus.userPresent;
       user = u;
+      Helper.printLog("user change: $user");
     });
+
     user = auth.currentUser;
     if(user!=null){
       status = AuthStatus.userPresent;

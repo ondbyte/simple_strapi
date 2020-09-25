@@ -1,4 +1,5 @@
 
+import 'package:bapp/screens/onboarding/onboardingscreen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -18,6 +19,12 @@ class RouteManager {
         return MaterialPageRoute(
           builder: (_) {
             return SplashScreen();
+          },
+        );
+      case "/onboarding":
+        return MaterialPageRoute(
+          builder: (_) {
+            return OnBoardingScreen();
           },
         );
       default:

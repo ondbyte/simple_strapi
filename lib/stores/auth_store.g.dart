@@ -42,7 +42,7 @@ mixin _$AuthStore on _AuthStore, Store {
   final _$initAsyncAction = AsyncAction('_AuthStore.init');
 
   @override
-  Future init() {
+  Future<dynamic> init() {
     return _$initAsyncAction.run(() => super.init());
   }
 

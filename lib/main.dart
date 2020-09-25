@@ -1,5 +1,6 @@
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/auth_store.dart';
+import 'package:bapp/stores/storage_store.dart';
 import 'package:bapp/stores/themestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +20,9 @@ class App extends StatelessWidget {
         ),
         Provider<AuthStore>(
           create: (_)=> AuthStore(),
+        ),
+        Provider<StorageStore>(
+          create: (_)=>StorageStore(),
         )
       ],
       builder: (context,w){

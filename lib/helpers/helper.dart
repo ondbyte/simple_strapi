@@ -15,4 +15,8 @@ class Helper{
       return data.size.shortestSide < 600 ? false : true;
     }
   }
+
+  static void printLog(d){
+    print("[BAPP]"+ d);
+  }
 }

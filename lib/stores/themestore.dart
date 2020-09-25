@@ -13,8 +13,11 @@ abstract class _ThemeStore with Store {
 
   ///call this to change the theme to alternate one
   @action
-  void flipTheme(){
-    _flipped?selectedThemeData = getDarkThemeData():selectedThemeData = getLightThemeData();
+  void flipTheme() {
+    _flipped = !_flipped;
+    _flipped
+        ? selectedThemeData = getDarkThemeData()
+        : selectedThemeData = getLightThemeData();
   }
 
   ///changes to the light theme should be done here
@@ -28,7 +31,9 @@ abstract class _ThemeStore with Store {
       primaryColorLight: Colors.white,
       secondaryHeaderColor: Colors.white,
       primaryColorDark: Colors.black,
-      buttonColor: Colors.white,
+
+      ///changes
+      //buttonColor: Colors.teal,
       canvasColor: Colors.black,
       cardColor: Color(0xFFF0F8F7),
       disabledColor: Colors.grey[500],
@@ -156,9 +161,6 @@ abstract class _ThemeStore with Store {
           color: Colors.teal,
         ),
       ),
-      buttonTheme: ButtonThemeData(
-        buttonColor: Colors.pink,
-      ),
       cardTheme: CardTheme(
         margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         elevation: 0,
@@ -213,7 +215,9 @@ abstract class _ThemeStore with Store {
       accentColor: Colors.tealAccent[700],
       primaryColorLight: Colors.white,
       primaryColorDark: Colors.black,
-      buttonColor: Colors.white,
+
+      ///changes
+      //buttonColor: Colors.teal,
       canvasColor: Colors.white,
       cardColor: Color(0xFF212524),
       disabledColor: Colors.grey[700],
@@ -325,12 +329,13 @@ abstract class _ThemeStore with Store {
         elevation: 0,
         textTheme: TextTheme(
           headline6: TextStyle(
-              fontSize: 16,
-              letterSpacing: 0,
-              height: 1,
-              fontWeight: FontWeight.w800,
-              fontFamily: 'Lato',
-              color: Colors.white),
+            fontSize: 16,
+            letterSpacing: 0,
+            height: 1,
+            fontWeight: FontWeight.w800,
+            fontFamily: 'Lato',
+            color: Colors.white,
+          ),
         ),
         iconTheme: IconThemeData(
           color: Colors.white,

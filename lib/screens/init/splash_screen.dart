@@ -1,5 +1,7 @@
+import 'package:bapp/helpers/constants.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/stores/auth_store.dart';
+import 'package:bapp/stores/storage_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -14,13 +16,19 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
-    final authStore = context.read<AuthStore>();
     return InitWidget(
-      initializers: [
-        authStore.init
-      ],
+      initializer: ()async{
+        await context.read<AuthStore>().init();
+        await context.read<StorageStore>().init();
+      },
       onInitComplete: (){
         ///after doing things like loading from storage/checking for user go to main screen
+        ///show onboarding screens if first time customer
+        if(context.read<StorageStore>().isFirstLaunch==FirstLaunch.yes){
+          Navigator.of(context).pushReplacementNamed("/onboarding");
+          return;
+        }
+        ///customer is not a first timer
         Navigator.of(context).pushReplacementNamed("/");
       },
       child: Scaffold(
@@ -40,7 +48,7 @@ class _SplashScreenState extends State<SplashScreen> {
               Column(
                 children: <Widget>[
                   new Text(
-                    'Bapp',
+                    '$kAppName',
                     style: Theme.of(context).textTheme.headline1,
                   ),
                   Padding(
