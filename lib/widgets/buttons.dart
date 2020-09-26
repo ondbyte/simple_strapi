@@ -3,9 +3,11 @@ import 'package:flutter/widgets.dart';
 
 class PrimaryButton extends StatefulWidget {
   final Function onPressed;
-  final Widget child;
+  final String data;
+  final bool hide;
 
-  const PrimaryButton({Key key, this.onPressed, this.child}) : super(key: key);
+  const PrimaryButton(this.data, {Key key, @required this.onPressed, this.hide = false})
+      : super(key: key);
   @override
   _PrimaryButtonState createState() => _PrimaryButtonState();
 }
@@ -13,10 +15,25 @@ class PrimaryButton extends StatefulWidget {
 class _PrimaryButtonState extends State<PrimaryButton> {
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
-      color: Theme.of(context).primaryColor,
-      onPressed: widget.onPressed,
-      child: DefaultTextStyle(style: Theme.of(context).textTheme.button, child: widget.child),
+    return SizedBox(
+      width: double.maxFinite,
+      height: 41,
+      child: !widget.hide
+          ? FlatButton(
+              color: Theme.of(context).primaryColor,
+              onPressed: widget.onPressed,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                widget.data,
+                style: Theme.of(context)
+                    .textTheme
+                    .subtitle1
+                    .apply(color: Theme.of(context).primaryColorLight),
+              ),
+            )
+          : SizedBox(),
     );
   }
 }

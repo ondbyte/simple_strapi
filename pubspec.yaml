@@ -24,6 +24,7 @@ dependencies:
   path_provider: ^1.6.18
   hive: ^1.4.4
   carousel_slider: ^2.2.1
+  geolocator: ^6.0.0+4
 
 dev_dependencies:
   flutter_test:

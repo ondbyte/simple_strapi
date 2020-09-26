@@ -5,19 +5,19 @@ class OnBoardingConfig {
     Slide(
       img: "assets/svg/barber.svg",
       title: "Welcome to Bapp",
-      description: "Bapp helps you  to discover services & book appointments",
+      description: "Bapp helps you  to discover services &\nbook appointments",
     ),
     ///2
     Slide(
       img: "assets/svg/barber.svg",
       title: "Welcome to Bapp",
-      description: "Bapp helps you  to discover services & book appointments",
+      description: "Bapp helps you  to discover services &\nbook appointments",
     ),
     ///3
     Slide(
       img: "assets/svg/barber.svg",
       title: "Welcome to Bapp",
-      description: "Bapp helps you  to discover services & book appointments",
+      description: "Bapp helps you  to discover services &\nbook appointments",
     ),
   ];
 }

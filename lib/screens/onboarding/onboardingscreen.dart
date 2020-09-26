@@ -1,5 +1,6 @@
 import 'package:bapp/config/config.dart';
 import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/widgets/buttons.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -20,12 +21,15 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Spacer(
+              flex: 4,
+            ),
             CarouselSlider(
               items: List.generate(
                 OnBoardingConfig.slides.length,
                 (index) => _buildSlide(
                   context,
-                  OnBoardingConfig.slides[index],
+                  index,
                 ),
               ),
               options: CarouselOptions(
@@ -34,7 +38,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                 autoPlay: false,
                 aspectRatio: 1,
                 enableInfiniteScroll: false,
-                enlargeCenterPage: true,
+                enlargeCenterPage: false,
                 onPageChanged: (index, reason) {
                   setState(
                     () {
@@ -45,20 +49,13 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                 },
               ),
             ),
-            SizedBox(
-              height: 10,
+            Spacer(
+              flex: 2,
             ),
-            SizedBox(
-              width: double.maxFinite,
-              child: FlatButton(
-                onPressed: (){},
-                child: Text("Proceed"),
-              ),
+            _buildIndicator(context, OnBoardingConfig.slides.length),
+            Spacer(
+              flex: 1,
             ),
-            SizedBox(
-              height: 10,
-            ),
-            _buildIndicator(context, OnBoardingConfig.slides.length)
           ],
         ),
       ),
@@ -88,14 +85,16 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     );
   }
 
-  Widget _buildSlide(BuildContext context, Slide slide) {
+  Widget _buildSlide(BuildContext context, index) {
+    var slide = OnBoardingConfig.slides[index];
     return Column(
       children: [
         Expanded(
-            child: SvgPicture.asset(
-          slide.img,
-          fit: BoxFit.fitWidth,
-        )),
+          child: SvgPicture.asset(
+            slide.img,
+            fit: BoxFit.fitWidth,
+          ),
+        ),
         SizedBox(
           height: 10,
         ),
@@ -111,6 +110,16 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
           style: Theme.of(context).textTheme.bodyText1,
           maxLines: 3,
           textAlign: TextAlign.center,
+        ),
+        SizedBox(
+          height: 10,
+        ),
+        PrimaryButton(
+          "Get Started",
+          hide: index != OnBoardingConfig.slides.length - 1,
+          onPressed: () {
+            Navigator.of(context).pushReplacementNamed("/pickaplace");
+          },
         )
       ],
     );

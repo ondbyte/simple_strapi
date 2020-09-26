@@ -1,6 +1,7 @@
 import 'package:bapp/helpers/constants.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/stores/auth_store.dart';
+import 'package:bapp/stores/location_store.dart';
 import 'package:bapp/stores/storage_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -17,9 +18,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return InitWidget(
-      initializer: ()async{
+      initializer: () async {
         await context.read<AuthStore>().init();
         await context.read<StorageStore>().init();
+        await context.read<LocationStore>().init(context.read<AuthStore>());
       },
       onInitComplete: (){
         ///after doing things like loading from storage/checking for user go to main screen
