@@ -19,18 +19,29 @@ abstract class _AuthStore with Store {
     var auth = FirebaseAuth.instance;
     ///listen for user updates
     auth.userChanges().listen((u) {
-      status = AuthStatus.userPresent;
-      user = u;
+      if(u!=null){
+        status = AuthStatus.userPresent;
+        user = u;
+      }
       Helper.printLog("user change: $user");
     });
 
     user = auth.currentUser;
     if(user!=null){
       status = AuthStatus.userPresent;
+      //auth.signOut();
     } else {
       status = AuthStatus.userNotPresent;
     }
+    //print(status);
   }
+
+  Future signInAnonymous()async{
+    status = AuthStatus.unsure;
+    var auth = FirebaseAuth.instance;
+    await auth.signInAnonymously();
+  }
+
 }
 
 enum AuthStatus{

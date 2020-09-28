@@ -1,5 +1,6 @@
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/auth_store.dart';
+import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/storage_store.dart';
 import 'package:bapp/stores/themestore.dart';
 import 'package:flutter/material.dart';
@@ -23,13 +24,16 @@ class App extends StatelessWidget {
         ),
         Provider<StorageStore>(
           create: (_)=>StorageStore(),
+        ),
+        Provider<CloudStore>(
+          create: (_)=>CloudStore(),
         )
       ],
       builder: (context,w){
         return MaterialApp(
           title: "Bapp",
           theme: context.watch<ThemeStore>().selectedThemeData,
-          initialRoute: "/splashscreen",
+          initialRoute: "/",
           onGenerateRoute: RouteManager.onGenerate,
         );
       },

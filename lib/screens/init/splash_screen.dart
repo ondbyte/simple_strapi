@@ -1,7 +1,7 @@
 import 'package:bapp/helpers/constants.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/stores/auth_store.dart';
-import 'package:bapp/stores/location_store.dart';
+import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/storage_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -20,18 +20,28 @@ class _SplashScreenState extends State<SplashScreen> {
     return InitWidget(
       initializer: () async {
         await context.read<AuthStore>().init();
-        await context.read<StorageStore>().init();
-        await context.read<LocationStore>().init(context.read<AuthStore>());
       },
-      onInitComplete: (){
+      onInitComplete: () async {
         ///after doing things like loading from storage/checking for user go to main screen
         ///show onboarding screens if first time customer
-        if(context.read<StorageStore>().isFirstLaunch==FirstLaunch.yes){
+        if(context.read<AuthStore>().status==AuthStatus.userNotPresent){
+          ///first time using the app sign in anonymous
+          await context.read<AuthStore>().signInAnonymous();
+          ///initialize user data
+          await context.read<CloudStore>().init(context.read<AuthStore>());
           Navigator.of(context).pushReplacementNamed("/onboarding");
           return;
         }
+        if(context.read<AuthStore>().status==AuthStatus.userPresent){
+          ///initialize user data
+          await context.read<CloudStore>().init(context.read<AuthStore>());
+          if(context.read<CloudStore>().myLocation==null){
+            Navigator.of(context).pushReplacementNamed("/pickaplace",arguments: 0);
+            return;
+          }
+        }
         ///customer is not a first timer
-        Navigator.of(context).pushReplacementNamed("/");
+        Navigator.of(context).pushReplacementNamed("/home");
       },
       child: Scaffold(
         body: Center(

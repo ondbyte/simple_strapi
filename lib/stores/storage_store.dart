@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:bapp/classes/loacation.dart';
+import 'package:bapp/classes/location.dart';
 import 'package:bapp/helpers/constants.dart';
 import 'package:hive/hive.dart';
 import 'package:mobx/mobx.dart';
@@ -11,18 +11,16 @@ part 'storage_store.g.dart';
 class StorageStore = _StorageStore with _$StorageStore;
 
 abstract class _StorageStore with Store {
-  Directory directory;
-  LazyBox box;
-  List<ReactionDisposer> _disposers = [];
+  //Directory directory;
+  //LazyBox box;
+  //List<ReactionDisposer> _disposers = [];
 
-  @observable
-  FirstLaunch isFirstLaunch = FirstLaunch.unsure;
-  @observable
-  Location location;
+  //@observable
+  //FirstLaunch isFirstLaunch = FirstLaunch.unsure;
 
   @action
   Future init() async {
-    _setupAutoRun();
+/*    _setupAutoRun();
     directory = await getApplicationSupportDirectory();
     Hive..init(directory.path);
     box = await Hive.openLazyBox("$kAppName");
@@ -36,11 +34,11 @@ abstract class _StorageStore with Store {
       isFirstLaunch = FirstLaunch.no;
     } else {
       isFirstLaunch = FirstLaunch.yes;
-    }
+    }*/
   }
 
   void _setupAutoRun() {
-    ///write first launch
+/*    ///write first launch
     _disposers.add(
       when(
             (_) => isFirstLaunch == FirstLaunch.yes,
@@ -48,8 +46,6 @@ abstract class _StorageStore with Store {
           await box.put("launched", true);
         },
       ),
-    );
+    );*/
   }
 }
-
-enum FirstLaunch { yes, no, unsure }

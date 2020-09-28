@@ -1,10 +1,16 @@
 import 'package:bapp/config/config.dart';
 import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/stores/auth_store.dart';
+import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/buttons.dart';
+import 'package:bapp/widgets/loading.dart';
+import 'package:bapp/widgets/store_provider.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 class OnBoardingScreen extends StatefulWidget {
   @override
@@ -16,48 +22,59 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Spacer(
-              flex: 4,
-            ),
-            CarouselSlider(
-              items: List.generate(
-                OnBoardingConfig.slides.length,
-                (index) => _buildSlide(
-                  context,
-                  index,
+      body: StoreProvider<AuthStore>(
+        store: context.watch<AuthStore>(),
+        builder: (context, authStore) {
+          return Observer(
+            builder: (context){
+              return authStore.status == AuthStatus.unsure
+                  ? LoadingWidget()
+                  : Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Spacer(
+                      flex: 4,
+                    ),
+                    CarouselSlider(
+                      items: List.generate(
+                        OnBoardingConfig.slides.length,
+                            (index) => _buildSlide(
+                          context,
+                          index,
+                        ),
+                      ),
+                      options: CarouselOptions(
+                        initialPage: 0,
+                        viewportFraction: 1,
+                        autoPlay: false,
+                        aspectRatio: 1,
+                        enableInfiniteScroll: false,
+                        enlargeCenterPage: false,
+                        onPageChanged: (index, reason) {
+                          setState(
+                                () {
+                              print(index);
+                              _selected = index;
+                            },
+                          );
+                        },
+                      ),
+                    ),
+                    Spacer(
+                      flex: 2,
+                    ),
+                    _buildIndicator(context, OnBoardingConfig.slides.length),
+                    Spacer(
+                      flex: 1,
+                    ),
+                  ],
                 ),
-              ),
-              options: CarouselOptions(
-                initialPage: 0,
-                viewportFraction: 1,
-                autoPlay: false,
-                aspectRatio: 1,
-                enableInfiniteScroll: false,
-                enlargeCenterPage: false,
-                onPageChanged: (index, reason) {
-                  setState(
-                    () {
-                      print(index);
-                      _selected = index;
-                    },
-                  );
-                },
-              ),
-            ),
-            Spacer(
-              flex: 2,
-            ),
-            _buildIndicator(context, OnBoardingConfig.slides.length),
-            Spacer(
-              flex: 1,
-            ),
-          ],
-        ),
+              );
+            },
+          );
+        },
       ),
     );
   }
@@ -117,8 +134,9 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
         PrimaryButton(
           "Get Started",
           hide: index != OnBoardingConfig.slides.length - 1,
-          onPressed: () {
-            Navigator.of(context).pushReplacementNamed("/pickaplace");
+          onPressed: () async {
+            Navigator.of(context)
+                .pushReplacementNamed("/pickaplace", arguments: 0);
           },
         )
       ],
