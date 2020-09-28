@@ -47,8 +47,7 @@ abstract class _CloudStore with Store {
   @action
   Future getMytLocation() async {
     if (myData.containsKey("my_location")) {
-      var locationDocPath = myData["my_location"];
-      var locationDoc = _firstore.doc(locationDocPath);
+      var locationDoc = myData["my_location"];
       var location = await locationDoc.get();
 
       ///id will be name of the
