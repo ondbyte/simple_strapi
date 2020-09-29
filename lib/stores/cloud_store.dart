@@ -54,6 +54,8 @@ abstract class _CloudStore with Store {
       myLocation = Location.fromJson(locationDoc.id, location.data());
 
       Helper.printLog(myLocation.toString());
+    } else {
+     throw FlutterError("This shouldnt have happened @cloud_store");
     }
   }
 

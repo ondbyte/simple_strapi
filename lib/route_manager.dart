@@ -4,7 +4,7 @@ import 'package:bapp/screens/onboarding/onboardingscreen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'screens/bapp.dart';
+import 'screens/home/bapp.dart';
 import 'screens/init/splash_screen.dart';
 
 class RouteManager {

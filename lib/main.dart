@@ -1,6 +1,7 @@
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/stores/feedback_store.dart';
 import 'package:bapp/stores/storage_store.dart';
 import 'package:bapp/stores/themestore.dart';
 import 'package:flutter/material.dart';
@@ -27,6 +28,9 @@ class App extends StatelessWidget {
         ),
         Provider<CloudStore>(
           create: (_)=>CloudStore(),
+        ),
+        Provider<FeedbackStore>(
+          create: (_)=>FeedbackStore(),
         )
       ],
       builder: (context,w){

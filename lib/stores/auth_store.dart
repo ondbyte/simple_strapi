@@ -20,7 +20,11 @@ abstract class _AuthStore with Store {
     ///listen for user updates
     auth.userChanges().listen((u) {
       if(u!=null){
-        status = AuthStatus.userPresent;
+        if(u.isAnonymous){
+          status = AuthStatus.anonymous;
+        } else {
+          status = AuthStatus.userPresent;
+        }
         user = u;
       }
       Helper.printLog("user change: $user");
@@ -28,7 +32,11 @@ abstract class _AuthStore with Store {
 
     user = auth.currentUser;
     if(user!=null){
-      status = AuthStatus.userPresent;
+      if(user.isAnonymous){
+        status = AuthStatus.anonymous;
+      }else {
+        status = AuthStatus.userPresent;
+      }
       //auth.signOut();
     } else {
       status = AuthStatus.userNotPresent;
@@ -47,5 +55,6 @@ abstract class _AuthStore with Store {
 enum AuthStatus{
   unsure,
   userPresent,
-  userNotPresent
+  userNotPresent,
+  anonymous
 }

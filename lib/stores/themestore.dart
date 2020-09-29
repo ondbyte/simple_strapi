@@ -23,6 +23,16 @@ abstract class _ThemeStore with Store {
   ///changes to the light theme should be done here
   static ThemeData getLightThemeData() {
     return ThemeData(
+      ///should add this to darker version too
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        selectedItemColor: Colors.teal,
+        showUnselectedLabels: true,
+        showSelectedLabels: true,
+        unselectedItemColor: Colors.black,
+      ),
+
+      //////////////////////////////
+
       backgroundColor: Colors.white,
       scaffoldBackgroundColor: Colors.white,
       // scaffoldBackgroundColor: Colors.white,
@@ -34,7 +44,7 @@ abstract class _ThemeStore with Store {
 
       ///changes
       //buttonColor: Colors.teal,
-      canvasColor: Colors.black,
+      canvasColor: Colors.white,
       cardColor: Color(0xFFF0F8F7),
       disabledColor: Colors.grey[500],
       bottomAppBarColor: Colors.white,
@@ -150,7 +160,7 @@ abstract class _ThemeStore with Store {
         elevation: 0,
         textTheme: TextTheme(
           headline6: TextStyle(
-              fontSize: 16,
+              fontSize: 22,
               letterSpacing: 0,
               height: 1,
               fontWeight: FontWeight.w800,
@@ -329,7 +339,7 @@ abstract class _ThemeStore with Store {
         elevation: 0,
         textTheme: TextTheme(
           headline6: TextStyle(
-            fontSize: 16,
+            fontSize: 22,
             letterSpacing: 0,
             height: 1,
             fontWeight: FontWeight.w800,

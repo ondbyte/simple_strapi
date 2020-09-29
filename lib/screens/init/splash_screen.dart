@@ -2,6 +2,7 @@ import 'package:bapp/helpers/constants.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/stores/feedback_store.dart';
 import 'package:bapp/stores/storage_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -20,6 +21,7 @@ class _SplashScreenState extends State<SplashScreen> {
     return InitWidget(
       initializer: () async {
         await context.read<AuthStore>().init();
+        //await context.read<FeedbackStore>().init();
       },
       onInitComplete: () async {
         ///after doing things like loading from storage/checking for user go to main screen
@@ -32,7 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
           Navigator.of(context).pushReplacementNamed("/onboarding");
           return;
         }
-        if(context.read<AuthStore>().status==AuthStatus.userPresent){
+        if(context.read<AuthStore>().status==AuthStatus.anonymous||context.read<AuthStore>().status==AuthStatus.userPresent){
           ///initialize user data
           await context.read<CloudStore>().init(context.read<AuthStore>());
           if(context.read<CloudStore>().myLocation==null){
