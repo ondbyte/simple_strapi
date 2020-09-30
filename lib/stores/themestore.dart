@@ -158,6 +158,10 @@ abstract class _ThemeStore with Store {
         color: Colors.white,
         // color: Colors.white,
         elevation: 0,
+        centerTitle: false,
+        actionsIconTheme: IconThemeData(
+          color: Colors.black
+        ),
         textTheme: TextTheme(
           headline6: TextStyle(
               fontSize: 22,

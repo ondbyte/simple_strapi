@@ -26,52 +26,53 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
         store: context.watch<AuthStore>(),
         builder: (context, authStore) {
           return Observer(
-            builder: (context){
+            builder: (context) {
               return authStore.status == AuthStatus.unsure
                   ? LoadingWidget()
                   : Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Spacer(
-                      flex: 4,
-                    ),
-                    CarouselSlider(
-                      items: List.generate(
-                        OnBoardingConfig.slides.length,
-                            (index) => _buildSlide(
-                          context,
-                          index,
-                        ),
+                      padding: EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Spacer(
+                            flex: 4,
+                          ),
+                          CarouselSlider(
+                            items: List.generate(
+                              OnBoardingConfig.slides.length,
+                              (index) => _buildSlide(
+                                context,
+                                index,
+                              ),
+                            ),
+                            options: CarouselOptions(
+                              initialPage: 0,
+                              viewportFraction: 1,
+                              autoPlay: false,
+                              aspectRatio: 1,
+                              enableInfiniteScroll: false,
+                              enlargeCenterPage: false,
+                              onPageChanged: (index, reason) {
+                                setState(
+                                  () {
+                                    print(index);
+                                    _selected = index;
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                          Spacer(
+                            flex: 2,
+                          ),
+                          _buildIndicator(
+                              context, OnBoardingConfig.slides.length),
+                          Spacer(
+                            flex: 1,
+                          ),
+                        ],
                       ),
-                      options: CarouselOptions(
-                        initialPage: 0,
-                        viewportFraction: 1,
-                        autoPlay: false,
-                        aspectRatio: 1,
-                        enableInfiniteScroll: false,
-                        enlargeCenterPage: false,
-                        onPageChanged: (index, reason) {
-                          setState(
-                                () {
-                              print(index);
-                              _selected = index;
-                            },
-                          );
-                        },
-                      ),
-                    ),
-                    Spacer(
-                      flex: 2,
-                    ),
-                    _buildIndicator(context, OnBoardingConfig.slides.length),
-                    Spacer(
-                      flex: 1,
-                    ),
-                  ],
-                ),
-              );
+                    );
             },
           );
         },
@@ -135,6 +136,11 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
           "Get Started",
           hide: index != OnBoardingConfig.slides.length - 1,
           onPressed: () async {
+            ///first time so sign in anonymously
+            await context.read<AuthStore>().signInAnonymous();
+            ///setup user data
+            //await await context.read<CloudStore>().init(context.read<AuthStore>());
+            ///ask a place
             Navigator.of(context)
                 .pushReplacementNamed("/pickaplace", arguments: 0);
           },

@@ -27,6 +27,7 @@ dependencies:
   geolocator: ^6.0.0+4
   cloud_firestore: ^0.14.0+2
   feather_icons_flutter: ^4.7.4
+  table_calendar: ^2.2.3
 
 dev_dependencies:
   flutter_test:

@@ -54,19 +54,41 @@ mixin _$CloudStore on _CloudStore, Store {
     });
   }
 
-  final _$isFirstLaunchAtom = Atom(name: '_CloudStore.isFirstLaunch');
+  final _$userTypeAtom = Atom(name: '_CloudStore.userType');
 
   @override
-  FirstLaunch get isFirstLaunch {
-    _$isFirstLaunchAtom.reportRead();
-    return super.isFirstLaunch;
+  UserType get userType {
+    _$userTypeAtom.reportRead();
+    return super.userType;
   }
 
   @override
-  set isFirstLaunch(FirstLaunch value) {
-    _$isFirstLaunchAtom.reportWrite(value, super.isFirstLaunch, () {
-      super.isFirstLaunch = value;
+  set userType(UserType value) {
+    _$userTypeAtom.reportWrite(value, super.userType, () {
+      super.userType = value;
     });
+  }
+
+  final _$alterEgoAtom = Atom(name: '_CloudStore.alterEgo');
+
+  @override
+  UserType get alterEgo {
+    _$alterEgoAtom.reportRead();
+    return super.alterEgo;
+  }
+
+  @override
+  set alterEgo(UserType value) {
+    _$alterEgoAtom.reportWrite(value, super.alterEgo, () {
+      super.alterEgo = value;
+    });
+  }
+
+  final _$getMyRolesAsyncAction = AsyncAction('_CloudStore.getMyRoles');
+
+  @override
+  Future<dynamic> getMyRoles() {
+    return _$getMyRolesAsyncAction.run(() => super.getMyRoles());
   }
 
   final _$getMytLocationAsyncAction = AsyncAction('_CloudStore.getMytLocation');
@@ -100,7 +122,8 @@ mixin _$CloudStore on _CloudStore, Store {
 myLocation: ${myLocation},
 activeCountries: ${activeCountries},
 availableLocations: ${availableLocations},
-isFirstLaunch: ${isFirstLaunch}
+userType: ${userType},
+alterEgo: ${alterEgo}
     ''';
   }
 }

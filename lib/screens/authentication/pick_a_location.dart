@@ -1,4 +1,5 @@
 import 'package:bapp/classes/location.dart';
+import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/store_provider.dart';
@@ -23,16 +24,18 @@ class PickALocationScreen extends StatelessWidget {
 
   Widget _showCountries(BuildContext context) {
     return StoreProvider<CloudStore>(
-      init: (cloudStore) {
-        cloudStore.getActiveCountries();
+      store: Provider.of<CloudStore>(context,listen: false),
+      init: (cloudStore) async {
+        ///initialize user data
+        await cloudStore.init(Provider.of<AuthStore>(context,listen: false));
+        await cloudStore.getActiveCountries();
       },
-      store: Provider.of<CloudStore>(context),
       builder: (_, cloudStore) {
         return Observer(
           builder: (context) {
             return Scaffold(
               appBar: AppBar(
-                title: Text("Pick a Country"),
+                title: Text("Pick a Country",style: Theme.of(context).textTheme.subtitle1,),
               ),
               body: cloudStore.activeCountries != null
                   ? ListView(
@@ -68,7 +71,7 @@ class PickALocationScreen extends StatelessWidget {
           builder: (context) {
             return Scaffold(
               appBar: AppBar(
-                title: Text("Pick a City"),
+                title: Text("Pick a City",style: Theme.of(context).textTheme.subtitle1,),
               ),
               body: cloudStore.availableLocations!=null?ListView(
                 children: List.generate(
@@ -92,17 +95,18 @@ class PickALocationScreen extends StatelessWidget {
     return Column(
       children: [
         ListTile(
+          trailing: Icon(Icons.arrow_forward_ios),
           title: Text(
             "$state",
             style: Theme.of(context).textTheme.subtitle1,
           ),
-          trailing: Icon(Icons.arrow_forward_ios),
         ),
         ...List.generate(
           locations.length,
           (index) => ListTile(
+            trailing: Icon(Icons.arrow_forward_ios),
             title: Text(locations[index].locality,
-                style: Theme.of(context).textTheme.bodyText1),
+                style: Theme.of(context).textTheme.subtitle2),
                 onTap: (){
                   context.read<CloudStore>().myLocation = locations[index];
                   Navigator.of(context).pushReplacementNamed("/home");

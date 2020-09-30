@@ -4,6 +4,7 @@ import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/feedback_store.dart';
 import 'package:bapp/stores/storage_store.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -26,24 +27,25 @@ class _SplashScreenState extends State<SplashScreen> {
       onInitComplete: () async {
         ///after doing things like loading from storage/checking for user go to main screen
         ///show onboarding screens if first time customer
-        if(context.read<AuthStore>().status==AuthStatus.userNotPresent){
-          ///first time using the app sign in anonymous
-          await context.read<AuthStore>().signInAnonymous();
+        //await FirebaseAuth.instance.signOut();
+        final authStore = Provider.of<AuthStore>(context,listen: false);
+        final cloudStore = Provider.of<CloudStore>(context,listen: false);
+        if(authStore.status==AuthStatus.userNotPresent){
           ///initialize user data
-          await context.read<CloudStore>().init(context.read<AuthStore>());
           Navigator.of(context).pushReplacementNamed("/onboarding");
           return;
         }
-        if(context.read<AuthStore>().status==AuthStatus.anonymous||context.read<AuthStore>().status==AuthStatus.userPresent){
-          ///initialize user data
-          await context.read<CloudStore>().init(context.read<AuthStore>());
-          if(context.read<CloudStore>().myLocation==null){
+        if(authStore.status==AuthStatus.anonymous||authStore.status==AuthStatus.userPresent){
+          await cloudStore.init(context.read<AuthStore>());
+          if(cloudStore.myLocation==null){
             Navigator.of(context).pushReplacementNamed("/pickaplace",arguments: 0);
             return;
+          } else {
+            ///customer is not a first timer
+            ///initialize user data
+            Navigator.of(context).pushReplacementNamed("/home");
           }
         }
-        ///customer is not a first timer
-        Navigator.of(context).pushReplacementNamed("/home");
       },
       child: Scaffold(
         body: Center(

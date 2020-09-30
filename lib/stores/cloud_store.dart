@@ -1,4 +1,5 @@
 import 'package:bapp/classes/location.dart';
+import 'package:bapp/config/config.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -23,7 +24,9 @@ abstract class _CloudStore with Store {
   @observable
   Map<String, List<Location>> availableLocations;
   @observable
-  FirstLaunch isFirstLaunch = FirstLaunch.unsure;
+  UserType userType;
+  @observable
+  UserType alterEgo;
 
 
   Future init(AuthStore a) async {
@@ -36,12 +39,44 @@ abstract class _CloudStore with Store {
 
     await getUserData();
     await getMytLocation();
+    await getMyRoles();
     _setupAutoRun();
   }
 
   Future getUserData()async{
     var snap = await _firstore.doc("users/${_me.uid}").get();
     myData = snap.data() ?? {};
+  }
+
+  @action
+  Future getMyRoles() async {
+    if(myData.containsKey("my_user_type")){
+      userType = UserType.values[myData["my_user_type"]];
+      if(myData.containsKey("my_alter_ego")){
+        alterEgo = UserType.values[myData["my_alter_ego"]];
+      } else {
+        alterEgo = UserType.customer;
+        setMyAlterEgo();
+      }
+    } else {
+      alterEgo = UserType.customer;
+      userType = UserType.customer;
+      setMyUserType();
+      setMyAlterEgo();
+    }
+    ///update menu items according to role
+    Helper.filterMenuItems(userType, alterEgo);
+  }
+
+  ///will auto run on change
+  Future setMyUserType() async {
+    var doc = _firstore.doc("users/${_me.uid}");
+    await doc.set({"my_user_type":userType.index},SetOptions(merge: true),);
+  }
+  ///will auto run on change
+  Future setMyAlterEgo() async {
+    var doc = _firstore.doc("users/${_me.uid}");
+    await doc.set({"my_alter_ego":alterEgo.index},SetOptions(merge: true),);
   }
 
   @action
@@ -52,10 +87,7 @@ abstract class _CloudStore with Store {
 
       ///id will be name of the
       myLocation = Location.fromJson(locationDoc.id, location.data());
-
-      Helper.printLog(myLocation.toString());
-    } else {
-     throw FlutterError("This shouldnt have happened @cloud_store");
+      //Helper.printLog(myLocation.toString());
     }
   }
 
@@ -96,10 +128,19 @@ abstract class _CloudStore with Store {
   }
 
   void _setupAutoRun() {
-    ///write first launch
     _disposers.add(
       reaction((_) => myLocation, (_) async {
         await setMyLocation();
+      }),
+    );
+    _disposers.add(
+      reaction((_) => userType, (_) async {
+        await setMyUserType();
+      }),
+    );
+    _disposers.add(
+      reaction((_) => alterEgo, (_) async {
+        await setMyAlterEgo();
       }),
     );
   }
@@ -123,4 +164,3 @@ abstract class _CloudStore with Store {
 
 }
 
-enum FirstLaunch { yes, no, unsure }
