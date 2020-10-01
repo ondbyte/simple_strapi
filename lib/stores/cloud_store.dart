@@ -39,7 +39,7 @@ abstract class _CloudStore with Store {
 
     await getUserData();
     await getMytLocation();
-    await getMyRoles();
+    await getMyUserTypes();
     _setupAutoRun();
   }
 
@@ -49,7 +49,14 @@ abstract class _CloudStore with Store {
   }
 
   @action
-  Future getMyRoles() async {
+  Future switchUserType() async {
+    final tmp = userType;
+    userType = alterEgo;
+    alterEgo = tmp;
+  }
+
+  @action
+  Future getMyUserTypes() async {
     if(myData.containsKey("my_user_type")){
       userType = UserType.values[myData["my_user_type"]];
       if(myData.containsKey("my_alter_ego")){
@@ -65,7 +72,7 @@ abstract class _CloudStore with Store {
       setMyAlterEgo();
     }
     ///update menu items according to role
-    Helper.filterMenuItems(userType, alterEgo);
+    Helper.filterMenuItems(userType, alterEgo,_authStore.status);
   }
 
   ///will auto run on change

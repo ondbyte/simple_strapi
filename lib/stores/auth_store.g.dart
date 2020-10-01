@@ -46,6 +46,13 @@ mixin _$AuthStore on _AuthStore, Store {
     return _$initAsyncAction.run(() => super.init());
   }
 
+  final _$signOutAsyncAction = AsyncAction('_AuthStore.signOut');
+
+  @override
+  Future<dynamic> signOut() {
+    return _$signOutAsyncAction.run(() => super.signOut());
+  }
+
   @override
   String toString() {
     return '''

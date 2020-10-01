@@ -18,7 +18,9 @@ class _InitWidgetState extends State<InitWidget> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       await widget.initializer();
-      widget.onInitComplete();
+      if(widget.onInitComplete!=null){
+        widget.onInitComplete();
+      }
     });
   }
 

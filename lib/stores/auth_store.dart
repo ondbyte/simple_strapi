@@ -21,7 +21,7 @@ abstract class _AuthStore with Store {
     auth.userChanges().listen((u) {
       if(u!=null){
         if(u.isAnonymous){
-          status = AuthStatus.anonymous;
+          status = AuthStatus.anonymousUser;
         } else {
           status = AuthStatus.userPresent;
         }
@@ -33,7 +33,7 @@ abstract class _AuthStore with Store {
     user = auth.currentUser;
     if(user!=null){
       if(user.isAnonymous){
-        status = AuthStatus.anonymous;
+        status = AuthStatus.anonymousUser;
       }else {
         status = AuthStatus.userPresent;
       }
@@ -50,11 +50,20 @@ abstract class _AuthStore with Store {
     await auth.signInAnonymously();
   }
 
+  @action
+  Future signOut() async {
+    if(user.isAnonymous){
+      return;
+    }
+    await FirebaseAuth.instance.signOut();
+    await FirebaseAuth.instance.signInAnonymously();
+  }
+
 }
 
 enum AuthStatus{
   unsure,
   userPresent,
   userNotPresent,
-  anonymous
+  anonymousUser
 }

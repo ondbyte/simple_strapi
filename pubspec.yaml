@@ -28,6 +28,9 @@ dependencies:
   cloud_firestore: ^0.14.0+2
   feather_icons_flutter: ^4.7.4
   table_calendar: ^2.2.3
+  enum_to_string: ^1.0.13
+  pull_to_refresh: ^1.6.2
+  bubble_tab_indicator: ^0.1.4
 
 dev_dependencies:
   flutter_test:

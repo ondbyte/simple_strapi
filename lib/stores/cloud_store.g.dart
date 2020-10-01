@@ -84,11 +84,18 @@ mixin _$CloudStore on _CloudStore, Store {
     });
   }
 
-  final _$getMyRolesAsyncAction = AsyncAction('_CloudStore.getMyRoles');
+  final _$switchUserTypeAsyncAction = AsyncAction('_CloudStore.switchUserType');
 
   @override
-  Future<dynamic> getMyRoles() {
-    return _$getMyRolesAsyncAction.run(() => super.getMyRoles());
+  Future<dynamic> switchUserType() {
+    return _$switchUserTypeAsyncAction.run(() => super.switchUserType());
+  }
+
+  final _$getMyUserTypesAsyncAction = AsyncAction('_CloudStore.getMyUserTypes');
+
+  @override
+  Future<dynamic> getMyUserTypes() {
+    return _$getMyUserTypesAsyncAction.run(() => super.getMyUserTypes());
   }
 
   final _$getMytLocationAsyncAction = AsyncAction('_CloudStore.getMytLocation');

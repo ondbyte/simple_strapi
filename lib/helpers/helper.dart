@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:bapp/config/config.dart';
+import 'package:bapp/stores/auth_store.dart';
 import 'package:device_info/device_info.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -23,20 +24,22 @@ class Helper{
     print("[BAPP]"+ d);
   }
 
-  static filterMenuItems(UserType userType,UserType alterEgo){
+  static filterMenuItems(UserType userType,UserType alterEgo,AuthStatus authStatus){
     final List<List<MenuItem>> ls = [];
     MenuConfig.menuItems.forEach((element) {
       final List<MenuItem> l = [];
       element.forEach((el) {
-        if(el.showWhen.contains(userType)){
-          if(el.specificToAlterEgo.contains(alterEgo)){
-            l.add(el);
+        if(el.showWhenUserTypeIs.contains(userType)){
+          if(el.showWhenAlterEgoIs.contains(alterEgo)){
+            if(el.showWhenAuthStatusIs.contains(authStatus)){
+              l.add(el);
+            }
           }
         }
       });
       ls.add(l);
     });
     kFilteredMenuItems = ls;
-    print(ls);
+    //print(ls);
   }
 }

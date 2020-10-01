@@ -7,6 +7,8 @@ import 'package:bapp/stores/themestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'stores/updates_store.dart';
+
 void main() {
   runApp(App());
 }
@@ -31,6 +33,9 @@ class App extends StatelessWidget {
         ),
         Provider<FeedbackStore>(
           create: (_)=>FeedbackStore(),
+        ),
+        Provider<UpdatesStore>(
+          create: (_)=>UpdatesStore(),
         )
       ],
       builder: (context,w){

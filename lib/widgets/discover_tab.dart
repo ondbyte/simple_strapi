@@ -61,11 +61,11 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     ),
                   if (authStore.status == AuthStatus.userPresent)
                     _getHowWasYourExperience(context),
-                  if (authStore.status == AuthStatus.anonymous)
+                  if (authStore.status == AuthStatus.anonymousUser)
                     SizedBox(
                       height: 20,
                     ),
-                  if (authStore.status == AuthStatus.anonymous)
+                  if (authStore.status == AuthStatus.anonymousUser)
                     _getOwnABusiness(context),
                 ],
               ),

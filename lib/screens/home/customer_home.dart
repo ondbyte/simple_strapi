@@ -1,11 +1,14 @@
 import 'package:bapp/config/config.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/widgets/bapp_bar.dart';
 import 'package:bapp/widgets/bookings_tab.dart';
 import 'package:bapp/widgets/discover_tab.dart';
 import 'package:bapp/widgets/favorites_tab.dart';
+import 'package:bapp/widgets/location_label.dart';
 import 'package:bapp/widgets/menu.dart';
 import 'package:bapp/widgets/store_provider.dart';
+import 'package:bapp/widgets/updates_tab.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -20,13 +23,13 @@ class CustomerHome extends StatefulWidget {
 class _CustomerHomeState extends State<CustomerHome> {
   int _selectedPage = 0;
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: _getPageTitle(_selectedPage),
-        centerTitle: false,
+        flexibleSpace: BappBar(
+          leading: _getPageTitle(_selectedPage),
+        ),
       ),
       endDrawer: Menu(),
       body: Padding(
@@ -36,7 +39,7 @@ class _CustomerHomeState extends State<CustomerHome> {
             DiscoverTab(),
             BookingsTab(),
             FavoritesTab(),
-            Container(),
+            UpdatesTab(),
           ],
           index: _selectedPage,
         ),
@@ -65,30 +68,7 @@ class _CustomerHomeState extends State<CustomerHome> {
     switch (i) {
       case 0:
         {
-          return Row(
-            children: [
-              Icon(
-                FeatherIcons.mapPin,
-                color: Theme.of(context).primaryColorDark,
-              ),
-              SizedBox(
-                width: 10,
-              ),
-              StoreProvider<CloudStore>(
-                store: context.watch<CloudStore>(),
-                builder: (_, cloudStore) {
-                  return Observer(
-                    builder: (_) {
-                      return Text(
-                        cloudStore.myLocation.locality,
-                        style: Theme.of(context).textTheme.headline3,
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
-          );
+          return LocationLabelWidget();
         }
       case 1:
         {

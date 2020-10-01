@@ -1,4 +1,5 @@
 import 'package:bapp/helpers/constants.dart';
+import 'package:bapp/stores/auth_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
@@ -6,18 +7,18 @@ import 'package:flutter/widgets.dart';
 
 ///add colors of cards across the app (color will be picked up randomely most of the time)
 class CardsColor {
-  static List<Color> colors = [
-    Color(0xff75B79E),
-    Color(0xff5A3D55),
-    Color(0xffE79C2A),
-    Color(0xff1BC3AD),
-  ];
+  static Map<String, Color> colors = {
+    "lightGreen": Color(0xff75B79E),
+    "purple": Color(0xff5A3D55),
+    "orange": Color(0xffE79C2A),
+    "teal": Color(0xff1BC3AD),
+  };
 
   static int last = 0;
   static Color next() {
     last++;
     if (last == colors.length) last = 0;
-    return colors[last];
+    return colors.values.elementAt(last);
   }
 }
 
@@ -63,7 +64,7 @@ class HomeScreenTabsConfig {
       icon: FeatherIcons.heart,
     ),
     Tab(
-      name: "Bookings",
+      name: "Updates",
       icon: FeatherIcons.bell,
     ),
   ];
@@ -114,6 +115,9 @@ class MenuConfig {
         name: "Your Profile",
         icon: FeatherIcons.user,
         kind: MenuItemKind.yourProfile,
+        showWhenAuthStatusIs: [
+          AuthStatus.userPresent,
+        ],
       ),
       MenuItem(
         name: "Settings",
@@ -124,6 +128,10 @@ class MenuConfig {
         name: "Rate the App",
         icon: FeatherIcons.star,
         kind: MenuItemKind.rateTheApp,
+        showWhenAuthStatusIs: [
+          AuthStatus.userPresent,
+          AuthStatus.anonymousUser,
+        ],
       ),
       MenuItem(
         name: "Help us improve",
@@ -134,11 +142,25 @@ class MenuConfig {
         name: "Refer a business",
         icon: FeatherIcons.disc,
         kind: MenuItemKind.referABusiness,
+        showWhenAuthStatusIs: [
+          AuthStatus.userPresent,
+        ],
       ),
       MenuItem(
         name: "Logout",
         icon: FeatherIcons.logOut,
-        kind: MenuItemKind.logout,
+        kind: MenuItemKind.logOut,
+        showWhenAuthStatusIs: [
+          AuthStatus.userPresent,
+        ],
+      ),
+      MenuItem(
+        name: "Login",
+        icon: FeatherIcons.logIn,
+        kind: MenuItemKind.logIn,
+        showWhenAuthStatusIs: [
+          AuthStatus.anonymousUser,
+        ],
       ),
     ],
 
@@ -148,7 +170,10 @@ class MenuConfig {
           name: "Switch to shopping",
           icon: FeatherIcons.repeat,
           kind: MenuItemKind.switchTosShopping,
-          showWhen: [
+          showWhenAuthStatusIs: [
+            AuthStatus.userPresent
+          ],
+          showWhenUserTypeIs: [
             UserType.sudo,
             UserType.sales,
             UserType.salesManager,
@@ -159,16 +184,52 @@ class MenuConfig {
           name: "Switch to business",
           icon: FeatherIcons.repeat,
           kind: MenuItemKind.switchToBusiness,
-          specificToAlterEgo: [UserType.businessOwner,UserType.businessStaff],
-          showWhen: [
+          showWhenAuthStatusIs: [
+            AuthStatus.userPresent
+          ],
+          showWhenAlterEgoIs: [
+            UserType.businessOwner,
+            UserType.businessStaff,
+            UserType.customer,
+          ],
+          showWhenUserTypeIs: [
+            UserType.customer,
+          ]),
+      MenuItem(
+          name: "Switch to sales",
+          icon: FeatherIcons.repeat,
+          kind: MenuItemKind.switchToSales,
+          showWhenAuthStatusIs: [
+            AuthStatus.userPresent
+          ],
+          showWhenAlterEgoIs: [
+            UserType.customer,
+            UserType.sales
+          ],
+          showWhenUserTypeIs: [
             UserType.customer,
           ]),
       MenuItem(
           name: "Manager",
           icon: FeatherIcons.briefcase,
-          kind: MenuItemKind.manager,
-          specificToAlterEgo: [UserType.salesManager],
-          showWhen: [
+          kind: MenuItemKind.switchToManager,
+          showWhenAuthStatusIs: [
+            AuthStatus.userPresent
+          ],
+          showWhenAlterEgoIs: [
+            UserType.salesManager
+          ],
+          showWhenUserTypeIs: [
+            UserType.customer,
+          ]),
+      MenuItem(
+          name: "Sudo",
+          icon: FeatherIcons.hash,
+          kind: MenuItemKind.switchToSudoUser,
+          showWhenAlterEgoIs: [
+            UserType.sudo
+          ],
+          showWhenUserTypeIs: [
             UserType.customer,
           ]),
     ],
@@ -185,31 +246,36 @@ enum UserType {
 }
 
 enum MenuItemKind {
+  logIn,
   yourProfile,
   settings,
   rateTheApp,
   helpUsImprove,
   referABusiness,
-  logout,
+  logOut,
   switchTosShopping,
   switchToBusiness,
-  manager,
-  onBoardABusiness
+  switchToManager,
+  onBoardABusiness,
+  switchToSales,
+  switchToSudoUser
 }
 
 class MenuItem {
   final String name;
   final IconData icon;
   final MenuItemKind kind;
-  final List<UserType> showWhen;
-  final List<UserType> specificToAlterEgo;
+  final List<UserType> showWhenUserTypeIs;
+  final List<UserType> showWhenAlterEgoIs;
+  final List<AuthStatus> showWhenAuthStatusIs;
 
   MenuItem(
-      {this.name,
+      {this.showWhenAuthStatusIs = AuthStatus.values,
+      this.name,
       this.icon,
       this.kind,
-      this.showWhen = const [UserType.customer],
-      this.specificToAlterEgo = const [UserType.customer]});
+      this.showWhenUserTypeIs = const [UserType.customer],
+      this.showWhenAlterEgoIs = const [UserType.customer]});
 }
 
 class Reasons {

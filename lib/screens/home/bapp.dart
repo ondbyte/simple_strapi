@@ -1,4 +1,7 @@
+import 'package:bapp/screens/init/initiating_widget.dart';
+import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/feedback_store.dart';
+import 'package:bapp/stores/updates_store.dart';
 import 'package:bapp/widgets/feedback_layer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -10,12 +13,18 @@ class Bapp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        if("notbusiness"=="notbusiness")
-          CustomerHome(),
-        FeedBackLayerWidget()
-      ],
+    return InitWidget(
+      initializer: () async {
+        final authStore = Provider.of<AuthStore>(context, listen: false);
+        await Provider.of<UpdatesStore>(context, listen: false).init(authStore);
+      },
+      child: Stack(
+        children: [
+          if("notbusiness"=="notbusiness")
+            CustomerHome(),
+          FeedBackLayerWidget()
+        ],
+      ),
     );
   }
 }
