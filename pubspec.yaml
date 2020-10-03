@@ -31,6 +31,7 @@ dependencies:
   enum_to_string: ^1.0.13
   pull_to_refresh: ^1.6.2
   bubble_tab_indicator: ^0.1.4
+  flushbar: ^1.10.4
 
 dev_dependencies:
   flutter_test:

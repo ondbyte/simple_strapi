@@ -1,7 +1,12 @@
+import 'dart:math';
+
 import 'package:bapp/classes/notification_update.dart';
 import 'package:bapp/config/config.dart' hide Tab;
 import 'package:bapp/stores/auth_store.dart';
+import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/stores/feedback_store.dart';
 import 'package:bapp/stores/updates_store.dart';
+import 'package:bapp/widgets/undo_widget.dart';
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
@@ -64,6 +69,9 @@ class _UpdatesTabState extends State<UpdatesTab> {
                         ),
                       ),
                       SizedBox(
+                        height: 20,
+                      ),
+                      SizedBox(
                         height: cons.maxHeight - 64,
                         child: IndexedStack(
                           index: _selectedUpdateTab,
@@ -85,7 +93,7 @@ class _UpdatesTabState extends State<UpdatesTab> {
   }
 
   ///updates tab
-  Widget _getUpdates(List<NotificationUpdate> updates) {
+  Widget _getUpdates(Map<String, NotificationUpdate> updates) {
     return CustomScrollView(
       slivers: <Widget>[
         SliverList(
@@ -98,7 +106,7 @@ class _UpdatesTabState extends State<UpdatesTab> {
   }
 
   ///news tab
-  Widget _getNews(List<NotificationUpdate> updates) {
+  Widget _getNews(Map<String, NotificationUpdate> updates) {
     return CustomScrollView(
       slivers: <Widget>[
         SliverList(
@@ -110,13 +118,41 @@ class _UpdatesTabState extends State<UpdatesTab> {
     );
   }
 
-  List<Widget> _getTiles(List<NotificationUpdate> updates) {
+  List<Widget> _getTiles(Map<String, NotificationUpdate> updates) {
     final ws = <Widget>[];
     updates.forEach(
-      (element) {
-        ws.add(NotificationUpdateTileWidget(
-          update: element,
-        ));
+      (id, element) {
+        ws.add(
+          UndoWidget(
+            key: Key(id),
+            undoFeedBack: TheFeedBack<NotificationUpdate>(
+              message: "You\'ve viewed the update",
+              variable: element,
+              doFirst: (u){
+                if(u.type==NotificationUpdateType.news){
+                  Provider.of<UpdatesStore>(context,listen: false).news.remove(u.id);
+                } else
+                if(u.type==NotificationUpdateType.orderUpdate){
+                  Provider.of<UpdatesStore>(context,listen: false).updates.remove(u.id);
+                }                
+              },
+              doOnOkay: (u){
+                Provider.of<UpdatesStore>(context,).setViewedForUpdate(u);
+              },
+              doOnUndo: (u){
+                if(u.type==NotificationUpdateType.news){
+                  Provider.of<UpdatesStore>(context,listen: false).news[u.id] = u;
+                } else
+                if(u.type==NotificationUpdateType.orderUpdate){
+                  Provider.of<UpdatesStore>(context,listen: false).updates[u.id] = u;
+                }
+              }
+            ),
+            child: NotificationUpdateTileWidget(
+              update: element,
+            ),
+          ),
+        );
       },
     );
     return ws;
@@ -143,12 +179,13 @@ class NotificationUpdateTileWidget extends StatelessWidget {
             padding: EdgeInsets.all(10),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   update.title,
                   style: Theme.of(context).textTheme.headline2.apply(
-                        color: Theme.of(context).primaryColorLight,
-                      ),
+                    color: Theme.of(context).primaryColorLight,
+                  ),
                 ),
                 SizedBox(
                   height: 20,
@@ -156,8 +193,8 @@ class NotificationUpdateTileWidget extends StatelessWidget {
                 Text(
                   update.description,
                   style: Theme.of(context).textTheme.bodyText1.apply(
-                        color: Theme.of(context).primaryColorLight,
-                      ),
+                    color: Theme.of(context).primaryColorLight,
+                  ),
                 ),
               ],
             ),
@@ -167,9 +204,18 @@ class NotificationUpdateTileWidget extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text("I\'m in"),
+                Text(
+                  "I\'m in",
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyText1
+                      .apply(color: Theme.of(context).primaryColorLight),
+                ),
                 IconButton(
-                  icon: Icon(FeatherIcons.arrowRightCircle),
+                  icon: Icon(
+                    FeatherIcons.arrowRightCircle,
+                    color: Theme.of(context).primaryColorLight,
+                  ),
                   onPressed: () {},
                 ),
               ],

@@ -103,7 +103,7 @@ class LoginConfig {
           "Creating account will help you to book and manage all your appointments");
   static Reasons favoritesTabLoginReason = Reasons(
       primary: "Login to view your Favorites",
-      secondary: "Favorites will help ");
+      secondary: "Favorites will help you to bookmark places and book appointments faster ");
 }
 
 class MenuConfig {

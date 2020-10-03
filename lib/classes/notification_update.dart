@@ -11,16 +11,20 @@ class NotificationUpdate{
   int orderId;
   NotificationUpdateType type;
   Timestamp at;
+  bool viewed;
+  String id;
 
-  NotificationUpdate(this.title, this.description, this.html, this.orderId, this.type,this.at);
+  NotificationUpdate(this.id,this.title, this.description, this.html, this.orderId, this.type,this.at,this.viewed,);
 
-  NotificationUpdate.fromJson(Map<String,dynamic> j){
+  NotificationUpdate.fromJson(String id,Map<String,dynamic> j){
+    this.id = id;
     this.title = j["title"];
     this.html = j["html"];
     this.description = j["description"];
     this.type = EnumToString.fromString(NotificationUpdateType.values, j["type"]);
     this.orderId = j["orderId"] as int;
     this.at = j["at"] as Timestamp;
+    this.viewed = j["viewed"] as bool;
   }
 
 }
