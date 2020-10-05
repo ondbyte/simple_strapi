@@ -81,7 +81,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
   Widget _getOwnABusiness(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          color: CardsColor.colors[0], borderRadius: BorderRadius.circular(6)),
+          color: CardsColor.colors["purple"], borderRadius: BorderRadius.circular(6)),
       child: ListTile(
         title: Text(
           "Own A Business",

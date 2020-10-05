@@ -54,6 +54,20 @@ mixin _$UpdatesStore on _UpdatesStore, Store {
     });
   }
 
+  final _$removeAsyncAction = AsyncAction('_UpdatesStore.remove');
+
+  @override
+  Future<dynamic> remove(NotificationUpdate u) {
+    return _$removeAsyncAction.run(() => super.remove(u));
+  }
+
+  final _$undoRemoveAsyncAction = AsyncAction('_UpdatesStore.undoRemove');
+
+  @override
+  Future<dynamic> undoRemove(NotificationUpdate u) {
+    return _$undoRemoveAsyncAction.run(() => super.undoRemove(u));
+  }
+
   final _$setViewedForUpdateAsyncAction =
       AsyncAction('_UpdatesStore.setViewedForUpdate');
 

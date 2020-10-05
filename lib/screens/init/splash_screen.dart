@@ -2,7 +2,6 @@ import 'package:bapp/helpers/constants.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
-import 'package:bapp/stores/feedback_store.dart';
 import 'package:bapp/stores/storage_store.dart';
 import 'package:bapp/stores/updates_store.dart';
 import 'package:firebase_auth/firebase_auth.dart';

@@ -9,6 +9,14 @@ part of 'cloud_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$CloudStore on _CloudStore, Store {
+  Computed<List<String>> _$activeCountriesNamesComputed;
+
+  @override
+  List<String> get activeCountriesNames => (_$activeCountriesNamesComputed ??=
+          Computed<List<String>>(() => super.activeCountriesNames,
+              name: '_CloudStore.activeCountriesNames'))
+      .value;
+
   final _$myLocationAtom = Atom(name: '_CloudStore.myLocation');
 
   @override
@@ -130,7 +138,8 @@ myLocation: ${myLocation},
 activeCountries: ${activeCountries},
 availableLocations: ${availableLocations},
 userType: ${userType},
-alterEgo: ${alterEgo}
+alterEgo: ${alterEgo},
+activeCountriesNames: ${activeCountriesNames}
     ''';
   }
 }

@@ -24,19 +24,40 @@ abstract class _UpdatesStore with Store {
     if (_authStore.user == null) {
       throw FlutterError("this should never be the case @updates_store");
     }
+    ///get updates on app start
     await getUpdates();
   }
 
+  @action
+  Future remove(NotificationUpdate u) async {
+    if(u.type==NotificationUpdateType.news){
+      news.remove(u.id);
+    } else if(u.type==NotificationUpdateType.orderUpdate) {
+      updates.remove(u.id);
+    }
+  }
+
+  @action
+  Future undoRemove(NotificationUpdate u) async {
+    if(u.type==NotificationUpdateType.news){
+      news[u.id] = u;
+    } else if(u.type==NotificationUpdateType.orderUpdate) {
+      updates[u.id] = u;
+    }
+  }
+
+  ///set viewed property to true when customer dismisses, so update doesn't show up
   @action
   Future setViewedForUpdate(NotificationUpdate update) async {
     if (_authStore.user == null) {
       return;
     }
-    await _fireStore.collection("users/${_authStore.user.uid}/updates/${update.id}").doc().update({
+    await _fireStore.doc("users/${_authStore.user.uid}/updates/${update.id}").update({
       "viewed": true
     });
   }
 
+  ///fetch updates and news from firestore
   @action
   Future getUpdates({DateTime dt}) async {
     final dateTime = dt ?? DateTime.now();
@@ -55,7 +76,7 @@ abstract class _UpdatesStore with Store {
       ),
     );
     final snaps = await updatesQuery.get();
-    print(snaps.docs);
+    //print(snaps.docs);
     final allUpdates = snaps.docs.map(
       (e) => NotificationUpdate.fromJson(e.id,e.data()),
     );

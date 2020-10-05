@@ -1,10 +1,12 @@
+import 'package:bapp/widgets/buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class LoginWidget extends StatelessWidget {
-  final String loginReason,secondaryReason;
+class AskToLoginWidget extends StatelessWidget {
+  final String loginReason, secondaryReason;
 
-  const LoginWidget({Key key, this.loginReason, this.secondaryReason}) : super(key: key);
+  const AskToLoginWidget({Key key, this.loginReason, this.secondaryReason})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -12,14 +14,40 @@ class LoginWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SvgPicture.asset("assets/svg/login.svg",width: 128,),
-          SizedBox(height: 20,),
-          Text("$loginReason",style: Theme.of(context).textTheme.headline1,),
-          SizedBox(height: 20,),
-          Text("$secondaryReason",style: Theme.of(context).textTheme.bodyText1,textAlign: TextAlign.center,)
+          SvgPicture.asset(
+            "assets/svg/login.svg",
+            width: 128,
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Text(
+            "$loginReason",
+            style: Theme.of(context).textTheme.headline1,
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Text(
+            "$secondaryReason",
+            style: Theme.of(context).textTheme.bodyText1,
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          FlatButton(
+            onPressed: () {
+              Navigator.of(context).pushNamed("/loginscreen");
+            },
+            color: Theme.of(context).primaryColor,
+            child: Text(
+              "Sign In or Sign Up",
+              style: Theme.of(context).textTheme.button.apply(color: Theme.of(context).primaryColorLight,),
+            ),
+          ),
         ],
       ),
     );
   }
 }
-

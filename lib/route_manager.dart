@@ -1,4 +1,5 @@
 
+import 'package:bapp/screens/auth/login_screen.dart';
 import 'package:bapp/screens/authentication/pick_a_location.dart';
 import 'package:bapp/screens/onboarding/onboardingscreen.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,6 +12,12 @@ class RouteManager {
   static Route<dynamic> onGenerate(RouteSettings settings) {
     print("route called: ${settings.name}");
     switch (settings.name) {
+      case "/loginscreen":
+      return MaterialPageRoute(
+        builder: (_) {
+          return LoginScreen();
+        },
+      );
       case "/home":
         return MaterialPageRoute(
           builder: (_) {

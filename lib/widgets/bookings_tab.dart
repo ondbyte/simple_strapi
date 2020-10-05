@@ -31,7 +31,7 @@ class _BookingsTabState extends State<BookingsTab> {
       store: context.watch<AuthStore>(),
       builder: (_, authStore) {
         return authStore.status == AuthStatus.anonymousUser
-            ? LoginWidget(
+            ? AskToLoginWidget(
                 loginReason: LoginConfig.bookingTabLoginReason.primary,
                 secondaryReason: LoginConfig.bookingTabLoginReason.secondary,
               )

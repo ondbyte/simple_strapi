@@ -3,6 +3,7 @@ import 'package:bapp/config/config.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:country_codes/country_codes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:mobx/mobx.dart';
@@ -28,12 +29,11 @@ abstract class _CloudStore with Store {
   @observable
   UserType alterEgo;
 
-
   Future init(AuthStore a) async {
     _authStore = a;
     _firstore = FirebaseFirestore.instance;
 
-    if(_me==null){
+    if (_me == null) {
       throw FlutterError("this should never be the case");
     }
 
@@ -43,7 +43,7 @@ abstract class _CloudStore with Store {
     _setupAutoRun();
   }
 
-  Future getUserData()async{
+  Future getUserData() async {
     var snap = await _firstore.doc("users/${_me.uid}").get();
     myData = snap.data() ?? {};
   }
@@ -57,9 +57,9 @@ abstract class _CloudStore with Store {
 
   @action
   Future getMyUserTypes() async {
-    if(myData.containsKey("my_user_type")){
+    if (myData.containsKey("my_user_type")) {
       userType = UserType.values[myData["my_user_type"]];
-      if(myData.containsKey("my_alter_ego")){
+      if (myData.containsKey("my_alter_ego")) {
         alterEgo = UserType.values[myData["my_alter_ego"]];
       } else {
         alterEgo = UserType.customer;
@@ -71,19 +71,27 @@ abstract class _CloudStore with Store {
       setMyUserType();
       setMyAlterEgo();
     }
+
     ///update menu items according to role
-    Helper.filterMenuItems(userType, alterEgo,_authStore.status);
+    Helper.filterMenuItems(userType, alterEgo, _authStore.status);
   }
 
   ///will auto run on change
   Future setMyUserType() async {
     var doc = _firstore.doc("users/${_me.uid}");
-    await doc.set({"my_user_type":userType.index},SetOptions(merge: true),);
+    await doc.set(
+      {"my_user_type": userType.index},
+      SetOptions(merge: true),
+    );
   }
+
   ///will auto run on change
   Future setMyAlterEgo() async {
     var doc = _firstore.doc("users/${_me.uid}");
-    await doc.set({"my_alter_ego":alterEgo.index},SetOptions(merge: true),);
+    await doc.set(
+      {"my_alter_ego": alterEgo.index},
+      SetOptions(merge: true),
+    );
   }
 
   @action
@@ -110,8 +118,21 @@ abstract class _CloudStore with Store {
     var countriesCollection = _firstore.collection("active_countries");
     var countriesDocs = await countriesCollection.get();
     activeCountries = [];
-    countriesDocs.docs.forEach((element) {activeCountries.add(element.id);});
+    countriesDocs.docs.forEach(
+      (element) {
+        activeCountries.add(element.id);
+      },
+    );
     //activeCountries = map((e) => e.id);
+  }
+
+  @computed
+  List<String> get activeCountriesNames {
+    return activeCountries.map(
+      (e) => CountryCodes.name(
+        locale: Locale(e),
+      ),
+    );
   }
 
   @action
@@ -131,7 +152,7 @@ abstract class _CloudStore with Store {
           availableLocations[key] = [element];
         }
       },
-    );    
+    );
   }
 
   void _setupAutoRun() {
@@ -170,4 +191,3 @@ abstract class _CloudStore with Store {
   } */
 
 }
-

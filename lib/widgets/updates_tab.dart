@@ -1,16 +1,17 @@
 import 'dart:math';
 
+import 'package:bapp/classes/feedback.dart';
 import 'package:bapp/classes/notification_update.dart';
 import 'package:bapp/config/config.dart' hide Tab;
 import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
-import 'package:bapp/stores/feedback_store.dart';
 import 'package:bapp/stores/updates_store.dart';
 import 'package:bapp/widgets/undo_widget.dart';
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
 import 'loading.dart';
@@ -92,9 +93,24 @@ class _UpdatesTabState extends State<UpdatesTab> {
     );
   }
 
+  ///empty updates
+  Widget _getEmpty(){
+    return Center(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SvgPicture.asset("assets/svg/empty-list.svg",width: 300,),
+          SizedBox(height: 10,),
+          Text("You are up to date",style: Theme.of(context).textTheme.subtitle1,),
+        ],
+      ),
+    );
+  }
+
   ///updates tab
   Widget _getUpdates(Map<String, NotificationUpdate> updates) {
-    return CustomScrollView(
+    return updates.isNotEmpty?CustomScrollView(
       slivers: <Widget>[
         SliverList(
           delegate: SliverChildListDelegate(
@@ -102,12 +118,12 @@ class _UpdatesTabState extends State<UpdatesTab> {
           ),
         )
       ],
-    );
+    ):_getEmpty();
   }
 
   ///news tab
   Widget _getNews(Map<String, NotificationUpdate> updates) {
-    return CustomScrollView(
+    return updates.isNotEmpty?CustomScrollView(
       slivers: <Widget>[
         SliverList(
           delegate: SliverChildListDelegate(
@@ -115,7 +131,7 @@ class _UpdatesTabState extends State<UpdatesTab> {
           ),
         )
       ],
-    );
+    ):_getEmpty();
   }
 
   List<Widget> _getTiles(Map<String, NotificationUpdate> updates) {
@@ -123,38 +139,21 @@ class _UpdatesTabState extends State<UpdatesTab> {
     updates.forEach(
       (id, element) {
         ws.add(
-          UndoWidget(
+          Dismissible(
             key: Key(id),
-            undoFeedBack: TheFeedBack<NotificationUpdate>(
-              message: "You\'ve viewed the update",
-              variable: element,
-              doFirst: (u){
-                if(u.type==NotificationUpdateType.news){
-                  Provider.of<UpdatesStore>(context,listen: false).news.remove(u.id);
-                } else
-                if(u.type==NotificationUpdateType.orderUpdate){
-                  Provider.of<UpdatesStore>(context,listen: false).updates.remove(u.id);
-                }                
-              },
-              doOnOkay: (u){
-                Provider.of<UpdatesStore>(context,).setViewedForUpdate(u);
-              },
-              doOnUndo: (u){
-                if(u.type==NotificationUpdateType.news){
-                  Provider.of<UpdatesStore>(context,listen: false).news[u.id] = u;
-                } else
-                if(u.type==NotificationUpdateType.orderUpdate){
-                  Provider.of<UpdatesStore>(context,listen: false).updates[u.id] = u;
-                }
-              }
-            ),
+            onDismissed: (d){
+              Provider.of<UpdatesStore>(context,listen: false).remove(element);
+              Provider.of<UpdatesStore>(context,listen:false).setViewedForUpdate(element);
+            },
             child: NotificationUpdateTileWidget(
               update: element,
             ),
           ),
         );
+        ws.add(SizedBox(height: 20,),);
       },
     );
+    if(ws.isNotEmpty) ws.removeLast();
     return ws;
   }
 }
@@ -168,7 +167,7 @@ class NotificationUpdateTileWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: CardsColor.next(),
+        color: update.myColor,
         borderRadius: BorderRadius.circular(6),
       ),
       padding: EdgeInsets.all(10),
@@ -188,7 +187,7 @@ class NotificationUpdateTileWidget extends StatelessWidget {
                   ),
                 ),
                 SizedBox(
-                  height: 20,
+                  height: 10,
                 ),
                 Text(
                   update.description,

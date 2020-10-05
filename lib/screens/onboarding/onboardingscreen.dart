@@ -110,7 +110,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
         Expanded(
           child: SvgPicture.asset(
             slide.img,
-            fit: BoxFit.fitWidth,
+            width: 128,
           ),
         ),
         SizedBox(

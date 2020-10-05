@@ -1,4 +1,7 @@
 
+import 'dart:ui';
+
+import 'package:bapp/config/config.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/foundation.dart';
@@ -13,6 +16,7 @@ class NotificationUpdate{
   Timestamp at;
   bool viewed;
   String id;
+  Color myColor;
 
   NotificationUpdate(this.id,this.title, this.description, this.html, this.orderId, this.type,this.at,this.viewed,);
 
@@ -25,6 +29,7 @@ class NotificationUpdate{
     this.orderId = j["orderId"] as int;
     this.at = j["at"] as Timestamp;
     this.viewed = j["viewed"] as bool;
+    this.myColor = CardsColor.next();
   }
 
 }

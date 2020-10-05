@@ -62,7 +62,7 @@ class _MenuState extends State<Menu> {
         ws.add(Divider());
       },
     );
-    ws.removeLast();
+    if(ws.isNotEmpty) ws.removeLast();
     return ws;
   }
   

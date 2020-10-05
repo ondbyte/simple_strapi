@@ -18,9 +18,9 @@ class _FavoritesTabState extends State<FavoritesTab> {
       store: Provider.of<AuthStore>(context, listen: false),
       builder: (_, authStore) {
         return authStore.status == AuthStatus.anonymousUser
-            ? LoginWidget(
-                loginReason: LoginConfig.bookingTabLoginReason.primary,
-                secondaryReason: LoginConfig.bookingTabLoginReason.secondary,
+            ? AskToLoginWidget(
+                loginReason: LoginConfig.favoritesTabLoginReason.primary,
+                secondaryReason: LoginConfig.favoritesTabLoginReason.secondary,
               )
             : CustomScrollView(
                 slivers: <Widget>[
