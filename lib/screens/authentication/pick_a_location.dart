@@ -37,7 +37,7 @@ class PickALocationScreen extends StatelessWidget {
               appBar: AppBar(
                 title: Text("Pick a Country",style: Theme.of(context).textTheme.subtitle1,),
               ),
-              body: cloudStore.activeCountriesNames != null
+              body: cloudStore.activeCountries != null
                   ? ListView(
                       children: <Widget>[
                         ...cloudStore.activeCountries.map(
