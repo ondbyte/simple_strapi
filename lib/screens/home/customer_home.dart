@@ -1,19 +1,12 @@
 import 'package:bapp/config/config.dart';
-import 'package:bapp/stores/auth_store.dart';
-import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/bapp_bar.dart';
 import 'package:bapp/widgets/bookings_tab.dart';
 import 'package:bapp/widgets/discover_tab.dart';
 import 'package:bapp/widgets/favorites_tab.dart';
 import 'package:bapp/widgets/location_label.dart';
 import 'package:bapp/widgets/menu.dart';
-import 'package:bapp/widgets/store_provider.dart';
 import 'package:bapp/widgets/updates_tab.dart';
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:provider/provider.dart';
-import 'package:table_calendar/table_calendar.dart';
 
 class CustomerHome extends StatefulWidget {
   @override

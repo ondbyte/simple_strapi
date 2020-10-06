@@ -9,14 +9,6 @@ part of 'cloud_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$CloudStore on _CloudStore, Store {
-  Computed<List<String>> _$activeCountriesNamesComputed;
-
-  @override
-  List<String> get activeCountriesNames => (_$activeCountriesNamesComputed ??=
-          Computed<List<String>>(() => super.activeCountriesNames,
-              name: '_CloudStore.activeCountriesNames'))
-      .value;
-
   final _$myLocationAtom = Atom(name: '_CloudStore.myLocation');
 
   @override
@@ -44,6 +36,23 @@ mixin _$CloudStore on _CloudStore, Store {
   set activeCountries(List<String> value) {
     _$activeCountriesAtom.reportWrite(value, super.activeCountries, () {
       super.activeCountries = value;
+    });
+  }
+
+  final _$activeCountriesNamesAtom =
+      Atom(name: '_CloudStore.activeCountriesNames');
+
+  @override
+  List<String> get activeCountriesNames {
+    _$activeCountriesNamesAtom.reportRead();
+    return super.activeCountriesNames;
+  }
+
+  @override
+  set activeCountriesNames(List<String> value) {
+    _$activeCountriesNamesAtom.reportWrite(value, super.activeCountriesNames,
+        () {
+      super.activeCountriesNames = value;
     });
   }
 
@@ -126,9 +135,9 @@ mixin _$CloudStore on _CloudStore, Store {
       AsyncAction('_CloudStore.getLocationsInCountry');
 
   @override
-  Future<dynamic> getLocationsInCountry(String country) {
+  Future<dynamic> getLocationsInCountry(String c) {
     return _$getLocationsInCountryAsyncAction
-        .run(() => super.getLocationsInCountry(country));
+        .run(() => super.getLocationsInCountry(c));
   }
 
   @override
@@ -136,10 +145,10 @@ mixin _$CloudStore on _CloudStore, Store {
     return '''
 myLocation: ${myLocation},
 activeCountries: ${activeCountries},
+activeCountriesNames: ${activeCountriesNames},
 availableLocations: ${availableLocations},
 userType: ${userType},
-alterEgo: ${alterEgo},
-activeCountriesNames: ${activeCountriesNames}
+alterEgo: ${alterEgo}
     ''';
   }
 }

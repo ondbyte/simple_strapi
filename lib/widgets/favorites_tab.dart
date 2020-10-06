@@ -1,6 +1,7 @@
 import 'package:bapp/config/config.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
 import 'login_widget.dart';
@@ -17,20 +18,22 @@ class _FavoritesTabState extends State<FavoritesTab> {
     return StoreProvider<AuthStore>(
       store: Provider.of<AuthStore>(context, listen: false),
       builder: (_, authStore) {
-        return authStore.status == AuthStatus.anonymousUser
-            ? AskToLoginWidget(
-                loginReason: LoginConfig.favoritesTabLoginReason.primary,
-                secondaryReason: LoginConfig.favoritesTabLoginReason.secondary,
+        return Observer(builder: (_){
+          return authStore.status == AuthStatus.anonymousUser
+              ? AskToLoginWidget(
+            loginReason: LoginConfig.favoritesTabLoginReason.primary,
+            secondaryReason: LoginConfig.favoritesTabLoginReason.secondary,
+          )
+              : CustomScrollView(
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildListDelegate([
+                  SizedBox(),
+                ]),
               )
-            : CustomScrollView(
-                slivers: <Widget>[
-                  SliverList(
-                    delegate: SliverChildListDelegate([
-                      SizedBox(),
-                    ]),
-                  )
-                ],
-              );
+            ],
+          );
+        });
       },
     );
   }

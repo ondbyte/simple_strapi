@@ -3,6 +3,7 @@ import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/widgets/login_widget.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import 'store_provider.dart';
@@ -30,20 +31,22 @@ class _BookingsTabState extends State<BookingsTab> {
     return StoreProvider<AuthStore>(
       store: context.watch<AuthStore>(),
       builder: (_, authStore) {
-        return authStore.status == AuthStatus.anonymousUser
-            ? AskToLoginWidget(
-                loginReason: LoginConfig.bookingTabLoginReason.primary,
-                secondaryReason: LoginConfig.bookingTabLoginReason.secondary,
+        return Observer(builder: (_){
+          return authStore.status == AuthStatus.anonymousUser
+              ? AskToLoginWidget(
+            loginReason: LoginConfig.bookingTabLoginReason.primary,
+            secondaryReason: LoginConfig.bookingTabLoginReason.secondary,
+          )
+              : CustomScrollView(
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildListDelegate([
+                  _buildTableCalendar(),
+                ]),
               )
-            : CustomScrollView(
-                slivers: <Widget>[
-                  SliverList(
-                    delegate: SliverChildListDelegate([
-                      _buildTableCalendar(),
-                    ]),
-                  )
-                ],
-              );
+            ],
+          );
+        });
       },
     );
   }

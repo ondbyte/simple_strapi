@@ -3,9 +3,10 @@ import 'package:bapp/config/config.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:country_codes/country_codes.dart';
+import 'package:country_pickers/country_pickers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:mobx/mobx.dart';
 
 part 'cloud_store.g.dart';
@@ -22,6 +23,8 @@ abstract class _CloudStore with Store {
   Location myLocation;
   @observable
   List<String> activeCountries;
+  @observable
+  List<String> activeCountriesNames;
   @observable
   Map<String, List<Location>> availableLocations;
   @observable
@@ -97,11 +100,10 @@ abstract class _CloudStore with Store {
   @action
   Future getMytLocation() async {
     if (myData.containsKey("my_location")) {
-      var locationDoc = myData["my_location"];
-      var location = await locationDoc.get();
+      var locationData = myData["my_location"];
 
       ///id will be name of the
-      myLocation = Location.fromJson(locationDoc.id, location.data());
+      myLocation = Location.fromJson(locationData);
       //Helper.printLog(myLocation.toString());
     }
   }
@@ -109,8 +111,7 @@ abstract class _CloudStore with Store {
   ///will run auto when the location is updated
   Future setMyLocation() async {
     var doc = _firstore.doc("users/${_me.uid}");
-    var ref = _firstore.doc("locations/${myLocation.locality}");
-    await doc.set({"my_location": ref}, SetOptions(merge: true));
+    await doc.set({"my_location": myLocation.toMap()}, SetOptions(merge: true));
   }
 
   @action
@@ -118,30 +119,27 @@ abstract class _CloudStore with Store {
     var countriesCollection = _firstore.collection("active_countries");
     var countriesDocs = await countriesCollection.get();
     activeCountries = [];
-    countriesDocs.docs.forEach(
+    activeCountriesNames = [];
+    countriesDocs.docs.toList().forEach(
       (element) {
         activeCountries.add(element.id);
+        final name = CountryPickerUtils.getCountryByIsoCode(element.id);
+        activeCountriesNames.add(
+          name.name,
+        );
       },
     );
     //activeCountries = map((e) => e.id);
   }
 
-  @computed
-  List<String> get activeCountriesNames {
-    return activeCountries.map(
-      (e) => CountryCodes.name(
-        locale: Locale(e),
-      ),
-    );
-  }
-
   @action
-  Future getLocationsInCountry(String country) async {
+  Future getLocationsInCountry(String c) async {
+    final country = CountryPickerUtils.getCountryByName(c);
     final locationsCollection = _firstore.collection("locations");
     final locationsQuery =
-        locationsCollection.where("country", isEqualTo: "$country");
+        locationsCollection.where("country", isEqualTo: "${country.isoCode}");
     final snaps = await locationsQuery.get();
-    var allLocations = snaps.docs.map((e) => Location.fromJson(e.id, e.data()));
+    var allLocations = snaps.docs.map((e) => Location.fromJson(e.data()));
     availableLocations = {};
     allLocations.forEach(
       (element) {

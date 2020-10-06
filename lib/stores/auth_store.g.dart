@@ -39,6 +39,21 @@ mixin _$AuthStore on _AuthStore, Store {
     });
   }
 
+  final _$loadingForOTPAtom = Atom(name: '_AuthStore.loadingForOTP');
+
+  @override
+  bool get loadingForOTP {
+    _$loadingForOTPAtom.reportRead();
+    return super.loadingForOTP;
+  }
+
+  @override
+  set loadingForOTP(bool value) {
+    _$loadingForOTPAtom.reportWrite(value, super.loadingForOTP, () {
+      super.loadingForOTP = value;
+    });
+  }
+
   final _$initAsyncAction = AsyncAction('_AuthStore.init');
 
   @override
@@ -57,7 +72,8 @@ mixin _$AuthStore on _AuthStore, Store {
   String toString() {
     return '''
 status: ${status},
-user: ${user}
+user: ${user},
+loadingForOTP: ${loadingForOTP}
     ''';
   }
 }

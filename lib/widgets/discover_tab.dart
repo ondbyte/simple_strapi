@@ -1,5 +1,7 @@
 import 'package:bapp/config/config.dart';
+import 'package:bapp/route_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
 import 'package:bapp/stores/auth_store.dart';
@@ -16,62 +18,62 @@ class _DiscoverTabState extends State<DiscoverTab> {
     return StoreProvider<AuthStore>(
       store: context.watch<AuthStore>(),
       builder: (_, authStore) {
-        return CustomScrollView(
-          slivers: <Widget>[
-            SliverList(
-              delegate: SliverChildListDelegate(
-                [
-                  Text("Hey User"),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text(
-                    "What can we help you book?",
-                    style: Theme.of(context).textTheme.headline1,
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Container(
-                    height: 50,
-                    width: double.maxFinite,
-                    decoration: BoxDecoration(color: Colors.grey[200]),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  Text("Or Browse Categories"),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  _getCategoriesScroller(context),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  _getFeaturedScroller(context),
-                  if (authStore.status == AuthStatus.userPresent)
+        return Observer(builder: (_){
+          return CustomScrollView(
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    Text("Hey User"),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text(
+                      "What can we help you book?",
+                      style: Theme.of(context).textTheme.headline1,
+                    ),
                     SizedBox(
                       height: 20,
                     ),
-                  if (authStore.status == AuthStatus.userPresent)
-                    _getCompleteOrder(context),
-                  if (authStore.status == AuthStatus.userPresent)
+                    Container(
+                      height: 50,
+                      width: double.maxFinite,
+                      decoration: BoxDecoration(color: Colors.grey[200]),
+                    ),
                     SizedBox(
                       height: 20,
                     ),
-                  if (authStore.status == AuthStatus.userPresent)
-                    _getHowWasYourExperience(context),
-                  if (authStore.status == AuthStatus.anonymousUser)
+                    Text("Or Browse Categories"),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    _getCategoriesScroller(context),
                     SizedBox(
                       height: 20,
                     ),
-                  if (authStore.status == AuthStatus.anonymousUser)
+                    _getFeaturedScroller(context),
+                    if (authStore.status == AuthStatus.userPresent)
+                      SizedBox(
+                        height: 20,
+                      ),
+                    if (authStore.status == AuthStatus.userPresent)
+                      _getCompleteOrder(context),
+                    if (authStore.status == AuthStatus.userPresent)
+                      SizedBox(
+                        height: 20,
+                      ),
+                    if (authStore.status == AuthStatus.userPresent)
+                      _getHowWasYourExperience(context),
+                    SizedBox(
+                      height: 20,
+                    ),
                     _getOwnABusiness(context),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
-        );
+            ],
+          );
+        });
       },
     );
   }
@@ -83,6 +85,9 @@ class _DiscoverTabState extends State<DiscoverTab> {
       decoration: BoxDecoration(
           color: CardsColor.colors["purple"], borderRadius: BorderRadius.circular(6)),
       child: ListTile(
+        onTap: (){
+          Navigator.of(context).pushNamed(RouteManager.businessCategoryScreen);
+        },
         title: Text(
           "Own A Business",
           style: Theme.of(context).textTheme.subtitle1.apply(

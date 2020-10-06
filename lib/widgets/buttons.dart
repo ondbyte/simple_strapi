@@ -20,6 +20,7 @@ class _PrimaryButtonState extends State<PrimaryButton> {
       height: 41,
       child: !widget.hide
           ? FlatButton(
+              disabledColor: Theme.of(context).disabledColor,
               color: Theme.of(context).primaryColor,
               onPressed: widget.onPressed,
               shape: RoundedRectangleBorder(

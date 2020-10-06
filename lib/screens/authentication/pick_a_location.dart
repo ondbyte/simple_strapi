@@ -13,21 +13,28 @@ class PickALocationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (screen == 0) {
-      return _showCountries(context);
-    }
-    if (screen == 1) {
-      return _showLocations(context);
-    }
-    throw FlutterError("only countries and location screen supported");
+    return WillPopScope(child: Builder(builder: (_) {
+      if (screen == 0) {
+        return _showCountries(context);
+      }
+      if (screen == 1) {
+        return _showLocations(context);
+      }
+      throw FlutterError("only countries and location screen supported");
+    }), onWillPop: () async {
+      if (screen == 1) {
+        Navigator.of(context).pushReplacementNamed("/pickaplace", arguments: 0);
+      }
+      return false;
+    });
   }
 
   Widget _showCountries(BuildContext context) {
     return StoreProvider<CloudStore>(
-      store: Provider.of<CloudStore>(context,listen: false),
+      store: Provider.of<CloudStore>(context, listen: false),
       init: (cloudStore) async {
         ///initialize user data
-        await cloudStore.init(Provider.of<AuthStore>(context,listen: false));
+        await cloudStore.init(Provider.of<AuthStore>(context, listen: false));
         await cloudStore.getActiveCountries();
       },
       builder: (_, cloudStore) {
@@ -35,12 +42,16 @@ class PickALocationScreen extends StatelessWidget {
           builder: (context) {
             return Scaffold(
               appBar: AppBar(
-                title: Text("Pick a Country",style: Theme.of(context).textTheme.subtitle1,),
+                automaticallyImplyLeading: false,
+                title: Text(
+                  "Pick a Country",
+                  style: Theme.of(context).textTheme.subtitle1,
+                ),
               ),
-              body: cloudStore.activeCountries != null
+              body: cloudStore.activeCountriesNames != null
                   ? ListView(
                       children: <Widget>[
-                        ...cloudStore.activeCountries.map(
+                        ...cloudStore.activeCountriesNames.map(
                           (e) => ListTile(
                             title: Text("$e"),
                             trailing: Icon(Icons.arrow_forward_ios),
@@ -65,24 +76,30 @@ class PickALocationScreen extends StatelessWidget {
 
   Widget _showLocations(BuildContext context) {
     return StoreProvider<CloudStore>(
-      store: context.watch<CloudStore>(),
+      store: Provider.of<CloudStore>(context,listen: false),
       builder: (context, cloudStore) {
         return Observer(
           builder: (context) {
             return Scaffold(
               appBar: AppBar(
-                title: Text("Pick a City",style: Theme.of(context).textTheme.subtitle1,),
-              ),
-              body: cloudStore.availableLocations!=null?ListView(
-                children: List.generate(
-                  cloudStore.availableLocations.length,
-                      (index) => _getSubLocationWidget(
-                    context,
-                    cloudStore.availableLocations.keys.elementAt(index),
-                    cloudStore.availableLocations.values.elementAt(index),
-                  ),
+                automaticallyImplyLeading: false,
+                title: Text(
+                  "Pick a City",
+                  style: Theme.of(context).textTheme.subtitle1,
                 ),
-              ):LoadingWidget(),
+              ),
+              body: cloudStore.availableLocations != null
+                  ? ListView(
+                      children: List.generate(
+                        cloudStore.availableLocations.length,
+                        (index) => _getSubLocationWidget(
+                          context,
+                          cloudStore.availableLocations.keys.elementAt(index),
+                          cloudStore.availableLocations.values.elementAt(index),
+                        ),
+                      ),
+                    )
+                  : LoadingWidget(),
             );
           },
         );
@@ -97,9 +114,13 @@ class PickALocationScreen extends StatelessWidget {
         ListTile(
           trailing: Icon(Icons.arrow_forward_ios),
           title: Text(
-            "$state",
+            "All of $state",
             style: Theme.of(context).textTheme.subtitle1,
           ),
+          onTap: (){
+            Provider.of<CloudStore>(context,listen: false).myLocation = Location("", "", state, locations[0].country);
+            Navigator.of(context).pushNamedAndRemoveUntil("/home",(_)=>false);
+          },
         ),
         ...List.generate(
           locations.length,
@@ -107,10 +128,10 @@ class PickALocationScreen extends StatelessWidget {
             trailing: Icon(Icons.arrow_forward_ios),
             title: Text(locations[index].locality,
                 style: Theme.of(context).textTheme.subtitle2),
-                onTap: (){
-                  context.read<CloudStore>().myLocation = locations[index];
-                  Navigator.of(context).pushReplacementNamed("/home");
-                },
+            onTap: () {
+              context.read<CloudStore>().myLocation = locations[index];
+              Navigator.of(context).pushNamedAndRemoveUntil("/home",(_)=>false);
+            },
           ),
         ),
       ],

@@ -3,11 +3,20 @@ class Location{
 
   Location(this.locality, this.city, this.state, this.country);
 
-  Location.fromJson(String locality, Map<String,dynamic> j){
-    this.locality = locality;
+  Location.fromJson(Map<String,dynamic> j){
+    this.locality = j["locality"];
     this.city = j["city"];
     this.state = j["state"];
     this.country = j["country"];
+  }
+
+  Map<String,String> toMap(){
+    return {
+      "locality":this.locality,
+      "city":this.city,
+      "state":this.state,
+      "country":this.country,
+    };
   }
 
   Location.update(Location oldLocation,{String locality,String city,String state,String country}){

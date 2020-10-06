@@ -35,14 +35,14 @@ class _MenuState extends State<Menu> {
             SizedBox(
               height: 20,
             ),
-            ..._getMenuItems()
+            ..._getMenuItems(context)
           ],
         ),
       ),
     );
   }
 
-  List<Widget> _getMenuItems() {
+  List<Widget> _getMenuItems(BuildContext context) {
     var ws = <Widget>[];
     kFilteredMenuItems.forEach(
       (element) {
@@ -89,7 +89,7 @@ class _MenuState extends State<Menu> {
         break;
       }
       case MenuItemKind.logOut:{
-        Provider.of<AuthStore>(context).signOut();
+        Provider.of<AuthStore>(context,listen: false).signOut();
         break;
       }
       case MenuItemKind.logIn:{
@@ -97,23 +97,23 @@ class _MenuState extends State<Menu> {
         break;
       }
       case MenuItemKind.switchTosShopping:{
-        Provider.of<CloudStore>(context).switchUserType();
+        Provider.of<CloudStore>(context,listen: false).switchUserType();
         break;
       }
       case MenuItemKind.switchToBusiness:{
-        Provider.of<CloudStore>(context).switchUserType();
+        Provider.of<CloudStore>(context,listen: false).switchUserType();
         break;
       }
       case MenuItemKind.switchToSales:{
-        Provider.of<CloudStore>(context).switchUserType();
+        Provider.of<CloudStore>(context,listen: false).switchUserType();
         break;
       }
       case MenuItemKind.switchToManager:{
-        Provider.of<CloudStore>(context).switchUserType();
+        Provider.of<CloudStore>(context,listen: false).switchUserType();
         break;
       }
       case MenuItemKind.switchToSudoUser:{
-        Provider.of<CloudStore>(context).switchUserType();
+        Provider.of<CloudStore>(context,listen: false).switchUserType();
         break;
       }
     }
