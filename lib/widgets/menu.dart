@@ -1,5 +1,6 @@
 import 'package:bapp/config/config.dart';
-import 'package:bapp/helpers/constants.dart';
+import 'package:bapp/config/config_data_types.dart';
+import 'package:bapp/config/constants.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/bapp_bar.dart';

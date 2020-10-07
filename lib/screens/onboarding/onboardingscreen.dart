@@ -110,7 +110,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
         Expanded(
           child: SvgPicture.asset(
             slide.img,
-            width: 128,
+            width: 256,
           ),
         ),
         SizedBox(
@@ -118,7 +118,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
         ),
         Text(
           slide.title,
-          style: Theme.of(context).textTheme.headline1,
+          style: Theme.of(context).textTheme.headline2,
         ),
         SizedBox(
           height: 10,

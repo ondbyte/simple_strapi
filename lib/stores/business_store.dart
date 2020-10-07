@@ -18,6 +18,7 @@ abstract class _BusinessStore with Store {
   @action
   Future getCategories() async {
     final categorySnaps = await _fireStore.collection("categories").get();
+    categories.clear();
     categorySnaps.docs.forEach((element) {
       categories.add(BusinessCategory(name: element.id,normalName: element.id.replaceAll("_", " ")));
     });

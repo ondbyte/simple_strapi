@@ -53,15 +53,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     ),
                     _getFeaturedScroller(context),
                     if (authStore.status == AuthStatus.userPresent)
-                      SizedBox(
-                        height: 20,
-                      ),
-                    if (authStore.status == AuthStatus.userPresent)
                       _getCompleteOrder(context),
-                    if (authStore.status == AuthStatus.userPresent)
-                      SizedBox(
-                        height: 20,
-                      ),
                     if (authStore.status == AuthStatus.userPresent)
                       _getHowWasYourExperience(context),
                     SizedBox(

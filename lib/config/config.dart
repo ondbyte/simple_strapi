@@ -1,11 +1,11 @@
-import 'package:bapp/helpers/constants.dart';
 import 'package:bapp/stores/auth_store.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Tab;
 import 'package:flutter/widgets.dart';
 
-///add colors of cards across the app (color will be picked up randomely most of the time)
+import 'config_data_types.dart';
+
+///add colors of cards across the app (color will be picked up randomly most of the time)
 class CardsColor {
   static Map<String, Color> colors = {
     "lightGreen": Color(0xff75B79E),
@@ -34,16 +34,16 @@ class OnBoardingConfig {
 
     ///2
     Slide(
-      img: "assets/svg/barber.svg",
-      title: "Welcome to Bapp",
+      img: "assets/svg/calendar.svg",
+      title: "Skip Queues and Waiting time",
       description: "Bapp helps you  to discover services &\nbook appointments",
     ),
 
     ///3
     Slide(
-      img: "assets/svg/barber.svg",
-      title: "Welcome to Bapp",
-      description: "Bapp helps you  to discover services &\nbook appointments",
+      img: "assets/svg/review.svg",
+      title: "Only The Best",
+      description: "Choose from the best service providers\naround you.",
     ),
   ];
 }
@@ -98,14 +98,18 @@ class HomeScreenFeaturedConfig {
 
 class LoginConfig {
   static Reasons bookingTabLoginReason = Reasons(
-      primary: "Login to view your bookings",
-      secondary:
-          "Creating account will help you to book and manage all your appointments");
+    primary: "Login to view your bookings",
+    secondary:
+        "Creating account will help you to book and manage all your appointments.",
+  );
   static Reasons favoritesTabLoginReason = Reasons(
-      primary: "Login to view your Favorites",
-      secondary: "Favorites will help you to bookmark places and book appointments faster ");
+    primary: "Login to view your Favorites",
+    secondary:
+        "Favorites will help you to bookmark places and book appointments faster.",
+  );
 }
 
+///the dynamic menu items, can be set to be visible/hidden depending on the [AuthStatus] and can be specific to [UserType]
 class MenuConfig {
   static final String title = "Menu";
   static final IconData closeIcon = FeatherIcons.xCircle;
@@ -234,76 +238,4 @@ class MenuConfig {
           ]),
     ],
   ];
-}
-
-enum UserType {
-  customer,
-  businessStaff,
-  businessOwner,
-  sales,
-  salesManager,
-  sudo
-}
-
-enum MenuItemKind {
-  logIn,
-  yourProfile,
-  settings,
-  rateTheApp,
-  helpUsImprove,
-  referABusiness,
-  logOut,
-  switchTosShopping,
-  switchToBusiness,
-  switchToManager,
-  onBoardABusiness,
-  switchToSales,
-  switchToSudoUser
-}
-
-class MenuItem {
-  final String name;
-  final IconData icon;
-  final MenuItemKind kind;
-  final List<UserType> showWhenUserTypeIs;
-  final List<UserType> showWhenAlterEgoIs;
-  final List<AuthStatus> showWhenAuthStatusIs;
-
-  MenuItem(
-      {this.showWhenAuthStatusIs = AuthStatus.values,
-      this.name,
-      this.icon,
-      this.kind,
-      this.showWhenUserTypeIs = const [UserType.customer],
-      this.showWhenAlterEgoIs = const [UserType.customer]});
-}
-
-class Reasons {
-  final String primary;
-  final String secondary;
-
-  Reasons({this.primary = "", this.secondary = ""});
-}
-
-class Tab {
-  final String name;
-  final IconData icon;
-
-  Tab({this.name, this.icon});
-}
-
-class Featured {
-  final String title;
-  final IconData icon;
-  final String ref;
-  final Color cardColor;
-
-  Featured({this.title, this.icon, this.ref, this.cardColor});
-}
-
-class Slide {
-  final String img;
-  final String title;
-  final String description;
-  Slide({this.img, this.title, this.description});
 }

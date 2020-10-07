@@ -26,26 +26,30 @@ class _ChooseYourBusinessScreenState extends State<ChooseYourBusinessScreen> {
           builder: (_, businessStore) {
             return Observer(builder: (_){
               return SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Choose your business type",
-                      style: Theme.of(context).textTheme.headline1,
-                    ),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Text(
-                      "People will be able to find your business based on these categories.",
-                      style: Theme.of(context).textTheme.bodyText1,
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    ..._getCategoriesTiles(context, businessStore.categories)
-                  ],
+                child: AnimatedContainer(
+                  duration: const Duration(seconds: 1),
+                  curve: Curves.easeInOutSine,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Choose your business type",
+                        style: Theme.of(context).textTheme.headline1,
+                      ),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        "People will be able to find your business based on these categories.",
+                        style: Theme.of(context).textTheme.bodyText1,
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      ..._getCategoriesTiles(context, businessStore.categories)
+                    ],
+                  ),
                 ),
               );
             },);
@@ -57,7 +61,6 @@ class _ChooseYourBusinessScreenState extends State<ChooseYourBusinessScreen> {
 
   List<Widget> _getCategoriesTiles(
       BuildContext context, List<BusinessCategory> categories) {
-    //print(categories);
     List<Widget> ws = [];
     categories.forEach((element) {
       ws.add(
@@ -75,8 +78,9 @@ class _ChooseYourBusinessScreenState extends State<ChooseYourBusinessScreen> {
           ),
         ),
       );
+
       ws.add(SizedBox(height: 20,));
-    });
+    },);
     return ws;
   }
 }

@@ -1,4 +1,4 @@
-import 'package:bapp/helpers/constants.dart';
+import 'package:bapp/config/constants.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/cloud_store.dart';

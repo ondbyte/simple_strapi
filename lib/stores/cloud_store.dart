@@ -1,5 +1,6 @@
 import 'package:bapp/classes/location.dart';
 import 'package:bapp/config/config.dart';
+import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -31,12 +32,19 @@ abstract class _CloudStore with Store {
   UserType userType;
   @observable
   UserType alterEgo;
+  @observable
+  User _user;
 
   Future init(AuthStore a) async {
     _authStore = a;
+    _user = _authStore.user;
+    FirebaseAuth.instance.userChanges().listen((u) {
+      _user = u;
+    });
+
     _firstore = FirebaseFirestore.instance;
 
-    if (_me == null) {
+    if (_user == null) {
       throw FlutterError("this should never be the case");
     }
 
@@ -47,8 +55,20 @@ abstract class _CloudStore with Store {
   }
 
   Future getUserData() async {
-    var snap = await _firstore.doc("users/${_me.uid}").get();
+    var snap = await _firstore.doc("users/${_user.uid}").get();
     myData = snap.data() ?? {};
+  }
+
+
+  @computed
+  PhoneNumber get number{
+    if(_user==null){
+      return null;
+    }
+    if(_user.phoneNumber==null){
+      return PhoneNumber(isoCode: myLocation.country);
+    }
+    return PhoneNumber(phoneNumber: _user.phoneNumber.replaceAll(myLocation.country, ""),isoCode: myLocation.country);
   }
 
   @action
@@ -81,7 +101,7 @@ abstract class _CloudStore with Store {
 
   ///will auto run on change
   Future setMyUserType() async {
-    var doc = _firstore.doc("users/${_me.uid}");
+    var doc = _firstore.doc("users/${_user.uid}");
     await doc.set(
       {"my_user_type": userType.index},
       SetOptions(merge: true),
@@ -90,7 +110,7 @@ abstract class _CloudStore with Store {
 
   ///will auto run on change
   Future setMyAlterEgo() async {
-    var doc = _firstore.doc("users/${_me.uid}");
+    var doc = _firstore.doc("users/${_user.uid}");
     await doc.set(
       {"my_alter_ego": alterEgo.index},
       SetOptions(merge: true),
@@ -110,7 +130,7 @@ abstract class _CloudStore with Store {
 
   ///will run auto when the location is updated
   Future setMyLocation() async {
-    var doc = _firstore.doc("users/${_me.uid}");
+    var doc = _firstore.doc("users/${_user.uid}");
     await doc.set({"my_location": myLocation.toMap()}, SetOptions(merge: true));
   }
 
@@ -169,10 +189,6 @@ abstract class _CloudStore with Store {
         await setMyAlterEgo();
       }),
     );
-  }
-
-  User get _me {
-    return _authStore.user;
   }
 
 /*   @action

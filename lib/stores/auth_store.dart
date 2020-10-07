@@ -53,7 +53,7 @@ abstract class _AuthStore with Store {
       {PhoneNumber number,
       Function onVerified,
       Function(FirebaseAuthException) onFail,
-      Future<String> Function() onAskOTP,
+      Future<String> Function(bool) onAskOTP,
       Function onResendOTPPossible,}) async {
     loadingForOTP = false;
     await _auth.verifyPhoneNumber(
@@ -66,8 +66,10 @@ abstract class _AuthStore with Store {
         onFail(exception);
       },
       codeSent: (String verificationID, int resendToken) async {
+        var askAgain = false;
         Future.doWhile(() async {
-          var otp = await onAskOTP();
+          var otp = await onAskOTP(askAgain);
+          askAgain = true;
           loadingForOTP = true;
 
           PhoneAuthCredential phoneAuthCredential =
@@ -79,8 +81,8 @@ abstract class _AuthStore with Store {
           } else {
             loadingForOTP = false;
           }
-          return linked;
-        });
+          return !linked;
+        },);
       },
       codeAutoRetrievalTimeout: (String verificationId) {},
     );

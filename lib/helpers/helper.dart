@@ -1,11 +1,12 @@
 import 'dart:io';
 
 import 'package:bapp/config/config.dart';
+import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:device_info/device_info.dart';
 import 'package:flutter/cupertino.dart';
 
-import 'constants.dart';
+import '../config/constants.dart';
 
 class Helper{
   static Future<bool> isTablet() async {

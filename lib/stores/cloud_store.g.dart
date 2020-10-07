@@ -9,6 +9,13 @@ part of 'cloud_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$CloudStore on _CloudStore, Store {
+  Computed<PhoneNumber> _$numberComputed;
+
+  @override
+  PhoneNumber get number => (_$numberComputed ??=
+          Computed<PhoneNumber>(() => super.number, name: '_CloudStore.number'))
+      .value;
+
   final _$myLocationAtom = Atom(name: '_CloudStore.myLocation');
 
   @override
@@ -101,6 +108,21 @@ mixin _$CloudStore on _CloudStore, Store {
     });
   }
 
+  final _$_userAtom = Atom(name: '_CloudStore._user');
+
+  @override
+  User get _user {
+    _$_userAtom.reportRead();
+    return super._user;
+  }
+
+  @override
+  set _user(User value) {
+    _$_userAtom.reportWrite(value, super._user, () {
+      super._user = value;
+    });
+  }
+
   final _$switchUserTypeAsyncAction = AsyncAction('_CloudStore.switchUserType');
 
   @override
@@ -148,7 +170,8 @@ activeCountries: ${activeCountries},
 activeCountriesNames: ${activeCountriesNames},
 availableLocations: ${availableLocations},
 userType: ${userType},
-alterEgo: ${alterEgo}
+alterEgo: ${alterEgo},
+number: ${number}
     ''';
   }
 }
