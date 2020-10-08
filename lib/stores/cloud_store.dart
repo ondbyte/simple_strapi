@@ -163,7 +163,7 @@ abstract class _CloudStore with Store {
     availableLocations = {};
     allLocations.forEach(
       (element) {
-        final key = element.state;
+        final key = element.city;
         if (availableLocations.containsKey(key)) {
           availableLocations[key].add(element);
         } else {

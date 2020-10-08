@@ -1,5 +1,6 @@
 
-import 'package:bapp/screens/authentication/pick_a_location.dart';
+import 'package:bapp/screens/authentication/pick_a_place.dart';
+import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:bapp/screens/onboarding/onboardingscreen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,9 +15,16 @@ import 'screens/init/splash_screen.dart';
 class RouteManager {
   static const String businessCategoryScreen = "/businesscategoryscreeen";
   static const String thankYouForYourInterestScreen = "/thankyouforinterest";
+  static const String pickALocation = "/pickalocation";
   static Route<dynamic> onGenerate(RouteSettings settings) {
     print("route called: ${settings.name}");
     switch (settings.name) {
+      case pickALocation:
+        return MaterialPageRoute(
+          builder: (_) {
+            return PickAPlaceLocationScreen();
+          },
+        );
       case businessCategoryScreen:
         return MaterialPageRoute(
           builder: (_) {
@@ -56,7 +64,7 @@ class RouteManager {
       case "/pickaplace":
         return MaterialPageRoute(
           builder: (_) {
-            return PickALocationScreen(settings.arguments);
+            return PickAPlaceScreen(settings.arguments);
           },
         );
       default:

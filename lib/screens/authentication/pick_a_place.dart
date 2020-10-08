@@ -1,4 +1,5 @@
 import 'package:bapp/classes/location.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/loading.dart';
@@ -7,9 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
-class PickALocationScreen extends StatelessWidget {
+class PickAPlaceScreen extends StatelessWidget {
   final int screen;
-  const PickALocationScreen(this.screen, {Key key}) : super(key: key);
+  const PickAPlaceScreen(this.screen, {Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +77,7 @@ class PickALocationScreen extends StatelessWidget {
 
   Widget _showLocations(BuildContext context) {
     return StoreProvider<CloudStore>(
-      store: Provider.of<CloudStore>(context,listen: false),
+      store: Provider.of<CloudStore>(context, listen: false),
       builder: (context, cloudStore) {
         return Observer(
           builder: (context) {
@@ -108,18 +109,26 @@ class PickALocationScreen extends StatelessWidget {
   }
 
   Widget _getSubLocationWidget(
-      BuildContext context, String state, List<Location> locations) {
+      BuildContext context, String city, List<Location> locations) {
     return Column(
       children: [
         ListTile(
           trailing: Icon(Icons.arrow_forward_ios),
           title: Text(
-            "All of $state",
+            "All of $city",
             style: Theme.of(context).textTheme.subtitle1,
           ),
-          onTap: (){
-            Provider.of<CloudStore>(context,listen: false).myLocation = Location("", "", state, locations[0].country);
-            Navigator.of(context).pushNamedAndRemoveUntil("/home",(_)=>false);
+          onTap: () {
+            Provider.of<CloudStore>(context, listen: false).myLocation =
+                Location(
+              "",
+              city,
+              locations[0].state,
+              locations[0].country,
+                  Helper.alternateLatLong(locations[0].latLong),
+            );
+            Navigator.of(context)
+                .pushNamedAndRemoveUntil("/home", (_) => false);
           },
         ),
         ...List.generate(
@@ -130,7 +139,8 @@ class PickALocationScreen extends StatelessWidget {
                 style: Theme.of(context).textTheme.subtitle2),
             onTap: () {
               context.read<CloudStore>().myLocation = locations[index];
-              Navigator.of(context).pushNamedAndRemoveUntil("/home",(_)=>false);
+              Navigator.of(context)
+                  .pushNamedAndRemoveUntil("/home", (_) => false,);
             },
           ),
         ),
