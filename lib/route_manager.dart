@@ -10,15 +10,26 @@ import 'screens/addbusiness/thank_you_for_your_interest.dart';
 import 'screens/authentication/login_screen.dart';
 import 'screens/home/bapp.dart';
 import 'screens/init/splash_screen.dart';
+import 'screens/location/search_a_place.dart';
 
 
 class RouteManager {
   static const String businessCategoryScreen = "/businesscategoryscreeen";
   static const String thankYouForYourInterestScreen = "/thankyouforinterest";
   static const String pickALocation = "/pickalocation";
+  static const String searchAPlace = "/searchaplace";
+  static const String home = "/home";
+  static const String contextualMessage = "/ctxtmsg";
+
   static Route<dynamic> onGenerate(RouteSettings settings) {
     print("route called: ${settings.name}");
     switch (settings.name) {
+      case searchAPlace:
+        return MaterialPageRoute(
+          builder: (_) {
+            return SearchAPlaceScreen();
+          },
+        );
       case pickALocation:
         return MaterialPageRoute(
           builder: (_) {
@@ -43,7 +54,7 @@ class RouteManager {
           return LoginScreen();
         },
       );
-      case "/home":
+      case home:
         return MaterialPageRoute(
           builder: (_) {
             return Bapp();

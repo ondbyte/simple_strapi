@@ -6,11 +6,16 @@ import 'package:bapp/stores/auth_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info/device_info.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import '../config/constants.dart';
 
 class Helper {
+  static stringifyAddresse(Address adr){
+    return '''${adr.subLocality}\n${adr.locality}\n${adr.addressLine}\n${adr.adminArea}\n${adr.postalCode}''';
+  }
+
   static Future<bool> isTablet() async {
     if (Platform.isIOS) {
       DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
