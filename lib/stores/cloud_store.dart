@@ -1,22 +1,27 @@
 import 'package:bapp/classes/location.dart';
-import 'package:bapp/config/config.dart';
+
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/auth_store.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:country_pickers/country_pickers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:mobx/mobx.dart';
+import 'package:provider/provider.dart';
+
+import 'business_store.dart';
 
 part 'cloud_store.g.dart';
 
 class CloudStore = _CloudStore with _$CloudStore;
 
 abstract class _CloudStore with Store {
-  AuthStore _authStore;
-  FirebaseFirestore _firstore;
+  final _auth = FirebaseAuth.instance;
+  final _fireStore = FirebaseFirestore.instance;
+
   Map<String, dynamic> myData;
   List<ReactionDisposer> _disposers = [];
 
@@ -34,19 +39,21 @@ abstract class _CloudStore with Store {
   UserType alterEgo;
   @observable
   User _user;
+  BuildContext _context;
 
-  Future init(AuthStore a) async {
-    _authStore = a;
-    _user = _authStore.user;
-    FirebaseAuth.instance.userChanges().listen((u) {
-      _user = u;
-    });
-
-    _firstore = FirebaseFirestore.instance;
+  Future init(BuildContext context) async {
+    _context = context;
+    _user = _auth.currentUser;
 
     if (_user == null) {
       throw FlutterError("this should never be the case");
     }
+
+    _auth.userChanges().listen(
+      (u) {
+        _user = u;
+      },
+    );
 
     await getUserData();
     await getMytLocation();
@@ -55,20 +62,23 @@ abstract class _CloudStore with Store {
   }
 
   Future getUserData() async {
-    var snap = await _firstore.doc("users/${_user.uid}").get();
+    var snap = await _fireStore.doc("users/${_user.uid}").get();
     myData = snap.data() ?? {};
   }
 
 
+
   @computed
-  PhoneNumber get number{
-    if(_user==null){
+  PhoneNumber get number {
+    if (_user == null) {
       return null;
     }
-    if(_user.phoneNumber==null){
+    if (_user.phoneNumber == null) {
       return PhoneNumber(isoCode: myLocation.country);
     }
-    return PhoneNumber(phoneNumber: _user.phoneNumber.replaceAll(myLocation.country, ""),isoCode: myLocation.country);
+    return PhoneNumber(
+        phoneNumber: _user.phoneNumber.replaceAll(myLocation.country, ""),
+        isoCode: myLocation.country);
   }
 
   @action
@@ -96,12 +106,12 @@ abstract class _CloudStore with Store {
     }
 
     ///update menu items according to role
-    Helper.filterMenuItems(userType, alterEgo, _authStore.status);
+    Helper.filterMenuItems(userType, alterEgo, getStore<AuthStore>(_context).status);
   }
 
   ///will auto run on change
   Future setMyUserType() async {
-    var doc = _firstore.doc("users/${_user.uid}");
+    var doc = _fireStore.doc("users/${_user.uid}");
     await doc.set(
       {"my_user_type": userType.index},
       SetOptions(merge: true),
@@ -110,7 +120,7 @@ abstract class _CloudStore with Store {
 
   ///will auto run on change
   Future setMyAlterEgo() async {
-    var doc = _firstore.doc("users/${_user.uid}");
+    var doc = _fireStore.doc("users/${_user.uid}");
     await doc.set(
       {"my_alter_ego": alterEgo.index},
       SetOptions(merge: true),
@@ -130,13 +140,13 @@ abstract class _CloudStore with Store {
 
   ///will run auto when the location is updated
   Future setMyLocation() async {
-    var doc = _firstore.doc("users/${_user.uid}");
+    var doc = _fireStore.doc("users/${_user.uid}");
     await doc.set({"my_location": myLocation.toMap()}, SetOptions(merge: true));
   }
 
   @action
   Future getActiveCountries() async {
-    var countriesCollection = _firstore.collection("active_countries");
+    var countriesCollection = _fireStore.collection("active_countries");
     var countriesDocs = await countriesCollection.get();
     activeCountries = [];
     activeCountriesNames = [];
@@ -155,7 +165,7 @@ abstract class _CloudStore with Store {
   @action
   Future getLocationsInCountry(String c) async {
     final country = CountryPickerUtils.getCountryByName(c);
-    final locationsCollection = _firstore.collection("locations");
+    final locationsCollection = _fireStore.collection("locations");
     final locationsQuery =
         locationsCollection.where("country", isEqualTo: "${country.isoCode}");
     final snaps = await locationsQuery.get();

@@ -1,6 +1,7 @@
 import 'package:bapp/config/config.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/bapp_bar.dart';
@@ -53,8 +54,8 @@ class _MenuState extends State<Menu> {
               ListTile(
                 title: Text(e.name,style: Theme.of(context).textTheme.subtitle2,),
                 trailing: Icon(e.icon),
-                onTap: (){
-                  _menuItemSelected(e.kind);
+                onTap: () {
+                  _menuItemSelected(e.kind,context);
                 },
               ),
             );
@@ -67,34 +68,35 @@ class _MenuState extends State<Menu> {
     return ws;
   }
   
-  void _menuItemSelected(MenuItemKind kind){
+  void _menuItemSelected(MenuItemKind kind,BuildContext context){
     switch (kind){
       case MenuItemKind.yourProfile:{
-        Navigator.of(context).pushNamed("/profilescreen");
+        Navigator.of(context).popAndPushNamed(RouteManager.profileScreen);
         break;
       }
       case MenuItemKind.settings:{
-        Navigator.of(context).pushNamed("/settingsscreen");
+        Navigator.of(context).popAndPushNamed(RouteManager.settingsScreen);
         break;
       }
       case MenuItemKind.rateTheApp:{
-        Navigator.of(context).pushNamed("/ratemyappscreen");
+        Navigator.of(context).popAndPushNamed(RouteManager.rateMyAppScreen);
         break;
       }
       case MenuItemKind.helpUsImprove:{
-        Navigator.of(context).pushNamed("/improvescreen");
+        Navigator.of(context).popAndPushNamed(RouteManager.helpUsImproveScreen);
         break;
       }
       case MenuItemKind.referABusiness:{
-        Navigator.of(context).pushNamed("/referbusinessscreen");
+        Navigator.of(context).popAndPushNamed(RouteManager.selectBusinessCategoryScreen);
         break;
       }
       case MenuItemKind.logOut:{
+        Navigator.pop(context);
         Provider.of<AuthStore>(context,listen: false).signOut();
         break;
       }
       case MenuItemKind.logIn:{
-        Navigator.of(context).pushNamed("/loginscreen");
+        Navigator.of(context).popAndPushNamed(RouteManager.loginScreen);
         break;
       }
       case MenuItemKind.switchTosShopping:{
@@ -118,6 +120,5 @@ class _MenuState extends State<Menu> {
         break;
       }
     }
-    Navigator.of(context).pop();
   }
 }

@@ -10,7 +10,7 @@ part 'updates_store.g.dart';
 class UpdatesStore = _UpdatesStore with _$UpdatesStore;
 
 abstract class _UpdatesStore with Store {
-  AuthStore _authStore;
+  final _auth = FirebaseAuth.instance;
   final _fireStore = FirebaseFirestore.instance;
   @observable
   ObservableMap<String,NotificationUpdate> updates = ObservableMap();
@@ -18,12 +18,16 @@ abstract class _UpdatesStore with Store {
   ObservableMap<String,NotificationUpdate> news = ObservableMap();
   @observable
   ObservableMap<String,NotificationUpdate> viewed = ObservableMap();
+  @observable
+  User _user;
 
-  Future init(AuthStore as) async {
-    this._authStore = as;
-    if (_authStore.user == null) {
+  Future init(BuildContext context) async {
+    if (_auth.currentUser == null) {
       throw FlutterError("this should never be the case @updates_store");
     }
+    _auth.userChanges().listen((u) {
+      _user = u;
+    });
     ///get updates on app start
     await getUpdates();
   }
@@ -49,10 +53,10 @@ abstract class _UpdatesStore with Store {
   ///set viewed property to true when customer dismisses, so update doesn't show up
   @action
   Future setViewedForUpdate(NotificationUpdate update) async {
-    if (_authStore.user == null) {
+    if (_user == null) {
       return;
     }
-    await _fireStore.doc("users/${_authStore.user.uid}/updates/${update.id}").update({
+    await _fireStore.doc("users/${_user.uid}/updates/${update.id}").update({
       "viewed": true
     });
   }
@@ -61,11 +65,11 @@ abstract class _UpdatesStore with Store {
   @action
   Future getUpdates({DateTime dt}) async {
     final dateTime = dt ?? DateTime.now();
-    if (_authStore.user == null) {
+    if (_user == null) {
       return;
     }
     final updatesCollection =
-        _fireStore.collection("users/${_authStore.user.uid}/updates");
+        _fireStore.collection("users/${_user.uid}/updates");
     final updatesQuery = updatesCollection.where(
       "at",
       isLessThan: Timestamp.fromDate(dateTime),

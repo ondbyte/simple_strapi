@@ -78,7 +78,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
           color: CardsColor.colors["purple"], borderRadius: BorderRadius.circular(6)),
       child: ListTile(
         onTap: (){
-          Navigator.of(context).pushNamed(RouteManager.businessCategoryScreen);
+          Navigator.of(context).pushNamed(RouteManager.selectBusinessCategoryScreen);
         },
         title: Text(
           "Own A Business",

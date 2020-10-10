@@ -24,6 +24,55 @@ mixin _$BusinessStore on _BusinessStore, Store {
     });
   }
 
+  final _$_businessApplicationsAtom =
+      Atom(name: '_BusinessStore._businessApplications');
+
+  @override
+  ObservableList<BusinessApplication> get _businessApplications {
+    _$_businessApplicationsAtom.reportRead();
+    return super._businessApplications;
+  }
+
+  @override
+  set _businessApplications(ObservableList<BusinessApplication> value) {
+    _$_businessApplicationsAtom.reportWrite(value, super._businessApplications,
+        () {
+      super._businessApplications = value;
+    });
+  }
+
+  final _$_userAtom = Atom(name: '_BusinessStore._user');
+
+  @override
+  User get _user {
+    _$_userAtom.reportRead();
+    return super._user;
+  }
+
+  @override
+  set _user(User value) {
+    _$_userAtom.reportWrite(value, super._user, () {
+      super._user = value;
+    });
+  }
+
+  final _$applyForBusinessAsyncAction =
+      AsyncAction('_BusinessStore.applyForBusiness');
+
+  @override
+  Future<dynamic> applyForBusiness(BusinessApplication ap) {
+    return _$applyForBusinessAsyncAction.run(() => super.applyForBusiness(ap));
+  }
+
+  final _$getMyBusinessApplicationsAsyncAction =
+      AsyncAction('_BusinessStore.getMyBusinessApplications');
+
+  @override
+  Future<dynamic> getMyBusinessApplications(BusinessApplication ap) {
+    return _$getMyBusinessApplicationsAsyncAction
+        .run(() => super.getMyBusinessApplications(ap));
+  }
+
   final _$getCategoriesAsyncAction =
       AsyncAction('_BusinessStore.getCategories');
 

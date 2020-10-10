@@ -64,6 +64,7 @@ abstract class _AuthStore with Store {
       },
       verificationFailed: (FirebaseAuthException exception) {
         onFail(exception);
+        print(exception);
       },
       codeSent: (String verificationID, int resendToken) async {
         var askAgain = false;

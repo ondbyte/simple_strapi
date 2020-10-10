@@ -54,6 +54,21 @@ mixin _$UpdatesStore on _UpdatesStore, Store {
     });
   }
 
+  final _$_userAtom = Atom(name: '_UpdatesStore._user');
+
+  @override
+  User get _user {
+    _$_userAtom.reportRead();
+    return super._user;
+  }
+
+  @override
+  set _user(User value) {
+    _$_userAtom.reportWrite(value, super._user, () {
+      super._user = value;
+    });
+  }
+
   final _$removeAsyncAction = AsyncAction('_UpdatesStore.remove');
 
   @override

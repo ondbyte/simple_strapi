@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
-class ChooseYourBusinessScreen extends StatefulWidget {
+class ChooseYourBusinessCategoryScreen extends StatefulWidget {
   @override
-  _ChooseYourBusinessScreenState createState() =>
-      _ChooseYourBusinessScreenState();
+  _ChooseYourBusinessCategoryScreenState createState() =>
+      _ChooseYourBusinessCategoryScreenState();
 }
 
-class _ChooseYourBusinessScreenState extends State<ChooseYourBusinessScreen> {
+class _ChooseYourBusinessCategoryScreenState extends State<ChooseYourBusinessCategoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

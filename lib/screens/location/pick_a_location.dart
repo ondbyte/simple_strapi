@@ -39,10 +39,7 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
         ),
         actions: [
           FlatButton(
-            onPressed: () async {
-              if (_loading) {
-                return;
-              }
+            onPressed: !_loading?() async {
               setState(
                 () {
                   _loading = !_loading;
@@ -67,12 +64,10 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
                 ),
               );
               Navigator.pop(context, _pickedLocation);
-            },
-            child: !_loading
-                ? Text(
-                    "OK",
-                  )
-                : CircularProgressIndicator(),
+            }:null,
+            child: Text(
+              "OK",
+            ),
             textTheme: ButtonTextTheme.primary,
           )
         ],

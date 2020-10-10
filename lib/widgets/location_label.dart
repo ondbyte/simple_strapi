@@ -1,3 +1,4 @@
+import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/store_provider.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
@@ -10,7 +11,7 @@ class LocationLabelWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: (){
-        Navigator.of(context).pushNamed("/pickaplace",arguments: 0);
+        Navigator.of(context).pushNamed(RouteManager.pickAPlace,arguments: 0);
       },
       child: Row(
         children: [

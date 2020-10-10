@@ -110,19 +110,19 @@ class _LoginScreenState extends State<LoginScreen> {
                       authStore.loginOrSignUpWithNumber(
                         number: _number,
                         onAskOTP: (bool b) async {
-
                           if (b) {
                             Flushbar(
                               message: "Please enter the correct OTP.",
                               duration: const Duration(seconds: 2),
                             ).show(context);
                           }
+
                           final t = Completer<String>();
                           _otpFutureCompleters.add(t);
                           setState(() {
                             _canVerifyotp = false;
                             _askOTP = true;
-                            print("Ask AGain");
+                            //print("Ask AGain");
                           });
                           return t.future;
                         },

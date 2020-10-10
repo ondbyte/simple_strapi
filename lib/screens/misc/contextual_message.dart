@@ -4,41 +4,54 @@ import 'package:bapp/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-
 class ContextualMessageScreen extends StatefulWidget {
-final  Function init;
+  final Function init;
+  final String message;
 
-  const ContextualMessageScreen({Key key, this.init}) : super(key: key);
+  const ContextualMessageScreen({Key key, this.init, this.message})
+      : super(key: key);
   @override
-  _ContextualMessageScreenState createState() => _ContextualMessageScreenState();
+  _ContextualMessageScreenState createState() =>
+      _ContextualMessageScreenState();
 }
 
 class _ContextualMessageScreenState extends State<ContextualMessageScreen> {
   bool loading = true;
   @override
   Widget build(BuildContext context) {
-    return InitWidget(
-      initializer: widget.init,
-      onInitComplete: (){
-        setState(() {
-          loading = false;
-        });
-      },
-      child: loading? LoadingWidget():
-      Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SvgPicture.asset("assets/svg/messages.svg",width: 256,),
-            SizedBox(height: 20,),
-            Text("Thank you, We\'ll reach you out soon.."),
-            SizedBox(height: 20,),
-            FlatButton(onPressed: (){
-              Navigator.of(context).pop();
-            }, child: Text("Back to Home"))
-          ],
-        )
+    return Material(
+      child: InitWidget(
+        initializer: widget.init,
+        onInitComplete: () {
+          setState(() {
+            loading = false;
+          });
+        },
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SvgPicture.asset(
+                "assets/svg/messages.svg",
+                width: 256,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Text("${widget.message}"),
+              SizedBox(
+                height: 20,
+              ),
+              FlatButton(
+                onPressed: loading?null:() {
+                  Navigator.of(context).pushNamedAndRemoveUntil(RouteManager.home, (route) => false);
+                },
+                child: Text("Back to Home"),
+              )
+            ],
+          ),
+        ),
       ),
     );
   }

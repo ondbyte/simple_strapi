@@ -1,6 +1,7 @@
 
 import 'package:bapp/screens/authentication/pick_a_place.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
+import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/screens/onboarding/onboardingscreen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,16 +15,30 @@ import 'screens/location/search_a_place.dart';
 
 
 class RouteManager {
-  static const String businessCategoryScreen = "/businesscategoryscreeen";
-  static const String thankYouForYourInterestScreen = "/thankyouforinterest";
-  static const String pickALocation = "/pickalocation";
-  static const String searchAPlace = "/searchaplace";
+  static const String selectBusinessCategoryScreen = "/sbcs";
+  static const String thankYouForYourInterestScreen = "/tfyis";
+  static const String pickALocation = "/pal";
+  static const String searchAPlace = "/sap";
   static const String home = "/home";
   static const String contextualMessage = "/ctxtmsg";
+  static const String pickAPlace = "/pap";
+  static const String onBoardingScreen = "/obs";
+  static const String loginScreen = "/ls";
+  static const String profileScreen = "/ps";
+  static const String settingsScreen = "/ss";
+  static const String rateMyAppScreen = "/rmas";
+  static const String helpUsImproveScreen = "/huis";
 
   static Route<dynamic> onGenerate(RouteSettings settings) {
     print("route called: ${settings.name}");
     switch (settings.name) {
+      case contextualMessage:
+        final list = settings.arguments as List;
+        return MaterialPageRoute(
+          builder: (_) {
+            return ContextualMessageScreen(init: list[0],message: list[1],);
+          },
+        );
       case searchAPlace:
         return MaterialPageRoute(
           builder: (_) {
@@ -36,10 +51,10 @@ class RouteManager {
             return PickAPlaceLocationScreen();
           },
         );
-      case businessCategoryScreen:
+      case selectBusinessCategoryScreen:
         return MaterialPageRoute(
           builder: (_) {
-            return ChooseYourBusinessScreen();
+            return ChooseYourBusinessCategoryScreen();
           },
         );
       case thankYouForYourInterestScreen:
@@ -48,7 +63,7 @@ class RouteManager {
             return ThankYouForYourInterestScreen(category: settings.arguments,);
           },
         );
-      case "/loginscreen":
+      case loginScreen:
       return MaterialPageRoute(
         builder: (_) {
           return LoginScreen();
@@ -66,13 +81,13 @@ class RouteManager {
             return SplashScreen();
           },
         );
-      case "/onboarding":
+      case onBoardingScreen:
         return MaterialPageRoute(
           builder: (_) {
             return OnBoardingScreen();
           },
         );
-      case "/pickaplace":
+      case pickAPlace:
         return MaterialPageRoute(
           builder: (_) {
             return PickAPlaceScreen(settings.arguments);

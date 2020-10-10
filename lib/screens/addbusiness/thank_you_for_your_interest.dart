@@ -6,6 +6,7 @@ import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/shake_widget.dart';
 import 'package:bapp/widgets/store_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -75,7 +76,7 @@ class _ThankYouForYourInterestScreenState
                   },
                   onInputValidated: (bool value) {
                     print(value);
-                    if(_canVerify==!value){
+                    if (_canVerify == !value) {
                       setState(() {
                         _canVerify = value;
                       });
@@ -85,7 +86,8 @@ class _ThankYouForYourInterestScreenState
                     selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
                   ),
                   ignoreBlank: true,
-                  initialValue: _validNumber!=null?_validNumber:cloudStore.number,
+                  initialValue:
+                      _validNumber != null ? _validNumber : cloudStore.number,
                 ),
                 SizedBox(
                   height: 20,
@@ -93,14 +95,17 @@ class _ThankYouForYourInterestScreenState
                 ShakeWidget(
                   doShake: _shake,
                   onShakeDone: () {
-                    setState(() {
-                      _shake = false;
-                    },);
+                    setState(
+                      () {
+                        _shake = false;
+                      },
+                    );
                   },
                   child: ListTile(
                     onTap: () async {
-                      final tmp = await Navigator.of(context).pushNamed(RouteManager.pickALocation);
-                      if(tmp!=null){
+                      final tmp = await Navigator.of(context)
+                          .pushNamed(RouteManager.pickALocation);
+                      if (tmp != null) {
                         setState(() {
                           _pickedLocation = tmp;
                         });
@@ -113,12 +118,13 @@ class _ThankYouForYourInterestScreenState
                       style: Theme.of(context).textTheme.subtitle1,
                     ),
                     subtitle: Text(
-                      _pickedLocation==null? "Pick an Address":_pickedLocation.address,
+                      _pickedLocation == null
+                          ? "Pick an Address"
+                          : _pickedLocation.address,
                       style: Theme.of(context).textTheme.bodyText1,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-
                   ),
                 ),
                 Spacer(),
@@ -126,11 +132,32 @@ class _ThankYouForYourInterestScreenState
                   onPressed: (_canVerify && _businessName.length > 2)
                       ? () {
                           if (_pickedLocation != null) {
-                            Navigator.of(context).pushNamedAndRemoveUntil(RouteManager.contextualMessage, (route) => route.settings.name==RouteManager.home);
+                            Navigator.of(context).pushNamedAndRemoveUntil(
+                              RouteManager.contextualMessage,
+                              (route) =>
+                                  route.settings.name == RouteManager.home,arguments: [
+                                  () async {
+                                final tmp = await Provider.of<BusinessStore>(context,listen: false).applyForBusiness(
+                                    BusinessApplication(
+                                        uid: FirebaseAuth.instance.currentUser.uid,
+                                        contactNumber: _validNumber.phoneNumber,
+                                        category: widget.category,
+                                        address: _pickedLocation.address,
+                                        businessName: _businessName,
+                                        latlong: _pickedLocation.latLong
+                                    )
+                                );
+                                return tmp;
+                              },
+                              "Thank you, we\'ll reach you out soon"
+                            ]
+                            );
                           } else {
-                            setState(() {
-                              _shake = true;
-                            });
+                            setState(
+                              () {
+                                _shake = true;
+                              },
+                            );
                           }
                         }
                       : null,
@@ -149,12 +176,4 @@ class _ThankYouForYourInterestScreenState
       ),
     );
   }
-}
-
-class BusinessApplication{
-  final String businessName;
-  final String address;
-  final GeoPoint latlong;
-
-  BusinessApplication(this.businessName, this.address, this.latlong);
 }

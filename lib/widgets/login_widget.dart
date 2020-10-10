@@ -1,3 +1,4 @@
+import 'package:bapp/route_manager.dart';
 import 'package:bapp/widgets/buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -38,7 +39,7 @@ class AskToLoginWidget extends StatelessWidget {
           ),
           FlatButton(
             onPressed: () {
-              Navigator.of(context).pushNamed("/loginscreen");
+              Navigator.of(context).pushNamed(RouteManager.loginScreen);
             },
             color: Theme.of(context).primaryColor,
             child: Text(

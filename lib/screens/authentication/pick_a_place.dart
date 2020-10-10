@@ -1,5 +1,6 @@
 import 'package:bapp/classes/location.dart';
 import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/loading.dart';
@@ -24,7 +25,7 @@ class PickAPlaceScreen extends StatelessWidget {
       throw FlutterError("only countries and location screen supported");
     }), onWillPop: () async {
       if (screen == 1) {
-        Navigator.of(context).pushReplacementNamed("/pickaplace", arguments: 0);
+        Navigator.of(context).pushReplacementNamed(RouteManager.pickAPlace, arguments: 0);
       }
       return false;
     });
@@ -35,7 +36,7 @@ class PickAPlaceScreen extends StatelessWidget {
       store: Provider.of<CloudStore>(context, listen: false),
       init: (cloudStore) async {
         ///initialize user data
-        await cloudStore.init(Provider.of<AuthStore>(context, listen: false));
+        await cloudStore.init(context);
         await cloudStore.getActiveCountries();
       },
       builder: (_, cloudStore) {
@@ -59,7 +60,7 @@ class PickAPlaceScreen extends StatelessWidget {
                             onTap: () async {
                               cloudStore.getLocationsInCountry(e);
                               Navigator.of(context).pushReplacementNamed(
-                                "/pickaplace",
+                                RouteManager.pickAPlace,
                                 arguments: 1,
                               );
                             },
@@ -128,7 +129,7 @@ class PickAPlaceScreen extends StatelessWidget {
                   Helper.alternateLatLong(locations[0].latLong),
             );
             Navigator.of(context)
-                .pushNamedAndRemoveUntil("/home", (_) => false);
+                .pushNamedAndRemoveUntil(RouteManager.home, (_) => false);
           },
         ),
         ...List.generate(
@@ -140,7 +141,7 @@ class PickAPlaceScreen extends StatelessWidget {
             onTap: () {
               context.read<CloudStore>().myLocation = locations[index];
               Navigator.of(context)
-                  .pushNamedAndRemoveUntil("/home", (_) => false,);
+                  .pushNamedAndRemoveUntil(RouteManager.home, (_) => false,);
             },
           ),
         ),

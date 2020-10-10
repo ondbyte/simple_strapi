@@ -12,6 +12,8 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
+import '../../route_manager.dart';
+
 class OnBoardingScreen extends StatefulWidget {
   @override
   _OnBoardingScreenState createState() => _OnBoardingScreenState();
@@ -142,7 +144,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
             //await await context.read<CloudStore>().init(context.read<AuthStore>());
             ///ask a place
             Navigator.of(context)
-                .pushReplacementNamed("/pickaplace", arguments: 0);
+                .pushReplacementNamed(RouteManager.pickAPlace, arguments: 0);
           },
         )
       ],

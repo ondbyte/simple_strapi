@@ -11,6 +11,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 
+import '../../route_manager.dart';
+
 class SplashScreen extends StatefulWidget {
   @override
   _SplashScreenState createState() => _SplashScreenState();
@@ -21,61 +23,68 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return InitWidget(
       initializer: () async {
+        ///init authentication store / load user
         await Provider.of<AuthStore>(context,listen: false).init();
         //await context.read<FeedbackStore>().init();
       },
       onInitComplete: () async {
-        ///show onboarding screens if first time customer
         //await FirebaseAuth.instance.signOut();
         final authStore = Provider.of<AuthStore>(context,listen: false);
         final cloudStore = Provider.of<CloudStore>(context,listen: false);
 
+        ///show on-boarding screens if first time customer
         if(authStore.status==AuthStatus.userNotPresent){
-          Navigator.of(context).pushReplacementNamed("/onboarding");
+          Navigator.of(context).pushReplacementNamed(RouteManager.onBoardingScreen);
           return;
         }
         if(authStore.status==AuthStatus.anonymousUser||authStore.status==AuthStatus.userPresent){
-          await cloudStore.init(context.read<AuthStore>());
+          await cloudStore.init(context);
+          ///show place selection if no place selected
           if(cloudStore.myLocation==null){
-            Navigator.of(context).pushReplacementNamed("/pickaplace",arguments: 0);
+            Navigator.of(context).pushReplacementNamed(RouteManager.pickAPlace,arguments: 0);
             return;
           } else {
             ///customer is not a first timer
-            Navigator.of(context).pushReplacementNamed("/home");
+            Navigator.of(context).pushReplacementNamed(RouteManager.home);
           }
         }
       },
-      child: Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                margin: EdgeInsets.only(top: 30, bottom: 30),
-                height: 80,
-                child: new SvgPicture.asset(
-                  'assets/svg/logo.svg',
-                  semanticsLabel: 'Ice Cream',
+      ///show splash screen while everything happens behind the scenes
+      child: _getSplashScreen(),
+    );
+  }
+
+  Widget _getSplashScreen(){
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              margin: EdgeInsets.only(top: 30, bottom: 30),
+              height: 80,
+              child: new SvgPicture.asset(
+                'assets/svg/logo.svg',
+                semanticsLabel: 'Ice Cream',
+              ),
+            ),
+            Column(
+              children: <Widget>[
+                new Text(
+                  '$kAppName',
+                  style: Theme.of(context).textTheme.headline1,
                 ),
-              ),
-              Column(
-                children: <Widget>[
-                  new Text(
-                    '$kAppName',
-                    style: Theme.of(context).textTheme.headline1,
+                Padding(
+                  padding: const EdgeInsets.only(top: 10.0),
+                  child: Text(
+                    'Book Appointments',
+                    style: Theme.of(context).textTheme.subtitle2,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 10.0),
-                    child: Text(
-                      'Book Appointments',
-                      style: Theme.of(context).textTheme.subtitle2,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

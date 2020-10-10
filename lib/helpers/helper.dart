@@ -8,6 +8,7 @@ import 'package:device_info/device_info.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:provider/provider.dart';
 
 import '../config/constants.dart';
 
@@ -62,4 +63,8 @@ class Helper {
     kFilteredMenuItems = ls;
     //print(ls);
   }
+}
+
+T getStore<T>(BuildContext context){
+  return Provider.of<T>(context,listen:false);
 }
