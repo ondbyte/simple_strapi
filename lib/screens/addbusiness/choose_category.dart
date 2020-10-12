@@ -11,7 +11,8 @@ class ChooseYourBusinessCategoryScreen extends StatefulWidget {
       _ChooseYourBusinessCategoryScreenState();
 }
 
-class _ChooseYourBusinessCategoryScreenState extends State<ChooseYourBusinessCategoryScreen> {
+class _ChooseYourBusinessCategoryScreenState
+    extends State<ChooseYourBusinessCategoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,9 +25,9 @@ class _ChooseYourBusinessCategoryScreenState extends State<ChooseYourBusinessCat
             await businessStore.getCategories();
           },
           builder: (_, businessStore) {
-            return Observer(builder: (_){
-              return SingleChildScrollView(
-                child: AnimatedContainer(
+            return Observer(
+              builder: (_) {
+                return AnimatedContainer(
                   duration: const Duration(seconds: 1),
                   curve: Curves.easeInOutSine,
                   child: Column(
@@ -47,40 +48,61 @@ class _ChooseYourBusinessCategoryScreenState extends State<ChooseYourBusinessCat
                       SizedBox(
                         height: 20,
                       ),
-                      ..._getCategoriesTiles(context, businessStore.categories)
+                      _getCategoriesTiles(
+                          context, businessStore.categories.toList())
                     ],
                   ),
-                ),
-              );
-            },);
+                );
+              },
+            );
           },
         ),
       ),
     );
   }
 
-  List<Widget> _getCategoriesTiles(
+  Widget _getCategoriesTiles(
       BuildContext context, List<BusinessCategory> categories) {
-    List<Widget> ws = [];
-    categories.forEach((element) {
-      ws.add(
-        Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor.withOpacity(0.3),
-            borderRadius: BorderRadius.circular(6)
-          ),
-          child: ListTile(
-            title: Text(element.normalName,style: Theme.of(context).textTheme.subtitle1,),
-            trailing: Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.of(context).pushNamed(RouteManager.thankYouForYourInterestScreen,arguments: element);
-            },
-          ),
-        ),
-      );
+    return CategoryListTilesWidget(
+      elements: categories,
+    );
+  }
+}
 
-      ws.add(SizedBox(height: 20,));
-    },);
-    return ws;
+class CategoryListTilesWidget extends StatelessWidget {
+  final List<BusinessCategory> elements;
+
+  const CategoryListTilesWidget({Key key, this.elements}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ...List.generate(
+            elements.length,
+                (index) => Container(
+              decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(6)),
+              margin: EdgeInsets.only(bottom: 20),
+              child: ListTile(
+                title: Text(
+                  elements[index].normalName,
+                  style: Theme.of(context).textTheme.subtitle1,
+                ),
+                trailing: Icon(Icons.arrow_forward_ios),
+                onTap: () {
+                  Navigator.of(context).pushNamed(
+                    RouteManager.thankYouForYourInterestScreen,
+                    arguments: elements[index],
+                  );
+                },
+              ),
+            ),
+          )
+        ],
+      ),
+    );
   }
 }

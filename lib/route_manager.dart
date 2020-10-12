@@ -12,6 +12,7 @@ import 'screens/authentication/login_screen.dart';
 import 'screens/home/bapp.dart';
 import 'screens/init/splash_screen.dart';
 import 'screens/location/search_a_place.dart';
+import 'screens/search/search_inside_bapp.dart';
 
 
 class RouteManager {
@@ -28,10 +29,18 @@ class RouteManager {
   static const String settingsScreen = "/ss";
   static const String rateMyAppScreen = "/rmas";
   static const String helpUsImproveScreen = "/huis";
+  static const String searchInsideBapp = "/sib";
 
   static Route<dynamic> onGenerate(RouteSettings settings) {
     print("route called: ${settings.name}");
     switch (settings.name) {
+      case searchInsideBapp:
+        final list = settings.arguments as List;
+        return MaterialPageRoute(
+          builder: (_) {
+            return SearchInsideBappScreen();
+          },
+        );
       case contextualMessage:
         final list = settings.arguments as List;
         return MaterialPageRoute(

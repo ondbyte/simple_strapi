@@ -11,7 +11,7 @@ abstract class _BusinessStore with Store {
   final _fireStore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
   @observable
-  ObservableList<BusinessCategory> categories = ObservableList();
+  var categories = ObservableList<BusinessCategory>();
   @observable
   var _businessApplications = ObservableList<BusinessApplication>();
   @observable

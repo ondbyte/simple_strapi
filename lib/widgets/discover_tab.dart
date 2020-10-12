@@ -1,10 +1,12 @@
 import 'package:bapp/config/config.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/stores/business_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
 import 'package:bapp/stores/auth_store.dart';
+import 'search_bar.dart';
 import 'store_provider.dart';
 
 class DiscoverTab extends StatefulWidget {
@@ -18,7 +20,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
     return StoreProvider<AuthStore>(
       store: context.watch<AuthStore>(),
       builder: (_, authStore) {
-        return Observer(builder: (_){
+        return Observer(builder: (_) {
           return CustomScrollView(
             slivers: <Widget>[
               SliverList(
@@ -35,11 +37,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     SizedBox(
                       height: 20,
                     ),
-                    Container(
-                      height: 50,
-                      width: double.maxFinite,
-                      decoration: BoxDecoration(color: Colors.grey[200]),
-                    ),
+                    _getSearchBar(),
                     SizedBox(
                       height: 20,
                     ),
@@ -70,29 +68,56 @@ class _DiscoverTabState extends State<DiscoverTab> {
     );
   }
 
-
+  Widget _getSearchBar(){
+    return StoreProvider<BusinessStore>(
+      store: Provider.of<BusinessStore>(context),
+      init: (businessStore) async {
+        await businessStore.getCategories();
+      },
+      builder: (_, businessStore) {
+        return Observer(
+          builder: (_) {
+            return SearchBarWidget(
+              possibilities: Provider.of<BusinessStore>(context,
+                  listen: false)
+                  .categories
+                  .map<String>(
+                    (element) => element.normalName,
+              )
+                  .toList(),
+            );
+          },
+        );
+      },
+    );
+  }
 
   Widget _getOwnABusiness(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          color: CardsColor.colors["purple"], borderRadius: BorderRadius.circular(6)),
+          color: CardsColor.colors["purple"],
+          borderRadius: BorderRadius.circular(6)),
       child: ListTile(
-        onTap: (){
-          Navigator.of(context).pushNamed(RouteManager.selectBusinessCategoryScreen);
+        onTap: () {
+          Navigator.of(context)
+              .pushNamed(RouteManager.selectBusinessCategoryScreen);
         },
         title: Text(
           "Own A Business",
           style: Theme.of(context).textTheme.subtitle1.apply(
-            color: Theme.of(context).primaryColorLight,
-          ),
+                color: Theme.of(context).primaryColorLight,
+              ),
         ),
         subtitle: Text(
           "List your business on Bapp",
           style: Theme.of(context).textTheme.bodyText1.apply(
-            color: Theme.of(context).primaryColorLight,
-          ),
+                color: Theme.of(context).primaryColorLight,
+              ),
         ),
-        trailing: Icon(Icons.arrow_forward_ios,color: Theme.of(context).primaryColorLight,),
+        trailing: Icon(
+          Icons.arrow_forward_ios,
+          color: Theme.of(context).primaryColorLight,
+        ),
       ),
     );
   }
@@ -111,7 +136,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
       child: Row(
         children: [
           ...HomeScreenFeaturedConfig.slides.map(
-                (e) => Container(
+            (e) => Container(
               height: 125,
               width: 142,
               margin: EdgeInsets.only(right: 20),
@@ -132,8 +157,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   Text(
                     e.title,
                     style: Theme.of(context).textTheme.headline3.apply(
-                      color: Theme.of(context).primaryColorLight,
-                    ),
+                          color: Theme.of(context).primaryColorLight,
+                        ),
                   ),
                 ],
               ),
@@ -188,5 +213,4 @@ class _DiscoverTabState extends State<DiscoverTab> {
       ),
     );
   }
-
 }

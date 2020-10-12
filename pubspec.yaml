@@ -40,6 +40,7 @@ dependencies:
   google_maps_flutter: ^1.0.2
   google_place: ^0.3.3
   geocoder: ^0.2.1
+  animated_text_kit: ^2.2.0
 
 dev_dependencies:
   flutter_test:
