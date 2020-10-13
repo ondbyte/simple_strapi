@@ -83,7 +83,7 @@ class PickAPlaceScreen extends StatelessWidget {
                   style: Theme.of(context).textTheme.subtitle1,
                 ),
               ),
-              body: cloudStore.availableLocations != null
+              body: cloudStore.availableLocations != null &&cloudStore.availableLocations.isNotEmpty
                   ? ListView(
                       children: List.generate(
                         cloudStore.availableLocations.length,

@@ -30,63 +30,66 @@ class _UpdatesTabState extends State<UpdatesTab> {
     return StoreProvider<UpdatesStore>(
       store: Provider.of<UpdatesStore>(context, listen: false),
       builder: (_, updatesStore) {
-        return DefaultTabController(
-          length: 2,
-          child: LayoutBuilder(
-            builder: (_, cons) {
-              return Observer(
-                builder: (_) {
-                  return Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        height: 40,
-                        child: TabBar(
-                          indicatorSize: TabBarIndicatorSize.tab,
-                          indicator: BubbleTabIndicator(
-                            indicatorHeight: 40,
-                            tabBarIndicatorSize: TabBarIndicatorSize.tab,
-                            indicatorColor: CardsColor.colors["lightGreen"],
+        return Padding(
+          padding: EdgeInsets.all(16),
+          child: DefaultTabController(
+            length: 2,
+            child: LayoutBuilder(
+              builder: (_, cons) {
+                return Observer(
+                  builder: (_) {
+                    return Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          height: 40,
+                          child: TabBar(
+                            indicatorSize: TabBarIndicatorSize.tab,
+                            indicator: BubbleTabIndicator(
+                              indicatorHeight: 40,
+                              tabBarIndicatorSize: TabBarIndicatorSize.tab,
+                              indicatorColor: CardsColor.colors["lightGreen"],
+                            ),
+                            labelStyle: Theme.of(context).textTheme.headline4,
+                            labelColor: Theme.of(context).primaryColorLight,
+                            unselectedLabelColor:
+                                Theme.of(context).primaryColorDark,
+                            onTap: (i) {
+                              setState(
+                                () {
+                                  _selectedUpdateTab = i;
+                                },
+                              );
+                            },
+                            tabs: [
+                              Tab(
+                                text: "Updates",
+                              ),
+                              Tab(
+                                text: "News",
+                              ),
+                            ],
                           ),
-                          labelStyle: Theme.of(context).textTheme.headline4,
-                          labelColor: Theme.of(context).primaryColorLight,
-                          unselectedLabelColor:
-                              Theme.of(context).primaryColorDark,
-                          onTap: (i) {
-                            setState(
-                              () {
-                                _selectedUpdateTab = i;
-                              },
-                            );
-                          },
-                          tabs: [
-                            Tab(
-                              text: "Updates",
-                            ),
-                            Tab(
-                              text: "News",
-                            ),
-                          ],
                         ),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      SizedBox(
-                        height: cons.maxHeight - 64,
-                        child: IndexedStack(
-                          index: _selectedUpdateTab,
-                          children: [
-                            _getUpdates(updatesStore.updates),
-                            _getNews(updatesStore.news),
-                          ],
+                        SizedBox(
+                          height: 20,
                         ),
-                      )
-                    ],
-                  );
-                },
-              );
-            },
+                        SizedBox(
+                          height: cons.maxHeight - 64,
+                          child: IndexedStack(
+                            index: _selectedUpdateTab,
+                            children: [
+                              _getUpdates(updatesStore.updates),
+                              _getNews(updatesStore.news),
+                            ],
+                          ),
+                        )
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
           ),
         );
       },
@@ -94,15 +97,23 @@ class _UpdatesTabState extends State<UpdatesTab> {
   }
 
   ///empty updates
-  Widget _getEmpty(){
+  Widget _getEmpty() {
     return Center(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SvgPicture.asset("assets/svg/empty-list.svg",width: 300,),
-          SizedBox(height: 10,),
-          Text("You are up to date",style: Theme.of(context).textTheme.subtitle1,),
+          SvgPicture.asset(
+            "assets/svg/empty-list.svg",
+            width: 300,
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Text(
+            "You are up to date",
+            style: Theme.of(context).textTheme.subtitle1,
+          ),
         ],
       ),
     );
@@ -110,28 +121,32 @@ class _UpdatesTabState extends State<UpdatesTab> {
 
   ///updates tab
   Widget _getUpdates(Map<String, NotificationUpdate> updates) {
-    return updates.isNotEmpty?CustomScrollView(
-      slivers: <Widget>[
-        SliverList(
-          delegate: SliverChildListDelegate(
-            _getTiles(updates),
-          ),
-        )
-      ],
-    ):_getEmpty();
+    return updates.isNotEmpty
+        ? CustomScrollView(
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  _getTiles(updates),
+                ),
+              )
+            ],
+          )
+        : _getEmpty();
   }
 
   ///news tab
   Widget _getNews(Map<String, NotificationUpdate> updates) {
-    return updates.isNotEmpty?CustomScrollView(
-      slivers: <Widget>[
-        SliverList(
-          delegate: SliverChildListDelegate(
-            _getTiles(updates),
-          ),
-        )
-      ],
-    ):_getEmpty();
+    return updates.isNotEmpty
+        ? CustomScrollView(
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  _getTiles(updates),
+                ),
+              )
+            ],
+          )
+        : _getEmpty();
   }
 
   List<Widget> _getTiles(Map<String, NotificationUpdate> updates) {
@@ -141,19 +156,24 @@ class _UpdatesTabState extends State<UpdatesTab> {
         ws.add(
           Dismissible(
             key: Key(id),
-            onDismissed: (d){
-              Provider.of<UpdatesStore>(context,listen: false).remove(element);
-              Provider.of<UpdatesStore>(context,listen:false).setViewedForUpdate(element);
+            onDismissed: (d) {
+              Provider.of<UpdatesStore>(context, listen: false).remove(element);
+              Provider.of<UpdatesStore>(context, listen: false)
+                  .setViewedForUpdate(element);
             },
             child: NotificationUpdateTileWidget(
               update: element,
             ),
           ),
         );
-        ws.add(SizedBox(height: 20,),);
+        ws.add(
+          SizedBox(
+            height: 20,
+          ),
+        );
       },
     );
-    if(ws.isNotEmpty) ws.removeLast();
+    if (ws.isNotEmpty) ws.removeLast();
     return ws;
   }
 }
@@ -183,8 +203,8 @@ class NotificationUpdateTileWidget extends StatelessWidget {
                 Text(
                   update.title,
                   style: Theme.of(context).textTheme.headline2.apply(
-                    color: Theme.of(context).primaryColorLight,
-                  ),
+                        color: Theme.of(context).primaryColorLight,
+                      ),
                 ),
                 SizedBox(
                   height: 10,
@@ -192,8 +212,8 @@ class NotificationUpdateTileWidget extends StatelessWidget {
                 Text(
                   update.description,
                   style: Theme.of(context).textTheme.bodyText1.apply(
-                    color: Theme.of(context).primaryColorLight,
-                  ),
+                        color: Theme.of(context).primaryColorLight,
+                      ),
                 ),
               ],
             ),

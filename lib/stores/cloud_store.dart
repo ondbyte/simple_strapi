@@ -12,6 +12,8 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 
+import 'auth_store.dart';
+
 part 'cloud_store.g.dart';
 
 class CloudStore = _CloudStore with _$CloudStore;
@@ -37,12 +39,12 @@ abstract class _CloudStore with Store {
   UserType alterEgo;
   @observable
   User _user;
-  BuildContext _context;
+
+  AuthStore _authStore;
 
   Future init(BuildContext context) async {
-    _context = context;
     _user = _auth.currentUser;
-
+    _authStore = Provider.of<AuthStore>(context,listen: false);
     if (_user == null) {
       throw FlutterError("this should never be the case");
     }
@@ -56,6 +58,7 @@ abstract class _CloudStore with Store {
     await getUserData();
     await getMytLocation();
     await getMyUserTypes();
+    updateMenuItems();
     _setupAutoRun();
   }
 
@@ -179,7 +182,8 @@ abstract class _CloudStore with Store {
 
   updateMenuItems(){
     ///update menu items according to role and authStatus changes
-    Helper.filterMenuItems(userType, alterEgo, getStore<AuthStore>(_context).status);
+    print("updating menu items @cloudstore");
+    Helper.filterMenuItems(userType, alterEgo, _authStore.status);
   }
 
   void _setupAutoRun() {

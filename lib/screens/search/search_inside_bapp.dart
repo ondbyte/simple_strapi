@@ -23,11 +23,15 @@ class _SearchInsideBappScreenState extends State<SearchInsideBappScreen> {
       body: StoreProvider<BusinessStore>(
         store: Provider.of<BusinessStore>(context),
         builder: (_, businessStore) {
-          return ChooseCategoryListTilesWidget(
-            elements: businessStore.categories,
-            onCategorySelected: (c){
-              Navigator.of(context).pushNamed(RouteManager.showResultsScreen,arguments: c);
-            },
+          return Padding(
+            padding: EdgeInsets.all(16),
+            child: ChooseCategoryListTilesWidget(
+              elements: businessStore.categories,
+              onCategorySelected: (c) {
+                Navigator.of(context)
+                    .pushNamed(RouteManager.showResultsScreen, arguments: c);
+              },
+            ),
           );
         },
       ),

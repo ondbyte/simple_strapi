@@ -38,10 +38,11 @@ class App extends StatelessWidget {
           create: (_)=>BusinessStore(),
         ),
       ],
+
       builder: (context,w){
         return MaterialApp(
           title: "Bapp",
-          theme: context.watch<ThemeStore>().selectedThemeData,
+          theme: Provider.of<ThemeStore>(context,listen: false).selectedThemeData,
           initialRoute: "/",
           onGenerateRoute: RouteManager.onGenerate,
         );

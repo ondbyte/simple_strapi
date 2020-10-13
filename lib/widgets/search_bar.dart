@@ -15,7 +15,7 @@ class SearchBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: (){
+      onTap: () {
         Navigator.of(context).pushNamed(RouteManager.searchInsideBapp);
       },
       child: Container(
@@ -23,17 +23,20 @@ class SearchBarWidget extends StatelessWidget {
         width: double.maxFinite,
         alignment: Alignment.centerLeft,
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(color: Colors.grey[200]),
+        decoration: BoxDecoration(
+          color: Theme.of(context).primaryColorDark.withOpacity(.4),
+          borderRadius: BorderRadius.circular(6),
+        ),
         child: possibilities.isNotEmpty
             ? RotateAnimatedTextKit(
-          totalRepeatCount: 4,
-          repeatForever: true, //this will ignore [totalRepeatCount]
-          text: possibilities,
-          textStyle: Theme.of(context).textTheme.subtitle1.apply(
-              color: Theme.of(context).primaryColorDark.withOpacity(0.6)),
-          pause: const Duration(milliseconds: 500),
-          displayFullTextOnTap: true,
-        )
+                totalRepeatCount: 4,
+                repeatForever: true, //this will ignore [totalRepeatCount]
+                text: possibilities,
+                textStyle: Theme.of(context).textTheme.subtitle1.apply(
+                    color: Theme.of(context).primaryColorDark.withOpacity(0.6)),
+                pause: const Duration(milliseconds: 500),
+                displayFullTextOnTap: true,
+              )
             : SizedBox(),
       ),
     );

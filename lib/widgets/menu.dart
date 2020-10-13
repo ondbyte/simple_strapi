@@ -71,7 +71,7 @@ class _MenuState extends State<Menu> {
   void _menuItemSelected(MenuItemKind kind,BuildContext context){
     switch (kind){
       case MenuItemKind.yourProfile:{
-        Navigator.of(context).popAndPushNamed(RouteManager.profileScreen);
+        Navigator.of(context).popAndPushNamed(RouteManager.createProfileScreen);
         break;
       }
       case MenuItemKind.settings:{

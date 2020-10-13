@@ -37,12 +37,12 @@ class MenuItem {
   final List<AuthStatus> showWhenAuthStatusIs;
 
   MenuItem(
-      {this.showWhenAuthStatusIs = AuthStatus.values,
+      {this.showWhenAuthStatusIs = const [],
         this.name,
         this.icon,
         this.kind,
-        this.showWhenUserTypeIs = const [UserType.customer],
-        this.showWhenAlterEgoIs = const [UserType.customer]});
+        this.showWhenUserTypeIs = const [],
+        this.showWhenAlterEgoIs = const []});
 }
 
 class Reasons {

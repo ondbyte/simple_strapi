@@ -15,6 +15,8 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../route_manager.dart';
+
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -133,7 +135,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           ).show(context);
                         },
                         onVerified: () {
-                          Navigator.pop(context);
+                          if(authStore.user.email.isEmpty||authStore.user.displayName.isEmpty){
+                            Navigator.pushReplacementNamed(context, RouteManager.createProfileScreen);
+                          } else {
+                            Navigator.pop(context);
+                          }
                         },
                       );
                     }

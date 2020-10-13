@@ -1,5 +1,5 @@
 
-import 'package:bapp/screens/authentication/pick_a_place.dart';
+import 'package:bapp/screens/location/pick_a_place.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/screens/onboarding/onboardingscreen.dart';
@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 
 import 'screens/addbusiness/choose_category.dart';
 import 'screens/addbusiness/thank_you_for_your_interest.dart';
+import 'screens/authentication/create_profile.dart';
 import 'screens/authentication/login_screen.dart';
 import 'screens/home/bapp.dart';
 import 'screens/init/splash_screen.dart';
@@ -26,7 +27,7 @@ class RouteManager {
   static const String pickAPlace = "/pap";
   static const String onBoardingScreen = "/obs";
   static const String loginScreen = "/ls";
-  static const String profileScreen = "/ps";
+  static const String createProfileScreen = "/crps";
   static const String settingsScreen = "/ss";
   static const String rateMyAppScreen = "/rmas";
   static const String helpUsImproveScreen = "/huis";
@@ -36,15 +37,19 @@ class RouteManager {
   static Route<dynamic> onGenerate(RouteSettings settings) {
     print("route called: ${settings.name}");
     switch (settings.name) {
+      case createProfileScreen:
+        return MaterialPageRoute(
+          builder: (_) {
+            return CreateYourProfileScreen();
+          },
+        );
       case showResultsScreen:
-        final list = settings.arguments as List;
         return MaterialPageRoute(
           builder: (_) {
             return ShowResultsScreen(showResultsFor: settings.arguments,);
           },
         );
       case searchInsideBapp:
-        final list = settings.arguments as List;
         return MaterialPageRoute(
           builder: (_) {
             return SearchInsideBappScreen();

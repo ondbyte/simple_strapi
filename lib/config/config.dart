@@ -3,6 +3,13 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart' hide Tab;
 import 'package:flutter/widgets.dart';
 
+import '../stores/auth_store.dart';
+import '../stores/auth_store.dart';
+import '../stores/auth_store.dart';
+import 'config_data_types.dart';
+import 'config_data_types.dart';
+import 'config_data_types.dart';
+import 'config_data_types.dart';
 import 'config_data_types.dart';
 
 ///add colors of cards across the app (color will be picked up randomly most of the time)
@@ -122,11 +129,16 @@ class MenuConfig {
         showWhenAuthStatusIs: [
           AuthStatus.userPresent,
         ],
+        showWhenUserTypeIs: UserType.values,
+        showWhenAlterEgoIs: UserType.values,
       ),
       MenuItem(
         name: "Settings",
         icon: FeatherIcons.settings,
         kind: MenuItemKind.settings,
+        showWhenAuthStatusIs: [AuthStatus.userPresent],
+        showWhenUserTypeIs: UserType.values,
+        showWhenAlterEgoIs: UserType.values,
       ),
       MenuItem(
         name: "Rate the App",
@@ -136,19 +148,24 @@ class MenuConfig {
           AuthStatus.userPresent,
           AuthStatus.anonymousUser,
         ],
+        showWhenUserTypeIs: UserType.values,
+        showWhenAlterEgoIs: UserType.values,
       ),
       MenuItem(
         name: "Help us improve",
         icon: FeatherIcons.user,
         kind: MenuItemKind.helpUsImprove,
+        showWhenAuthStatusIs: AuthStatus.values,
+        showWhenUserTypeIs: UserType.values,
+        showWhenAlterEgoIs: UserType.values,
       ),
       MenuItem(
         name: "Refer a business",
         icon: FeatherIcons.disc,
         kind: MenuItemKind.referABusiness,
-        showWhenAuthStatusIs: [
-          AuthStatus.userPresent,
-        ],
+        showWhenAuthStatusIs: AuthStatus.values,
+        showWhenUserTypeIs: UserType.values,
+        showWhenAlterEgoIs: UserType.values,
       ),
       MenuItem(
         name: "Logout",
@@ -157,6 +174,8 @@ class MenuConfig {
         showWhenAuthStatusIs: [
           AuthStatus.userPresent,
         ],
+        showWhenUserTypeIs: UserType.values,
+        showWhenAlterEgoIs: UserType.values,
       ),
       MenuItem(
         name: "Login",
@@ -165,6 +184,8 @@ class MenuConfig {
         showWhenAuthStatusIs: [
           AuthStatus.anonymousUser,
         ],
+        showWhenUserTypeIs: UserType.values,
+        showWhenAlterEgoIs: UserType.values,
       ),
     ],
 
@@ -185,57 +206,43 @@ class MenuConfig {
             UserType.businessOwner,
           ]),
       MenuItem(
-          name: "Switch to business",
-          icon: FeatherIcons.repeat,
-          kind: MenuItemKind.switchToBusiness,
-          showWhenAuthStatusIs: [
-            AuthStatus.userPresent
-          ],
-          showWhenAlterEgoIs: [
-            UserType.businessOwner,
-            UserType.businessStaff,
-            UserType.customer,
-          ],
-          showWhenUserTypeIs: [
-            UserType.customer,
-          ]),
+        name: "Switch to business",
+        icon: FeatherIcons.repeat,
+        kind: MenuItemKind.switchToBusiness,
+        showWhenAuthStatusIs: [AuthStatus.userPresent],
+        showWhenAlterEgoIs: [
+          UserType.businessOwner,
+          UserType.businessStaff,
+          UserType.customer,
+        ],
+        showWhenUserTypeIs: [
+          UserType.customer,
+        ],
+      ),
       MenuItem(
-          name: "Switch to sales",
-          icon: FeatherIcons.repeat,
-          kind: MenuItemKind.switchToSales,
-          showWhenAuthStatusIs: [
-            AuthStatus.userPresent
-          ],
-          showWhenAlterEgoIs: [
-            UserType.customer,
-            UserType.sales
-          ],
-          showWhenUserTypeIs: [
-            UserType.customer,
-          ]),
+        name: "Switch to sales",
+        icon: FeatherIcons.repeat,
+        kind: MenuItemKind.switchToSales,
+      ),
       MenuItem(
-          name: "Manager",
-          icon: FeatherIcons.briefcase,
-          kind: MenuItemKind.switchToManager,
-          showWhenAuthStatusIs: [
-            AuthStatus.userPresent
-          ],
-          showWhenAlterEgoIs: [
-            UserType.salesManager
-          ],
-          showWhenUserTypeIs: [
-            UserType.customer,
-          ]),
+        name: "Manager",
+        icon: FeatherIcons.briefcase,
+        kind: MenuItemKind.switchToManager,
+        showWhenAuthStatusIs: [AuthStatus.userPresent],
+        showWhenAlterEgoIs: [UserType.salesManager],
+        showWhenUserTypeIs: [
+          UserType.customer,
+        ],
+      ),
       MenuItem(
-          name: "Sudo",
-          icon: FeatherIcons.hash,
-          kind: MenuItemKind.switchToSudoUser,
-          showWhenAlterEgoIs: [
-            UserType.sudo
-          ],
-          showWhenUserTypeIs: [
-            UserType.customer,
-          ]),
+        name: "Sudo",
+        icon: FeatherIcons.hash,
+        kind: MenuItemKind.switchToSudoUser,
+        showWhenAlterEgoIs: [UserType.sudo],
+        showWhenUserTypeIs: [
+          UserType.customer,
+        ],
+      ),
     ],
   ];
 }

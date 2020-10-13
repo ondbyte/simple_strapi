@@ -192,20 +192,25 @@ class _DiscoverTabState extends State<DiscoverTab> {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: StoreProvider<BusinessStore>(
-        store: Provider.of<BusinessStore>(context),
+        store: Provider.of<BusinessStore>(context, listen: false),
         builder: (_, businessStore) {
-          return Row(
-            children: [
-              ...List.generate(
-                businessStore.categories.length,
-                (index) => FlatButton(
-                  onPressed: () {
-
-                  },
-                  child: Text(businessStore.categories[index].normalName,style: Theme.of(context).textTheme.subtitle1,),
-                ),
-              ),
-            ],
+          return Observer(
+            builder: (_) {
+              return Row(
+                children: [
+                  ...List.generate(
+                    businessStore.categories.length,
+                    (index) => FlatButton(
+                      onPressed: () {},
+                      child: Text(
+                        businessStore.categories[index].normalName,
+                        style: Theme.of(context).textTheme.subtitle1,
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
           );
         },
       ),
