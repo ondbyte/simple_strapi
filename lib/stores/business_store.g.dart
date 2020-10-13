@@ -28,13 +28,13 @@ mixin _$BusinessStore on _BusinessStore, Store {
       Atom(name: '_BusinessStore._businessApplications');
 
   @override
-  ObservableList<BusinessApplication> get _businessApplications {
+  ObservableList<BusinessDetails> get _businessApplications {
     _$_businessApplicationsAtom.reportRead();
     return super._businessApplications;
   }
 
   @override
-  set _businessApplications(ObservableList<BusinessApplication> value) {
+  set _businessApplications(ObservableList<BusinessDetails> value) {
     _$_businessApplicationsAtom.reportWrite(value, super._businessApplications,
         () {
       super._businessApplications = value;
@@ -60,7 +60,7 @@ mixin _$BusinessStore on _BusinessStore, Store {
       AsyncAction('_BusinessStore.applyForBusiness');
 
   @override
-  Future<dynamic> applyForBusiness(BusinessApplication ap) {
+  Future<dynamic> applyForBusiness(BusinessDetails ap) {
     return _$applyForBusinessAsyncAction.run(() => super.applyForBusiness(ap));
   }
 
@@ -68,7 +68,7 @@ mixin _$BusinessStore on _BusinessStore, Store {
       AsyncAction('_BusinessStore.getMyBusinessApplications');
 
   @override
-  Future<dynamic> getMyBusinessApplications(BusinessApplication ap) {
+  Future<dynamic> getMyBusinessApplications(BusinessDetails ap) {
     return _$getMyBusinessApplicationsAsyncAction
         .run(() => super.getMyBusinessApplications(ap));
   }

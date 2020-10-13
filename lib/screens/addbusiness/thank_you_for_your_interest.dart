@@ -138,7 +138,7 @@ class _ThankYouForYourInterestScreenState
                                   route.settings.name == RouteManager.home,arguments: [
                                   () async {
                                 final tmp = await Provider.of<BusinessStore>(context,listen: false).applyForBusiness(
-                                    BusinessApplication(
+                                    BusinessDetails(
                                         uid: FirebaseAuth.instance.currentUser.uid,
                                         contactNumber: _validNumber.phoneNumber,
                                         category: widget.category,

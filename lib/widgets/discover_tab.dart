@@ -1,6 +1,7 @@
 import 'package:bapp/config/config.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/business_store.dart';
+import 'package:bapp/stores/cloud_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -23,42 +24,58 @@ class _DiscoverTabState extends State<DiscoverTab> {
         return Observer(builder: (_) {
           return CustomScrollView(
             slivers: <Widget>[
+              SliverPadding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate(
+                    [
+                      Text("Hey User"),
+                      SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        "What can we help you book?",
+                        style: Theme.of(context).textTheme.headline1,
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      _getSearchBar(),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Text("Or Browse Categories"),
+                    ],
+                  ),
+                ),
+              ),
               SliverList(
-                delegate: SliverChildListDelegate(
-                  [
-                    Text("Hey User"),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Text(
-                      "What can we help you book?",
-                      style: Theme.of(context).textTheme.headline1,
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    _getSearchBar(),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Text("Or Browse Categories"),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    _getCategoriesScroller(context),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    _getFeaturedScroller(context),
-                    if (authStore.status == AuthStatus.userPresent)
-                      _getCompleteOrder(context),
-                    if (authStore.status == AuthStatus.userPresent)
-                      _getHowWasYourExperience(context),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    _getOwnABusiness(context),
-                  ],
+                delegate: SliverChildListDelegate([
+                  SizedBox(
+                    height: 10,
+                  ),
+                  _getCategoriesScroller(context),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  _getFeaturedScroller(context),
+                ]),
+              ),
+              SliverPadding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate(
+                    [
+                      if (authStore.status == AuthStatus.userPresent)
+                        _getCompleteOrder(context),
+                      if (authStore.status == AuthStatus.userPresent)
+                        _getHowWasYourExperience(context),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      _getOwnABusiness(context),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -68,7 +85,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
     );
   }
 
-  Widget _getSearchBar(){
+  Widget _getSearchBar() {
     return StoreProvider<BusinessStore>(
       store: Provider.of<BusinessStore>(context),
       init: (businessStore) async {
@@ -78,12 +95,11 @@ class _DiscoverTabState extends State<DiscoverTab> {
         return Observer(
           builder: (_) {
             return SearchBarWidget(
-              possibilities: Provider.of<BusinessStore>(context,
-                  listen: false)
+              possibilities: Provider.of<BusinessStore>(context, listen: false)
                   .categories
                   .map<String>(
                     (element) => element.normalName,
-              )
+                  )
                   .toList(),
             );
           },
@@ -135,6 +151,9 @@ class _DiscoverTabState extends State<DiscoverTab> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
+          SizedBox(
+            width: 16,
+          ),
           ...HomeScreenFeaturedConfig.slides.map(
             (e) => Container(
               height: 125,
@@ -172,44 +191,23 @@ class _DiscoverTabState extends State<DiscoverTab> {
   Widget _getCategoriesScroller(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          FlatButton(
-            onPressed: () {},
-            child: Text(
-              "Mock",
-              style: Theme.of(context).textTheme.subtitle1,
-            ),
-          ),
-          FlatButton(
-            onPressed: () {},
-            child: Text(
-              "mock two",
-              style: Theme.of(context).textTheme.subtitle1,
-            ),
-          ),
-          FlatButton(
-            onPressed: () {},
-            child: Text(
-              "Mock 3",
-              style: Theme.of(context).textTheme.subtitle1,
-            ),
-          ),
-          FlatButton(
-            onPressed: () {},
-            child: Text(
-              "Mock",
-              style: Theme.of(context).textTheme.subtitle1,
-            ),
-          ),
-          FlatButton(
-            onPressed: () {},
-            child: Text(
-              "Mock",
-              style: Theme.of(context).textTheme.subtitle1,
-            ),
-          ),
-        ],
+      child: StoreProvider<BusinessStore>(
+        store: Provider.of<BusinessStore>(context),
+        builder: (_, businessStore) {
+          return Row(
+            children: [
+              ...List.generate(
+                businessStore.categories.length,
+                (index) => FlatButton(
+                  onPressed: () {
+
+                  },
+                  child: Text(businessStore.categories[index].normalName,style: Theme.of(context).textTheme.subtitle1,),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

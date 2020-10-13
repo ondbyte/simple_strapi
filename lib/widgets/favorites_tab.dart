@@ -18,22 +18,27 @@ class _FavoritesTabState extends State<FavoritesTab> {
     return StoreProvider<AuthStore>(
       store: Provider.of<AuthStore>(context, listen: false),
       builder: (_, authStore) {
-        return Observer(builder: (_){
-          return authStore.status == AuthStatus.anonymousUser
-              ? AskToLoginWidget(
-            loginReason: LoginConfig.favoritesTabLoginReason.primary,
-            secondaryReason: LoginConfig.favoritesTabLoginReason.secondary,
-          )
-              : CustomScrollView(
-            slivers: <Widget>[
-              SliverList(
-                delegate: SliverChildListDelegate([
-                  SizedBox(),
-                ]),
-              )
-            ],
-          );
-        });
+        return Observer(
+          builder: (_) {
+            return authStore.status == AuthStatus.anonymousUser
+                ? AskToLoginWidget(
+                    loginReason: LoginConfig.favoritesTabLoginReason.primary,
+                    secondaryReason:
+                        LoginConfig.favoritesTabLoginReason.secondary,
+                  )
+                : CustomScrollView(
+                    slivers: <Widget>[
+                      SliverList(
+                        delegate: SliverChildListDelegate(
+                          [
+                            SizedBox(),
+                          ],
+                        ),
+                      )
+                    ],
+                  );
+          },
+        );
       },
     );
   }

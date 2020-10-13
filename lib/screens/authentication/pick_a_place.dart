@@ -15,20 +15,13 @@ class PickAPlaceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(child: Builder(builder: (_) {
-      if (screen == 0) {
-        return _showCountries(context);
-      }
-      if (screen == 1) {
-        return _showLocations(context);
-      }
-      throw FlutterError("only countries and location screen supported");
-    }), onWillPop: () async {
-      if (screen == 1) {
-        Navigator.of(context).pushReplacementNamed(RouteManager.pickAPlace, arguments: 0);
-      }
-      return false;
-    });
+    if (screen == 0) {
+      return _showCountries(context);
+    }
+    if (screen == 1) {
+      return _showLocations(context);
+    }
+    throw FlutterError("only countries and location screen supported");
   }
 
   Widget _showCountries(BuildContext context) {
@@ -44,7 +37,7 @@ class PickAPlaceScreen extends StatelessWidget {
           builder: (context) {
             return Scaffold(
               appBar: AppBar(
-                automaticallyImplyLeading: false,
+                automaticallyImplyLeading: true,
                 title: Text(
                   "Pick a Country",
                   style: Theme.of(context).textTheme.subtitle1,
@@ -59,7 +52,7 @@ class PickAPlaceScreen extends StatelessWidget {
                             trailing: Icon(Icons.arrow_forward_ios),
                             onTap: () async {
                               cloudStore.getLocationsInCountry(e);
-                              Navigator.of(context).pushReplacementNamed(
+                              Navigator.of(context).pushNamed(
                                 RouteManager.pickAPlace,
                                 arguments: 1,
                               );
@@ -84,7 +77,7 @@ class PickAPlaceScreen extends StatelessWidget {
           builder: (context) {
             return Scaffold(
               appBar: AppBar(
-                automaticallyImplyLeading: false,
+                automaticallyImplyLeading: true,
                 title: Text(
                   "Pick a City",
                   style: Theme.of(context).textTheme.subtitle1,
@@ -126,7 +119,7 @@ class PickAPlaceScreen extends StatelessWidget {
               city,
               locations[0].state,
               locations[0].country,
-                  Helper.alternateLatLong(locations[0].latLong),
+                  locations[0].latLong,
             );
             Navigator.of(context)
                 .pushNamedAndRemoveUntil(RouteManager.home, (_) => false);

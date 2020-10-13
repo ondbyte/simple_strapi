@@ -12,8 +12,6 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 
-import 'business_store.dart';
-
 part 'cloud_store.g.dart';
 
 class CloudStore = _CloudStore with _$CloudStore;
@@ -66,8 +64,6 @@ abstract class _CloudStore with Store {
     myData = snap.data() ?? {};
   }
 
-
-
   @computed
   PhoneNumber get number {
     if (_user == null) {
@@ -104,9 +100,6 @@ abstract class _CloudStore with Store {
       setMyUserType();
       setMyAlterEgo();
     }
-
-    ///update menu items according to role
-    Helper.filterMenuItems(userType, alterEgo, getStore<AuthStore>(_context).status);
   }
 
   ///will auto run on change
@@ -164,6 +157,7 @@ abstract class _CloudStore with Store {
 
   @action
   Future getLocationsInCountry(String c) async {
+    availableLocations = {};
     final country = CountryPickerUtils.getCountryByName(c);
     final locationsCollection = _fireStore.collection("locations");
     final locationsQuery =
@@ -183,6 +177,11 @@ abstract class _CloudStore with Store {
     );
   }
 
+  updateMenuItems(){
+    ///update menu items according to role and authStatus changes
+    Helper.filterMenuItems(userType, alterEgo, getStore<AuthStore>(_context).status);
+  }
+
   void _setupAutoRun() {
     _disposers.add(
       reaction((_) => myLocation, (_) async {
@@ -192,11 +191,18 @@ abstract class _CloudStore with Store {
     _disposers.add(
       reaction((_) => userType, (_) async {
         await setMyUserType();
+        updateMenuItems();
       }),
     );
     _disposers.add(
       reaction((_) => alterEgo, (_) async {
         await setMyAlterEgo();
+      }),
+    );
+
+    _disposers.add(
+      reaction((_) => _user, (_) async {
+        updateMenuItems();
       }),
     );
   }

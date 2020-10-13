@@ -26,7 +26,7 @@ class _CustomerHomeState extends State<CustomerHome> {
       ),
       endDrawer: Menu(),
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16),
+        padding: EdgeInsets.symmetric(horizontal: 0),
         child: IndexedStack(
           children: [
             DiscoverTab(),
