@@ -39,7 +39,7 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
         ),
         actions: [
           FlatButton(
-            onPressed: !_loading?() async {
+            onPressed: !_loading||_pickedLocation!=null?() async {
               setState(
                 () {
                   _loading = !_loading;
@@ -49,7 +49,7 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
                 _pickedLocation.latLong.latitude,
                 _pickedLocation.latLong.longitude,
               );
-              print(point);
+              ///print(point);
               final adr =
                   await Geocoder.google(kMapsKey).findAddressesFromCoordinates(
                 point,
@@ -73,6 +73,7 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
         ],
       ),
       body: Stack(
+        alignment: Alignment.topCenter,
         children: [
           StoreProvider<CloudStore>(
             store: Provider.of<CloudStore>(context, listen: false),
@@ -97,7 +98,10 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
                 zoomControlsEnabled: true,
                 zoomGesturesEnabled: true,
                 onMapCreated: (GoogleMapController controller) {
-                  _controller.complete(controller);
+                  _pickedLocation = PickedLocation(cloudStore.myLocation.latLong, "");
+                  if(!_controller.isCompleted){
+                    _controller.complete(controller);
+                  }
                 },
                 onCameraMove: (cp) {
                   _pickedLocation = PickedLocation(

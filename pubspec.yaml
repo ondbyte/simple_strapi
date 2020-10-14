@@ -29,7 +29,8 @@ dependencies:
   path_provider: ^1.6.18
   #hive: ^1.4.4
   thephonenumber:
-    path: /Users/apple/Desktop/source_given_to_me/Git/thephonenumber
+    git:
+      url: https://github.com/ondbyte/thephonenumber_dart.git
 
   #ICONS
   feather_icons_flutter: ^4.7.4

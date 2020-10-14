@@ -24,20 +24,18 @@ mixin _$BusinessStore on _BusinessStore, Store {
     });
   }
 
-  final _$_businessApplicationsAtom =
-      Atom(name: '_BusinessStore._businessApplications');
+  final _$businessAtom = Atom(name: '_BusinessStore.business');
 
   @override
-  ObservableList<BusinessDetails> get _businessApplications {
-    _$_businessApplicationsAtom.reportRead();
-    return super._businessApplications;
+  BusinessDetails get business {
+    _$businessAtom.reportRead();
+    return super.business;
   }
 
   @override
-  set _businessApplications(ObservableList<BusinessDetails> value) {
-    _$_businessApplicationsAtom.reportWrite(value, super._businessApplications,
-        () {
-      super._businessApplications = value;
+  set business(BusinessDetails value) {
+    _$businessAtom.reportWrite(value, super.business, () {
+      super.business = value;
     });
   }
 
@@ -64,13 +62,12 @@ mixin _$BusinessStore on _BusinessStore, Store {
     return _$applyForBusinessAsyncAction.run(() => super.applyForBusiness(ap));
   }
 
-  final _$getMyBusinessApplicationsAsyncAction =
-      AsyncAction('_BusinessStore.getMyBusinessApplications');
+  final _$getMyBusinessAsyncAction =
+      AsyncAction('_BusinessStore.getMyBusiness');
 
   @override
-  Future<dynamic> getMyBusinessApplications(BusinessDetails ap) {
-    return _$getMyBusinessApplicationsAsyncAction
-        .run(() => super.getMyBusinessApplications(ap));
+  Future<dynamic> getMyBusiness(BusinessDetails ap) {
+    return _$getMyBusinessAsyncAction.run(() => super.getMyBusiness(ap));
   }
 
   final _$getCategoriesAsyncAction =
@@ -84,7 +81,8 @@ mixin _$BusinessStore on _BusinessStore, Store {
   @override
   String toString() {
     return '''
-categories: ${categories}
+categories: ${categories},
+business: ${business}
     ''';
   }
 }

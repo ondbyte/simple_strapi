@@ -8,7 +8,7 @@ enum UserType {
   businessStaff,
   businessOwner,
   sales,
-  salesManager,
+  manager,
   sudo
 }
 

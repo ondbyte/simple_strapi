@@ -2,6 +2,7 @@ import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
@@ -16,51 +17,53 @@ abstract class _BusinessStore with Store {
   @observable
   var categories = ObservableList<BusinessCategory>();
   @observable
-  var _businessApplications = ObservableList<BusinessDetails>();
+  BusinessDetails business;
   @observable
   User _user;
 
-  CloudStore _cloudStore ;
+  CloudStore _cloudStore;
 
   Future init(BuildContext context) async {
     _auth.userChanges().listen((u) {
       _user = u;
     });
 
-    _cloudStore = Provider.of<CloudStore>(context,listen: false);
+    _cloudStore = Provider.of<CloudStore>(context, listen: false);
   }
 
   @action
   Future applyForBusiness(BusinessDetails ap) async {
-    _businessApplications.add(ap);
-    final businessDoc =
-        await _fireStore.collection("businesses/${_user.uid}").add(ap.toMap());
+    final businessDoc = _fireStore.doc("businesses/${_user.uid}");
+    await businessDoc.set(ap.toMap());
 
-    final firstBranchname = ap.businessName;
+    final firstBranchname = ap.businessName.value;
     final firstBranchDoc = _fireStore
         .doc("businesses/${_user.uid}/businessBranches/$firstBranchname");
 
+    final branch = BusinessBranch(
+      business: businessDoc,
+      staff: null,
+      manager: null,
+      receptionist: null,
+      latlong: ap.latlong.value,
+      address: ap.address.value,
+      name: ap.businessName.value,
+      images: null,
+    );
+
     await firstBranchDoc.set(
-      BusinessBranch(
-              business: businessDoc,
-              staff: null,
-              manager: null,
-              receptionist: null,
-              latlong: ap.latlong,
-              address: ap.address,
-              name: ap.businessName,
-              images: null)
-          .toMap(),
+      branch.toMap(),
     );
 
     _cloudStore.alterEgo = UserType.businessOwner;
+
+    business = ap;
   }
 
   @action
-  Future getMyBusinessApplications(BusinessDetails ap) async {
-    _businessApplications.add(ap);
-    final collec = _fireStore.collection("businesses/${_user.uid}");
-    collec.where("uid", isEqualTo: _user.uid);
+  Future getMyBusiness(BusinessDetails ap) async {
+    final businessData = await _fireStore.doc("businesses/${_user.uid}").get();
+    business = BusinessDetails.fromJson(businessData.data());
   }
 
   @action
@@ -76,42 +79,49 @@ abstract class _BusinessStore with Store {
 }
 
 class BusinessDetails {
-  final BusinessCategory category;
-  final String businessName;
-  final String contactNumber;
-  final String address;
-  final GeoPoint latlong;
-  final String uid;
-  final List<BusinessBranch> branches;
+  final category = Observable<BusinessCategory>(null);
+  final Observable<String> businessName = Observable<String>(null);
+  final Observable<String> contactNumber = Observable<String>(null);
+  final Observable<String> address = Observable<String>(null);
+  final Observable<GeoPoint> latlong = Observable<GeoPoint>(null);
+  final Observable<String> uid = Observable<String>(null);
+  final branches = Observable<ObservableList<BusinessBranch>>(
+      ObservableList<BusinessBranch>());
 
-  BusinessDetails(
-      {this.branches,
-      this.category,
-      this.businessName,
-      this.contactNumber,
-      this.address,
-      this.latlong,
-      this.uid});
+  BusinessDetails.from({
+    String businessName,
+    String contactNumber,
+    String address,
+    GeoPoint latlong,
+    String uid,
+    BusinessCategory category,
+    ObservableList<BusinessBranch> branches,
+  }) {
+    this.category.value = category;
+    this.businessName.value = businessName;
+    this.contactNumber.value = contactNumber;
+    this.address.value = address;
+    this.latlong.value = latlong;
+    this.uid.value = uid;
+  }
 
-  BusinessDetails fromJson(Map<String, dynamic> j) {
-    return BusinessDetails(
-      category: BusinessCategory.fromJson(j["category"]),
-      businessName: j["businessName"] as String,
-      contactNumber: j["contactNumber"] as String,
-      address: j["address"] as String,
-      latlong: j["latlong"] as GeoPoint,
-      uid: j["uid"] as String,
-    );
+  BusinessDetails.fromJson(Map<String, dynamic> j) {
+    this.category.value = BusinessCategory.fromJson(j["category"]);
+    this.businessName.value = j["businessName"] as String;
+    this.contactNumber.value = j["contactNumber"] as String;
+    this.address.value = j["address"] as String;
+    this.latlong.value = j["latlong"] as GeoPoint;
+    this.uid.value = j["uid"] as String;
   }
 
   Map<String, dynamic> toMap() {
     return {
-      "category": category.toMap(),
-      "businessName": businessName,
-      "contactNumber": contactNumber,
-      "address": address,
-      "latLong": latlong,
-      "uid": uid,
+      "category": category.value.toMap(),
+      "businessName": businessName.value,
+      "contactNumber": contactNumber.value,
+      "address": address.value,
+      "latLong": latlong.value,
+      "uid": uid.value,
     };
   }
 }

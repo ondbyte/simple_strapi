@@ -73,7 +73,7 @@ class _ThankYouForYourInterestScreenState
                 ),
                 InternationalPhoneNumberInput(
                   onInputChanged: (PhoneNumber number) {
-                    _validNumber = _validNumber.addPhoneNumber(
+                    _validNumber = ThePhoneNumberLib.parseNumber(
                       internationalNumber: number.phoneNumber,
                     );
                   },
@@ -147,7 +147,7 @@ class _ThankYouForYourInterestScreenState
                                     final tmp = await Provider.of<
                                                 BusinessStore>(context,
                                             listen: false)
-                                        .applyForBusiness(BusinessDetails(
+                                        .applyForBusiness(BusinessDetails.from(
                                             uid: FirebaseAuth
                                                 .instance.currentUser.uid,
                                             contactNumber: _validNumber

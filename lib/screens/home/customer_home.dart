@@ -49,7 +49,7 @@ class _CustomerHomeState extends State<CustomerHome> {
           ...HomeScreenTabsConfig.tabs.map(
             (e) => BottomNavigationBarItem(
               icon: Icon(e.icon),
-              title: Text(e.name),
+              label: e.name,
             ),
           ),
         ],

@@ -22,7 +22,8 @@ class _SearchAPlaceScreenState extends State<SearchAPlaceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return ListView(
+      shrinkWrap: true,
       children: [
         Container(
           margin: EdgeInsets.all(16),
@@ -49,34 +50,29 @@ class _SearchAPlaceScreenState extends State<SearchAPlaceScreen> {
             },
           ),
         ),
-        SingleChildScrollView(
-          child: Column(
-            children: [
-              ...List.generate(
-                predictions.length,
-                (index) => Container(
-                  margin: EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(6),
-                      color: Theme.of(context).primaryColorLight),
-                  padding: EdgeInsets.all(16),
-                  child: ListTile(
-                    onTap: () {
-                      setState(
-                        () {
-                          FocusScope.of(context).unfocus();
-                          _controller.text = "";
-                          _callOnSelectedWithDeets(predictions[index]);
-                          predictions.clear();
-                        },
-                      );
-                    },
-                    title: Text(predictions[index].description),
-                    trailing: Icon(Icons.location_on),
-                  ),
-                ),
-              )
-            ],
+
+        ...List.generate(
+          predictions.length,
+              (index) => Container(
+            margin: EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(6),
+                color: Theme.of(context).primaryColorLight),
+            padding: EdgeInsets.all(16),
+            child: ListTile(
+              onTap: () {
+                setState(
+                      () {
+                    FocusScope.of(context).unfocus();
+                    _controller.text = "";
+                    _callOnSelectedWithDeets(predictions[index]);
+                    predictions.clear();
+                  },
+                );
+              },
+              title: Text(predictions[index].description),
+              trailing: Icon(Icons.location_on),
+            ),
           ),
         )
       ],

@@ -836,9 +836,11 @@ packages:
   thephonenumber:
     dependency: "direct main"
     description:
-      path: "/Users/apple/Desktop/source_given_to_me/Git/thephonenumber"
-      relative: false
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: fad33a86b089c62b61a1b13e4f9b02779d93d921
+      url: "https://github.com/ondbyte/thephonenumber_dart.git"
+    source: git
     version: "0.0.1"
   timing:
     dependency: transitive

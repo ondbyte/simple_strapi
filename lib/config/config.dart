@@ -77,6 +77,28 @@ class HomeScreenTabsConfig {
   ];
 }
 
+///add homescreeen tab names and icons here
+class BusinessHomeScreenTabsConfig {
+  static List<Tab> tabs = [
+    Tab(
+      name: "Dashboard",
+      icon: FeatherIcons.compass,
+    ),
+    Tab(
+      name: "Bookings",
+      icon: FeatherIcons.calendar,
+    ),
+    Tab(
+      name: "Manager",
+      icon: FeatherIcons.shoppingBag,
+    ),
+    Tab(
+      name: "Updates",
+      icon: FeatherIcons.bell,
+    ),
+  ];
+}
+
 ///add home screen featured cards to show
 class HomeScreenFeaturedConfig {
   static List<Featured> slides = [
@@ -201,7 +223,7 @@ class MenuConfig {
           showWhenUserTypeIs: [
             UserType.sudo,
             UserType.sales,
-            UserType.salesManager,
+            UserType.manager,
             UserType.businessStaff,
             UserType.businessOwner,
           ]),
@@ -213,8 +235,9 @@ class MenuConfig {
         showWhenAlterEgoIs: [
           UserType.businessOwner,
           UserType.businessStaff,
-          UserType.customer,
+          UserType.manager,
         ],
+        
         showWhenUserTypeIs: [
           UserType.customer,
         ],
@@ -229,7 +252,7 @@ class MenuConfig {
         icon: FeatherIcons.briefcase,
         kind: MenuItemKind.switchToManager,
         showWhenAuthStatusIs: [AuthStatus.userPresent],
-        showWhenAlterEgoIs: [UserType.salesManager],
+        showWhenAlterEgoIs: [UserType.manager],
         showWhenUserTypeIs: [
           UserType.customer,
         ],
