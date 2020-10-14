@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/buttons.dart';
@@ -66,6 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               "Create an account or log in",
@@ -78,7 +80,6 @@ class _LoginScreenState extends State<LoginScreen> {
               "Please enter a phone number where we can send you a verification code.",
               maxLines: 2,
               style: Theme.of(context).textTheme.bodyText1,
-              textAlign: TextAlign.center,
             ),
             SizedBox(
               height: 20,
@@ -135,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ).show(context);
                         },
                         onVerified: () {
-                          if(authStore.user.email.isEmpty||authStore.user.displayName.isEmpty){
+                          if(isNullOrEmpty(authStore.user.email)||isNullOrEmpty(authStore.user.displayName)){
                             Navigator.pushReplacementNamed(context, RouteManager.createProfileScreen);
                           } else {
                             Navigator.pop(context);
@@ -198,6 +199,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ? CircularProgressIndicator()
                 : Column(
                     mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       SvgPicture.asset(

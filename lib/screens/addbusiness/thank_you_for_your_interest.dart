@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:provider/provider.dart';
+import 'package:thephonenumber/thephonenumber.dart';
 
 class ThankYouForYourInterestScreen extends StatefulWidget {
   final BusinessCategory category;
@@ -25,7 +26,7 @@ class ThankYouForYourInterestScreen extends StatefulWidget {
 
 class _ThankYouForYourInterestScreenState
     extends State<ThankYouForYourInterestScreen> {
-  PhoneNumber _validNumber;
+  ThePhoneNumber _validNumber;
   bool _canVerify = false;
   PickedLocation _pickedLocation;
   bool _shake = false;
@@ -72,22 +73,27 @@ class _ThankYouForYourInterestScreenState
                 ),
                 InternationalPhoneNumberInput(
                   onInputChanged: (PhoneNumber number) {
-                    _validNumber = number;
+                    _validNumber = _validNumber.addPhoneNumber(
+                      internationalNumber: number.phoneNumber,
+                    );
                   },
                   onInputValidated: (bool value) {
-                    print(value);
                     if (_canVerify == !value) {
-                      setState(() {
-                        _canVerify = value;
-                      });
+                      setState(
+                        () {
+                          _canVerify = value;
+                        },
+                      );
                     }
                   },
                   selectorConfig: SelectorConfig(
                     selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
                   ),
                   ignoreBlank: true,
-                  initialValue:
-                      _validNumber != null ? _validNumber : cloudStore.number,
+                  initialValue: PhoneNumber(
+                    phoneNumber: cloudStore.theNumber.number,
+                    isoCode: cloudStore.theNumber.iso2Code,
+                  ),
                 ),
                 SizedBox(
                   height: 20,
@@ -133,25 +139,27 @@ class _ThankYouForYourInterestScreenState
                       ? () {
                           if (_pickedLocation != null) {
                             Navigator.of(context).pushNamedAndRemoveUntil(
-                              RouteManager.contextualMessage,
-                              (route) =>
-                                  route.settings.name == RouteManager.home,arguments: [
+                                RouteManager.contextualMessage,
+                                (route) =>
+                                    route.settings.name == RouteManager.home,
+                                arguments: [
                                   () async {
-                                final tmp = await Provider.of<BusinessStore>(context,listen: false).applyForBusiness(
-                                    BusinessDetails(
-                                        uid: FirebaseAuth.instance.currentUser.uid,
-                                        contactNumber: _validNumber.phoneNumber,
-                                        category: widget.category,
-                                        address: _pickedLocation.address,
-                                        businessName: _businessName,
-                                        latlong: _pickedLocation.latLong
-                                    )
-                                );
-                                return tmp;
-                              },
-                              "Thank you, we\'ll reach you out soon"
-                            ]
-                            );
+                                    final tmp = await Provider.of<
+                                                BusinessStore>(context,
+                                            listen: false)
+                                        .applyForBusiness(BusinessDetails(
+                                            uid: FirebaseAuth
+                                                .instance.currentUser.uid,
+                                            contactNumber: _validNumber
+                                                .internationalNumber,
+                                            category: widget.category,
+                                            address: _pickedLocation.address,
+                                            businessName: _businessName,
+                                            latlong: _pickedLocation.latLong));
+                                    return tmp;
+                                  },
+                                  "Thank you, we\'ll reach you out soon"
+                                ]);
                           } else {
                             setState(
                               () {

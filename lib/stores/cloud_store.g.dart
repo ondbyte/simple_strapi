@@ -9,12 +9,13 @@ part of 'cloud_store.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$CloudStore on _CloudStore, Store {
-  Computed<PhoneNumber> _$numberComputed;
+  Computed<ThePhoneNumber> _$theNumberComputed;
 
   @override
-  PhoneNumber get number => (_$numberComputed ??=
-          Computed<PhoneNumber>(() => super.number, name: '_CloudStore.number'))
-      .value;
+  ThePhoneNumber get theNumber =>
+      (_$theNumberComputed ??= Computed<ThePhoneNumber>(() => super.theNumber,
+              name: '_CloudStore.theNumber'))
+          .value;
 
   final _$myLocationAtom = Atom(name: '_CloudStore.myLocation');
 
@@ -171,7 +172,7 @@ activeCountriesNames: ${activeCountriesNames},
 availableLocations: ${availableLocations},
 userType: ${userType},
 alterEgo: ${alterEgo},
-number: ${number}
+theNumber: ${theNumber}
     ''';
   }
 }

@@ -1,6 +1,7 @@
 import 'package:bapp/helpers/helper.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:mobx/mobx.dart';
 
@@ -47,6 +48,16 @@ abstract class _AuthStore with Store {
       status = AuthStatus.userNotPresent;
     }
     //print(status);
+  }
+
+  Future updateProfile({String displayName,String email,@required Function(FirebaseAuthException) onFail,@required Function() onSuccess}) async {
+    await user.updateProfile(displayName: displayName);
+    try{
+      await user.updateEmail(email);
+      onSuccess();
+    } on FirebaseAuthException catch(e) {
+      onFail(e);
+    }
   }
 
   Future loginOrSignUpWithNumber(
@@ -127,7 +138,7 @@ abstract class _AuthStore with Store {
       return;
     }
     await FirebaseAuth.instance.signOut();
-    await FirebaseAuth.instance.signInAnonymously();
+    //await FirebaseAuth.instance.signInAnonymously();
   }
 }
 

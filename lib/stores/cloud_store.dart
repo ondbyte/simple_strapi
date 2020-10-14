@@ -11,6 +11,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
+import 'package:thephonenumber/thephonenumber.dart';
 
 import 'auth_store.dart';
 
@@ -43,8 +44,9 @@ abstract class _CloudStore with Store {
   AuthStore _authStore;
 
   Future init(BuildContext context) async {
+    await ThePhoneNumberLib.init();
     _user = _auth.currentUser;
-    _authStore = Provider.of<AuthStore>(context,listen: false);
+    _authStore = Provider.of<AuthStore>(context, listen: false);
     if (_user == null) {
       throw FlutterError("this should never be the case");
     }
@@ -68,16 +70,13 @@ abstract class _CloudStore with Store {
   }
 
   @computed
-  PhoneNumber get number {
-    if (_user == null) {
-      return null;
+  ThePhoneNumber get theNumber {
+    final tmp = ThePhoneNumberLib.parseNumber(
+        internationalNumber: _user.phoneNumber);
+    if(tmp==null){
+      return ThePhoneNumber(iso2Code: myLocation.country);
     }
-    if (_user.phoneNumber == null) {
-      return PhoneNumber(isoCode: myLocation.country);
-    }
-    return PhoneNumber(
-        phoneNumber: _user.phoneNumber.replaceAll(myLocation.country, ""),
-        isoCode: myLocation.country);
+    return tmp;
   }
 
   @action
@@ -180,7 +179,7 @@ abstract class _CloudStore with Store {
     );
   }
 
-  updateMenuItems(){
+  updateMenuItems() {
     ///update menu items according to role and authStatus changes
     print("updating menu items @cloudstore");
     Helper.filterMenuItems(userType, alterEgo, _authStore.status);

@@ -833,6 +833,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.19-nullsafety.2"
+  thephonenumber:
+    dependency: "direct main"
+    description:
+      path: "/Users/apple/Desktop/source_given_to_me/Git/thephonenumber"
+      relative: false
+    source: path
+    version: "0.0.1"
   timing:
     dependency: transitive
     description:

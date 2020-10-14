@@ -68,3 +68,16 @@ class Helper {
 T getStore<T>(BuildContext context){
   return Provider.of<T>(context,listen:false);
 }
+
+bool isNullOrEmpty(dynamic variable){
+  if(variable==null){
+    return true;
+  }
+  if(variable is Iterable){
+    return variable.isEmpty;
+  }
+  if(variable is String){
+    return variable.isEmpty;
+  }
+  return false;
+}

@@ -90,9 +90,11 @@ class _MenuState extends State<Menu> {
         Navigator.of(context).popAndPushNamed(RouteManager.selectBusinessCategoryScreen);
         break;
       }
-      case MenuItemKind.logOut:{
-        Navigator.pop(context);
-        Provider.of<AuthStore>(context,listen: false).signOut();
+      case MenuItemKind.logOut: {
+        () async {
+          await Provider.of<AuthStore>(context,listen: false).signOut();
+          Navigator.of(context).pushNamedAndRemoveUntil("/", (route) => false);
+        }();
         break;
       }
       case MenuItemKind.logIn:{
