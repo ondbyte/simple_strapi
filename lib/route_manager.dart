@@ -1,9 +1,8 @@
-
 import 'package:bapp/screens/business/addbusiness/choose_category.dart';
 import 'package:bapp/screens/business/addbusiness/thank_you_for_your_interest.dart';
 import 'package:bapp/screens/business/branch_chooser.dart';
-import 'package:bapp/screens/location/pick_a_place.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
+import 'package:bapp/screens/location/pick_a_place.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/screens/onboarding/onboardingscreen.dart';
 import 'package:bapp/screens/search/show_results.dart';
@@ -16,7 +15,6 @@ import 'screens/home/bapp.dart';
 import 'screens/init/splash_screen.dart';
 import 'screens/location/search_a_place.dart';
 import 'screens/search/search_inside_bapp.dart';
-
 
 class RouteManager {
   static const String selectBusinessCategoryScreen = "/sbcs";
@@ -54,7 +52,9 @@ class RouteManager {
       case showResultsScreen:
         return MaterialPageRoute(
           builder: (_) {
-            return ShowResultsScreen(showResultsFor: settings.arguments,);
+            return ShowResultsScreen(
+              showResultsFor: settings.arguments,
+            );
           },
         );
       case searchInsideBapp:
@@ -67,7 +67,10 @@ class RouteManager {
         final list = settings.arguments as List;
         return MaterialPageRoute(
           builder: (_) {
-            return ContextualMessageScreen(init: list[0],message: list[1],);
+            return ContextualMessageScreen(
+              init: list[0],
+              message: list[1],
+            );
           },
         );
       case searchAPlace:
@@ -91,15 +94,17 @@ class RouteManager {
       case thankYouForYourInterestScreen:
         return MaterialPageRoute(
           builder: (_) {
-            return ThankYouForYourInterestScreen(category: settings.arguments,);
+            return ThankYouForYourInterestScreen(
+              category: settings.arguments,
+            );
           },
         );
       case loginScreen:
-      return MaterialPageRoute(
-        builder: (_) {
-          return LoginScreen();
-        },
-      );
+        return MaterialPageRoute(
+          builder: (_) {
+            return LoginScreen();
+          },
+        );
       case home:
         return MaterialPageRoute(
           builder: (_) {

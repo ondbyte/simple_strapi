@@ -1,5 +1,4 @@
 import 'package:bapp/classes/notification_update.dart';
-import 'package:bapp/stores/auth_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,11 +12,11 @@ abstract class _UpdatesStore with Store {
   final _auth = FirebaseAuth.instance;
   final _fireStore = FirebaseFirestore.instance;
   @observable
-  ObservableMap<String,NotificationUpdate> updates = ObservableMap();
+  ObservableMap<String, NotificationUpdate> updates = ObservableMap();
   @observable
-  ObservableMap<String,NotificationUpdate> news = ObservableMap();
+  ObservableMap<String, NotificationUpdate> news = ObservableMap();
   @observable
-  ObservableMap<String,NotificationUpdate> viewed = ObservableMap();
+  ObservableMap<String, NotificationUpdate> viewed = ObservableMap();
   @observable
   User _user;
 
@@ -28,24 +27,25 @@ abstract class _UpdatesStore with Store {
     _auth.userChanges().listen((u) {
       _user = u;
     });
+
     ///get updates on app start
     await getUpdates();
   }
 
   @action
   Future remove(NotificationUpdate u) async {
-    if(u.type==NotificationUpdateType.news){
+    if (u.type == NotificationUpdateType.news) {
       news.remove(u.id);
-    } else if(u.type==NotificationUpdateType.orderUpdate) {
+    } else if (u.type == NotificationUpdateType.orderUpdate) {
       updates.remove(u.id);
     }
   }
 
   @action
   Future undoRemove(NotificationUpdate u) async {
-    if(u.type==NotificationUpdateType.news){
+    if (u.type == NotificationUpdateType.news) {
       news[u.id] = u;
-    } else if(u.type==NotificationUpdateType.orderUpdate) {
+    } else if (u.type == NotificationUpdateType.orderUpdate) {
       updates[u.id] = u;
     }
   }
@@ -56,9 +56,9 @@ abstract class _UpdatesStore with Store {
     if (_user == null) {
       return;
     }
-    await _fireStore.doc("users/${_user.uid}/updates/${update.id}").update({
-      "viewed": true
-    });
+    await _fireStore
+        .doc("users/${_user.uid}/updates/${update.id}")
+        .update({"viewed": true});
   }
 
   ///fetch updates and news from firestore
@@ -82,22 +82,22 @@ abstract class _UpdatesStore with Store {
     final snaps = await updatesQuery.get();
     //print(snaps.docs);
     final allUpdates = snaps.docs.map(
-      (e) => NotificationUpdate.fromJson(e.id,e.data()),
+      (e) => NotificationUpdate.fromJson(e.id, e.data()),
     );
     _segregate(allUpdates.toList());
   }
 
   ///segregate news/viewed
-  void _segregate(List<NotificationUpdate> allUpdates){
+  void _segregate(List<NotificationUpdate> allUpdates) {
     allUpdates.forEach(
-          (element) {
+      (element) {
         if (element.viewed) {
-          viewed[element.id]=element;
+          viewed[element.id] = element;
         } else {
           if (element.type == NotificationUpdateType.news) {
-            news[element.id]=element;
+            news[element.id] = element;
           } else {
-            updates[element.id]=element;
+            updates[element.id] = element;
           }
         }
       },

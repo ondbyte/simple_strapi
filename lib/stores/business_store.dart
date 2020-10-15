@@ -3,7 +3,6 @@ import 'package:bapp/config/constants.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
@@ -21,6 +20,8 @@ abstract class _BusinessStore with Store {
   BusinessDetails business;
   @observable
   User _user;
+  @observable
+  DateTime dayForTheDetails = DateTime.now();
 
   CloudStore _cloudStore;
 
@@ -67,11 +68,15 @@ abstract class _BusinessStore with Store {
 
   @action
   Future getMyBusiness() async {
-    final businessDetails = await _fireStore.doc("businesses/${_user.uid}").get();
+    final businessDetails =
+        await _fireStore.doc("businesses/${_user.uid}").get();
 
-    if(businessDetails.exists){
+    if (businessDetails.exists) {
       final data = businessDetails.data();
-      final branches = (await businessDetails.reference.collection("/businessBranches").get()).docs;
+      final branches = (await businessDetails.reference
+              .collection("/businessBranches")
+              .get())
+          .docs;
       data["branches"] = branches.map((e) => e.data()).toList();
       print(data);
       business = BusinessDetails.fromJson(data);
@@ -116,7 +121,7 @@ class BusinessDetails {
     this.address.value = address;
     this.latlong.value = latlong;
     this.uid.value = uid;
-    this.branches.value = branches??[];
+    this.branches.value = branches ?? [];
     this.selectedBranch.value = selectedBranch;
   }
 
@@ -128,7 +133,7 @@ class BusinessDetails {
     this.latlong.value = j["latlong"] as GeoPoint;
     this.uid.value = j["uid"] as String;
     final tmp = j["branches"] as List;
-    if(tmp!=null){
+    if (tmp != null) {
       this.branches.value = tmp.map((e) => BusinessBranch.fromJson(e)).toList();
     }
     this.selectedBranch.value = BusinessBranch.fromJson(j["selectedBranch"]);
@@ -143,7 +148,7 @@ class BusinessDetails {
       "latLong": latlong.value,
       "uid": uid.value,
       "branches": branches.value.map((e) => e.toMap()).toList(),
-      "selectedBranch":selectedBranch.value.toMap(),
+      "selectedBranch": selectedBranch.value.toMap(),
     };
   }
 }

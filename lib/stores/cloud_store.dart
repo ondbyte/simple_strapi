@@ -1,15 +1,12 @@
 import 'package:bapp/classes/location.dart';
-
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/auth_store.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:country_pickers/country_pickers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:thephonenumber/thephonenumber.dart';
@@ -69,7 +66,7 @@ abstract class _CloudStore with Store {
   }
 
   Future getIsRoleFlippable() async {
-    isRoleFlippable = myData["isRoleFlippable"]??false;
+    isRoleFlippable = myData["isRoleFlippable"] ?? false;
   }
 
   Future getUserData() async {
@@ -79,9 +76,9 @@ abstract class _CloudStore with Store {
 
   @computed
   ThePhoneNumber get theNumber {
-    final tmp = ThePhoneNumberLib.parseNumber(
-        internationalNumber: _user.phoneNumber);
-    if(tmp==null){
+    final tmp =
+        ThePhoneNumberLib.parseNumber(internationalNumber: _user.phoneNumber);
+    if (tmp == null) {
       return ThePhoneNumber(iso2Code: myLocation.country);
     }
     return tmp;
@@ -89,13 +86,16 @@ abstract class _CloudStore with Store {
 
   @action
   Future<bool> switchUserType(BuildContext context) async {
-    if(isRoleFlippable){
+    if (isRoleFlippable) {
       final tmp = userType;
       userType = alterEgo;
       alterEgo = tmp;
       return true;
     } else {
-      Flushbar(message: "Your business is not approved yet",duration: Duration(seconds: 2),).show(context);
+      Flushbar(
+        message: "Your business is not approved yet",
+        duration: Duration(seconds: 2),
+      ).show(context);
       return false;
     }
   }

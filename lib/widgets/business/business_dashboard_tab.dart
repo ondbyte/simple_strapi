@@ -1,7 +1,8 @@
-import 'package:bapp/config/config.dart';
 import 'package:bapp/stores/auth_store.dart';
-import 'package:bapp/widgets/provider/provider_widget.dart';
+import 'package:bapp/stores/business_store.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import 'business_branch_switch.dart';
@@ -27,21 +28,63 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
               sliver: SliverList(
                 delegate: SliverChildListDelegate(
                   [
-                    SizedBox(
-                      height: 16,
-                    ),
-                    Consumer<AuthStore>(
-                      builder: (_, authStore, __) {
-                        return Text("Hello " + authStore.user.displayName,
-                            style: Theme.of(context).textTheme.subtitle2);
-                      },
-                    ),
-                    Text("Here\'s your business highlights",
-                      style: Theme.of(context).textTheme.headline1,),
-                    Text("For",
-                      style: Theme.of(context).textTheme.bodyText1,),
-                    SizedBox(
-                      height: 20,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                height: 16,
+                              ),
+                              Consumer<AuthStore>(
+                                builder: (_, authStore, __) {
+                                  return Text(
+                                      "Hello " + authStore.user.displayName,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headline1);
+                                },
+                              ),
+                              Text(
+                                "Here\'s your business highlights",
+                                style: Theme.of(context).textTheme.subtitle1,
+                              ),
+                              Consumer<BusinessStore>(
+                                builder: (_, businessStore, __) {
+                                  return Observer(
+                                    builder: (_) {
+                                      return Text(
+                                        "For " +
+                                            DateFormat("MMMM dd, yyyy").format(
+                                                businessStore.dayForTheDetails),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyText1,
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.calendar_today_outlined),
+                          onPressed: () async {
+                            final store = Provider.of<BusinessStore>(context,
+                                listen: false);
+                            final selectedDate = await showDatePicker(
+                                context: context,
+                                initialDate: store.dayForTheDetails,
+                                firstDate: DateTime.now()
+                                    .subtract(Duration(days: 365)),
+                                lastDate: DateTime.now());
+                            store.dayForTheDetails =
+                                selectedDate ?? store.dayForTheDetails;
+                          },
+                        )
+                      ],
                     ),
                     SizedBox(
                       height: 20,

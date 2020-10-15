@@ -5,15 +5,16 @@ import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info/device_info.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart' hide Action;
 import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:mobx/mobx.dart' show Action;
 import 'package:provider/provider.dart';
 
 import '../config/constants.dart';
 
 class Helper {
-  static stringifyAddresse(Address adr){
+  static stringifyAddresse(Address adr) {
     return '''${adr.subLocality}\n${adr.locality}\n${adr.addressLine}\n${adr.adminArea}\n${adr.postalCode}''';
   }
 
@@ -33,12 +34,12 @@ class Helper {
     print("[BAPP]" + d);
   }
 
-  static dynamic alternateLatLong(dynamic ll){
-    if(ll is GeoPoint){
+  static dynamic alternateLatLong(dynamic ll) {
+    if (ll is GeoPoint) {
       return LatLng(ll.latitude, ll.longitude);
     }
-    if(ll is LatLng){
-      return GeoPoint(ll.latitude,ll.longitude);
+    if (ll is LatLng) {
+      return GeoPoint(ll.latitude, ll.longitude);
     }
   }
 
@@ -65,19 +66,25 @@ class Helper {
   }
 }
 
-T getStore<T>(BuildContext context){
-  return Provider.of<T>(context,listen:false);
+T getStore<T>(BuildContext context) {
+  return Provider.of<T>(context, listen: false);
 }
 
-bool isNullOrEmpty(dynamic variable){
-  if(variable==null){
+bool isNullOrEmpty(dynamic variable) {
+  if (variable == null) {
     return true;
   }
-  if(variable is Iterable){
+  if (variable is Iterable) {
     return variable.isEmpty;
   }
-  if(variable is String){
+  if (variable is String) {
     return variable.isEmpty;
   }
   return false;
+}
+
+dynamic act(Function fn) {
+  return Action(() {
+    return fn();
+  }).call();
 }

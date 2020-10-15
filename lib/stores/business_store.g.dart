@@ -54,6 +54,21 @@ mixin _$BusinessStore on _BusinessStore, Store {
     });
   }
 
+  final _$dayForTheDetailsAtom = Atom(name: '_BusinessStore.dayForTheDetails');
+
+  @override
+  DateTime get dayForTheDetails {
+    _$dayForTheDetailsAtom.reportRead();
+    return super.dayForTheDetails;
+  }
+
+  @override
+  set dayForTheDetails(DateTime value) {
+    _$dayForTheDetailsAtom.reportWrite(value, super.dayForTheDetails, () {
+      super.dayForTheDetails = value;
+    });
+  }
+
   final _$applyForBusinessAsyncAction =
       AsyncAction('_BusinessStore.applyForBusiness');
 
@@ -82,7 +97,8 @@ mixin _$BusinessStore on _BusinessStore, Store {
   String toString() {
     return '''
 categories: ${categories},
-business: ${business}
+business: ${business},
+dayForTheDetails: ${dayForTheDetails}
     ''';
   }
 }
