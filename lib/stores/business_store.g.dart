@@ -66,8 +66,8 @@ mixin _$BusinessStore on _BusinessStore, Store {
       AsyncAction('_BusinessStore.getMyBusiness');
 
   @override
-  Future<dynamic> getMyBusiness(BusinessDetails ap) {
-    return _$getMyBusinessAsyncAction.run(() => super.getMyBusiness(ap));
+  Future<dynamic> getMyBusiness() {
+    return _$getMyBusinessAsyncAction.run(() => super.getMyBusiness());
   }
 
   final _$getCategoriesAsyncAction =

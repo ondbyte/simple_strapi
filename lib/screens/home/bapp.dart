@@ -21,7 +21,7 @@ class Bapp extends StatelessWidget {
       store: Provider.of<CloudStore>(context),
       init: (cloudStore) async {
         await Provider.of<UpdatesStore>(context, listen: false).init(context);
-        await Provider.of<BusinessStore>(context, listen: false).init(context);
+        //await Provider.of<BusinessStore>(context, listen: false).init(context);
       },
       builder: (_, cloudStore) {
         return Observer(

@@ -4,6 +4,8 @@ import 'package:bapp/widgets/provider/provider_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'business_branch_switch.dart';
+
 class BusinessDashboardTab extends StatefulWidget {
   @override
   _BusinessDashboardTabState createState() => _BusinessDashboardTabState();
@@ -13,6 +15,10 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: BusinessBranchSwitchWidget(),
+      ),
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -30,38 +36,13 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
                             style: Theme.of(context).textTheme.subtitle2);
                       },
                     ),
-                    Text("Your business highlights",
-                        style: Theme.of(context).textTheme.headline1),
+                    Text("Here\'s your business highlights",
+                      style: Theme.of(context).textTheme.headline1,),
+                    Text("For",
+                      style: Theme.of(context).textTheme.bodyText1,),
                     SizedBox(
                       height: 20,
                     ),
-                    Container(
-                      decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.circular(6)),
-                      child: ListTile(
-                        title: Text("AL HANA",
-                            style: Theme.of(context).textTheme.subtitle1.apply(
-                                color: Theme.of(context).primaryColorLight)),
-                        trailing: Icon(
-                          Icons.keyboard_arrow_down,
-                          color: Theme.of(context).primaryColorLight,
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Container(
-                        decoration: BoxDecoration(
-                            color:
-                                Theme.of(context).primaryColor.withOpacity(.2),
-                            borderRadius: BorderRadius.circular(6)),
-                        alignment: Alignment.center,
-                        child: SizedBox(
-                          height: 120,
-                          child: Text("place holder"),
-                        )),
                     SizedBox(
                       height: 20,
                     ),

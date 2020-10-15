@@ -89,8 +89,8 @@ class BusinessHomeScreenTabsConfig {
       icon: FeatherIcons.calendar,
     ),
     Tab(
-      name: "Manager",
-      icon: FeatherIcons.shoppingBag,
+      name: "Toolkit",
+      icon: FeatherIcons.layers,
     ),
     Tab(
       name: "Updates",

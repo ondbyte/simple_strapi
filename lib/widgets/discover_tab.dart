@@ -73,7 +73,11 @@ class _DiscoverTabState extends State<DiscoverTab> {
                       SizedBox(
                         height: 20,
                       ),
-                      _getOwnABusiness(context),
+                      Consumer<CloudStore>(
+                        builder: (_, cloudStore, __) {
+                          return !cloudStore.isRoleFlippable?_getOwnABusiness(context):SizedBox();
+                        },
+                      ),
                     ],
                   ),
                 ),

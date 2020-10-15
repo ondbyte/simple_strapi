@@ -102,23 +102,23 @@ class _MenuState extends State<Menu> {
         break;
       }
       case MenuItemKind.switchTosShopping:{
-        Provider.of<CloudStore>(context,listen: false).switchUserType();
+        Provider.of<CloudStore>(context,listen: false).switchUserType(context);
         break;
       }
       case MenuItemKind.switchToBusiness:{
-        Provider.of<CloudStore>(context,listen: false).switchUserType();
+        Provider.of<CloudStore>(context,listen: false).switchUserType(context);
         break;
       }
       case MenuItemKind.switchToSales:{
-        Provider.of<CloudStore>(context,listen: false).switchUserType();
+        Provider.of<CloudStore>(context,listen: false).switchUserType(context);
         break;
       }
       case MenuItemKind.switchToManager:{
-        Provider.of<CloudStore>(context,listen: false).switchUserType();
+        Provider.of<CloudStore>(context,listen: false).switchUserType(context);
         break;
       }
       case MenuItemKind.switchToSudoUser:{
-        Provider.of<CloudStore>(context,listen: false).switchUserType();
+        Provider.of<CloudStore>(context,listen: false).switchUserType(context);
         break;
       }
     }

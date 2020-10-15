@@ -1,6 +1,8 @@
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/business_store.dart';
+import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/choose_category.dart';
 import 'package:bapp/widgets/login_widget.dart';
 import 'package:bapp/widgets/store_provider.dart';
@@ -40,14 +42,14 @@ class _ChooseYourBusinessCategoryScreenState
                               return AnimatedContainer(
                                 duration: const Duration(seconds: 1),
                                 curve: Curves.easeInOutSine,
-                                child: Column(
+                                child: businessStore.business==null?Column(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       "Choose your business type",
                                       style:
-                                          Theme.of(context).textTheme.headline1,
+                                      Theme.of(context).textTheme.headline1,
                                     ),
                                     SizedBox(
                                       height: 10,
@@ -55,14 +57,14 @@ class _ChooseYourBusinessCategoryScreenState
                                     Text(
                                       "People will be able to find your business based on these categories.",
                                       style:
-                                          Theme.of(context).textTheme.bodyText1,
+                                      Theme.of(context).textTheme.bodyText1,
                                     ),
                                     SizedBox(
                                       height: 20,
                                     ),
                                     ChooseCategoryListTilesWidget(
                                       elements:
-                                          businessStore.categories.toList(),
+                                      businessStore.categories.toList(),
                                       onCategorySelected: (c) {
                                         Navigator.of(context).pushNamed(
                                           RouteManager
@@ -72,7 +74,7 @@ class _ChooseYourBusinessCategoryScreenState
                                       },
                                     )
                                   ],
-                                ),
+                                ):_getAlreadyHaveABusiness(context),
                               );
                             },
                           );
@@ -88,6 +90,16 @@ class _ChooseYourBusinessCategoryScreenState
           );
         },
       ),
+    );
+  }
+
+  _getAlreadyHaveABusiness(BuildContext context){
+    return ContextualMessageScreen(
+      message: "You already have a business on Bapp",
+      buttonText: "Switch to Business",
+      onButtonPressed: (){
+        Provider.of<CloudStore>(context,listen: false).switchUserType(context);
+      },
     );
   }
 }

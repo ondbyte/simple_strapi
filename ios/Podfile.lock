@@ -328,6 +328,9 @@ PODS:
     - FirebaseCore (~> 6.6)
     - GTMSessionFetcher/Core (~> 1.1)
   - Flutter (1.0.0)
+  - FMDB (2.7.5):
+    - FMDB/standard (= 2.7.5)
+  - FMDB/standard (2.7.5)
   - geocoder (0.0.1):
     - Flutter
   - "geolocator (6.0.0+4)":
@@ -402,6 +405,9 @@ PODS:
     - Flutter
   - PromisesObjC (1.2.10)
   - Protobuf (3.13.0)
+  - sqflite (0.0.1):
+    - Flutter
+    - FMDB (~> 2.7.2)
   - url_launcher (0.0.1):
     - Flutter
 
@@ -420,6 +426,7 @@ DEPENDENCIES:
   - libphonenumber (from `.symlinks/plugins/libphonenumber/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
+  - sqflite (from `.symlinks/plugins/sqflite/ios`)
   - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
 
 SPEC REPOS:
@@ -439,6 +446,7 @@ SPEC REPOS:
     - FirebaseInstanceID
     - FirebaseMessaging
     - FirebaseStorage
+    - FMDB
     - GoogleDataTransport
     - GoogleDataTransportCCTSupport
     - GoogleMaps
@@ -481,6 +489,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider/ios"
   permission_handler:
     :path: ".symlinks/plugins/permission_handler/ios"
+  sqflite:
+    :path: ".symlinks/plugins/sqflite/ios"
   url_launcher:
     :path: ".symlinks/plugins/url_launcher/ios"
 
@@ -508,6 +518,7 @@ SPEC CHECKSUMS:
   FirebaseMessaging: 29543feb343b09546ab3aa04d008ee8595b43c44
   FirebaseStorage: f4f39ae834a7145963b913f54e2f24a9db1d8fac
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   geocoder: 3cfab70531a0b367e917bafe82df4c30f6d4c45a
   geolocator: 1ae40084cc6c1586ce5ad12cfc3fd38c64d05f2f
   google_maps_flutter: c7f9c73576de1fbe152a227bfd6e6c4ae8088619
@@ -526,6 +537,7 @@ SPEC CHECKSUMS:
   permission_handler: eac8e15b4a1a3fba55b761d19f3f4e6b005d15b6
   PromisesObjC: b14b1c6b68e306650688599de8a45e49fae81151
   Protobuf: 3dac39b34a08151c6d949560efe3f86134a3f748
+  sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
 
 PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c

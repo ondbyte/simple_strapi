@@ -1,6 +1,7 @@
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/stores/auth_store.dart';
+import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/storage_store.dart';
 import 'package:bapp/stores/updates_store.dart';
@@ -45,6 +46,7 @@ class _SplashScreenState extends State<SplashScreen> {
             return;
           } else {
             ///customer is not a first timer
+            await Provider.of<BusinessStore>(context, listen: false).init(context);
             Navigator.of(context).pushReplacementNamed(RouteManager.home);
           }
         }

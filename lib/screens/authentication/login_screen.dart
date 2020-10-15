@@ -51,9 +51,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                 ),
               ),
-              body: !_askOTP
-                  ? _getNumberWidget(authStore, cloudStore)
-                  : _getOTPWidget(authStore, cloudStore),
+              body: LayoutBuilder(
+                builder: (_,c){
+                  return Center(
+                    child: SingleChildScrollView(
+                      child: !_askOTP
+                          ? _getNumberWidget(authStore, cloudStore)
+                          : _getOTPWidget(authStore, cloudStore),
+                    )
+                  );
+                },
+              )
             );
           },
         );

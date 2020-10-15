@@ -109,26 +109,26 @@ mixin _$CloudStore on _CloudStore, Store {
     });
   }
 
-  final _$_userAtom = Atom(name: '_CloudStore._user');
+  final _$isRoleFlippableAtom = Atom(name: '_CloudStore.isRoleFlippable');
 
   @override
-  User get _user {
-    _$_userAtom.reportRead();
-    return super._user;
+  bool get isRoleFlippable {
+    _$isRoleFlippableAtom.reportRead();
+    return super.isRoleFlippable;
   }
 
   @override
-  set _user(User value) {
-    _$_userAtom.reportWrite(value, super._user, () {
-      super._user = value;
+  set isRoleFlippable(bool value) {
+    _$isRoleFlippableAtom.reportWrite(value, super.isRoleFlippable, () {
+      super.isRoleFlippable = value;
     });
   }
 
   final _$switchUserTypeAsyncAction = AsyncAction('_CloudStore.switchUserType');
 
   @override
-  Future<dynamic> switchUserType() {
-    return _$switchUserTypeAsyncAction.run(() => super.switchUserType());
+  Future<bool> switchUserType(BuildContext context) {
+    return _$switchUserTypeAsyncAction.run(() => super.switchUserType(context));
   }
 
   final _$getMyUserTypesAsyncAction = AsyncAction('_CloudStore.getMyUserTypes');
@@ -172,6 +172,7 @@ activeCountriesNames: ${activeCountriesNames},
 availableLocations: ${availableLocations},
 userType: ${userType},
 alterEgo: ${alterEgo},
+isRoleFlippable: ${isRoleFlippable},
 theNumber: ${theNumber}
     ''';
   }

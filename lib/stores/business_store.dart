@@ -1,4 +1,5 @@
 import 'package:bapp/config/config_data_types.dart';
+import 'package:bapp/config/constants.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -24,21 +25,18 @@ abstract class _BusinessStore with Store {
   CloudStore _cloudStore;
 
   Future init(BuildContext context) async {
+    _user = _auth.currentUser;
     _auth.userChanges().listen((u) {
       _user = u;
     });
 
     _cloudStore = Provider.of<CloudStore>(context, listen: false);
+    await getMyBusiness();
   }
 
   @action
   Future applyForBusiness(BusinessDetails ap) async {
     final businessDoc = _fireStore.doc("businesses/${_user.uid}");
-    await businessDoc.set(ap.toMap());
-
-    final firstBranchname = ap.businessName.value;
-    final firstBranchDoc = _fireStore
-        .doc("businesses/${_user.uid}/businessBranches/$firstBranchname");
 
     final branch = BusinessBranch(
       business: businessDoc,
@@ -48,8 +46,15 @@ abstract class _BusinessStore with Store {
       latlong: ap.latlong.value,
       address: ap.address.value,
       name: ap.businessName.value,
-      images: null,
+      images: [kTemporaryBusinessImage],
     );
+    ap.selectedBranch.value = branch;
+    ap.branches.value.add(branch);
+    await businessDoc.set(ap.toMap());
+
+    final firstBranchname = ap.businessName.value;
+    final firstBranchDoc = _fireStore
+        .doc("businesses/${_user.uid}/businessBranches/$firstBranchname");
 
     await firstBranchDoc.set(
       branch.toMap(),
@@ -61,9 +66,16 @@ abstract class _BusinessStore with Store {
   }
 
   @action
-  Future getMyBusiness(BusinessDetails ap) async {
-    final businessData = await _fireStore.doc("businesses/${_user.uid}").get();
-    business = BusinessDetails.fromJson(businessData.data());
+  Future getMyBusiness() async {
+    final businessDetails = await _fireStore.doc("businesses/${_user.uid}").get();
+
+    if(businessDetails.exists){
+      final data = businessDetails.data();
+      final branches = (await businessDetails.reference.collection("/businessBranches").get()).docs;
+      data["branches"] = branches.map((e) => e.data()).toList();
+      print(data);
+      business = BusinessDetails.fromJson(data);
+    }
   }
 
   @action
@@ -85,8 +97,8 @@ class BusinessDetails {
   final Observable<String> address = Observable<String>(null);
   final Observable<GeoPoint> latlong = Observable<GeoPoint>(null);
   final Observable<String> uid = Observable<String>(null);
-  final branches = Observable<ObservableList<BusinessBranch>>(
-      ObservableList<BusinessBranch>());
+  final branches = Observable<List<BusinessBranch>>([]);
+  final selectedBranch = Observable<BusinessBranch>(null);
 
   BusinessDetails.from({
     String businessName,
@@ -95,7 +107,8 @@ class BusinessDetails {
     GeoPoint latlong,
     String uid,
     BusinessCategory category,
-    ObservableList<BusinessBranch> branches,
+    List<BusinessBranch> branches,
+    BusinessBranch selectedBranch,
   }) {
     this.category.value = category;
     this.businessName.value = businessName;
@@ -103,6 +116,8 @@ class BusinessDetails {
     this.address.value = address;
     this.latlong.value = latlong;
     this.uid.value = uid;
+    this.branches.value = branches??[];
+    this.selectedBranch.value = selectedBranch;
   }
 
   BusinessDetails.fromJson(Map<String, dynamic> j) {
@@ -112,6 +127,11 @@ class BusinessDetails {
     this.address.value = j["address"] as String;
     this.latlong.value = j["latlong"] as GeoPoint;
     this.uid.value = j["uid"] as String;
+    final tmp = j["branches"] as List;
+    if(tmp!=null){
+      this.branches.value = tmp.map((e) => BusinessBranch.fromJson(e)).toList();
+    }
+    this.selectedBranch.value = BusinessBranch.fromJson(j["selectedBranch"]);
   }
 
   Map<String, dynamic> toMap() {
@@ -122,6 +142,8 @@ class BusinessDetails {
       "address": address.value,
       "latLong": latlong.value,
       "uid": uid.value,
+      "branches": branches.value.map((e) => e.toMap()).toList(),
+      "selectedBranch":selectedBranch.value.toMap(),
     };
   }
 }
@@ -182,9 +204,10 @@ class BusinessBranch {
       this.receptionist,
       this.business});
 
-  BusinessBranch fromJson(Map<String, dynamic> j) {
+  static BusinessBranch fromJson(Map<String, dynamic> j) {
+    //print(j);
     return BusinessBranch(
-        images: j["images"],
+        images: List.castFrom(j["images"]),
         name: j["name"],
         address: j["address"],
         latlong: j["latlong"],

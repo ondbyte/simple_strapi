@@ -7,6 +7,7 @@ import 'package:bapp/stores/auth_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:country_pickers/country_pickers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:mobx/mobx.dart';
@@ -38,8 +39,10 @@ abstract class _CloudStore with Store {
   UserType userType;
   @observable
   UserType alterEgo;
-  @observable
+
   User _user;
+  @observable
+  var isRoleFlippable = false;
 
   AuthStore _authStore;
 
@@ -60,8 +63,13 @@ abstract class _CloudStore with Store {
     await getUserData();
     await getMytLocation();
     await getMyUserTypes();
+    await getIsRoleFlippable();
     updateMenuItems();
     _setupAutoRun();
+  }
+
+  Future getIsRoleFlippable() async {
+    isRoleFlippable = myData["isRoleFlippable"]??false;
   }
 
   Future getUserData() async {
@@ -80,10 +88,16 @@ abstract class _CloudStore with Store {
   }
 
   @action
-  Future switchUserType() async {
-    final tmp = userType;
-    userType = alterEgo;
-    alterEgo = tmp;
+  Future<bool> switchUserType(BuildContext context) async {
+    if(isRoleFlippable){
+      final tmp = userType;
+      userType = alterEgo;
+      alterEgo = tmp;
+      return true;
+    } else {
+      Flushbar(message: "Your business is not approved yet",duration: Duration(seconds: 2),).show(context);
+      return false;
+    }
   }
 
   @action

@@ -36,150 +36,152 @@ class _ThankYouForYourInterestScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: Padding(
-        padding: EdgeInsets.all(16),
-        child: StoreProvider<CloudStore>(
-          store: Provider.of<CloudStore>(context, listen: false),
-          builder: (_, cloudStore) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Thank you for your interest",
-                  style: Theme.of(context).textTheme.headline1,
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  "Please send us below information and we will on-board you as quickly as possible",
-                  style: Theme.of(context).textTheme.bodyText1,
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                TextFormField(
-                  onChanged: (s) {
-                    setState(() {
-                      _businessName = s;
-                    });
-                  },
-                  decoration: InputDecoration(
-                    labelText: "Name of your business",
-                  ),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                InternationalPhoneNumberInput(
-                  onInputChanged: (PhoneNumber number) {
-                    _validNumber = ThePhoneNumberLib.parseNumber(
-                      internationalNumber: number.phoneNumber,
-                    );
-                  },
-                  onInputValidated: (bool value) {
-                    if (_canVerify == !value) {
-                      setState(
-                        () {
-                          _canVerify = value;
-                        },
-                      );
-                    }
-                  },
-                  selectorConfig: SelectorConfig(
-                    selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
-                  ),
-                  ignoreBlank: true,
-                  initialValue: PhoneNumber(
-                    phoneNumber: cloudStore.theNumber.number,
-                    isoCode: cloudStore.theNumber.iso2Code,
-                  ),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                ShakeWidget(
-                  doShake: _shake,
-                  onShakeDone: () {
-                    setState(
-                      () {
-                        _shake = false;
-                      },
-                    );
-                  },
-                  child: ListTile(
-                    onTap: () async {
-                      final tmp = await Navigator.of(context)
-                          .pushNamed(RouteManager.pickALocation);
-                      if (tmp != null) {
-                        setState(() {
-                          _pickedLocation = tmp;
-                        });
-                      }
-                    },
-                    contentPadding: EdgeInsets.only(left: 0),
-                    trailing: Icon(Icons.arrow_forward_ios),
-                    title: Text(
-                      "Where is your business located",
-                      style: Theme.of(context).textTheme.subtitle1,
+      body: StoreProvider<CloudStore>(
+        store: Provider.of<CloudStore>(context, listen: false),
+        builder: (_, cloudStore) {
+          return CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: EdgeInsets.all(16),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    Text(
+                      "Thank you for your interest",
+                      style: Theme.of(context).textTheme.headline1,
                     ),
-                    subtitle: Text(
-                      _pickedLocation == null
-                          ? "Pick an Address"
-                          : _pickedLocation.address,
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text(
+                      "Please send us below information and we will on-board you as quickly as possible",
                       style: Theme.of(context).textTheme.bodyText1,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ),
-                Spacer(),
-                MaterialButton(
-                  onPressed: (_canVerify && _businessName.length > 2)
-                      ? () {
-                          if (_pickedLocation != null) {
-                            Navigator.of(context).pushNamedAndRemoveUntil(
-                                RouteManager.contextualMessage,
-                                (route) =>
-                                    route.settings.name == RouteManager.home,
-                                arguments: [
-                                  () async {
-                                    final tmp = await Provider.of<
-                                                BusinessStore>(context,
-                                            listen: false)
-                                        .applyForBusiness(BusinessDetails.from(
-                                            uid: FirebaseAuth
-                                                .instance.currentUser.uid,
-                                            contactNumber: _validNumber
-                                                .internationalNumber,
-                                            category: widget.category,
-                                            address: _pickedLocation.address,
-                                            businessName: _businessName,
-                                            latlong: _pickedLocation.latLong));
-                                    return tmp;
-                                  },
-                                  "Thank you, we\'ll reach you out soon"
-                                ]);
-                          } else {
-                            setState(
-                              () {
-                                _shake = true;
-                              },
-                            );
-                          }
+                    SizedBox(
+                      height: 20,
+                    ),
+                    TextFormField(
+                      onChanged: (s) {
+                        setState(() {
+                          _businessName = s;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        labelText: "Name of your business",
+                      ),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    InternationalPhoneNumberInput(
+                      onInputChanged: (PhoneNumber number) {
+                        _validNumber = ThePhoneNumberLib.parseNumber(
+                          internationalNumber: number.phoneNumber,
+                        );
+                      },
+                      onInputValidated: (bool value) {
+                        if (_canVerify == !value) {
+                          setState(
+                            () {
+                              _canVerify = value;
+                            },
+                          );
                         }
-                      : null,
-                  child: Row(
-                    children: [
-                      Text("Submit"),
-                      Spacer(),
-                      Icon(Icons.arrow_forward),
+                      },
+                      selectorConfig: SelectorConfig(
+                        selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
+                      ),
+                      ignoreBlank: true,
+                      initialValue: PhoneNumber(
+                        phoneNumber: cloudStore.theNumber.number,
+                        isoCode: cloudStore.theNumber.iso2Code,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    ShakeWidget(
+                      doShake: _shake,
+                      onShakeDone: () {
+                        setState(
+                          () {
+                            _shake = false;
+                          },
+                        );
+                      },
+                      child: ListTile(
+                        onTap: () async {
+                          final tmp = await Navigator.of(context)
+                              .pushNamed(RouteManager.pickALocation);
+                          if (tmp != null) {
+                            setState(() {
+                              _pickedLocation = tmp;
+                            });
+                          }
+                        },
+                        contentPadding: EdgeInsets.only(left: 0),
+                        trailing: Icon(Icons.arrow_forward_ios),
+                        title: Text(
+                          "Where is your business located",
+                          style: Theme.of(context).textTheme.subtitle1,
+                        ),
+                        subtitle: Text(
+                          _pickedLocation == null
+                              ? "Pick an Address"
+                              : _pickedLocation.address,
+                          style: Theme.of(context).textTheme.bodyText1,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ]),
+                ),
+              )
+            ],
+          );
+        },
+      ),
+      bottomSheet: MaterialButton(
+        onPressed: (_canVerify && _businessName.length > 2)
+            ? () {
+                if (_pickedLocation != null) {
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                    RouteManager.contextualMessage,
+                    (route) => route.settings.name == RouteManager.home,
+                    arguments: [
+                      () async {
+                        final tmp = await Provider.of<BusinessStore>(context,
+                                listen: false)
+                            .applyForBusiness(
+                          BusinessDetails.from(
+                            uid: FirebaseAuth.instance.currentUser.uid,
+                            contactNumber: _validNumber.internationalNumber,
+                            category: widget.category,
+                            address: _pickedLocation.address,
+                            businessName: _businessName,
+                            latlong: _pickedLocation.latLong,
+                          ),
+                        );
+                        return tmp;
+                      },
+                      "Thank you, we\'ll reach you out soon"
                     ],
-                  ),
-                )
-              ],
-            );
-          },
+                  );
+                } else {
+                  setState(
+                    () {
+                      _shake = true;
+                    },
+                  );
+                }
+              }
+            : null,
+        child: Row(
+          children: [
+            Text("Submit"),
+            Spacer(),
+            Icon(Icons.arrow_forward),
+          ],
         ),
       ),
     );

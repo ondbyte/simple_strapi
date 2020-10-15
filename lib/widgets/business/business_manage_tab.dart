@@ -1,4 +1,6 @@
+import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -13,28 +15,38 @@ class _BusinessManageTabState extends State<BusinessManageTab> {
     return Scaffold(
       body: SafeArea(
         child: CustomScrollView(
-          slivers: [
-            SliverPadding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate(
-                  [
-                    _getAppBar(),
-                  ],
-                ),
-              ),
-            ),
-          ],
+          slivers: [_getAppBar()],
         ),
       ),
     );
   }
 
   Widget _getAppBar() {
-    return Consumer<CloudStore>(builder: (_, cloudStore, __) {
-      return SliverAppBar(
-        automaticallyImplyLeading: false,
-      );
-    });
+    return Consumer<BusinessStore>(
+      builder: (_, businessStore, __) {
+        return SliverAppBar(
+          automaticallyImplyLeading: false,
+          flexibleSpace: SizedBox(),
+        );
+      },
+    );
+  }
+
+  Widget _getImageGallery(List<String> urls){
+    return PageView(
+      children: [
+        ...List.generate(urls.length, (index) =>
+        CachedNetworkImage(
+          imageUrl: urls[index],
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.width,
+          placeholder: (_,s){
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          },
+        ),),
+      ],
+    );
   }
 }
