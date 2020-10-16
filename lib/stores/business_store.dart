@@ -39,7 +39,7 @@ abstract class _BusinessStore with Store {
   Future applyForBusiness(BusinessDetails ap) async {
     final businessDoc = _fireStore.doc("businesses/${_user.uid}");
 
-    final branch = BusinessBranch(
+    final branch = BusinessBranch.from(
       business: businessDoc,
       staff: null,
       manager: null,
@@ -190,47 +190,55 @@ class BusinessReceptionist {
 }
 
 class BusinessBranch {
-  final List<String> images;
-  final String name;
-  final String address;
-  final GeoPoint latlong;
-  final List<DocumentReference> staff;
-  final DocumentReference manager;
-  final DocumentReference receptionist;
-  final DocumentReference business;
+  final images = Observable<List<String>>([]);
+  final name = Observable<String>(null);
+  final address = Observable<String>(null);
+  final latlong = Observable<GeoPoint>(null);
+  final staff = Observable<List<DocumentReference>>([]);
+  final manager = Observable<DocumentReference>(null);
+  final receptionist = Observable<DocumentReference>(null);
+  final business = Observable<DocumentReference>(null);
 
-  BusinessBranch(
-      {this.images,
-      this.name,
-      this.address,
-      this.latlong,
-      this.staff,
-      this.manager,
-      this.receptionist,
-      this.business});
+  BusinessBranch.from({
+    List<String> images,
+    String name,
+    String address,
+    GeoPoint latlong,
+    List<DocumentReference> staff,
+    DocumentReference manager,
+    DocumentReference receptionist,
+    DocumentReference business,
+  }) {
+    this.images.value = images;
+    this.name.value = name;
+    this.address.value = address;
+    this.latlong.value = latlong;
+    this.staff.value = staff;
+    this.manager.value = manager;
+    this.receptionist.value = receptionist;
+    this.business.value = business;
+  }
 
-  static BusinessBranch fromJson(Map<String, dynamic> j) {
-    //print(j);
-    return BusinessBranch(
-        images: List.castFrom(j["images"]),
-        name: j["name"],
-        address: j["address"],
-        latlong: j["latlong"],
-        staff: j["staff"],
-        manager: j["manager"],
-        receptionist: j["receptionist"],
-        business: j["business"]);
+  BusinessBranch.fromJson(Map<String, dynamic> j) {
+    this.images.value = List.castFrom(j["images"]);
+    this.name.value = j["name"];
+    this.address.value = j["address"];
+    this.latlong.value = j["latlong"];
+    this.staff.value = List.castFrom(j["staff"]);
+    this.manager.value = j["manager"];
+    this.receptionist.value = j["receptionist"];
+    this.business.value = j["business"];
   }
 
   Map<String, dynamic> toMap() {
     return {
-      "images": images,
-      "name": name,
-      "address": address,
-      "latlong": latlong,
-      "staff": staff,
-      "manager": manager,
-      "receptionist": receptionist
+      "images": images.value,
+      "name": name.value,
+      "address": address.value,
+      "latlong": latlong.value,
+      "staff": staff.value,
+      "manager": manager.value,
+      "receptionist": receptionist.value,
     };
   }
 }

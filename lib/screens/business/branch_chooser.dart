@@ -24,17 +24,19 @@ class BranchChooserScreen extends StatelessWidget {
             itemBuilder: (_, i) {
               return ListTile(
                 onTap: () {
-                  act(() {
-                    businessStore.business.selectedBranch.value = branches[i];
-                  });
+                  act(
+                    () {
+                      businessStore.business.selectedBranch.value = branches[i];
+                    },
+                  );
                   Navigator.pop(context);
                 },
                 title: Text(
-                  branches[i].name,
+                  branches[i].name.value,
                   maxLines: 1,
                 ),
                 subtitle: Text(
-                  branches[i].address,
+                  branches[i].address.value,
                   maxLines: 3,
                 ),
                 trailing: Icon(Icons.arrow_forward_ios),

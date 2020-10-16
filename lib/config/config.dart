@@ -1,3 +1,4 @@
+import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart' hide Tab;
@@ -237,7 +238,6 @@ class MenuConfig {
           UserType.businessStaff,
           UserType.manager,
         ],
-        
         showWhenUserTypeIs: [
           UserType.customer,
         ],
@@ -267,5 +267,178 @@ class MenuConfig {
         ],
       ),
     ],
+  ];
+}
+
+class BusinessExpandingPanelConfigs {
+  static final List<BusinessExpandingPanelConfig> cfgs = [
+    BusinessExpandingPanelConfig(
+      title: "Grow your business",
+      subTitle: "Set of tools to help you grow your business.",
+      tiles: [
+        BusinessExpandingTile(
+          name: "Reports & Insights",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessReportsAndInsightsScreen,
+          enabled: false,
+        ),
+        BusinessExpandingTile(
+          name: "Offers & Promotions",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessOffersAndPromoScreen,
+          enabled: false,
+        ),
+        BusinessExpandingTile(
+          name: "Vouchers",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessVoucherScreen,
+          enabled: false,
+        ),
+        BusinessExpandingTile(
+          name: "Loyalty Program",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessLoyaltyProgramScreen,
+          enabled: false,
+        ),
+        BusinessExpandingTile(
+          name: "Sell Merchandise",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessSeleMerchScreen,
+          enabled: false,
+        ),
+        BusinessExpandingTile(
+          name: "Manage Campaigns",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessManageCampaignScreen,
+          enabled: false,
+        ),
+        BusinessExpandingTile(
+          name: "Booking Channel",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessBookingChannelsScreen,
+          enabled: false,
+        ),
+      ],
+    ),
+    BusinessExpandingPanelConfig(
+      title: "Client Management",
+      subTitle: "Set of tools to help you grow your business",
+      tiles: [
+        BusinessExpandingTile(
+          name: "Your Clients",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessYourClientsScreen,
+          enabled: false,
+        ),
+        BusinessExpandingTile(
+          name: "Customer Support",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessCustomerSupportScreen,
+          enabled: false,
+        ),
+        BusinessExpandingTile(
+          name: "Customer Feedback",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessCustomerFeedbackScreen,
+          enabled: false,
+        ),
+      ],
+    ),
+    BusinessExpandingPanelConfig(
+      title: "HRMs",
+      subTitle: "Set of tools to help you grow your business",
+      tiles: [
+        BusinessExpandingTile(
+          name: "Manage Staff",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessManageStaffScreen,
+          enabled: false,
+        ),
+        BusinessExpandingTile(
+          name: "Leaves",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessLeavesScreen,
+          enabled: false,
+        ),
+        BusinessExpandingTile(
+          name: "Salaries",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessSalariesScreen,
+          enabled: false,
+        ),
+      ],
+    ),
+    BusinessExpandingPanelConfig(
+      title: "Logistics",
+      subTitle: "Set of tools to help you grow your business",
+      tiles: [
+        BusinessExpandingTile(
+          name: "Stocks",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessStocksScreen,
+          enabled: false,
+        ),
+        BusinessExpandingTile(
+          name: "Merchandise",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessMerchScreen,
+          enabled: false,
+        ),
+      ],
+    ),
+    BusinessExpandingPanelConfig(
+      title: "Store Presence",
+      subTitle: "Set of tools to help you grow your business",
+      tiles: [
+        BusinessExpandingTile(
+          name: "Store Name & Address",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessNameAndAddressScreen,
+          enabled: false,
+        ),
+        BusinessExpandingTile(
+          name: "Manage Media",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessManageMediaScreen,
+          enabled: true,
+        ),
+        BusinessExpandingTile(
+          name: "Products & Pricing",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessProductsPricingScreen,
+          enabled: false,
+        ),
+        BusinessExpandingTile(
+          name: "Contact Details",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessContactDetailsScreen,
+          enabled: false,
+        ),
+        BusinessExpandingTile(
+          name: "Business Hours",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessHoursScreen,
+          enabled: false,
+        ),
+        BusinessExpandingTile(
+          name: "Holidays",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessHolidaysScreen,
+          enabled: false,
+        ),
+        BusinessExpandingTile(
+          name: "Manage Branches",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessManageBranchesScreen,
+          enabled: false,
+        ),
+        BusinessExpandingTile(
+          name: "Business Verification",
+          iconData: FeatherIcons.alertOctagon,
+          onClickRoute: RouteManager.businessVerificationScreen,
+          enabled: false,
+        ),
+      ],
+    ),
   ];
 }

@@ -72,5 +72,24 @@ class Slide {
   final String img;
   final String title;
   final String description;
+
   Slide({this.img, this.title, this.description});
+}
+
+class BusinessExpandingPanelConfig{
+  final String title;
+  final String subTitle;
+  final List<BusinessExpandingTile> tiles;
+
+  BusinessExpandingPanelConfig({this.tiles, this.title, this.subTitle});
+
+}
+
+class BusinessExpandingTile{
+  final IconData iconData;
+  final String name;
+  final String onClickRoute;
+  final bool enabled;
+
+  BusinessExpandingTile({this.iconData, this.name, this.onClickRoute,this.enabled});
 }

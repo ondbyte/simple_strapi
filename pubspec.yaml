@@ -28,6 +28,7 @@ dependencies:
   device_info: ^0.4.2+8
   path_provider: ^1.6.18
   #hive: ^1.4.4
+  multi_image_picker: ^4.7.14
   thephonenumber:
     git:
       url: https://github.com/ondbyte/thephonenumber_dart.git

@@ -88,3 +88,10 @@ dynamic act(Function fn) {
     return fn();
   }).call();
 }
+
+String localOrNetworkFilePath(String path){
+  if(path.startsWith("http")){
+    return path;
+  }
+  return "file:///"+path;
+}

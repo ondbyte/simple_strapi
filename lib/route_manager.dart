@@ -1,6 +1,7 @@
 import 'package:bapp/screens/business/addbusiness/choose_category.dart';
 import 'package:bapp/screens/business/addbusiness/thank_you_for_your_interest.dart';
 import 'package:bapp/screens/business/branch_chooser.dart';
+import 'package:bapp/screens/business/toolkit/manage_media.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:bapp/screens/location/pick_a_place.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';
@@ -34,9 +35,44 @@ class RouteManager {
   static const String showResultsScreen = "/srs";
   static const String businessBranchChooserScreen = "/bbcs";
 
+  ///business expansion tiles routes
+
+  static const String businessReportsAndInsightsScreen = "/businessReportsAndInsightsScreen";
+  static const String businessOffersAndPromoScreen = "/businessOffersAndPromoScreen";
+  static const String businessVoucherScreen = "/businessVoucherScreen";
+  static const String businessLoyaltyProgramScreen = "/businessLoyaltyProgramScreen";
+  static const String businessSeleMerchScreen = "/businessSeleeMerchScreen";
+  static const String businessManageCampaignScreen = "/businessManageCampaignScreen";
+  static const String businessBookingChannelsScreen = "/businessBookingChannelsScreen";
+  static const String businessYourClientsScreen = "/businessYourClientsScreen";
+  static const String businessCustomerSupportScreen = "/businessCustomerSupportScreen";
+  static const String businessCustomerFeedbackScreen = "/businessCustomerFeedbackScreen";
+  static const String businessManageStaffScreen = "/businessManageStaffScreen";
+  static const String businessLeavesScreen = "/businessLeavesScreen";
+  static const String businessSalariesScreen = "/businessSalariesScreen";
+  static const String businessStocksScreen = "/businessStocksScreen";
+  static const String businessMerchScreen = "/businessMerchScreen";
+  static const String businessNameAndAddressScreen = "/businessNameAndAddressScreen";
+  static const String businessManageMediaScreen = "/businessManageMediaScreen";
+  static const String businessProductsPricingScreen = "/businessProductsPricingScreen";
+  static const String businessContactDetailsScreen = "/businessContactDetailsScreen";
+  static const String businessHoursScreen = "/businessHoursScreen";
+  static const String businessHolidaysScreen = "/businessHolidaysScreen";
+  static const String businessManageBranchesScreen = "/businessManageBranchesScreen";
+  static const String businessVerificationScreen = "/businessVerificationScreen";
+
   static Route<dynamic> onGenerate(RouteSettings settings) {
     print("route called: ${settings.name}");
     switch (settings.name) {
+      ///business
+      case businessManageMediaScreen:
+        return MaterialPageRoute(
+          builder: (_) {
+            return BusinessManageMediaScreen();
+          },
+        );
+
+
       case businessBranchChooserScreen:
         return MaterialPageRoute(
           builder: (_) {
