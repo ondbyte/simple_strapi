@@ -55,72 +55,81 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
       sliver: SliverList(
         delegate: SliverChildListDelegate(
           [
-            ExpansionPanelList(
-              elevation: 0,
-              dividerColor: Colors.transparent,
-              children:
-                  List.generate(BusinessExpandingPanelConfigs.cfgs.length, (i) {
-                return ExpansionPanel(
-                  isExpanded: i == _expandedPanel,
-                  headerBuilder: (_, expanded) {
-                    return ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      onTap: () {
-                        setState(() {
-                          if (_expandedPanel == i) {
-                            _expandedPanel = -1;
-                          } else {
-                            _expandedPanel = i;
-                          }
-                        });
-                      },
-                      title: Text(BusinessExpandingPanelConfigs.cfgs[i].title),
-                      subtitle:
-                          Text(BusinessExpandingPanelConfigs.cfgs[i].subTitle),
-                    );
-                  },
-                  body: LayoutBuilder(
-                    builder: (_, cons) {
-                      return SizedBox(
-                        height: cons.maxWidth /
-                            3 *
-                            (BusinessExpandingPanelConfigs
-                                        .cfgs[i].tiles.length /
-                                    3)
-                                .ceil(),
-                        width: cons.maxWidth,
-                        child: GridView.count(
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                          physics: const NeverScrollableScrollPhysics(),
-                          crossAxisCount: 3,
-                          children: List.generate(
-                            BusinessExpandingPanelConfigs.cfgs[i].tiles.length,
-                            (index) => _getTile(
-                              context: context,
-                              name: BusinessExpandingPanelConfigs
-                                  .cfgs[i].tiles[index].name,
-                              icon: Icon(BusinessExpandingPanelConfigs
-                                  .cfgs[i].tiles[index].iconData),
-                              onClick: BusinessExpandingPanelConfigs
-                                      .cfgs[i].tiles[index].enabled
-                                  ? () {
-                                print("YAA");
-                                      Navigator.of(context).pushNamed(
-                                        BusinessExpandingPanelConfigs
-                                            .cfgs[i].tiles[index].onClickRoute,
-                                      );
-                                    }
-                                  : null,
-                            ),
-                          ),
-                        ),
+            Theme(
+              data: Theme.of(context)
+                  .copyWith(cardColor: Theme.of(context).primaryColorLight),
+              child: ExpansionPanelList(
+                elevation: 0,
+                dividerColor: Colors.transparent,
+                children: List.generate(
+                    BusinessExpandingPanelConfigs.cfgs.length, (i) {
+                  return ExpansionPanel(
+                    isExpanded: i == _expandedPanel,
+                    headerBuilder: (_, expanded) {
+                      return ListTile(
+                        tileColor: Theme.of(context).primaryColorLight,
+                        selectedTileColor: Theme.of(context).primaryColorLight,
+                        contentPadding: EdgeInsets.zero,
+                        onTap: () {
+                          setState(
+                            () {
+                              if (_expandedPanel == i) {
+                                _expandedPanel = -1;
+                              } else {
+                                _expandedPanel = i;
+                              }
+                            },
+                          );
+                        },
+                        title:
+                            Text(BusinessExpandingPanelConfigs.cfgs[i].title),
+                        subtitle: Text(
+                            BusinessExpandingPanelConfigs.cfgs[i].subTitle),
                       );
                     },
-                  ),
-                );
-              }),
-              expansionCallback: (i, isExpanded) {},
+                    body: LayoutBuilder(
+                      builder: (_, cons) {
+                        return SizedBox(
+                          height: cons.maxWidth /
+                              3 *
+                              (BusinessExpandingPanelConfigs
+                                          .cfgs[i].tiles.length /
+                                      3)
+                                  .ceil(),
+                          width: cons.maxWidth,
+                          child: GridView.count(
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                            physics: const NeverScrollableScrollPhysics(),
+                            crossAxisCount: 3,
+                            children: List.generate(
+                              BusinessExpandingPanelConfigs
+                                  .cfgs[i].tiles.length,
+                              (index) => _getTile(
+                                context: context,
+                                name: BusinessExpandingPanelConfigs
+                                    .cfgs[i].tiles[index].name,
+                                icon: Icon(BusinessExpandingPanelConfigs
+                                    .cfgs[i].tiles[index].iconData),
+                                onClick: BusinessExpandingPanelConfigs
+                                        .cfgs[i].tiles[index].enabled
+                                    ? () {
+                                        Navigator.of(context).pushNamed(
+                                          BusinessExpandingPanelConfigs.cfgs[i]
+                                              .tiles[index].onClickRoute,
+                                        );
+                                      }
+                                    : null,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                }),
+                expansionCallback: (i, isExpanded) {},
+              ),
             )
           ],
         ),
@@ -172,18 +181,18 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
               leading: ClipRRect(
                 borderRadius: BorderRadius.circular(6),
                 child: CachedNetworkImage(
-                  imageUrl:
-                      businessStore.business.selectedBranch.value.images.value[0],
+                  imageUrl: businessStore
+                      .business.selectedBranchDoc.value.images.value[0],
                   height: 80,
                   width: 80,
                 ),
               ),
               title: Text(
-                businessStore.business.selectedBranch.value.name.value,
+                businessStore.business.selectedBranchDoc.value.name.value,
                 maxLines: 1,
               ),
               subtitle: Text(
-                businessStore.business.selectedBranch.value.address.value
+                businessStore.business.selectedBranchDoc.value.address.value
                     .split("\n")
                     .join(", "),
                 maxLines: 1,
@@ -222,61 +231,6 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
         trailing: Icon(FeatherIcons.arrowRightCircle,
             color: Theme.of(context).primaryColorLight),
       ),
-    );
-  }
-
-  _getGrowYourBusinessCollapserWidget(BuildContext context) {
-    return ExpandablePanel(
-      header: Text("Grow your Business"),
-      collapsed: Text(
-        "Set of tools to help you grow your business",
-        softWrap: true,
-        maxLines: 1,
-      ),
-      expanded: LayoutBuilder(
-        builder: (_, cons) {
-          return GridView.count(
-            crossAxisCount: 3,
-            children: [
-              Container(
-                width: cons.maxWidth / 3,
-                color: Colors.red,
-                child: Text("YAAA"),
-              ),
-              Container(
-                width: cons.maxWidth / 3,
-                color: Colors.red,
-                child: Text("YAAA"),
-              ),
-              Container(
-                width: cons.maxWidth / 3,
-                color: Colors.red,
-                child: Text("YAAA"),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-    return ExpansionTile(
-      title: Text("Grow your Business"),
-      subtitle: Text("Set of tools to help you grow your business"),
-      children: [
-        GridView.count(
-          crossAxisCount: 3,
-          children: [
-            Container(
-              child: Text("YAAA"),
-            ),
-            Container(
-              child: Text("YAAA"),
-            ),
-            Container(
-              child: Text("YAAA"),
-            ),
-          ],
-        )
-      ],
     );
   }
 }

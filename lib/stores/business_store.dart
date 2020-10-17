@@ -1,11 +1,16 @@
+import 'dart:typed_data';
+
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
+import 'package:mobx/mobx.dart' show reaction;
 
 part 'business_store.g.dart';
 
@@ -49,13 +54,16 @@ abstract class _BusinessStore with Store {
       name: ap.businessName.value,
       images: [kTemporaryBusinessImage],
     );
-    ap.selectedBranch.value = branch;
-    ap.branches.value.add(branch);
-    await businessDoc.set(ap.toMap());
-
+    
     final firstBranchname = ap.businessName.value;
     final firstBranchDoc = _fireStore
         .doc("businesses/${_user.uid}/businessBranches/$firstBranchname");
+    
+    ap.selectedBranchDoc.value = firstBranchDoc;
+    
+    ap.branches.value.add(branch);
+    await businessDoc.set(ap.toMap());
+
 
     await firstBranchDoc.set(
       branch.toMap(),
@@ -78,7 +86,7 @@ abstract class _BusinessStore with Store {
               .get())
           .docs;
       data["branches"] = branches.map((e) => e.data()).toList();
-      print(data);
+      //print(data);
       business = BusinessDetails.fromJson(data);
     }
   }
@@ -103,6 +111,7 @@ class BusinessDetails {
   final Observable<GeoPoint> latlong = Observable<GeoPoint>(null);
   final Observable<String> uid = Observable<String>(null);
   final branches = Observable<List<BusinessBranch>>([]);
+  final selectedBranchDoc = Observable<DocumentReference>(null);
   final selectedBranch = Observable<BusinessBranch>(null);
 
   BusinessDetails.from({
@@ -113,7 +122,7 @@ class BusinessDetails {
     String uid,
     BusinessCategory category,
     List<BusinessBranch> branches,
-    BusinessBranch selectedBranch,
+    DocumentReference selectedBranchDoc,
   }) {
     this.category.value = category;
     this.businessName.value = businessName;
@@ -122,7 +131,12 @@ class BusinessDetails {
     this.latlong.value = latlong;
     this.uid.value = uid;
     this.branches.value = branches ?? [];
-    this.selectedBranch.value = selectedBranch;
+    this.selectedBranchDoc.value = selectedBranchDoc;
+    this.selectedBranch = _getBusinessBranch(this.selectedBranchDoc);
+  }
+
+  _getBusinessBranch(DocumentReference doc){
+
   }
 
   BusinessDetails.fromJson(Map<String, dynamic> j) {
@@ -136,7 +150,7 @@ class BusinessDetails {
     if (tmp != null) {
       this.branches.value = tmp.map((e) => BusinessBranch.fromJson(e)).toList();
     }
-    this.selectedBranch.value = BusinessBranch.fromJson(j["selectedBranch"]);
+    this.selectedBranchDoc.value = j["selectedBranch"];
   }
 
   Map<String, dynamic> toMap() {
@@ -148,7 +162,7 @@ class BusinessDetails {
       "latLong": latlong.value,
       "uid": uid.value,
       "branches": branches.value.map((e) => e.toMap()).toList(),
-      "selectedBranch": selectedBranch.value.toMap(),
+      "selectedBranch": selectedBranchDoc.value,
     };
   }
 }
@@ -198,6 +212,7 @@ class BusinessBranch {
   final manager = Observable<DocumentReference>(null);
   final receptionist = Observable<DocumentReference>(null);
   final business = Observable<DocumentReference>(null);
+  final myDoc = Observable<DocumentReference>(null);
 
   BusinessBranch.from({
     List<String> images,
@@ -217,6 +232,7 @@ class BusinessBranch {
     this.manager.value = manager;
     this.receptionist.value = receptionist;
     this.business.value = business;
+    this.myDoc.value = business.collection("businessBranches").doc(name);
   }
 
   BusinessBranch.fromJson(Map<String, dynamic> j) {
@@ -228,6 +244,7 @@ class BusinessBranch {
     this.manager.value = j["manager"];
     this.receptionist.value = j["receptionist"];
     this.business.value = j["business"];
+    this.myDoc.value = business.value.collection("businessBranches").doc(name.value);
   }
 
   Map<String, dynamic> toMap() {
@@ -239,7 +256,30 @@ class BusinessBranch {
       "staff": staff.value,
       "manager": manager.value,
       "receptionist": receptionist.value,
+      "business": business.value,
+      "myDoc":myDoc.value,
     };
+  }
+
+  Future updateImages(List<String> paths,List<Uint8List> datas) async {
+    final storage = FirebaseStorage.instance;
+    final auth = FirebaseAuth.instance;
+    print(paths.join("\n"));
+    for (var i=0;i<paths.length;i++){
+      if(!paths[i].startsWith("http")){
+        final ref = storage.ref().child("${auth.currentUser.uid}/${paths[i]}");
+        final task = ref.putData(datas[i]);
+        final snap = await task.onComplete;
+        paths[i] = await snap.ref.getDownloadURL();
+      }
+    }
+
+    act((){
+      images.value = paths;
+    });
+    
+    print(paths.join("\n"));
+    await myDoc.value.set({"images":paths},SetOptions(merge: true));
   }
 }
 
