@@ -1,9 +1,12 @@
 import 'package:bapp/config/config.dart';
+import 'package:bapp/config/constants.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/widgets/business/business_branch_switch.dart';
+import 'package:bapp/widgets/firebase_image.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:expandable/expandable.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -180,19 +183,23 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
               contentPadding: EdgeInsets.zero,
               leading: ClipRRect(
                 borderRadius: BorderRadius.circular(6),
-                child: CachedNetworkImage(
-                  imageUrl: businessStore
-                      .business.selectedBranchDoc.value.images.value[0],
+                child: FirebaseStorageImage(
+                  storagePathOrURL: businessStore.business.selectedBranch.value
+                              .images.value.length >
+                          0
+                      ? businessStore
+                          .business.selectedBranch.value.images.value[0]
+                      : kTemporaryBusinessImage,
                   height: 80,
                   width: 80,
                 ),
               ),
               title: Text(
-                businessStore.business.selectedBranchDoc.value.name.value,
+                businessStore.business.selectedBranch.value.name.value,
                 maxLines: 1,
               ),
               subtitle: Text(
-                businessStore.business.selectedBranchDoc.value.address.value
+                businessStore.business.selectedBranch.value.address.value
                     .split("\n")
                     .join(", "),
                 maxLines: 1,

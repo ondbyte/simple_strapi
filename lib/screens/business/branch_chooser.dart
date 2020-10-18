@@ -26,7 +26,7 @@ class BranchChooserScreen extends StatelessWidget {
                 onTap: () {
                   act(
                     () {
-                      businessStore.business.selectedBranchDoc.value = branches[i];
+                      businessStore.business.selectedBranch.value = branches[i];
                     },
                   );
                   Navigator.pop(context);

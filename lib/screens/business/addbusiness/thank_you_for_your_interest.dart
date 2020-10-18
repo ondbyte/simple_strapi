@@ -3,6 +3,8 @@ import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/stores/firebase_structures/business_category.dart';
+import 'package:bapp/stores/firebase_structures/business_details.dart';
 import 'package:bapp/widgets/shake_widget.dart';
 import 'package:bapp/widgets/store_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

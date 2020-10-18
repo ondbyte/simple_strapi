@@ -89,9 +89,13 @@ dynamic act(Function fn) {
   }).call();
 }
 
-String localOrNetworkFilePath(String path){
-  if(path.startsWith("http")){
+String localOrNetworkFilePath(String path) {
+  if (path.startsWith("http")) {
     return path;
   }
-  return "file:///"+path;
+  return "file:///" + path;
+}
+
+String removeNewLines(String s) {
+  return s.split("\n").join(", ");
 }

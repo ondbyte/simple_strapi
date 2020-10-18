@@ -430,7 +430,7 @@ class BusinessExpandingPanelConfigs {
           name: "Manage Branches",
           iconData: FeatherIcons.alertOctagon,
           onClickRoute: RouteManager.businessManageBranchesScreen,
-          enabled: false,
+          enabled: true,
         ),
         BusinessExpandingTile(
           name: "Business Verification",

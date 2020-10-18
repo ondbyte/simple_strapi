@@ -20,7 +20,7 @@ class BusinessBranchSwitchWidget extends StatelessWidget {
               Observer(
                 builder: (_) {
                   return Text(
-                    businessStore.business.selectedBranchDoc.value.address.value
+                    businessStore.business.selectedBranch.value.address.value
                         .split("\n")
                         .first,
                     style: Theme.of(context).textTheme.subtitle1,
