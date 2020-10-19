@@ -1,12 +1,17 @@
 import 'dart:typed_data';
 
 import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/stores/business_services.dart';
+import 'package:bapp/stores/firebase_structures/business_holidays.dart';
+import 'package:bapp/stores/firebase_structures/business_timings.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:mobx/mobx.dart';
 
 class BusinessBranch {
+  DocumentReference myDoc;
+
   final images = Observable<List<String>>([]);
   final name = Observable<String>("");
   final address = Observable<String>("");
@@ -15,42 +20,43 @@ class BusinessBranch {
   final manager = Observable<DocumentReference>(null);
   final receptionist = Observable<DocumentReference>(null);
   final business = Observable<DocumentReference>(null);
-  final myDoc = Observable<DocumentReference>(null);
+  final contactNumber = Observable<String>("");
+  final email = Observable<String>("");
+  final rating = Observable<double>(0.0);
+  final businessServices = Observable<BusinessServices>(null);
+  final businessTimings = Observable<BusinessTimings>(null);
+  final businessHolidays = Observable<BusinessHolidays>(null);
 
-  BusinessBranch();
-
-  BusinessBranch.from({
-    List<String> images,
-    String name,
-    String address,
-    GeoPoint latlong,
-    List<DocumentReference> staff,
-    DocumentReference manager,
-    DocumentReference receptionist,
-    DocumentReference business,
-  }) {
-    this.images.value = images;
-    this.name.value = name;
-    this.address.value = address;
-    this.latlong.value = latlong;
-    this.staff.value = staff;
-    this.manager.value = manager;
-    this.receptionist.value = receptionist;
-    this.business.value = business;
-    this.myDoc.value = business.collection("businessBranches").doc(name);
+  BusinessBranch({this.myDoc}) {
+    _getBranch(myDoc);
   }
 
-  BusinessBranch.fromJson(Map<String, dynamic> j) {
-    this.images.value = List.castFrom(j["images"]);
-    this.name.value = j["name"];
-    this.address.value = j["address"];
-    this.latlong.value = j["latlong"];
-    this.staff.value = List.castFrom(j["staff"]);
-    this.manager.value = j["manager"];
-    this.receptionist.value = j["receptionist"];
-    this.business.value = j["business"];
-    this.myDoc.value =
-        business.value.collection("businessBranches").doc(name.value);
+  Future _getBranch(DocumentReference myDoc) async {
+    if (myDoc == null) {
+      print("WARNING: empty docRef");
+      return;
+    }
+    final snap = await myDoc.get();
+    if (snap.exists) {
+      final j = snap.data();
+
+      this.images.value = List.castFrom(j["images"]);
+      this.name.value = j["name"];
+      this.address.value = j["address"];
+      this.latlong.value = j["latlong"];
+      this.staff.value = List.castFrom(j["staff"]);
+      this.manager.value = j["manager"];
+      this.receptionist.value = j["receptionist"];
+      this.business.value = j["business"];
+      this.contactNumber.value = j["contactNumber"];
+      this.email.value = j["email"];
+      this.rating.value = j["rating"];
+      this.businessServices.value =
+          BusinessServices(myDoc: j["businessServices"]);
+      this.businessTimings.value = BusinessTimings(myDoc: j["businessTimings"]);
+      this.businessHolidays.value =
+          BusinessHolidays(myCollection: j["businessHolidays"]);
+    }
   }
 
   Map<String, dynamic> toMap() {
@@ -63,7 +69,13 @@ class BusinessBranch {
       "manager": manager.value,
       "receptionist": receptionist.value,
       "business": business.value,
-      "myDoc": myDoc.value,
+      "myDoc": myDoc,
+      "contactNumber": contactNumber.value,
+      "email": email.value,
+      "rating": rating.value,
+      "businessServices": businessServices.value.myDoc,
+      "businessTimings": businessTimings.value.myDoc,
+      "businessHolidays": businessHolidays.value.myCollection,
     };
   }
 
@@ -79,7 +91,6 @@ class BusinessBranch {
       storage.ref().child(element).delete();
     });
 
-    print(paths.join("\n"));
     for (var i = 0; i < paths.length; i++) {
       if (paths[i].startsWith("local")) {
         paths[i] = paths[i].replaceFirst("local", "");
@@ -94,7 +105,14 @@ class BusinessBranch {
       images.value = paths;
     });
 
-    print(paths.join("\n"));
-    await myDoc.value.set({"images": paths}, SetOptions(merge: true));
+    await myDoc.set({"images": paths}, SetOptions(merge: true));
+  }
+
+  Future saveBranch() async {
+    final collec = business.value.collection("businessBranches");
+    final doc = await collec.add(toMap());
+    await act(() {
+      this.myDoc = doc;
+    });
   }
 }

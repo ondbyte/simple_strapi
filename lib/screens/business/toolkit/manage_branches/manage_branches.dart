@@ -1,3 +1,4 @@
+import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/business_store.dart';
@@ -45,7 +46,9 @@ class _BusinessManageBranchesScreenState
                 itemBuilder: (_, i) {
                   return ListTile(
                     leading: FirebaseStorageImage(
-                      storagePathOrURL: branches[i].images.value[0],
+                      storagePathOrURL: branches[i].images.value.isNotEmpty
+                          ? branches[i].images.value[0]
+                          : kTemporaryBusinessImage,
                       height: 80,
                       width: 80,
                     ),

@@ -4,6 +4,7 @@ import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/widgets/loading.dart';
+import 'package:bapp/widgets/removable_image.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flushbar/flushbar.dart';
@@ -142,37 +143,16 @@ class _BusinessManageMediaScreenState extends State<BusinessManageMediaScreen> {
                                 crossAxisCount: count,
                               ),
                               itemBuilder: (_, i) {
-                                return Stack(
-                                  alignment: Alignment.topRight,
-                                  children: [
-                                    Padding(
-                                      padding: EdgeInsets.all(16),
-                                      child: SizedBox.expand(
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(6),
-                                          child: Image.memory(
-                                            _listOfImageData[i],
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.remove_circle,
-                                        color: Theme.of(context).errorColor,
-                                      ),
-                                      onPressed: () {
-                                        setState(
-                                          () {
-                                            _listOfImage.removeAt(i);
-                                            _listOfImageData.removeAt(i);
-                                          },
-                                        );
+                                return RemovableImageWidget(
+                                  data: _listOfImageData[i],
+                                  onRemove: () {
+                                    setState(
+                                      () {
+                                        _listOfImage.removeAt(i);
+                                        _listOfImageData.removeAt(i);
                                       },
-                                    )
-                                  ],
+                                    );
+                                  },
                                 );
                               },
                             );

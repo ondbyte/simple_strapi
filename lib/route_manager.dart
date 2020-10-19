@@ -141,7 +141,9 @@ class RouteManager {
       case searchAPlace:
         return MaterialPageRoute(
           builder: (_) {
-            return SearchAPlaceScreen();
+            return SearchAPlaceScreen(
+              googlePlace: settings.arguments,
+            );
           },
         );
       case pickALocation:

@@ -19,10 +19,10 @@ class BusinessBranchSwitchWidget extends StatelessWidget {
             children: [
               Observer(
                 builder: (_) {
+                  final text =
+                      businessStore.business.selectedBranch.value.address.value;
                   return Text(
-                    businessStore.business.selectedBranch.value.address.value
-                        .split("\n")
-                        .first,
+                    text.isEmpty ? "Select a branch" : text.split(", ").first,
                     style: Theme.of(context).textTheme.subtitle1,
                   );
                 },

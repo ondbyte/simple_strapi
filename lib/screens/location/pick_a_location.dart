@@ -39,32 +39,38 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
         ),
         actions: [
           FlatButton(
-            onPressed: !_loading||_pickedLocation!=null?() async {
-              setState(
-                () {
-                  _loading = !_loading;
-                },
-              );
-              final point = Coordinates(
-                _pickedLocation.latLong.latitude,
-                _pickedLocation.latLong.longitude,
-              );
-              ///print(point);
-              final adr =
-                  await Geocoder.google(kMapsKey).findAddressesFromCoordinates(
-                point,
-              );
-              _pickedLocation = PickedLocation(
-                GeoPoint(
-                  _pickedLocation.latLong.latitude,
-                  _pickedLocation.latLong.longitude,
-                ),
-                Helper.stringifyAddresse(
-                  adr[0],
-                ),
-              );
-              Navigator.pop(context, _pickedLocation);
-            }:null,
+            onPressed: !_loading || _pickedLocation != null
+                ? () async {
+                    if (!mounted) {
+                      return;
+                    }
+                    setState(
+                      () {
+                        _loading = !_loading;
+                      },
+                    );
+                    final point = Coordinates(
+                      _pickedLocation.latLong.latitude,
+                      _pickedLocation.latLong.longitude,
+                    );
+
+                    ///print(point);
+                    final adr = await Geocoder.google(kMapsKey)
+                        .findAddressesFromCoordinates(
+                      point,
+                    );
+                    _pickedLocation = PickedLocation(
+                      GeoPoint(
+                        _pickedLocation.latLong.latitude,
+                        _pickedLocation.latLong.longitude,
+                      ),
+                      Helper.stringifyAddresse(
+                        adr[0],
+                      ),
+                    );
+                    Navigator.pop(context, _pickedLocation);
+                  }
+                : null,
             child: Text(
               "OK",
             ),
@@ -98,8 +104,9 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
                 zoomControlsEnabled: true,
                 zoomGesturesEnabled: true,
                 onMapCreated: (GoogleMapController controller) {
-                  _pickedLocation = PickedLocation(cloudStore.myLocation.latLong, "");
-                  if(!_controller.isCompleted){
+                  _pickedLocation =
+                      PickedLocation(cloudStore.myLocation.latLong, "");
+                  if (!_controller.isCompleted) {
                     _controller.complete(controller);
                   }
                 },

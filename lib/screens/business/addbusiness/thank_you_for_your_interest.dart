@@ -7,6 +7,7 @@ import 'package:bapp/stores/firebase_structures/business_category.dart';
 import 'package:bapp/stores/firebase_structures/business_details.dart';
 import 'package:bapp/widgets/shake_widget.dart';
 import 'package:bapp/widgets/store_provider.dart';
+import 'package:bapp/widgets/wheres_it_located.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -110,30 +111,10 @@ class _ThankYouForYourInterestScreenState
                           },
                         );
                       },
-                      child: ListTile(
-                        onTap: () async {
-                          final tmp = await Navigator.of(context)
-                              .pushNamed(RouteManager.pickALocation);
-                          if (tmp != null) {
-                            setState(() {
-                              _pickedLocation = tmp;
-                            });
-                          }
+                      child: WheresItLocatedTileWidget(
+                        onPickLocation: (p) {
+                          _pickedLocation = p;
                         },
-                        contentPadding: EdgeInsets.only(left: 0),
-                        trailing: Icon(Icons.arrow_forward_ios),
-                        title: Text(
-                          "Where is your business located",
-                          style: Theme.of(context).textTheme.subtitle1,
-                        ),
-                        subtitle: Text(
-                          _pickedLocation == null
-                              ? "Pick an Address"
-                              : _pickedLocation.address,
-                          style: Theme.of(context).textTheme.bodyText1,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
                       ),
                     ),
                   ]),
@@ -155,14 +136,11 @@ class _ThankYouForYourInterestScreenState
                         final tmp = await Provider.of<BusinessStore>(context,
                                 listen: false)
                             .applyForBusiness(
-                          BusinessDetails.from(
-                            uid: FirebaseAuth.instance.currentUser.uid,
-                            contactNumber: _validNumber.internationalNumber,
-                            category: widget.category,
-                            address: _pickedLocation.address,
-                            businessName: _businessName,
-                            latlong: _pickedLocation.latLong,
-                          ),
+                          latlong: _pickedLocation.latLong,
+                          address: _pickedLocation.address,
+                          businessName: _businessName,
+                          contactNumber: _validNumber.internationalNumber,
+                          category: widget.category,
                         );
                         return tmp;
                       },

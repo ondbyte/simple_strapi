@@ -17,6 +17,5 @@ final kPrivacy = "https://example.com";
 ///currently uses the one from bapp not bapp-dev
 final kMapsKey = "AIzaSyDp-XSgu-pZdyYRgyLdasTR1FEid_Lh_dA";
 
-final kTemporaryBusinessImage =
-    "https://firebasestorage.googleapis.com/v0/b/bapp-dev-c3849.appspot.com/o/download.jpeg?alt=media&token=5d6f5505-d60f-4912-97a0-abfec74b6787";
+final kTemporaryBusinessImage = "assets/svg/ico-spa.svg";
 final kTemporaryBusinessImageStorageRefPath = "download.jpeg";

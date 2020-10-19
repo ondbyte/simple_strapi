@@ -55,6 +55,7 @@ dependencies:
   flutter_svg: ^0.19.0
   cached_network_image: ^2.3.2+1
   expandable: ^4.1.4
+  date_range_picker: ^1.0.5
 
   # MAPS
   google_maps_flutter: ^1.0.2

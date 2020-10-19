@@ -3,6 +3,8 @@ import 'dart:typed_data';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/screens/location/pick_a_location.dart';
+import 'package:bapp/stores/business_services.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,8 +15,12 @@ import 'package:provider/provider.dart';
 import 'package:mobx/mobx.dart' show reaction;
 
 import 'firebase_structures/business_branch.dart';
+import 'firebase_structures/business_branch.dart';
+import 'firebase_structures/business_branch.dart';
 import 'firebase_structures/business_category.dart';
 import 'firebase_structures/business_details.dart';
+import 'firebase_structures/business_holidays.dart';
+import 'firebase_structures/business_timings.dart';
 
 part 'business_store.g.dart';
 
@@ -32,46 +38,91 @@ abstract class _BusinessStore with Store {
   @observable
   DateTime dayForTheDetails = DateTime.now();
 
+  DocumentReference businessDoc;
+
   CloudStore _cloudStore;
 
   Future init(BuildContext context) async {
     _user = _auth.currentUser;
+    userRelatedUpdate();
     _auth.userChanges().listen((u) {
       _user = u;
+      userRelatedUpdate();
     });
 
     _cloudStore = Provider.of<CloudStore>(context, listen: false);
     await getMyBusiness();
   }
 
+  userRelatedUpdate() {
+    businessDoc = _fireStore.doc("businesses/${_user.uid}");
+  }
+
   @action
-  Future applyForBusiness(BusinessDetails ap) async {
-    final businessDoc = _fireStore.doc("businesses/${_user.uid}");
+  Future applyForBusiness({
+    GeoPoint latlong,
+    String address,
+    String businessName,
+    String contactNumber,
+    BusinessCategory category,
+  }) async {
+    ///create the first branch
 
-    final branch = BusinessBranch.from(
-      business: businessDoc,
-      staff: null,
-      manager: null,
-      receptionist: null,
-      latlong: ap.latlong.value,
-      address: ap.address.value,
-      name: ap.businessName.value,
-      images: [kTemporaryBusinessImageStorageRefPath],
-    );
-
-    final firstBranchname = ap.businessName.value;
+    final firstBranchname = businessName;
     final firstBranchDoc = _fireStore
         .doc("businesses/${_user.uid}/businessBranches/$firstBranchname");
 
-    ap.selectedBranchDoc.value = firstBranchDoc;
+    ///create the first default timing set
+    final mainBusinessTimingDoc =
+        _fireStore.doc("businesses/${_user.uid}/businessTimings/main");
+    final businessTimings = BusinessTimings(myDoc: mainBusinessTimingDoc);
 
-    ap.branches.value.add(branch);
-    await businessDoc.set(ap.toMap());
+    ///create the deafult empty services set
+    final mainBusinessServicesDoc =
+        _fireStore.doc("businesses/${_user.uid}/businessServices/main");
+    final businessServices = BusinessServices(myDoc: mainBusinessServicesDoc);
 
-    await firstBranchDoc.set(
-      branch.toMap(),
+    ///create the deafult empty holidays set
+    final mainBusinessHolidaysCollection =
+        _fireStore.collection("businesses/${_user.uid}/businessHolidays");
+    final businessHolidays =
+        BusinessHolidays(myCollection: mainBusinessHolidaysCollection.path);
+
+    final branch = BusinessBranch()
+      ..business.value = businessDoc
+      ..staff.value = []
+      ..manager.value = null
+      ..receptionist.value = null
+      ..latlong.value = latlong
+      ..address.value = address
+      ..name.value = businessName
+      ..images.value = []
+      ..contactNumber.value = contactNumber
+      ..email.value = ""
+      ..businessServices.value = businessServices
+      ..businessTimings.value = businessTimings
+      ..businessHolidays.value = businessHolidays
+      ..rating.value = 0.0;
+
+    await branch.saveBranch();
+
+    final ap = BusinessDetails.from(
+      businessName: businessName,
+      address: address,
+      category: category,
+      branches: [branch],
+      contactNumber: contactNumber,
+      latlong: latlong,
+      selectedBranch: branch,
+      uid: FirebaseAuth.instance.currentUser.uid,
+      email: "",
+      myDoc: businessDoc,
+      businessTimings: businessTimings,
+      businessServices: businessServices,
+      businessHolidays: businessHolidays,
     );
-    ap.getSelectedBranchDetails(firstBranchDoc);
+
+    await ap.saveBusiness();
 
     _cloudStore.alterEgo = UserType.businessOwner;
 
@@ -85,11 +136,6 @@ abstract class _BusinessStore with Store {
 
     if (businessDetails.exists) {
       final data = businessDetails.data();
-      final branches = (await businessDetails.reference
-              .collection("/businessBranches")
-              .get())
-          .docs;
-      data["branches"] = branches.map((e) => e.data()).toList();
       //print(data);
       business = BusinessDetails.fromJson(data);
     }

@@ -73,8 +73,18 @@ mixin _$BusinessStore on _BusinessStore, Store {
       AsyncAction('_BusinessStore.applyForBusiness');
 
   @override
-  Future<dynamic> applyForBusiness(BusinessDetails ap) {
-    return _$applyForBusinessAsyncAction.run(() => super.applyForBusiness(ap));
+  Future<dynamic> applyForBusiness(
+      {GeoPoint latlong,
+      String address,
+      String businessName,
+      String contactNumber,
+      BusinessCategory category}) {
+    return _$applyForBusinessAsyncAction.run(() => super.applyForBusiness(
+        latlong: latlong,
+        address: address,
+        businessName: businessName,
+        contactNumber: contactNumber,
+        category: category));
   }
 
   final _$getMyBusinessAsyncAction =
