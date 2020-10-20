@@ -122,10 +122,14 @@ Future<List<String>> uploadImagesToStorageAndReturnStringList(
     if (!entry.value) {
       await f.ref().child(entry.key).delete();
     } else {
-      final file = File(removeLocalFromPath(entry.key));
-      final task = folder.child(nameFromPath(entry.key)).putFile(file);
-      final done = await task.onComplete;
-      storagePaths.add(done.ref.path);
+      if (entry.key.startsWith("local")) {
+        final file = File(removeLocalFromPath(entry.key));
+        final task = folder.child(nameFromPath(entry.key)).putFile(file);
+        final done = await task.onComplete;
+        storagePaths.add(done.ref.path);
+      } else {
+        storagePaths.add(entry.key);
+      }
     }
   });
   return storagePaths;

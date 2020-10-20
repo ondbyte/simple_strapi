@@ -100,33 +100,14 @@ class BusinessBranch {
     };
   }
 
-  Future updateImages(List<String> paths, List<Uint8List> datas) async {
-    final storage = FirebaseStorage.instance;
-    final auth = FirebaseAuth.instance;
-
-    ///remove images
-    final lastImages = images.value;
-    lastImages.removeWhere((element) => paths.contains(element));
-
-    lastImages.forEach((element) {
-      storage.ref().child(element).delete();
-    });
-
-    for (var i = 0; i < paths.length; i++) {
-      if (paths[i].startsWith("local")) {
-        paths[i] = paths[i].replaceFirst("local", "");
-        final ref = storage.ref().child("${auth.currentUser.uid}/${paths[i]}");
-        final task = ref.putData(datas[i]);
-        final snap = await task.onComplete;
-        paths[i] = snap.ref.path;
-      }
-    }
+  Future updateImages({Map<String, bool> imgs}) async {
+    final list = await uploadImagesToStorageAndReturnStringList(imgs);
 
     act(() {
-      images.value = paths;
+      images.value = list;
     });
 
-    await myDoc.set({"images": paths}, SetOptions(merge: true));
+    await myDoc.set({"images": list}, SetOptions(merge: true));
   }
 
   Future saveBranch() async {
