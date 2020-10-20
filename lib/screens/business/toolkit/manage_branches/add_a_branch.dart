@@ -8,6 +8,8 @@ import 'package:bapp/widgets/shake_widget.dart';
 import 'package:bapp/widgets/store_provider.dart';
 import 'package:bapp/widgets/wheres_it_located.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:provider/provider.dart';
 
 class BusinessAddABranchScreen extends StatefulWidget {
@@ -20,9 +22,10 @@ class BusinessAddABranchScreen extends StatefulWidget {
 
 class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
   PickedLocation _pickedLocation;
+  Map<String, bool> _filteredExistingImages;
   bool _doShakePlace = false;
   bool _doShakePhotos = false;
-  final imageDatas = <Uint8List>[];
+  final _pickedImages = <Asset>[];
   final _controller = TextEditingController();
   bool _loading = false;
 
@@ -51,8 +54,10 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
                         StoreProvider<BusinessStore>(
                           store: Provider.of<BusinessStore>(context),
                           init: (businessStore) {
-                            _controller.text =
-                                businessStore.business.businessName.value;
+                            if (_controller.text.isEmpty) {
+                              _controller.text =
+                                  businessStore.business.businessName.value;
+                            }
                           },
                           builder: (_, businessStore) {
                             return TextFormField(
@@ -65,17 +70,6 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
                                   return "Enter a valid branch name";
                                 }
                                 return null;
-                              },
-                              onChanged: (s) {
-                                setState(
-                                  () {
-                                    if (s.length >= 3) {
-                                      _controller.text = s;
-                                    } else {
-                                      _controller.text = "";
-                                    }
-                                  },
-                                );
                               },
                             );
                           },
@@ -118,9 +112,8 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
                             );
                           },
                           child: AddImageTileWidget(
-                            onImagesSelected: (imageList) {
-                              imageDatas.clear();
-                              imageDatas.addAll(imageList);
+                            onImagesSelected: (filteredExistingImages) {
+                              _filteredExistingImages = filteredExistingImages;
                             },
                           ),
                         )
@@ -141,13 +134,16 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
               onTap: _controller.text.isEmpty
                   ? null
                   : () async {
+                      if (_controller.text.length < 3) {
+                        return;
+                      }
                       if (_pickedLocation == null) {
                         setState(() {
                           _doShakePlace = true;
                         });
                         return;
                       }
-                      if (imageDatas.isEmpty) {
+                      if (_filteredExistingImages.isEmpty) {
                         setState(() {
                           _doShakePhotos = true;
                         });
@@ -162,7 +158,8 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
                       await business.addABranch(
                           branchName: _controller.text,
                           pickedLocation: _pickedLocation,
-                          imageDatas: imageDatas);
+                          imagesWithFiltered: _filteredExistingImages);
+                      Navigator.of(context).pop();
                     },
             ),
     );

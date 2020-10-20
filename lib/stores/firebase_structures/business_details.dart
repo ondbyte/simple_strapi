@@ -6,6 +6,7 @@ import 'package:bapp/stores/business_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:mobx/mobx.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
 
 import 'business_branch.dart';
 import 'business_category.dart';
@@ -123,17 +124,23 @@ class BusinessDetails {
   Future removeBranch(BusinessBranch branch) async {
     final old = branches.value;
     old.remove(branch);
-    act(() {
-      branches.value = old; //new
-    });
     await branch.myDoc.delete();
+    await act(() async {
+      branches.value = old; //new
+      if (branch.myDoc == selectedBranch.value.myDoc) {
+        selectedBranch.value = branches.value[0];
+      }
+    });
   }
 
   Future addABranch({
     String branchName,
     PickedLocation pickedLocation,
-    List<Uint8List> imageDatas,
+    Map<String, bool> imagesWithFiltered,
   }) async {
+    final imgs =
+        await uploadImagesToStorageAndReturnStringList(imagesWithFiltered);
+
     final branch = BusinessBranch()
       ..business.value = myDoc.value
       ..staff.value = []
@@ -142,23 +149,40 @@ class BusinessDetails {
       ..latlong.value = pickedLocation.latLong
       ..address.value = pickedLocation.address
       ..name.value = branchName
-      ..images.value = []
+      ..images.value = imgs
       ..contactNumber.value = contactNumber.value
       ..email.value = email.value
       ..businessServices.value = businessServices.value
       ..businessTimings.value = businessTimings.value
       ..businessHolidays.value = businessHolidays.value
-      ..rating.value = 0.0;
+      ..rating.value = 0.0
+      ..status.value = BusinessBranchActiveStatus.draft;
 
     await branch.saveBranch();
 
     final old = branches.value;
     act(() {
       branches.value = [...old, branch];
+      selectedBranch.value = branch;
     });
   }
 
   Future saveBusiness() async {
     await myDoc.value.set(toMap());
+  }
+
+  bool anyBusinessInDraft() {
+    return branches.value.any(
+        (element) => element.status.value == BusinessBranchActiveStatus.draft);
+  }
+
+  bool anyBusinessInPublished() {
+    return branches.value.any((element) =>
+        element.status.value == BusinessBranchActiveStatus.published);
+  }
+
+  bool anyBusinessInUnPublished() {
+    return branches.value.any((element) =>
+        element.status.value == BusinessBranchActiveStatus.unPublished);
   }
 }

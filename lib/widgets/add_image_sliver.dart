@@ -4,46 +4,75 @@ import 'package:bapp/widgets/removable_image.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_absolute_path/flutter_absolute_path.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:thephonenumber/data.dart';
 
 class AddImageTileWidget extends StatefulWidget {
-  final Function(List<Uint8List>) onImagesSelected;
+  final Function(Map<String, bool>) onImagesSelected;
+  final Map<String, bool> existingImages;
+  final String title;
+  final String subTitle;
+  final int maxImage;
 
-  AddImageTileWidget({Key key, this.onImagesSelected}) : super(key: key);
+  AddImageTileWidget(
+      {Key key,
+      this.onImagesSelected,
+      this.existingImages,
+      this.title,
+      this.subTitle,
+      this.maxImage})
+      : super(key: key);
 
   @override
   _AddImageTileWidgetState createState() => _AddImageTileWidgetState();
 }
 
 class _AddImageTileWidgetState extends State<AddImageTileWidget> {
-  final List<Uint8List> imageDatas = [];
+  final List<Asset> _pickedImages = [];
+  final Map<String, bool> _existingImages = {};
+  _AddImageTileWidgetState();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      setState(() {
+        if (widget.existingImages != null) {
+          _existingImages.addAll(widget.existingImages);
+        }
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    assert(widget.title != null &&
+        widget.subTitle != null &&
+        widget.maxImage != null);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         ListTile(
-          contentPadding: EdgeInsets.zero,
-          title: Text("Photos"),
-          subtitle: Text("You can add upto 3 photos now"),
+          title: Text(widget.title),
+          subtitle: Text(widget.subTitle),
           trailing: Icon(
             Icons.add_a_photo_outlined,
             color: Theme.of(context).primaryColorDark,
           ),
           onTap: () async {
             final picked = <Asset>[];
-            if (imageDatas.length == 3) {
+            final filtered = getFiltered();
+            if (filtered.length == widget.maxImage) {
               Flushbar(
-                message: "Max 3 images",
+                message: "Max ${widget.maxImage} images",
                 duration: const Duration(seconds: 2),
               ).show(context);
               return;
             }
             try {
               picked.addAll(await MultiImagePicker.pickImages(
-                  maxImages: 3 - imageDatas.length));
+                  maxImages: widget.maxImage - filtered.length));
             } catch (e) {
               Flushbar(
                 message: "No images selected",
@@ -52,11 +81,13 @@ class _AddImageTileWidgetState extends State<AddImageTileWidget> {
               return;
             }
             await Future.forEach(picked, (element) async {
-              imageDatas
-                  .add((await element.getByteData()).buffer.asUint8List());
+              final absPath =
+                  await FlutterAbsolutePath.getAbsolutePath(element.identifier);
+              print(absPath);
+              _existingImages["local" + absPath] = true;
             });
             setState(() {});
-            widget.onImagesSelected(imageDatas);
+            widget.onImagesSelected(_existingImages);
           },
         ),
         SizedBox(
@@ -67,26 +98,45 @@ class _AddImageTileWidgetState extends State<AddImageTileWidget> {
             final cCount = o == Orientation.landscape ? 6 : 3;
             return LayoutBuilder(
               builder: (_, c) {
-                return GridView.count(
-                  shrinkWrap: true,
-                  crossAxisCount: cCount,
-                  children: [
-                    ...List.generate(
-                      imageDatas.length,
-                      (index) => SizedBox(
-                        height: c.maxWidth / cCount,
-                        width: c.maxWidth / cCount,
-                        child: RemovableImageWidget(
-                          data: imageDatas[index],
-                          onRemove: () {
-                            setState(() {
-                              imageDatas.removeAt(index);
-                            });
-                          },
+                final filtered = getFiltered();
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 500),
+                  child: filtered.length == 0
+                      ? SizedBox(
+                          height: 0,
+                        )
+                      : SizedBox(
+                          width: c.maxWidth,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                ...List.generate(filtered.length, (index) {
+                                  return SizedBox(
+                                    height: c.maxWidth / cCount,
+                                    width: c.maxWidth / cCount,
+                                    child: RemovableImageWidget(
+                                      storageUrlOrPath: filtered[index],
+                                      onRemove: () {
+                                        setState(() {
+                                          if (filtered[index]
+                                              .startsWith("local")) {
+                                            _existingImages
+                                                .remove(filtered[index]);
+                                          } else {
+                                            _existingImages[filtered[index]] =
+                                                false;
+                                          }
+                                        });
+                                      },
+                                    ),
+                                  );
+                                }),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                    )
-                  ],
                 );
               },
             );
@@ -94,5 +144,15 @@ class _AddImageTileWidgetState extends State<AddImageTileWidget> {
         )
       ],
     );
+  }
+
+  List<String> getFiltered() {
+    final List<String> list = [];
+    _existingImages.forEach((key, value) {
+      if (value) {
+        list.add(key);
+      }
+    });
+    return list;
   }
 }

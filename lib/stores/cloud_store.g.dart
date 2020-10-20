@@ -109,21 +109,6 @@ mixin _$CloudStore on _CloudStore, Store {
     });
   }
 
-  final _$isRoleFlippableAtom = Atom(name: '_CloudStore.isRoleFlippable');
-
-  @override
-  bool get isRoleFlippable {
-    _$isRoleFlippableAtom.reportRead();
-    return super.isRoleFlippable;
-  }
-
-  @override
-  set isRoleFlippable(bool value) {
-    _$isRoleFlippableAtom.reportWrite(value, super.isRoleFlippable, () {
-      super.isRoleFlippable = value;
-    });
-  }
-
   final _$switchUserTypeAsyncAction = AsyncAction('_CloudStore.switchUserType');
 
   @override
@@ -172,7 +157,6 @@ activeCountriesNames: ${activeCountriesNames},
 availableLocations: ${availableLocations},
 userType: ${userType},
 alterEgo: ${alterEgo},
-isRoleFlippable: ${isRoleFlippable},
 theNumber: ${theNumber}
     ''';
   }

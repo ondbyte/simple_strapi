@@ -1,18 +1,4 @@
-import 'dart:typed_data';
-
-import 'package:bapp/helpers/helper.dart';
-import 'package:bapp/screens/init/initiating_widget.dart';
-import 'package:bapp/stores/business_store.dart';
-import 'package:bapp/widgets/loading.dart';
-import 'package:bapp/widgets/removable_image.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flushbar/flushbar.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:multi_image_picker/multi_image_picker.dart';
-import 'package:provider/provider.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+/* 
 
 class BusinessManageMediaScreen extends StatefulWidget {
   @override
@@ -21,7 +7,8 @@ class BusinessManageMediaScreen extends StatefulWidget {
 }
 
 class _BusinessManageMediaScreenState extends State<BusinessManageMediaScreen> {
-  List<Uint8List> _listOfImageData = List<Uint8List>();
+  final _listOfImageData = List<Uint8List>();
+  final _pickedImages = List<Asset>();
   List<String> _listOfImage = List<String>();
   final _cache = DefaultCacheManager();
   bool _loading = false;
@@ -82,8 +69,8 @@ class _BusinessManageMediaScreenState extends State<BusinessManageMediaScreen> {
                     onPressed: _loading
                         ? null
                         : () async {
-                            final maxImages = 6 - _listOfImage.length;
-                            print(maxImages);
+                            final maxImages = 6 - _pickedImages.length;
+                            //print(maxImages);
                             if (maxImages == 0) {
                               Flushbar(
                                 message: "Maximum 6 images",
@@ -92,27 +79,32 @@ class _BusinessManageMediaScreenState extends State<BusinessManageMediaScreen> {
                               return;
                             }
                             try {
-                              final pI = await MultiImagePicker.pickImages(
-                                maxImages: maxImages,
+                              _pickedImages.addAll(
+                                await MultiImagePicker.pickImages(
+                                  maxImages: maxImages,
+                                ),
                               );
 
                               await Future.forEach(
-                                pI,
+                                _pickedImages,
                                 (element) async {
-                                  if (_listOfImage
-                                      .any((el) => element.name == el)) {
+                                  if (_pickedImages
+                                      .any((el) => element.name == el.name)) {
                                     return;
                                   }
 
                                   _listOfImageData.add(
-                                      (await element.getByteData())
-                                          .buffer
-                                          .asUint8List());
+                                    (await element.getByteData())
+                                        .buffer
+                                        .asUint8List(),
+                                  );
                                   _listOfImage.add("local" + element.name);
 
-                                  setState(() {
-                                    _loading = false;
-                                  });
+                                  setState(
+                                    () {
+                                      _loading = false;
+                                    },
+                                  );
                                 },
                               );
                             } catch (e, s) {
@@ -143,17 +135,33 @@ class _BusinessManageMediaScreenState extends State<BusinessManageMediaScreen> {
                                 crossAxisCount: count,
                               ),
                               itemBuilder: (_, i) {
-                                return RemovableImageWidget(
-                                  data: _listOfImageData[i],
-                                  onRemove: () {
-                                    setState(
-                                      () {
-                                        _listOfImage.removeAt(i);
-                                        _listOfImageData.removeAt(i);
-                                      },
-                                    );
-                                  },
-                                );
+                                if (_listOfImage[i].startsWith("local")) {
+                                  return RemovableImageWidget(
+                                    asset: _pickedImages[i],
+                                    onRemove: () {
+                                      setState(
+                                        () {
+                                          _listOfImage.removeAt(i);
+                                          _pickedImages.removeAt(i);
+                                          _listOfImageData.removeAt(i);
+                                        },
+                                      );
+                                    },
+                                  );
+                                } else {
+                                  return RemovableImageWidget(
+                                    data: _listOfImageData[i],
+                                    onRemove: () {
+                                      setState(
+                                        () {
+                                          _listOfImage.removeAt(i);
+                                          _pickedImages.removeAt(i);
+                                          _listOfImageData.removeAt(i);
+                                        },
+                                      );
+                                    },
+                                  );
+                                }
                               },
                             );
                           },
@@ -162,6 +170,54 @@ class _BusinessManageMediaScreenState extends State<BusinessManageMediaScreen> {
                     ),
                   ),
           )),
+    );
+  }
+}
+ */
+
+import 'package:bapp/stores/business_store.dart';
+import 'package:bapp/widgets/add_image_sliver.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:provider/provider.dart';
+
+class BusinessManageMediaScreen extends StatefulWidget {
+  BusinessManageMediaScreen({Key key}) : super(key: key);
+
+  @override
+  _BusinessManageMediaScreenState createState() =>
+      _BusinessManageMediaScreenState();
+}
+
+class _BusinessManageMediaScreenState extends State<BusinessManageMediaScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: true,
+        title: Text("Add Branch images"),
+      ),
+      body: Padding(
+        padding: EdgeInsets.zero,
+        child: Consumer<BusinessStore>(
+          builder: (_, businessStore, __) {
+            return Observer(
+              builder: (_) {
+                final images =
+                    businessStore.business.selectedBranch.value.images.value;
+                return AddImageTileWidget(
+                  existingImages: Map.fromIterable(images,
+                      key: (k) => k, value: (k) => true),
+                  maxImage: 6,
+                  title: "Add Images",
+                  subTitle: "Add upto 6 Images that show off your business",
+                  onImagesSelected: (images) {},
+                );
+              },
+            );
+          },
+        ),
+      ),
     );
   }
 }

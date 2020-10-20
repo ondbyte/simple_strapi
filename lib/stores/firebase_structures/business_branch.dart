@@ -5,6 +5,7 @@ import 'package:bapp/stores/business_services.dart';
 import 'package:bapp/stores/firebase_structures/business_holidays.dart';
 import 'package:bapp/stores/firebase_structures/business_timings.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:mobx/mobx.dart';
@@ -26,9 +27,24 @@ class BusinessBranch {
   final businessServices = Observable<BusinessServices>(null);
   final businessTimings = Observable<BusinessTimings>(null);
   final businessHolidays = Observable<BusinessHolidays>(null);
+  final status = Observable<BusinessBranchActiveStatus>(
+      BusinessBranchActiveStatus.justApplied);
 
   BusinessBranch({this.myDoc}) {
     _getBranch(myDoc);
+  }
+
+  var _disposers = <ReactionDisposer>[];
+  _setupReactions() {
+    _disposers.add(
+      reaction(
+        (_) => status.value,
+        (_) async {
+          await myDoc
+              .update({"status": EnumToString.convertToString(status.value)});
+        },
+      ),
+    );
   }
 
   Future _getBranch(DocumentReference myDoc) async {
@@ -56,6 +72,10 @@ class BusinessBranch {
       this.businessTimings.value = BusinessTimings(myDoc: j["businessTimings"]);
       this.businessHolidays.value =
           BusinessHolidays(myCollection: j["businessHolidays"]);
+      this.status.value = EnumToString.fromString(
+          BusinessBranchActiveStatus.values, j["status"]);
+
+      _setupReactions();
     }
   }
 
@@ -76,6 +96,7 @@ class BusinessBranch {
       "businessServices": businessServices.value.myDoc,
       "businessTimings": businessTimings.value.myDoc,
       "businessHolidays": businessHolidays.value.myCollection,
+      "status": EnumToString.convertToString(status.value),
     };
   }
 
@@ -115,4 +136,12 @@ class BusinessBranch {
       this.myDoc = doc;
     });
   }
+}
+
+enum BusinessBranchActiveStatus {
+  justApplied,
+  draft,
+  documentVerification,
+  published,
+  unPublished,
 }

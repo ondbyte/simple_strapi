@@ -12,6 +12,7 @@ import 'package:flutter/cupertino.dart' hide Action;
 import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mobx/mobx.dart' show Action;
+import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../config/constants.dart';
@@ -105,9 +106,50 @@ String removeNewLines(String s) {
   return s.split("\n").join(", ");
 }
 
-List<String> uploadAndGimmeList(List<Uint8List> datas, {String path = ""}) {
+Future<List<String>> uploadImagesToStorageAndReturnStringList(
+    Map<String, bool> imagesWithFiltered,
+    {String path = ""}) async {
+  final f = FirebaseStorage.instance;
+  final a = FirebaseAuth.instance;
+  final List<String> storagePaths = [];
+
+  final folder = path.isEmpty
+      ? f.ref().child(a.currentUser.uid)
+      : f.ref().child(a.currentUser.uid).child(path);
+
+  await Future.forEach<MapEntry<String, bool>>(imagesWithFiltered.entries,
+      (entry) async {
+    if (!entry.value) {
+      await f.ref().child(entry.key).delete();
+    } else {
+      final file = File(removeLocalFromPath(entry.key));
+      final task = folder.child(nameFromPath(entry.key)).putFile(file);
+      final done = await task.onComplete;
+      storagePaths.add(done.ref.path);
+    }
+  });
+  return storagePaths;
+}
+
+String removeLocalFromPath(String path) {
+  return path.replaceFirst("local", "");
+}
+
+String nameFromPath(String path) {
+  return path.split("/").last;
+}
+
+Future uploadBusinessBranchApprovalPDF({File fileToUpload}) async {
   final f = FirebaseStorage.instance;
   final a = FirebaseAuth.instance;
 
-  //f.ref().
+  final file = f
+      .ref()
+      .child(a.currentUser.uid)
+      .child("submittedPdf")
+      .child(DateTime.now().toIso8601String() + ".pdf");
+
+  final task = file.putFile(fileToUpload);
+  await task.onComplete;
+  print("File Uploaded");
 }

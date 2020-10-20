@@ -47,9 +47,9 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
                   height: widget.height,
                 );
               }
-              return CachedNetworkImage(
-                imageUrl: kTemporaryBusinessImage,
-                fit: widget.fit,
+              return SvgPicture.asset(
+                kTemporaryBusinessImage,
+                fit: BoxFit.contain,
                 width: widget.width,
                 height: widget.height,
               );

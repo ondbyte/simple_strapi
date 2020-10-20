@@ -113,6 +113,11 @@ class _SplashScreenState extends State<SplashScreen> {
       ///errors other than flutter
       Isolate.current.addErrorListener(RawReceivePort((pair) async {
         final List<dynamic> errorAndStacktrace = pair;
+        if (errorAndStacktrace.first
+            .toString()
+            .contains("The service is currently unavailable")) {
+          Navigator.of(context).pushNamedAndRemoveUntil("/", (_) => false);
+        }
         await FirebaseCrashlytics.instance.recordError(
           errorAndStacktrace.first,
           errorAndStacktrace.last,

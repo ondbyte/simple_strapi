@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 
 import 'screens/authentication/create_profile.dart';
 import 'screens/authentication/login_screen.dart';
+import 'screens/business/toolkit/submit_for_verification.dart';
 import 'screens/home/bapp.dart';
 import 'screens/init/splash_screen.dart';
 import 'screens/location/search_a_place.dart';
@@ -75,12 +76,21 @@ class RouteManager {
   static const String businessVerificationScreen =
       "/businessVerificationScreen";
   static const String businessAddABranchScreeen = "/businessAddABranchScreeen";
+  static const String submitSelectedBranchForVerification =
+      "/submitSelectedBranchForVerification";
 
   static Route<dynamic> onGenerate(RouteSettings settings) {
     print("route called: ${settings.name}");
     switch (settings.name) {
 
       ///business
+      case submitSelectedBranchForVerification:
+        return MaterialPageRoute(
+          builder: (_) {
+            return BusinessSubmitBranchForVerification();
+          },
+        );
+
       case businessAddABranchScreeen:
         return MaterialPageRoute(
           builder: (_) {

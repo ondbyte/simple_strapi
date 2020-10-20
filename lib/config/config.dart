@@ -227,6 +227,9 @@ class MenuConfig {
             UserType.manager,
             UserType.businessStaff,
             UserType.businessOwner,
+          ],
+          showWhenAlterEgoIs: [
+            UserType.customer
           ]),
       MenuItem(
         name: "Switch to business",

@@ -42,39 +42,45 @@ class _ChooseYourBusinessCategoryScreenState
                               return AnimatedContainer(
                                 duration: const Duration(seconds: 1),
                                 curve: Curves.easeInOutSine,
-                                child: businessStore.business==null?Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      "Choose your business type",
-                                      style:
-                                      Theme.of(context).textTheme.headline1,
-                                    ),
-                                    SizedBox(
-                                      height: 10,
-                                    ),
-                                    Text(
-                                      "People will be able to find your business based on these categories.",
-                                      style:
-                                      Theme.of(context).textTheme.bodyText1,
-                                    ),
-                                    SizedBox(
-                                      height: 20,
-                                    ),
-                                    ChooseCategoryListTilesWidget(
-                                      elements:
-                                      businessStore.categories.toList(),
-                                      onCategorySelected: (c) {
-                                        Navigator.of(context).pushNamed(
-                                          RouteManager
-                                              .thankYouForYourInterestScreen,
-                                          arguments: c,
-                                        );
-                                      },
-                                    )
-                                  ],
-                                ):_getAlreadyHaveABusiness(context),
+                                child: businessStore.business == null
+                                    ? Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Choose your business type",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .headline1,
+                                          ),
+                                          SizedBox(
+                                            height: 10,
+                                          ),
+                                          Text(
+                                            "People will be able to find your business based on these categories.",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyText1,
+                                          ),
+                                          SizedBox(
+                                            height: 20,
+                                          ),
+                                          ChooseCategoryListTilesWidget(
+                                            elements: businessStore.categories
+                                                .toList(),
+                                            onCategorySelected: (c) {
+                                              Navigator.of(context).pushNamed(
+                                                RouteManager
+                                                    .thankYouForYourInterestScreen,
+                                                arguments: c,
+                                              );
+                                            },
+                                          )
+                                        ],
+                                      )
+                                    : _getAlreadyHaveABusiness(context),
                               );
                             },
                           );
@@ -93,12 +99,12 @@ class _ChooseYourBusinessCategoryScreenState
     );
   }
 
-  _getAlreadyHaveABusiness(BuildContext context){
+  _getAlreadyHaveABusiness(BuildContext context) {
     return ContextualMessageScreen(
       message: "You already have a business on Bapp",
       buttonText: "Switch to Business",
-      onButtonPressed: (){
-        Provider.of<CloudStore>(context,listen: false).switchUserType(context);
+      onButtonPressed: () async {
+        Provider.of<CloudStore>(context, listen: false).switchUserType(context);
       },
     );
   }

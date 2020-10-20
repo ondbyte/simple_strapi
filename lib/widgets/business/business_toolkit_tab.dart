@@ -1,6 +1,8 @@
 import 'package:bapp/config/config.dart';
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/business_store.dart';
+import 'package:bapp/stores/firebase_structures/business_branch.dart';
 import 'package:bapp/widgets/business/business_branch_switch.dart';
 import 'package:bapp/widgets/firebase_image.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -20,34 +22,28 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
   int _expandedPanel = -1;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        title: BusinessBranchSwitchWidget(),
-      ),
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverPadding(
-              padding: EdgeInsets.only(top: 20, left: 16, right: 16),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate(
-                  [
-                    _getBranchTile(context),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    _getSubmitForVerificationButton(context),
-                    SizedBox(
-                      height: 20,
-                    ),
-                  ],
-                ),
+    return SafeArea(
+      child: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: EdgeInsets.only(top: 20, left: 16, right: 16),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate(
+                [
+                  _getBranchTile(context),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  _getSubmitForVerificationButton(context),
+                  SizedBox(
+                    height: 20,
+                  ),
+                ],
               ),
             ),
-            _getExpansionTiles(context),
-          ],
-        ),
+          ),
+          _getExpansionTiles(context),
+        ],
       ),
     );
   }
@@ -225,19 +221,47 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
   }
 
   _getSubmitForVerificationButton(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.redAccent,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: ListTile(
-        title: Text(
-          "Submit for verification",
-          style: TextStyle(color: Theme.of(context).primaryColorLight),
-        ),
-        trailing: Icon(FeatherIcons.arrowRightCircle,
-            color: Theme.of(context).primaryColorLight),
-      ),
+    return Consumer<BusinessStore>(
+      builder: (_, businessStore, ___) {
+        return Observer(
+          builder: (_) {
+            final draft =
+                businessStore.business.selectedBranch.value.status.value ==
+                    BusinessBranchActiveStatus.draft;
+            final docuVerification =
+                businessStore.business.selectedBranch.value.status.value ==
+                    BusinessBranchActiveStatus.documentVerification;
+            return draft || docuVerification
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(6),
+                    child: ListTile(
+                      tileColor:
+                          docuVerification ? Colors.green : Colors.redAccent,
+                      title: Text(
+                        docuVerification
+                            ? "Branch is in verification"
+                            : "Submit for verification",
+                        style: TextStyle(
+                            color: Theme.of(context).primaryColorLight),
+                      ),
+                      trailing: draft
+                          ? Icon(
+                              FeatherIcons.arrowRightCircle,
+                              color: Theme.of(context).primaryColorLight,
+                            )
+                          : null,
+                      onTap: docuVerification
+                          ? null
+                          : () {
+                              Navigator.of(context).pushNamed(RouteManager
+                                  .submitSelectedBranchForVerification);
+                            },
+                    ),
+                  )
+                : Divider();
+          },
+        );
+      },
     );
   }
 }

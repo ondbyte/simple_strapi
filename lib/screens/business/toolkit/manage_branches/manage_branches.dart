@@ -2,6 +2,7 @@ import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/business_store.dart';
+import 'package:bapp/stores/firebase_structures/business_branch.dart';
 import 'package:bapp/widgets/firebase_image.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
@@ -23,8 +24,21 @@ class _BusinessManageBranchesScreenState
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.of(context)
-              .pushNamed(RouteManager.businessAddABranchScreeen);
+          final branches = Provider.of<BusinessStore>(context, listen: false)
+              .business
+              .branches
+              .value;
+          if (branches.any((element) =>
+              element.status.value == BusinessBranchActiveStatus.published)) {
+            Navigator.of(context)
+                .pushNamed(RouteManager.businessAddABranchScreeen);
+          } else {
+            Flushbar(
+              message:
+                  "Your new business needs to have atleast one approved branch to add more branches",
+              duration: const Duration(seconds: 4),
+            ).show(context);
+          }
         },
         child: Icon(
           Icons.add,
@@ -89,7 +103,8 @@ class _BusinessManageBranchesScreenState
                                 duration: Duration(seconds: 4),
                               ).show(context);
                             } else {
-                              businessStore.business.removeBranch(branches[i]);
+                              await businessStore.business
+                                  .removeBranch(branches[i]);
                             }
                           }
                         }),

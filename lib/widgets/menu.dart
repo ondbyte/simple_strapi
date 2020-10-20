@@ -52,10 +52,13 @@ class _MenuState extends State<Menu> {
           (e) {
             ws.add(
               ListTile(
-                title: Text(e.name,style: Theme.of(context).textTheme.subtitle2,),
+                title: Text(
+                  e.name,
+                  style: Theme.of(context).textTheme.subtitle2,
+                ),
                 trailing: Icon(e.icon),
                 onTap: () {
-                  _menuItemSelected(e.kind,context);
+                  _menuItemSelected(e.kind, context);
                 },
               ),
             );
@@ -64,63 +67,84 @@ class _MenuState extends State<Menu> {
         ws.add(Divider());
       },
     );
-    if(ws.isNotEmpty) ws.removeLast();
+    if (ws.isNotEmpty) ws.removeLast();
     return ws;
   }
-  
-  void _menuItemSelected(MenuItemKind kind,BuildContext context){
-    switch (kind){
-      case MenuItemKind.yourProfile:{
-        Navigator.of(context).popAndPushNamed(RouteManager.createProfileScreen);
-        break;
-      }
-      case MenuItemKind.settings:{
-        Navigator.of(context).popAndPushNamed(RouteManager.settingsScreen);
-        break;
-      }
-      case MenuItemKind.rateTheApp:{
-        Navigator.of(context).popAndPushNamed(RouteManager.rateMyAppScreen);
-        break;
-      }
-      case MenuItemKind.helpUsImprove:{
-        Navigator.of(context).popAndPushNamed(RouteManager.helpUsImproveScreen);
-        break;
-      }
-      case MenuItemKind.referABusiness:{
-        Navigator.of(context).popAndPushNamed(RouteManager.selectBusinessCategoryScreen);
-        break;
-      }
-      case MenuItemKind.logOut: {
-        () async {
-          await Provider.of<AuthStore>(context,listen: false).signOut();
-          Navigator.of(context).pushNamedAndRemoveUntil("/", (route) => false);
-        }();
-        break;
-      }
-      case MenuItemKind.logIn:{
-        Navigator.of(context).popAndPushNamed(RouteManager.loginScreen);
-        break;
-      }
-      case MenuItemKind.switchTosShopping:{
-        Provider.of<CloudStore>(context,listen: false).switchUserType(context);
-        break;
-      }
-      case MenuItemKind.switchToBusiness:{
-        Provider.of<CloudStore>(context,listen: false).switchUserType(context);
-        break;
-      }
-      case MenuItemKind.switchToSales:{
-        Provider.of<CloudStore>(context,listen: false).switchUserType(context);
-        break;
-      }
-      case MenuItemKind.switchToManager:{
-        Provider.of<CloudStore>(context,listen: false).switchUserType(context);
-        break;
-      }
-      case MenuItemKind.switchToSudoUser:{
-        Provider.of<CloudStore>(context,listen: false).switchUserType(context);
-        break;
-      }
+
+  void _menuItemSelected(MenuItemKind kind, BuildContext context) {
+    switch (kind) {
+      case MenuItemKind.yourProfile:
+        {
+          Navigator.of(context)
+              .popAndPushNamed(RouteManager.createProfileScreen);
+          break;
+        }
+      case MenuItemKind.settings:
+        {
+          Navigator.of(context).popAndPushNamed(RouteManager.settingsScreen);
+          break;
+        }
+      case MenuItemKind.rateTheApp:
+        {
+          Navigator.of(context).popAndPushNamed(RouteManager.rateMyAppScreen);
+          break;
+        }
+      case MenuItemKind.helpUsImprove:
+        {
+          Navigator.of(context)
+              .popAndPushNamed(RouteManager.helpUsImproveScreen);
+          break;
+        }
+      case MenuItemKind.referABusiness:
+        {
+          Navigator.of(context)
+              .popAndPushNamed(RouteManager.selectBusinessCategoryScreen);
+          break;
+        }
+      case MenuItemKind.logOut:
+        {
+          () async {
+            await Provider.of<AuthStore>(context, listen: false).signOut();
+            Navigator.of(context)
+                .pushNamedAndRemoveUntil("/", (route) => false);
+          }();
+          break;
+        }
+      case MenuItemKind.logIn:
+        {
+          Navigator.of(context).popAndPushNamed(RouteManager.loginScreen);
+          break;
+        }
+      case MenuItemKind.switchTosShopping:
+        {
+          Provider.of<CloudStore>(context, listen: false)
+              .switchUserType(context);
+          break;
+        }
+      case MenuItemKind.switchToBusiness:
+        {
+          Provider.of<CloudStore>(context, listen: false)
+              .switchUserType(context);
+          break;
+        }
+      case MenuItemKind.switchToSales:
+        {
+          Provider.of<CloudStore>(context, listen: false)
+              .switchUserType(context);
+          break;
+        }
+      case MenuItemKind.switchToManager:
+        {
+          Provider.of<CloudStore>(context, listen: false)
+              .switchUserType(context);
+          break;
+        }
+      case MenuItemKind.switchToSudoUser:
+        {
+          Provider.of<CloudStore>(context, listen: false)
+              .switchUserType(context);
+          break;
+        }
     }
   }
 }

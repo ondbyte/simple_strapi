@@ -50,22 +50,31 @@ abstract class _AuthStore with Store {
     //print(status);
   }
 
-  Future updateProfile({String displayName,String email,@required Function(FirebaseAuthException) onFail,@required Function() onSuccess}) async {
-    await user.updateProfile(displayName: displayName);
-    try{
-      await user.updateEmail(email);
-      onSuccess();
-    } on FirebaseAuthException catch(e) {
-      onFail(e);
+  Future updateProfile(
+      {String displayName,
+      String email,
+      @required Function(FirebaseAuthException) onFail,
+      @required Function() onSuccess}) async {
+    if (user.displayName != displayName) {
+      await user.updateProfile(displayName: displayName);
+    }
+    if (user.email == null && user.email != email) {
+      try {
+        await user.updateEmail(email);
+        onSuccess();
+      } on FirebaseAuthException catch (e) {
+        onFail(e);
+      }
     }
   }
 
-  Future loginOrSignUpWithNumber(
-      {PhoneNumber number,
-      Function onVerified,
-      Function(FirebaseAuthException) onFail,
-      Future<String> Function(bool) onAskOTP,
-      Function onResendOTPPossible,}) async {
+  Future loginOrSignUpWithNumber({
+    PhoneNumber number,
+    Function onVerified,
+    Function(FirebaseAuthException) onFail,
+    Future<String> Function(bool) onAskOTP,
+    Function onResendOTPPossible,
+  }) async {
     loadingForOTP = false;
     await _auth.verifyPhoneNumber(
       phoneNumber: number.phoneNumber,
@@ -79,22 +88,24 @@ abstract class _AuthStore with Store {
       },
       codeSent: (String verificationID, int resendToken) async {
         var askAgain = false;
-        Future.doWhile(() async {
-          var otp = await onAskOTP(askAgain);
-          askAgain = true;
-          loadingForOTP = true;
+        Future.doWhile(
+          () async {
+            var otp = await onAskOTP(askAgain);
+            askAgain = true;
+            loadingForOTP = true;
 
-          PhoneAuthCredential phoneAuthCredential =
-              PhoneAuthProvider.credential(
-                  verificationId: verificationID, smsCode: otp);
-          final linked = await _link(phoneAuthCredential);
-          if(linked){
-            onVerified();
-          } else {
-            loadingForOTP = false;
-          }
-          return !linked;
-        },);
+            PhoneAuthCredential phoneAuthCredential =
+                PhoneAuthProvider.credential(
+                    verificationId: verificationID, smsCode: otp);
+            final linked = await _link(phoneAuthCredential);
+            if (linked) {
+              onVerified();
+            } else {
+              loadingForOTP = false;
+            }
+            return !linked;
+          },
+        );
       },
       codeAutoRetrievalTimeout: (String verificationId) {},
     );

@@ -1,6 +1,8 @@
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/business_store.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Action;
+import 'package:flutter_mobx/flutter_mobx.dart';
 import "package:provider/provider.dart";
 
 class BranchChooserScreen extends StatelessWidget {
@@ -17,29 +19,34 @@ class BranchChooserScreen extends StatelessWidget {
       ),
       body: Consumer<BusinessStore>(
         builder: (_, businessStore, __) {
-          final branches = businessStore.business.branches.value;
-          return ListView.builder(
-            shrinkWrap: true,
-            itemCount: branches.length,
-            itemBuilder: (_, i) {
-              return ListTile(
-                onTap: () {
-                  act(
-                    () {
-                      businessStore.business.selectedBranch.value = branches[i];
+          return Observer(
+            builder: (context) {
+              final branches = businessStore.business.branches.value;
+              return ListView.builder(
+                shrinkWrap: true,
+                itemCount: branches.length,
+                itemBuilder: (_, i) {
+                  return ListTile(
+                    onTap: () {
+                      act(
+                        () {
+                          businessStore.business.selectedBranch.value =
+                              branches[i];
+                        },
+                      );
+                      Navigator.pop(context);
                     },
+                    title: Text(
+                      branches[i].name.value,
+                      maxLines: 1,
+                    ),
+                    subtitle: Text(
+                      branches[i].address.value,
+                      maxLines: 3,
+                    ),
+                    trailing: Icon(Icons.arrow_forward_ios),
                   );
-                  Navigator.pop(context);
                 },
-                title: Text(
-                  branches[i].name.value,
-                  maxLines: 1,
-                ),
-                subtitle: Text(
-                  branches[i].address.value,
-                  maxLines: 3,
-                ),
-                trailing: Icon(Icons.arrow_forward_ios),
               );
             },
           );

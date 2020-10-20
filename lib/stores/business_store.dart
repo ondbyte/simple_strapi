@@ -102,7 +102,8 @@ abstract class _BusinessStore with Store {
       ..businessServices.value = businessServices
       ..businessTimings.value = businessTimings
       ..businessHolidays.value = businessHolidays
-      ..rating.value = 0.0;
+      ..rating.value = 0.0
+      ..status.value = BusinessBranchActiveStatus.justApplied;
 
     await branch.saveBranch();
 

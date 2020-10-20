@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:bapp/config/config_data_types.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:uuid/uuid.dart';
 
 var kAppName = "Bapp";
 var kPackageName = "com.bigmints.bapp";
@@ -19,3 +20,5 @@ final kMapsKey = "AIzaSyDp-XSgu-pZdyYRgyLdasTR1FEid_Lh_dA";
 
 final kTemporaryBusinessImage = "assets/svg/ico-spa.svg";
 final kTemporaryBusinessImageStorageRefPath = "download.jpeg";
+
+final kUUIDGen = Uuid();

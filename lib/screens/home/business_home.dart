@@ -1,4 +1,5 @@
 import 'package:bapp/config/config.dart';
+import 'package:bapp/widgets/business/business_branch_switch.dart';
 import 'package:bapp/widgets/business/business_dashboard_tab.dart';
 import 'package:bapp/widgets/business/business_toolkit_tab.dart';
 import 'package:bapp/widgets/menu.dart';
@@ -15,6 +16,10 @@ class _BusinessHomeState extends State<BusinessHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: BusinessBranchSwitchWidget(),
+      ),
       endDrawer: Menu(),
       body: IndexedStack(
         children: [

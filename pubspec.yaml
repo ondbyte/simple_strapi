@@ -29,6 +29,8 @@ dependencies:
   path_provider: ^1.6.18
   #hive: ^1.4.4
   multi_image_picker: ^4.7.14
+  flutter_absolute_path: ^1.0.6
+
   thephonenumber:
     git:
       url: https://github.com/ondbyte/thephonenumber_dart.git
@@ -41,6 +43,8 @@ dependencies:
   enum_to_string: ^1.0.13
   url_launcher: ^5.7.2
   intl: ^0.16.1
+  uuid: ^2.2.2
+  pdf: ^1.11.2
 
   #UI
   animated_text_kit: ^2.2.0
