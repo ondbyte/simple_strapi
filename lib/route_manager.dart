@@ -4,6 +4,7 @@ import 'package:bapp/screens/business/branch_chooser.dart';
 import 'package:bapp/screens/business/toolkit/manage_branches/add_a_branch.dart';
 import 'package:bapp/screens/business/toolkit/manage_branches/manage_branches.dart';
 import 'package:bapp/screens/business/toolkit/manage_media.dart';
+import 'package:bapp/screens/business/toolkit/store_name_address.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:bapp/screens/location/pick_a_place.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';
@@ -84,6 +85,14 @@ class RouteManager {
     switch (settings.name) {
 
       ///business
+
+      case businessNameAndAddressScreen:
+        return MaterialPageRoute(
+          builder: (_) {
+            return BusinessStoreNameAddress();
+          },
+        );
+
       case submitSelectedBranchForVerification:
         return MaterialPageRoute(
           builder: (_) {

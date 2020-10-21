@@ -397,7 +397,7 @@ class BusinessExpandingPanelConfigs {
           name: "Store Name & Address",
           iconData: FeatherIcons.alertOctagon,
           onClickRoute: RouteManager.businessNameAndAddressScreen,
-          enabled: false,
+          enabled: true,
         ),
         BusinessExpandingTile(
           name: "Manage Media",

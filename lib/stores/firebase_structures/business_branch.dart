@@ -45,6 +45,24 @@ class BusinessBranch {
         },
       ),
     );
+
+    _disposers.add(
+      reaction(
+        (_) => address.value,
+        (_) async {
+          await myDoc.update({"address": address.value});
+        },
+      ),
+    );
+
+    _disposers.add(
+      reaction(
+        (_) => name.value,
+        (_) async {
+          await myDoc.update({"name": name.value});
+        },
+      ),
+    );
   }
 
   Future _getBranch(DocumentReference myDoc) async {
