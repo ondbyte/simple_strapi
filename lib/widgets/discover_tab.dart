@@ -29,7 +29,14 @@ class _DiscoverTabState extends State<DiscoverTab> {
                 sliver: SliverList(
                   delegate: SliverChildListDelegate(
                     [
-                      Text("Hey User"),
+                      Consumer<AuthStore>(builder: (_,authStore,__){
+                        return Observer(
+                          builder: (_){
+                            final name = authStore.user?.displayName??"user";
+                            return Text("Hey "+name);
+                          },
+                        );
+                      }),
                       SizedBox(
                         height: 10,
                       ),
@@ -79,12 +86,12 @@ class _DiscoverTabState extends State<DiscoverTab> {
                               context,
                               listen: false);
                           return (businessStore.business != null &&
-                                  (businessStore.business
-                                          .anyBusinessInDraft() ||
-                                      businessStore.business
-                                          .anyBusinessInPublished() ||
-                                      businessStore.business
-                                          .anyBusinessInUnPublished()))
+                              (businessStore.business
+                                  .anyBusinessInDraft() ||
+                                  businessStore.business
+                                      .anyBusinessInPublished() ||
+                                  businessStore.business
+                                      .anyBusinessInUnPublished()))
                               ? SizedBox()
                               : _getOwnABusiness(context);
                         },
@@ -114,7 +121,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   .categories
                   .map<String>(
                     (element) => element.normalName,
-                  )
+              )
                   .toList(),
             );
           },
@@ -136,14 +143,14 @@ class _DiscoverTabState extends State<DiscoverTab> {
         title: Text(
           "Own A Business",
           style: Theme.of(context).textTheme.subtitle1.apply(
-                color: Theme.of(context).primaryColorLight,
-              ),
+            color: Theme.of(context).primaryColorLight,
+          ),
         ),
         subtitle: Text(
           "List your business on Bapp",
           style: Theme.of(context).textTheme.bodyText1.apply(
-                color: Theme.of(context).primaryColorLight,
-              ),
+            color: Theme.of(context).primaryColorLight,
+          ),
         ),
         trailing: Icon(
           Icons.arrow_forward_ios,
@@ -170,7 +177,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
             width: 16,
           ),
           ...HomeScreenFeaturedConfig.slides.map(
-            (e) => Container(
+                (e) => Container(
               height: 125,
               width: 142,
               margin: EdgeInsets.only(right: 20),
@@ -191,8 +198,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   Text(
                     e.title,
                     style: Theme.of(context).textTheme.headline3.apply(
-                          color: Theme.of(context).primaryColorLight,
-                        ),
+                      color: Theme.of(context).primaryColorLight,
+                    ),
                   ),
                 ],
               ),
@@ -215,7 +222,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                 children: [
                   ...List.generate(
                     businessStore.categories.length,
-                    (index) => FlatButton(
+                        (index) => FlatButton(
                       onPressed: () {},
                       child: Text(
                         businessStore.categories[index].normalName,

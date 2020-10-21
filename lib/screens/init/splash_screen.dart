@@ -68,8 +68,9 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Widget _getSplashScreen() {
-    return Scaffold(
-      body: Center(
+    return Material(
+      color: Colors.white,
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,

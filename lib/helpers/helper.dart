@@ -67,7 +67,7 @@ class Helper {
         ls.add(l);
       },
     );
-    kFilteredMenuItems = ls;
+    return ls;
     //print(ls);
   }
 }

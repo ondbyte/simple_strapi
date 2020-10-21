@@ -41,6 +41,8 @@ abstract class _CloudStore with Store {
 
   User _user;
 
+  String _previousUID = "";
+
   AuthStore _authStore;
 
   Future init(BuildContext context) async {
@@ -54,14 +56,20 @@ abstract class _CloudStore with Store {
     _auth.userChanges().listen(
       (u) {
         _user = u;
+         if(_previousUID != _user?.uid){
+           _init();
+         }
       },
     );
 
+    await _init();
+    _setupAutoRun();
+  }
+
+  _init() async {
     await getUserData();
     await getMytLocation();
     await getMyUserTypes();
-    updateMenuItems();
-    _setupAutoRun();
   }
 
   Future getUserData() async {
@@ -194,12 +202,6 @@ abstract class _CloudStore with Store {
     );
   }
 
-  updateMenuItems() {
-    ///update menu items according to role and authStatus changes
-    print("updating menu items @cloudstore");
-    Helper.filterMenuItems(userType, alterEgo, _authStore.status);
-  }
-
   void _setupAutoRun() {
     _disposers.add(
       reaction((_) => myLocation, (_) async {
@@ -209,18 +211,11 @@ abstract class _CloudStore with Store {
     _disposers.add(
       reaction((_) => userType, (_) async {
         await setMyUserType();
-        updateMenuItems();
       }),
     );
     _disposers.add(
       reaction((_) => alterEgo, (_) async {
         await setMyAlterEgo();
-      }),
-    );
-
-    _disposers.add(
-      reaction((_) => _user, (_) async {
-        updateMenuItems();
       }),
     );
   }

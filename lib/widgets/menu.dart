@@ -1,12 +1,14 @@
 import 'package:bapp/config/config.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/bapp_bar.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
 class Menu extends StatefulWidget {
@@ -32,24 +34,33 @@ class _MenuState extends State<Menu> {
             ),
           ),
         ),
-        body: ListView(
-          children: [
-            SizedBox(
-              height: 20,
-            ),
-            ..._getMenuItems(context)
-          ],
+        body: Consumer2<CloudStore,AuthStore>(
+          builder: (_,cloudStore,authStore,__){
+            return Observer(
+              builder: (_){
+                final items = Helper.filterMenuItems(cloudStore.userType, cloudStore.alterEgo, authStore.status);
+                return ListView(
+                  children: [
+                    SizedBox(
+                      height: 20,
+                    ),
+                    ..._getMenuItems(context,items)
+                  ],
+                );
+              },
+            );
+          },
         ),
       ),
     );
   }
 
-  List<Widget> _getMenuItems(BuildContext context) {
+  List<Widget> _getMenuItems(BuildContext context,List<List<MenuItem>> items) {
     var ws = <Widget>[];
-    kFilteredMenuItems.forEach(
-      (element) {
+    items.forEach(
+          (element) {
         element.forEach(
-          (e) {
+              (e) {
             ws.add(
               ListTile(
                 title: Text(

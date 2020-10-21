@@ -20,7 +20,6 @@ abstract class _AuthStore with Store {
 
   @action
   Future init() async {
-    await Firebase.initializeApp();
     _auth = FirebaseAuth.instance;
 
     ///listen for user updates
