@@ -1,6 +1,8 @@
 import 'package:bapp/screens/business/addbusiness/choose_category.dart';
 import 'package:bapp/screens/business/addbusiness/thank_you_for_your_interest.dart';
 import 'package:bapp/screens/business/branch_chooser.dart';
+import 'package:bapp/screens/business/toolkit/manage_holidays/add_a_holiday.dart';
+import 'package:bapp/screens/business/toolkit/manage_holidays/holidays.dart';
 import 'package:bapp/screens/business/toolkit/manage_branches/add_a_branch.dart';
 import 'package:bapp/screens/business/toolkit/manage_branches/manage_branches.dart';
 import 'package:bapp/screens/business/toolkit/manage_contact.dart';
@@ -12,6 +14,7 @@ import 'package:bapp/screens/location/pick_a_place.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/screens/onboarding/onboardingscreen.dart';
 import 'package:bapp/screens/search/show_results.dart';
+import 'package:bapp/stores/firebase_structures/business_holidays.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -79,12 +82,27 @@ class RouteManager {
   static const String businessAddABranchScreeen = "/businessAddABranchScreeen";
   static const String businessVerificationScreen =
       "/submitSelectedBranchForVerification";
+  static const String businessAddAHolidayScreen = "/businessAddAHolidayScreen";
 
   static Route<dynamic> onGenerate(RouteSettings settings) {
     print("route called: ${settings.name}");
     switch (settings.name) {
 
       ///business
+
+      case businessAddAHolidayScreen:
+        return MaterialPageRoute(
+          builder: (_) {
+            return BusinessAddAHolidayScreen();
+          },
+        );
+
+      case businessHolidaysScreen:
+        return MaterialPageRoute(
+          builder: (_) {
+            return BusinessManageHolidaysScreen();
+          },
+        );
 
       case businessTimingssScreen:
         return MaterialPageRoute(

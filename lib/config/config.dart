@@ -427,7 +427,7 @@ class BusinessExpandingPanelConfigs {
           name: "Holidays",
           iconData: FeatherIcons.alertOctagon,
           onClickRoute: RouteManager.businessHolidaysScreen,
-          enabled: false,
+          enabled: true,
         ),
         BusinessExpandingTile(
           name: "Manage Branches",

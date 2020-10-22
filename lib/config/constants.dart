@@ -22,3 +22,19 @@ final kTemporaryBusinessImage = "assets/svg/ico-spa.svg";
 final kTemporaryBusinessImageStorageRefPath = "download.jpeg";
 
 final kUUIDGen = Uuid();
+
+const kDays = [
+  "sunday",
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday"
+];
+
+const kHolidayTypes = [
+  "type A",
+  "type B",
+  "change the options in constants",
+];

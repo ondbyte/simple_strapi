@@ -21,35 +21,43 @@ class _BusinessTimingsScreenState extends State<BusinessTimingsScreen> {
         automaticallyImplyLeading: true,
         title: Text("Manage working hours"),
       ),
-      body: Consumer<BusinessStore>(
-        builder: (_, businessStore, __) {
-          return Observer(
-            builder: (_) {
-              final timings = businessStore
-                  .business.businessTimings.value.allDayTimings.value;
-              return CustomScrollView(
-                slivers: [
-                  SliverPadding(
-                    padding: EdgeInsets.all(16),
-                    sliver: SliverList(
-                      delegate: SliverChildListDelegate(
-                        [
-                          ...List.generate(
-                            timings.length,
-                            (index) => DayTimingsWidget(
-                              dayName: timings[index].dayName,
-                              dayTiming: timings[index],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                ],
-              );
-            },
-          );
+      body: WillPopScope(
+        onWillPop: () async {
+          final businessStore =
+              Provider.of<BusinessStore>(context, listen: false);
+          businessStore.business.businessTimings.value.saveTimings();
+          return true;
         },
+        child: Consumer<BusinessStore>(
+          builder: (_, businessStore, __) {
+            return Observer(
+              builder: (_) {
+                final timings = businessStore
+                    .business.businessTimings.value.allDayTimings.value;
+                return CustomScrollView(
+                  slivers: [
+                    SliverPadding(
+                      padding: EdgeInsets.all(16),
+                      sliver: SliverList(
+                        delegate: SliverChildListDelegate(
+                          [
+                            ...List.generate(
+                              timings.length,
+                              (index) => DayTimingsWidget(
+                                dayName: timings[index].dayName + "s",
+                                dayTiming: timings[index],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
@@ -71,7 +79,7 @@ class _DayTimingsWidgetState extends State<DayTimingsWidget> {
     return Container(
       padding: EdgeInsets.all(16),
       margin: EdgeInsets.only(bottom: 16),
-      color: Theme.of(context).cardColor,
+      //color: Theme.of(context).cardColor,
       child: Observer(
         builder: (_) {
           return Column(
@@ -83,7 +91,7 @@ class _DayTimingsWidgetState extends State<DayTimingsWidget> {
                 children: [
                   Text(
                     widget.dayName,
-                    style: Theme.of(context).textTheme.subtitle1,
+                    style: Theme.of(context).textTheme.headline3,
                   ),
                   Switch(
                       activeColor: Theme.of(context).primaryColor,
@@ -101,25 +109,31 @@ class _DayTimingsWidgetState extends State<DayTimingsWidget> {
                   return IgnorePointer(
                     ignoring: !widget.dayTiming.enabled.value,
                     child: ListView.builder(
+                      physics: NeverScrollableScrollPhysics(),
                       shrinkWrap: true,
                       itemCount: widget.dayTiming.timings.value.length,
                       itemBuilder: (_, index) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 10),
-                          child: DayTimingRowWidget(
-                            fromToTiming: widget.dayTiming.timings.value[index],
-                            onRemove: () {
-                              act(() {
-                                widget.dayTiming.timings.value.removeAt(index);
-                              });
-                            },
-                            onChange: (cd) {
-                              act(() {
-                                widget.dayTiming.timings.value[index] = cd;
-                              });
-                            },
-                          ),
-                        );
+                        return widget.dayTiming.timings.value[index] == null
+                            ? SizedBox()
+                            : Padding(
+                                padding: EdgeInsets.zero,
+                                child: DayTimingRowWidget(
+                                  fromToTiming:
+                                      widget.dayTiming.timings.value[index],
+                                  onRemove: () {
+                                    act(() {
+                                      widget.dayTiming.timings.value[index] =
+                                          null;
+                                    });
+                                  },
+                                  onChange: (cd) {
+                                    act(() {
+                                      widget.dayTiming.timings.value[index] =
+                                          cd;
+                                    });
+                                  },
+                                ),
+                              );
                       },
                     ),
                   );
@@ -132,17 +146,12 @@ class _DayTimingsWidgetState extends State<DayTimingsWidget> {
                       icon: Icon(Icons.add_circle_outline),
                       onPressed: () {
                         act(() {
-                          final old = widget.dayTiming.timings.value;
-                          final neww = ObservableList<FromToTiming>();
-                          neww.addAll([
-                            ...old,
-                            FromToTiming(
-                              from: DateTime(0, 0, 0, 9),
-                              to: DateTime(0, 0, 0, 18),
-                            )
-                          ]);
-                          widget.dayTiming.timings.value = neww;
-                          print(neww.toString());
+                          widget.dayTiming.timings.value.add(
+                            FromToTiming.fromDates(
+                              from: DateTime(2020, 1, 1, 9, 0, 0, 0, 0),
+                              to: DateTime(2020, 1, 1, 18, 0, 0, 0, 0),
+                            ),
+                          );
                         });
                       },
                     ),
@@ -180,39 +189,32 @@ class _DayTimingRowWidgetState extends State<DayTimingRowWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Observer(
-      builder: (_) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            SizedBox(
-              width: 8,
-            ),
-            Text(
-              format(_fromToTiming.from),
-              style: Theme.of(context).textTheme.subtitle1,
-            ),
-            Text("To"),
-            Text(
-              format(_fromToTiming.to),
-              style: Theme.of(context).textTheme.subtitle1,
-            ),
-            SizedBox(
-              width: 8,
-            ),
-            IconButton(
-              icon: Icon(Icons.edit),
-              onPressed: () async {
-                await _edit();
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.remove_circle_outline),
-              onPressed: widget.onRemove,
-            ),
-          ],
-        );
-      },
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          format(_fromToTiming.from),
+          style: Theme.of(context).textTheme.subtitle1,
+        ),
+        Text("To"),
+        Text(
+          format(_fromToTiming.to),
+          style: Theme.of(context).textTheme.subtitle1,
+        ),
+        SizedBox(
+          width: 8,
+        ),
+        IconButton(
+          icon: Icon(Icons.edit),
+          onPressed: () async {
+            await _edit();
+          },
+        ),
+        IconButton(
+          icon: Icon(Icons.remove_circle_outline),
+          onPressed: widget.onRemove,
+        ),
+      ],
     );
   }
 
@@ -227,7 +229,7 @@ class _DayTimingRowWidgetState extends State<DayTimingRowWidget> {
       snap: true,
       use24HourFormat: false,
     );
-    if(timeRange==null){
+    if (timeRange == null) {
       return;
     }
     final from =
@@ -236,7 +238,7 @@ class _DayTimingRowWidgetState extends State<DayTimingRowWidget> {
         DateTime(0, 0, 0, timeRange.endTime.hour, timeRange.endTime.minute);
     setState(
       () {
-        _fromToTiming = FromToTiming(from: from, to: to);
+        _fromToTiming = FromToTiming.fromDates(from: from, to: to);
         widget.onChange(_fromToTiming);
       },
     );

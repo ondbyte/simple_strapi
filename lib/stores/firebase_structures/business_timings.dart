@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:bapp/config/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mobx/mobx.dart';
 
@@ -10,7 +13,8 @@ class BusinessTimings {
   }
 
   Future saveTimings() async {
-    await myDoc.set(toMap());
+    final map = toMap();
+    await myDoc.set(map);
   }
 
   Map<String, dynamic> toMap() {
@@ -37,12 +41,18 @@ class BusinessTimings {
           );
         },
       );
+    } else {
+      allDayTimings.value.addAll(kDays.map((e) => DayTiming({}, dayName: e)));
+      await saveTimings();
     }
-    final dt = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
-    dt.forEach((day) {
-      allDayTimings.value.any((element) => element.dayName.)
+    allDayTimings.value.sort((a, b) {
+      final aa = kDays.indexOf(a.dayName);
+      final bb = kDays.indexOf(b.dayName);
+      if (aa > bb) {
+        return 1;
+      }
+      return -1;
     });
-    allDayTimings.value.addAll(dt.map((e) => DayTiming([],dayName: e)));
   }
 }
 
@@ -51,25 +61,31 @@ class DayTiming {
   final enabled = Observable(false);
   final timings = Observable(ObservableList<FromToTiming>());
 
-  DayTiming(List<dynamic> data, {this.dayName}) {
-    timings.value.addAll(_getDayTimings(data));
+  DayTiming(Map<String, dynamic> data, {this.dayName}) {
+    enabled.value = data["enabled"];
+    timings.value.addAll(_getDayTimings(data["timings"]));
   }
 
   toMap() {
+    filterNull();
     return {
       "dayName": dayName,
-      "enabled":enabled.value,
-      "timings": timings.value.map((element) => element.toList()),
+      "enabled": enabled.value,
+      "timings": timings.value.isEmpty
+          ? []
+          : timings.value.map((element) => element.toJson()).toList(),
     };
+  }
+
+  filterNull() {
+    timings.value.removeWhere((element) => element == null);
   }
 
   List<FromToTiming> _getDayTimings(List j) {
     final List<FromToTiming> dayTimings = [];
     j.forEach(
       (element) {
-        final List<Timestamp> times = List.castFrom(element);
-        final FromToTiming fromTo =
-            FromToTiming(from: times.first.toDate(), to: times.last.toDate());
+        final FromToTiming fromTo = FromToTiming(element);
         dayTimings.add(fromTo);
       },
     );
@@ -78,15 +94,24 @@ class DayTiming {
 }
 
 class FromToTiming {
-  final DateTime from;
-  final DateTime to;
+  DateTime from;
+  DateTime to;
 
-  FromToTiming({this.from, this.to});
+  FromToTiming(String data) {
+    final j = json.decode(data);
+    from = DateTime.parse(j[0]);
+    to = DateTime.parse(j[1]);
+  }
 
-  List<Timestamp> toList() {
-    return [
-      Timestamp.fromDate(from),
-      Timestamp.fromDate(to),
-    ];
+  FromToTiming.fromDates({DateTime from, DateTime to}) {
+    this.from = from;
+    this.to = to;
+  }
+
+  String toJson() {
+    return json.encode([
+      from.toIso8601String(),
+      to.toIso8601String(),
+    ]);
   }
 }
