@@ -3,8 +3,10 @@ import 'package:bapp/screens/business/addbusiness/thank_you_for_your_interest.da
 import 'package:bapp/screens/business/branch_chooser.dart';
 import 'package:bapp/screens/business/toolkit/manage_branches/add_a_branch.dart';
 import 'package:bapp/screens/business/toolkit/manage_branches/manage_branches.dart';
+import 'package:bapp/screens/business/toolkit/manage_contact.dart';
 import 'package:bapp/screens/business/toolkit/manage_media.dart';
 import 'package:bapp/screens/business/toolkit/store_name_address.dart';
+import 'package:bapp/screens/business/toolkit/timings.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:bapp/screens/location/pick_a_place.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';
@@ -70,14 +72,12 @@ class RouteManager {
       "/businessProductsPricingScreen";
   static const String businessContactDetailsScreen =
       "/businessContactDetailsScreen";
-  static const String businessHoursScreen = "/businessHoursScreen";
+  static const String businessTimingssScreen = "/businessHoursScreen";
   static const String businessHolidaysScreen = "/businessHolidaysScreen";
   static const String businessManageBranchesScreen =
       "/businessManageBranchesScreen";
-  static const String businessVerificationScreen =
-      "/businessVerificationScreen";
   static const String businessAddABranchScreeen = "/businessAddABranchScreeen";
-  static const String submitSelectedBranchForVerification =
+  static const String businessVerificationScreen =
       "/submitSelectedBranchForVerification";
 
   static Route<dynamic> onGenerate(RouteSettings settings) {
@@ -86,6 +86,20 @@ class RouteManager {
 
       ///business
 
+      case businessTimingssScreen:
+        return MaterialPageRoute(
+          builder: (_) {
+            return BusinessTimingsScreen();
+          },
+        );
+
+      case businessContactDetailsScreen:
+        return MaterialPageRoute(
+          builder: (_) {
+            return BusinessManageContactDetailsScreen();
+          },
+        );
+
       case businessNameAndAddressScreen:
         return MaterialPageRoute(
           builder: (_) {
@@ -93,7 +107,7 @@ class RouteManager {
           },
         );
 
-      case submitSelectedBranchForVerification:
+      case businessVerificationScreen:
         return MaterialPageRoute(
           builder: (_) {
             return BusinessSubmitBranchForVerification();

@@ -254,7 +254,7 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
                           ? null
                           : () {
                               Navigator.of(context).pushNamed(RouteManager
-                                  .submitSelectedBranchForVerification);
+                                  .businessVerificationScreen);
                             },
                     ),
                   )

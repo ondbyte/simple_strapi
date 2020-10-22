@@ -3,13 +3,7 @@ import 'package:mobx/mobx.dart';
 
 class BusinessTimings {
   final DocumentReference myDoc;
-  final sundayTiming = Observable(ObservableList<FromToTiming>());
-  final mondayTiming = Observable(ObservableList<FromToTiming>());
-  final tuesdayTiming = Observable(ObservableList<FromToTiming>());
-  final wednesdayTiming = Observable(ObservableList<FromToTiming>());
-  final thursdayTiming = Observable(ObservableList<FromToTiming>());
-  final fridayTiming = Observable(ObservableList<FromToTiming>());
-  final saturdayTiming = Observable(ObservableList<FromToTiming>());
+  final allDayTimings = Observable(ObservableList<DayTiming>());
 
   BusinessTimings({this.myDoc}) {
     _getTimings(myDoc);
@@ -20,16 +14,13 @@ class BusinessTimings {
   }
 
   Map<String, dynamic> toMap() {
-    return {
-      "sundayTiming": sundayTiming.value.map((element) => element.toList()),
-      "mondayTiming": mondayTiming.value.map((element) => element.toList()),
-      "tuesdayTiming": tuesdayTiming.value.map((element) => element.toList()),
-      "wednesdayTiming":
-          wednesdayTiming.value.map((element) => element.toList()),
-      "thursdayTiming": thursdayTiming.value.map((element) => element.toList()),
-      "fridayTiming": fridayTiming.value.map((element) => element.toList()),
-      "saturdayTiming": saturdayTiming.value.map((element) => element.toList()),
-    };
+    return allDayTimings.value.fold(
+      {},
+      (previousValue, dt) {
+        previousValue.addAll({dt.dayName: dt.toMap()});
+        return previousValue;
+      },
+    );
   }
 
   Future _getTimings(DocumentReference myDoc) async {
@@ -39,14 +30,37 @@ class BusinessTimings {
     final snap = await myDoc.get();
     if (snap.exists) {
       final data = snap.data();
-      sundayTiming.value = _getDayTimings(data["sundayTiming"]);
-      mondayTiming.value = _getDayTimings(data["mondayTiming"]);
-      tuesdayTiming.value = _getDayTimings(data["tuesdayTiming"]);
-      wednesdayTiming.value = _getDayTimings(data["wednesdayTiming"]);
-      thursdayTiming.value = _getDayTimings(data["thursdayTiming"]);
-      fridayTiming.value = _getDayTimings(data["fridayTiming"]);
-      saturdayTiming.value = _getDayTimings(data["saturdayTiming"]);
+      data.forEach(
+        (key, value) {
+          allDayTimings.value.add(
+            DayTiming(value, dayName: key),
+          );
+        },
+      );
     }
+    final dt = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
+    dt.forEach((day) {
+      allDayTimings.value.any((element) => element.dayName.)
+    });
+    allDayTimings.value.addAll(dt.map((e) => DayTiming([],dayName: e)));
+  }
+}
+
+class DayTiming {
+  final String dayName;
+  final enabled = Observable(false);
+  final timings = Observable(ObservableList<FromToTiming>());
+
+  DayTiming(List<dynamic> data, {this.dayName}) {
+    timings.value.addAll(_getDayTimings(data));
+  }
+
+  toMap() {
+    return {
+      "dayName": dayName,
+      "enabled":enabled.value,
+      "timings": timings.value.map((element) => element.toList()),
+    };
   }
 
   List<FromToTiming> _getDayTimings(List j) {
@@ -55,7 +69,7 @@ class BusinessTimings {
       (element) {
         final List<Timestamp> times = List.castFrom(element);
         final FromToTiming fromTo =
-            FromToTiming(times.first.toDate(), times.last.toDate());
+            FromToTiming(from: times.first.toDate(), to: times.last.toDate());
         dayTimings.add(fromTo);
       },
     );
@@ -67,7 +81,7 @@ class FromToTiming {
   final DateTime from;
   final DateTime to;
 
-  FromToTiming(this.from, this.to);
+  FromToTiming({this.from, this.to});
 
   List<Timestamp> toList() {
     return [

@@ -104,7 +104,10 @@ class _BusinessSubmitBranchForVerificationState
                             _apply();
                           },
                         ),
-                      )
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
                     ],
                   ),
                 ),
