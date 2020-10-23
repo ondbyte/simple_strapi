@@ -64,8 +64,8 @@ class DayTiming {
   final timings = Observable(ObservableList<FromToTiming>());
 
   DayTiming(Map<String, dynamic> data, {this.dayName}) {
-    enabled.value = data["enabled"];
-    timings.value.addAll(_getDayTimings(data["timings"]));
+    enabled.value = data["enabled"] ?? false;
+    timings.value.addAll(_getDayTimings(j: data["timings"] ?? []));
   }
 
   toMap() {
@@ -83,7 +83,7 @@ class DayTiming {
     timings.value.removeWhere((element) => element == null);
   }
 
-  List<FromToTiming> _getDayTimings(List j) {
+  List<FromToTiming> _getDayTimings({List j = const []}) {
     final List<FromToTiming> dayTimings = [];
     j.forEach(
       (element) {

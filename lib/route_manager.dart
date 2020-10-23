@@ -7,6 +7,7 @@ import 'package:bapp/screens/business/toolkit/manage_branches/add_a_branch.dart'
 import 'package:bapp/screens/business/toolkit/manage_branches/manage_branches.dart';
 import 'package:bapp/screens/business/toolkit/manage_contact.dart';
 import 'package:bapp/screens/business/toolkit/manage_media.dart';
+import 'package:bapp/screens/business/toolkit/manage_services/add_a_category.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/manage_services.dart';
 import 'package:bapp/screens/business/toolkit/store_name_address.dart';
 import 'package:bapp/screens/business/toolkit/timings.dart';
@@ -86,7 +87,8 @@ class RouteManager {
   static const String businessAddAHolidayScreen = "/businessAddAHolidayScreen";
 
   static const String businessAddAServiceScreen = "/businessAddAServiceScreen";
-  static const String businessAddAServiceCategoryScreen = "/businessAddAServiceCategoryScreen";
+  static const String businessAddAServiceCategoryScreen =
+      "/businessAddAServiceCategoryScreen";
 
   static Route<dynamic> onGenerate(RouteSettings settings) {
     print("route called: ${settings.name}");
@@ -94,10 +96,17 @@ class RouteManager {
 
       ///business
 
-      case businessAddAServiceCategoryScreen:
+      case businessProductsPricingScreen:
         return MaterialPageRoute(
           builder: (_) {
             return BusinessProductsPricingScreen();
+          },
+        );
+
+      case businessAddAServiceCategoryScreen:
+        return MaterialPageRoute(
+          builder: (_) {
+            return BusinessAddServiceCategoryScreen();
           },
         );
       case businessAddAServiceScreen:

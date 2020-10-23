@@ -104,39 +104,41 @@ class _DayTimingsWidgetState extends State<DayTimingsWidget> {
                 ),
               ),
               if (widget.dayTiming.timings.value.isNotEmpty)
-                Observer(builder: (_) {
-                  return IgnorePointer(
-                    ignoring: !widget.dayTiming.enabled.value,
-                    child: ListView.builder(
-                      physics: NeverScrollableScrollPhysics(),
-                      shrinkWrap: true,
-                      itemCount: widget.dayTiming.timings.value.length,
-                      itemBuilder: (_, index) {
-                        return widget.dayTiming.timings.value[index] == null
-                            ? SizedBox()
-                            : Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 16),
-                                child: DayTimingRowWidget(
-                                  fromToTiming:
-                                      widget.dayTiming.timings.value[index],
-                                  onRemove: () {
-                                    act(() {
-                                      widget.dayTiming.timings.value[index] =
-                                          null;
-                                    });
-                                  },
-                                  onChange: (cd) {
-                                    act(() {
-                                      widget.dayTiming.timings.value[index] =
-                                          cd;
-                                    });
-                                  },
-                                ),
-                              );
-                      },
-                    ),
-                  );
-                },),
+                Observer(
+                  builder: (_) {
+                    return IgnorePointer(
+                      ignoring: !widget.dayTiming.enabled.value,
+                      child: ListView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        shrinkWrap: true,
+                        itemCount: widget.dayTiming.timings.value.length,
+                        itemBuilder: (_, index) {
+                          return widget.dayTiming.timings.value[index] == null
+                              ? SizedBox()
+                              : Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 16),
+                                  child: DayTimingRowWidget(
+                                    fromToTiming:
+                                        widget.dayTiming.timings.value[index],
+                                    onRemove: () {
+                                      act(() {
+                                        widget.dayTiming.timings.value[index] =
+                                            null;
+                                      });
+                                    },
+                                    onChange: (cd) {
+                                      act(() {
+                                        widget.dayTiming.timings.value[index] =
+                                            cd;
+                                      });
+                                    },
+                                  ),
+                                );
+                        },
+                      ),
+                    );
+                  },
+                ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Observer(

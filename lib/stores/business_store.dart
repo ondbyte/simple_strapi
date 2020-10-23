@@ -79,8 +79,9 @@ abstract class _BusinessStore with Store {
 
     ///create the deafult empty services set
     final mainBusinessServicesCollec =
-        _fireStore.collection("businesses/${_user.uid}/businessServices/main");
-    final businessServices = BusinessServices(myCollec: mainBusinessServicesCollec);
+        _fireStore.collection("businesses/${_user.uid}/businessServices");
+    final businessServices =
+        BusinessServices(myCollec: mainBusinessServicesCollec.path);
 
     ///create the deafult empty holidays set
     final mainBusinessHolidaysCollection =
@@ -116,7 +117,7 @@ abstract class _BusinessStore with Store {
       latlong: latlong,
       selectedBranch: branch,
       uid: FirebaseAuth.instance.currentUser.uid,
-      email: "",
+      email: FirebaseAuth.instance.currentUser.email,
       myDoc: businessDoc,
       businessTimings: businessTimings,
       businessServices: businessServices,

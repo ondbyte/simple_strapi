@@ -109,6 +109,9 @@ String removeNewLines(String s) {
 Future<List<String>> uploadImagesToStorageAndReturnStringList(
     Map<String, bool> imagesWithFiltered,
     {String path = ""}) async {
+  if (imagesWithFiltered == null || imagesWithFiltered.isEmpty) {
+    return [];
+  }
   final f = FirebaseStorage.instance;
   final a = FirebaseAuth.instance;
   final List<String> storagePaths = [];

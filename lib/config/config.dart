@@ -409,7 +409,7 @@ class BusinessExpandingPanelConfigs {
           name: "Products & Pricing",
           iconData: FeatherIcons.alertOctagon,
           onClickRoute: RouteManager.businessProductsPricingScreen,
-          enabled: false,
+          enabled: true,
         ),
         BusinessExpandingTile(
           name: "Contact Details",

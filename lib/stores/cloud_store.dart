@@ -56,9 +56,11 @@ abstract class _CloudStore with Store {
     _auth.userChanges().listen(
       (u) {
         _user = u;
-         if(_previousUID != _user?.uid){
-           _init();
-         }
+        if (_user != null) {
+          if (_previousUID != _user?.uid) {
+            _init();
+          }
+        }
       },
     );
 

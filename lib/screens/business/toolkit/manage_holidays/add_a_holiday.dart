@@ -1,5 +1,6 @@
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/stores/business_store.dart';
+import 'package:bapp/widgets/buttons.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -13,9 +14,12 @@ class BusinessAddAHolidayScreen extends StatefulWidget {
 }
 
 class _BusinessAddAHolidayScreenState extends State<BusinessAddAHolidayScreen> {
-  List<DateTime> _pickedDates = [DateTime.now(),DateTime.now().add(
-    Duration(days: 1),
-  ),];
+  List<DateTime> _pickedDates = [
+    DateTime.now(),
+    DateTime.now().add(
+      Duration(days: 1),
+    ),
+  ];
   String _name = "";
   String _type = "";
   String _details = "";
@@ -38,45 +42,6 @@ class _BusinessAddAHolidayScreenState extends State<BusinessAddAHolidayScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: true,
         title: Text("Add Holiday"),
-        actions: [
-          FlatButton(
-              onPressed: () async {
-                if (_key.currentState.validate()) {
-                  final businessStore =
-                      Provider.of<BusinessStore>(context, listen: false);
-                  if (businessStore.business.businessHolidays.value.all.contains(_name)) {
-                    Flushbar(
-                      message: "The holiday with that name exists",
-                      duration: const Duration(seconds: 2),
-                    ).show(context);
-                    return;
-                  }
-                  var b = false;
-                  businessStore.business.businessHolidays.value.all.forEach(
-                    (businessHoliday) {
-                      if (businessHoliday.dates == _pickedDates) {
-                        b = true;
-                      }
-                    },
-                  );
-                  if (b) {
-                    Flushbar(
-                      message: "The holiday range exists",
-                      duration: const Duration(seconds: 2),
-                    ).show(context);
-                    return;
-                  }
-                  await businessStore.business.businessHolidays.value.addHoliday(
-                    name: _name,
-                    type: _type,
-                    details: _details,
-                    fromToDate: _pickedDates,
-                  );
-                  Navigator.of(context).pop();
-                }
-              },
-              child: Text("Add"))
-        ],
       ),
       body: WillPopScope(
         onWillPop: () async {
@@ -158,7 +123,7 @@ class _BusinessAddAHolidayScreenState extends State<BusinessAddAHolidayScreen> {
                             decoration:
                                 InputDecoration(labelText: "Holiday Type"),
                             validator: (s) {
-                              if (s==null) {
+                              if (s == null) {
                                 return "Select holiday type";
                               }
                               return null;
@@ -197,6 +162,55 @@ class _BusinessAddAHolidayScreenState extends State<BusinessAddAHolidayScreen> {
                               return null;
                             },
                           ),
+                          SizedBox(
+                            height: 20,
+                          ),
+                          PrimaryButton(
+                            "Apply",
+                            onPressed: () async {
+                              if (_key.currentState.validate()) {
+                                final businessStore =
+                                    Provider.of<BusinessStore>(context,
+                                        listen: false);
+                                if (businessStore
+                                    .business.businessHolidays.value.all
+                                    .contains(_name)) {
+                                  Flushbar(
+                                    message:
+                                        "The holiday with that name exists",
+                                    duration: const Duration(seconds: 2),
+                                  ).show(context);
+                                  return;
+                                }
+                                var b = false;
+                                businessStore
+                                    .business.businessHolidays.value.all
+                                    .forEach(
+                                  (businessHoliday) {
+                                    if (businessHoliday.dates == _pickedDates) {
+                                      b = true;
+                                    }
+                                  },
+                                );
+                                if (b) {
+                                  Flushbar(
+                                    message: "The holiday range exists",
+                                    duration: const Duration(seconds: 2),
+                                  ).show(context);
+                                  return;
+                                }
+                                await businessStore
+                                    .business.businessHolidays.value
+                                    .addHoliday(
+                                  name: _name,
+                                  type: _type,
+                                  details: _details,
+                                  fromToDate: _pickedDates,
+                                );
+                                Navigator.of(context).pop();
+                              }
+                            },
+                          )
                         ],
                       ),
                     )

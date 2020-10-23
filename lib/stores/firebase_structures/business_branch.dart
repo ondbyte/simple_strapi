@@ -57,8 +57,8 @@ class BusinessBranch {
 
     _disposers.add(
       reaction(
-            (_) => name.value,
-            (_) async {
+        (_) => name.value,
+        (_) async {
           await myDoc.update({"name": name.value});
         },
       ),
@@ -66,8 +66,8 @@ class BusinessBranch {
 
     _disposers.add(
       reaction(
-            (_) => email.value,
-            (_) async {
+        (_) => email.value,
+        (_) async {
           await myDoc.update({"email": email.value});
         },
       ),
@@ -75,8 +75,8 @@ class BusinessBranch {
 
     _disposers.add(
       reaction(
-            (_) => contactNumber.value,
-            (_) async {
+        (_) => contactNumber.value,
+        (_) async {
           await myDoc.update({"contactNumber": contactNumber.value});
         },
       ),
