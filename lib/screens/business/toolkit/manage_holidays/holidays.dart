@@ -1,6 +1,12 @@
+import 'package:bapp/config/config.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/business_store.dart';
+import 'package:bapp/stores/firebase_structures/business_holidays.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class BusinessManageHolidaysScreen extends StatefulWidget {
@@ -32,24 +38,41 @@ class _BusinessManageHolidaysScreenState
       body: Consumer<BusinessStore>(
         builder: (_, businessStore, __) {
           final holidays = businessStore.business.businessHolidays.value;
-          return CustomScrollView(
-            slivers: [
-              SliverPadding(
-                padding: EdgeInsets.all(16),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate(
-                    [
-                      ...List.generate(
-                        holidays.all.value.length,
-                        (index) => HolidayWidget(
-                          holiday: holidays.all.value.entries.elementAt(index),
-                        ),
+          return Observer(
+            builder: (_) {
+              return CustomScrollView(
+                slivers: [
+                  SliverPadding(
+                    padding: EdgeInsets.all(0),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate(
+                        [
+                          ...List.generate(
+                            holidays.all.length,
+                            (index) => Dismissible(
+                              key: GlobalKey(),
+                              direction: DismissDirection.endToStart,
+                              background: Container(
+                                color: CardsColor.colors["teal"],
+                                alignment: Alignment.centerRight,
+                                padding: EdgeInsets.symmetric(horizontal: 16),
+                                child: Icon(Icons.delete,color: Theme.of(context).primaryColorLight,),
+                              ),
+                              onDismissed: (_){
+                                holidays.removeHoliday(holidays.all[index]);
+                              },
+                              child: HolidayWidget(
+                                holiday: holidays.all[index],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              )
-            ],
+                    ),
+                  )
+                ],
+              );
+            },
           );
         },
       ),
@@ -58,7 +81,7 @@ class _BusinessManageHolidaysScreenState
 }
 
 class HolidayWidget extends StatefulWidget {
-  final MapEntry holiday;
+  final BusinesssHoliday holiday;
 
   const HolidayWidget({Key key, this.holiday}) : super(key: key);
 
@@ -66,10 +89,31 @@ class HolidayWidget extends StatefulWidget {
 }
 
 class _HolidayWidgetState extends State<HolidayWidget> {
+  final f = DateFormat("dd");
+  final f2 = DateFormat("dd MMMM, yyyy");
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Text(widget.holiday.key),
+    return Observer(
+      builder: (_) {
+        return ListTile(
+          title: Text(widget.holiday.name),
+          subtitle: Text(
+            f.format(widget.holiday.dates.first) +
+                " to " +
+                f2.format(widget.holiday.dates.last),
+          ),
+          trailing: Switch(
+            value: widget.holiday.enabled.value,
+            onChanged: (b) {
+              act(
+                () {
+                  widget.holiday.enabled.value = b;
+                },
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

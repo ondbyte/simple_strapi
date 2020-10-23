@@ -4,7 +4,7 @@ import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
-import 'package:bapp/stores/business_services.dart';
+import 'package:bapp/stores/firebase_structures/business_services.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -78,9 +78,9 @@ abstract class _BusinessStore with Store {
     final businessTimings = BusinessTimings(myDoc: mainBusinessTimingDoc);
 
     ///create the deafult empty services set
-    final mainBusinessServicesDoc =
-        _fireStore.doc("businesses/${_user.uid}/businessServices/main");
-    final businessServices = BusinessServices(myDoc: mainBusinessServicesDoc);
+    final mainBusinessServicesCollec =
+        _fireStore.collection("businesses/${_user.uid}/businessServices/main");
+    final businessServices = BusinessServices(myCollec: mainBusinessServicesCollec);
 
     ///create the deafult empty holidays set
     final mainBusinessHolidaysCollection =

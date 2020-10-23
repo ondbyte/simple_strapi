@@ -45,14 +45,16 @@ class BusinessTimings {
       allDayTimings.value.addAll(kDays.map((e) => DayTiming({}, dayName: e)));
       await saveTimings();
     }
-    allDayTimings.value.sort((a, b) {
-      final aa = kDays.indexOf(a.dayName);
-      final bb = kDays.indexOf(b.dayName);
-      if (aa > bb) {
-        return 1;
-      }
-      return -1;
-    });
+    allDayTimings.value.sort(
+      (a, b) {
+        final aa = kDays.indexOf(a.dayName);
+        final bb = kDays.indexOf(b.dayName);
+        if (aa > bb) {
+          return 1;
+        }
+        return -1;
+      },
+    );
   }
 }
 

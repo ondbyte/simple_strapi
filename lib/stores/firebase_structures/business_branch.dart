@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:bapp/helpers/helper.dart';
-import 'package:bapp/stores/business_services.dart';
+import 'package:bapp/stores/firebase_structures/business_services.dart';
 import 'package:bapp/stores/firebase_structures/business_holidays.dart';
 import 'package:bapp/stores/firebase_structures/business_timings.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -104,7 +104,7 @@ class BusinessBranch {
       this.email.value = j["email"];
       this.rating.value = j["rating"];
       this.businessServices.value =
-          BusinessServices(myDoc: j["businessServices"]);
+          BusinessServices(myCollec: j["businessServices"]);
       this.businessTimings.value = BusinessTimings(myDoc: j["businessTimings"]);
       this.businessHolidays.value =
           BusinessHolidays(myCollection: j["businessHolidays"]);
@@ -129,7 +129,7 @@ class BusinessBranch {
       "contactNumber": contactNumber.value,
       "email": email.value,
       "rating": rating.value,
-      "businessServices": businessServices.value.myDoc,
+      "businessServices": businessServices.value.myCollec,
       "businessTimings": businessTimings.value.myDoc,
       "businessHolidays": businessHolidays.value.myCollection,
       "status": EnumToString.convertToString(status.value),

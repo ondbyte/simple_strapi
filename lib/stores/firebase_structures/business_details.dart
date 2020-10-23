@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
-import 'package:bapp/stores/business_services.dart';
+import 'package:bapp/stores/firebase_structures/business_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:mobx/mobx.dart';
@@ -96,7 +96,7 @@ class BusinessDetails {
     this.myDoc.value = j["myDoc"];
     this.businessTimings.value = BusinessTimings(myDoc: j["businessTimings"]);
     this.businessServices.value =
-        BusinessServices(myDoc: j["businessServices"]);
+        BusinessServices(myCollec: j["businessServices"]);
     this.businessHolidays.value =
         BusinessHolidays(myCollection: j["businessHolidays"]);
 
@@ -116,7 +116,7 @@ class BusinessDetails {
       "email": email.value,
       "myDoc": myDoc.value,
       "businessTimings": businessTimings.value.myDoc,
-      "businessServices": businessServices.value.myDoc,
+      "businessServices": businessServices.value.myCollec,
       "businessHolidays": businessHolidays.value.myCollection,
     };
   }

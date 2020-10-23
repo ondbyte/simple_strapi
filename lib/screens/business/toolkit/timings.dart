@@ -94,8 +94,6 @@ class _DayTimingsWidgetState extends State<DayTimingsWidget> {
                       style: Theme.of(context).textTheme.headline3,
                     ),
                     Switch(
-                        activeColor: Theme.of(context).primaryColor,
-                        activeTrackColor: Theme.of(context).primaryColor,
                         value: widget.dayTiming.enabled.value,
                         onChanged: (b) {
                           act(() {
@@ -138,7 +136,7 @@ class _DayTimingsWidgetState extends State<DayTimingsWidget> {
                       },
                     ),
                   );
-                }),
+                },),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Observer(
