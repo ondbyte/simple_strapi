@@ -99,7 +99,7 @@ abstract class _BusinessStore with Store {
       ..name.value = businessName
       ..images.value = []
       ..contactNumber.value = contactNumber
-      ..email.value = ""
+      ..email.value = FirebaseAuth.instance.currentUser.email
       ..businessServices.value = businessServices
       ..businessTimings.value = businessTimings
       ..businessHolidays.value = businessHolidays

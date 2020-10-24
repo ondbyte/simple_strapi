@@ -8,6 +8,7 @@ import 'package:bapp/screens/business/toolkit/manage_branches/manage_branches.da
 import 'package:bapp/screens/business/toolkit/manage_contact.dart';
 import 'package:bapp/screens/business/toolkit/manage_media.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_category.dart';
+import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/manage_services.dart';
 import 'package:bapp/screens/business/toolkit/store_name_address.dart';
 import 'package:bapp/screens/business/toolkit/timings.dart';
@@ -112,7 +113,7 @@ class RouteManager {
       case businessAddAServiceScreen:
         return MaterialPageRoute(
           builder: (_) {
-            return BusinessProductsPricingScreen();
+            return BusinessAddAServiceScreen();
           },
         );
 

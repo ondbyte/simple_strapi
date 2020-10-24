@@ -1,8 +1,10 @@
+import 'package:bapp/config/constants.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/widgets/firebase_image.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
 class BusinessProductsPricingScreen extends StatefulWidget {
@@ -52,6 +54,7 @@ class _BusinessProductsPricingScreenState
               indicatorPadding: EdgeInsets.all(16),
               indicatorWeight: 6,
               indicatorSize: TabBarIndicatorSize.tab,
+              labelPadding: EdgeInsets.all(8),
               tabs: [
                 Text("Services"),
                 Text("Categories"),
@@ -76,41 +79,95 @@ class _BusinessProductsPricingScreenState
   Widget _getServices(
     BuildContext context,
   ) {
-    return CustomScrollView(
-      slivers: [],
+    return Consumer<BusinessStore>(
+      builder: (_, businessStore, __) {
+        return Observer(
+          builder: (_) {
+            return CustomScrollView(
+              slivers: [
+                SliverList(
+                  delegate: SliverChildListDelegate(
+                    [
+                      ...List.generate(
+                        businessStore
+                            .business.businessServices.value.all.length,
+                        (index) {
+                          final t = businessStore
+                              .business.businessServices.value.all[index];
+                          return ListTile(
+                            title: Text(t.serviceName.value),
+                            subtitle: Text(t.description.value),
+                            leading: FirebaseStorageImage(
+                              width: 64,
+                              height: 64,
+                              storagePathOrURL: t.images.isNotEmpty
+                                  ? t.images.keys.elementAt(0)
+                                  : kTemporaryBusinessImage,
+                            ),
+                            trailing: IconButton(
+                              icon: Icon(Icons.delete_forever),
+                              onPressed: () async {
+                                await businessStore
+                                    .business.businessServices.value
+                                    .removeService(t);
+                              },
+                            ),
+                          );
+                        },
+                      )
+                    ],
+                  ),
+                )
+              ],
+            );
+          },
+        );
+      },
     );
   }
 
   Widget _getCategories(BuildContext context) {
     return Consumer<BusinessStore>(
       builder: (_, businessStore, __) {
-        return CustomScrollView(
-          slivers: [
-            SliverList(
-              delegate: SliverChildListDelegate(
-                [
-                  ...List.generate(
-                    businessStore
-                        .business.businessServices.value.allCategories.length,
-                    (index) {
-                      final t = businessStore
-                          .business.businessServices.value.allCategories[index];
-                      return ListTile(
-                        title: Text(t.categoryName.value),
-                        subtitle: Text(t.description.value),
-                        leading: t.images.value.isNotEmpty
-                            ? FirebaseStorageImage(
-                                storagePathOrURL: t.images.value[0],
-                              )
-                            : SizedBox(),
-                      );
-                    },
-                  )
-                ],
-              ),
-            )
-          ],
-        );
+        return Observer(builder: (_) {
+          return CustomScrollView(
+            slivers: [
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    ...List.generate(
+                      businessStore
+                          .business.businessServices.value.allCategories.length,
+                      (index) {
+                        final t = businessStore.business.businessServices.value
+                            .allCategories[index];
+                        return ListTile(
+                          title: Text(t.categoryName.value),
+                          subtitle: Text(t.description.value),
+                          leading: FirebaseStorageImage(
+                            width: 64,
+                            height: 64,
+                            storagePathOrURL: t.images.isNotEmpty
+                                ? t.images.keys.elementAt(0)
+                                : kTemporaryBusinessImage,
+                          ),
+                          trailing: IconButton(
+                            icon: Icon(Icons.delete_forever),
+                            onPressed: () async {
+                              await businessStore
+                                  .business.businessServices.value
+                                  .removeCategory(t);
+                            },
+                          ),
+                        );
+                      },
+                    )
+                  ],
+                ),
+              )
+            ],
+          );
+        });
       },
     );
   }

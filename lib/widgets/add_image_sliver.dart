@@ -14,6 +14,7 @@ class AddImageTileWidget extends StatefulWidget {
   final String title;
   final String subTitle;
   final int maxImage;
+  final EdgeInsets padding;
 
   AddImageTileWidget(
       {Key key,
@@ -21,7 +22,7 @@ class AddImageTileWidget extends StatefulWidget {
       this.existingImages,
       this.title,
       this.subTitle,
-      this.maxImage})
+      this.maxImage, this.padding})
       : super(key: key);
 
   @override
@@ -54,6 +55,7 @@ class _AddImageTileWidgetState extends State<AddImageTileWidget> {
       mainAxisSize: MainAxisSize.min,
       children: [
         ListTile(
+          contentPadding: widget.padding??EdgeInsets.symmetric(horizontal: 16),
           title: Text(widget.title),
           subtitle: Text(widget.subTitle),
           trailing: Icon(
