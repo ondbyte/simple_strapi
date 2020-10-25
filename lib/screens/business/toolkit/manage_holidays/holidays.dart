@@ -23,7 +23,7 @@ class _BusinessManageHolidaysScreenState
       floatingActionButton: FloatingActionButton(
         child: Icon(
           Icons.add,
-          color: Theme.of(context).primaryColorLight,
+          color: Theme.of(context).indicatorColor,
         ),
         onPressed: () {
           Navigator.of(context)
@@ -56,9 +56,12 @@ class _BusinessManageHolidaysScreenState
                                 color: CardsColor.colors["teal"],
                                 alignment: Alignment.centerRight,
                                 padding: EdgeInsets.symmetric(horizontal: 16),
-                                child: Icon(Icons.delete,color: Theme.of(context).primaryColorLight,),
+                                child: Icon(
+                                  Icons.delete,
+                                  color: Theme.of(context).indicatorColor,
+                                ),
                               ),
-                              onDismissed: (_){
+                              onDismissed: (_) {
                                 holidays.removeHoliday(holidays.all[index]);
                               },
                               child: HolidayWidget(

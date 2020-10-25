@@ -179,17 +179,17 @@ class BusinessDetails {
     await myDoc.value.set(toMap());
   }
 
-  bool anyBusinessInDraft() {
+  bool anyBranchInDraft() {
     return branches.value.any(
         (element) => element.status.value == BusinessBranchActiveStatus.draft);
   }
 
-  bool anyBusinessInPublished() {
+  bool anyBranchInPublished() {
     return branches.value.any((element) =>
         element.status.value == BusinessBranchActiveStatus.published);
   }
 
-  bool anyBusinessInUnPublished() {
+  bool anyBranchInUnPublished() {
     return branches.value.any((element) =>
         element.status.value == BusinessBranchActiveStatus.unPublished);
   }

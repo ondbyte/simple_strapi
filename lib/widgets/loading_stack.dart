@@ -21,13 +21,15 @@ class _LoadingStackWidgetState extends State<LoadingStackWidget> {
       children: [
         widget.child,
         Observer(
-          builder: (_){
-            return kLoading.value? SizedBox(
-              child: Container(
-                color: Theme.of(context).primaryColorLight,
-                child: LoadingWidget(),
-              ),
-            ):SizedBox();
+          builder: (_) {
+            return kLoading.value
+                ? SizedBox(
+                    child: Container(
+                      color: Theme.of(context).backgroundColor,
+                      child: LoadingWidget(),
+                    ),
+                  )
+                : SizedBox();
           },
         )
       ],

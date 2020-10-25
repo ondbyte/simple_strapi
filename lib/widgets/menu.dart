@@ -24,16 +24,16 @@ class _MenuState extends State<Menu> {
       width: double.maxFinite,
       child: Scaffold(
         appBar: AppBar(
-          leading: SizedBox(),
-          flexibleSpace: BappBar(
-            leading: "Menu",
-            trailing: IconButton(
+          automaticallyImplyLeading: false,
+          title: Text("Menu"),
+          actions: [
+            IconButton(
               icon: Icon(FeatherIcons.xCircle),
               onPressed: () {
                 Navigator.of(context).pop();
               },
-            ),
-          ),
+            )
+          ],
         ),
         body: Consumer2<CloudStore, AuthStore>(
           builder: (_, cloudStore, authStore, __) {

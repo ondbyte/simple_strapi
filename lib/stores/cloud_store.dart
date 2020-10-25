@@ -98,11 +98,14 @@ abstract class _CloudStore with Store {
   @action
   Future<bool> switchUserType(BuildContext context) async {
     final businessStore = Provider.of<BusinessStore>(context, listen: false);
-
+    await Future.forEach<BusinessBranch>(businessStore.business.branches.value,
+        (element) async {
+      await element.pull();
+    });
     if (businessStore.business != null &&
-        (businessStore.business.anyBusinessInDraft() ||
-            businessStore.business.anyBusinessInPublished() ||
-            businessStore.business.anyBusinessInUnPublished())) {
+        (businessStore.business.anyBranchInDraft() ||
+            businessStore.business.anyBranchInPublished() ||
+            businessStore.business.anyBranchInUnPublished())) {
       final tmp = userType;
       userType = alterEgo;
       alterEgo = tmp;

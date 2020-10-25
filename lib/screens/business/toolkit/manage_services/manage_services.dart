@@ -28,7 +28,7 @@ class _BusinessProductsPricingScreenState
           floatingActionButton: FloatingActionButton(
             child: Icon(
               Icons.add,
-              color: Theme.of(context).primaryColorLight,
+              color: Theme.of(context).indicatorColor,
             ),
             onPressed: () {
               final selected = DefaultTabController.of(context).index;

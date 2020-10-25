@@ -6,7 +6,8 @@ class PrimaryButton extends StatefulWidget {
   final String data;
   final bool hide;
 
-  const PrimaryButton(this.data, {Key key, @required this.onPressed, this.hide = false})
+  const PrimaryButton(this.data,
+      {Key key, @required this.onPressed, this.hide = false})
       : super(key: key);
   @override
   _PrimaryButtonState createState() => _PrimaryButtonState();
@@ -31,7 +32,7 @@ class _PrimaryButtonState extends State<PrimaryButton> {
                 style: Theme.of(context)
                     .textTheme
                     .subtitle1
-                    .apply(color: Theme.of(context).primaryColorLight),
+                    .apply(color: Theme.of(context).indicatorColor),
               ),
             )
           : SizedBox(),

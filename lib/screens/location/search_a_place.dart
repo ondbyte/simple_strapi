@@ -29,13 +29,13 @@ class _SearchAPlaceScreenState extends State<SearchAPlaceScreen> {
           margin: EdgeInsets.all(16),
           padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           decoration: BoxDecoration(
-              color: Theme.of(context).primaryColorLight,
+              color: Theme.of(context).backgroundColor,
               borderRadius: BorderRadius.circular(6)),
           child: TextFormField(
             controller: _controller,
             decoration: InputDecoration(
               hintText: "Google your place..",
-              fillColor: Theme.of(context).primaryColorLight,
+              fillColor: Theme.of(context).indicatorColor,
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
               focusedBorder: InputBorder.none,
@@ -50,19 +50,18 @@ class _SearchAPlaceScreenState extends State<SearchAPlaceScreen> {
             },
           ),
         ),
-
         ...List.generate(
           predictions.length,
-              (index) => Container(
+          (index) => Container(
             margin: EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(6),
-                color: Theme.of(context).primaryColorLight),
+                color: Theme.of(context).backgroundColor),
             padding: EdgeInsets.all(16),
             child: ListTile(
               onTap: () {
                 setState(
-                      () {
+                  () {
                     FocusScope.of(context).unfocus();
                     _controller.text = "";
                     _callOnSelectedWithDeets(predictions[index]);

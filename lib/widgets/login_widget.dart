@@ -45,7 +45,9 @@ class AskToLoginWidget extends StatelessWidget {
             color: Theme.of(context).primaryColor,
             child: Text(
               "Sign In or Sign Up",
-              style: Theme.of(context).textTheme.button.apply(color: Theme.of(context).primaryColorLight,),
+              style: Theme.of(context).textTheme.button.apply(
+                    color: Theme.of(context).indicatorColor,
+                  ),
             ),
           ),
         ],

@@ -20,7 +20,12 @@ class _BusinessManageStaffScreenState extends State<BusinessManageStaffScreen> {
         automaticallyImplyLeading: true,
         title: Text("Staff manager"),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
+        child: Icon(
+          Icons.add,
+          color: Theme.of(context).indicatorColor,
+        ),
         onPressed: () {
           Navigator.of(context).pushNamed(RouteManager.businessAddAStaffScreen);
         },

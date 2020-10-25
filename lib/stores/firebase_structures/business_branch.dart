@@ -37,6 +37,7 @@ class BusinessBranch {
   BusinessBranch(
       {DocumentReference myDoc, @required BusinessDetails business}) {
     this.business.value = business;
+    this.myDoc.value = myDoc;
     _getBranch(myDoc);
     _setupReactions();
   }
@@ -97,6 +98,11 @@ class BusinessBranch {
         },
       ),
     );
+  }
+
+  ///get current data from firestore
+  Future pull() async {
+    await _getBranch(myDoc.value);
   }
 
   Future _getBranch(DocumentReference myDoc) async {

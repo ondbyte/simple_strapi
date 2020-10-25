@@ -20,9 +20,8 @@ class _CustomerHomeState extends State<CustomerHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        flexibleSpace: BappBar(
-          leading: _getPageTitle(_selectedPage),
-        ),
+        automaticallyImplyLeading: false,
+        title: _getPageTitle(_selectedPage),
       ),
       endDrawer: Menu(),
       body: Padding(

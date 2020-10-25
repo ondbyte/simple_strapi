@@ -153,19 +153,19 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
         onPressed: onClick,
         padding: EdgeInsets.zero,
         child: Container(
-          padding: EdgeInsets.all(6),
+          padding: EdgeInsets.symmetric(vertical: 16, horizontal: 8),
           alignment: Alignment.center,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(6),
             color: CardsColor.colors["purple"].withOpacity(0.1),
           ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               icon,
               Text(
-                name,
+                name + "\n",
                 maxLines: 2,
                 textAlign: TextAlign.center,
               ),
@@ -247,13 +247,13 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
                         docuVerification
                             ? "Branch is in verification"
                             : "Submit for verification",
-                        style: TextStyle(
-                            color: Theme.of(context).primaryColorLight),
+                        style:
+                            TextStyle(color: Theme.of(context).indicatorColor),
                       ),
                       trailing: draft
                           ? Icon(
                               FeatherIcons.arrowRightCircle,
-                              color: Theme.of(context).primaryColorLight,
+                              color: Theme.of(context).indicatorColor,
                             )
                           : null,
                       onTap: docuVerification

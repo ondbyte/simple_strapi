@@ -51,9 +51,9 @@ class _UpdatesTabState extends State<UpdatesTab> {
                               indicatorColor: CardsColor.colors["lightGreen"],
                             ),
                             labelStyle: Theme.of(context).textTheme.headline4,
-                            labelColor: Theme.of(context).primaryColorLight,
+                            labelColor: Theme.of(context).indicatorColor,
                             unselectedLabelColor:
-                                Theme.of(context).primaryColorDark,
+                                Theme.of(context).indicatorColor,
                             onTap: (i) {
                               setState(
                                 () {
@@ -203,7 +203,7 @@ class NotificationUpdateTileWidget extends StatelessWidget {
                 Text(
                   update.title,
                   style: Theme.of(context).textTheme.headline2.apply(
-                        color: Theme.of(context).primaryColorLight,
+                        color: Theme.of(context).indicatorColor,
                       ),
                 ),
                 SizedBox(
@@ -212,7 +212,7 @@ class NotificationUpdateTileWidget extends StatelessWidget {
                 Text(
                   update.description,
                   style: Theme.of(context).textTheme.bodyText1.apply(
-                        color: Theme.of(context).primaryColorLight,
+                        color: Theme.of(context).indicatorColor,
                       ),
                 ),
               ],
@@ -228,12 +228,12 @@ class NotificationUpdateTileWidget extends StatelessWidget {
                   style: Theme.of(context)
                       .textTheme
                       .bodyText1
-                      .apply(color: Theme.of(context).primaryColorLight),
+                      .apply(color: Theme.of(context).indicatorColor),
                 ),
                 IconButton(
                   icon: Icon(
                     FeatherIcons.arrowRightCircle,
-                    color: Theme.of(context).primaryColorLight,
+                    color: Theme.of(context).indicatorColor,
                   ),
                   onPressed: () {},
                 ),

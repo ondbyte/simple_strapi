@@ -42,7 +42,7 @@ class _BusinessManageBranchesScreenState
         },
         child: Icon(
           Icons.add,
-          color: Theme.of(context).primaryColorLight,
+          color: Theme.of(context).indicatorColor,
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

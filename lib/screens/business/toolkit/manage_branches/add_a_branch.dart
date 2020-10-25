@@ -112,6 +112,10 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
                             );
                           },
                           child: AddImageTileWidget(
+                            maxImage: 6,
+                            title: "Add photos",
+                            subTitle: "maximum of 6 images",
+                            padding: EdgeInsets.zero,
                             onImagesSelected: (filteredExistingImages) {
                               _filteredExistingImages = filteredExistingImages;
                             },

@@ -56,7 +56,7 @@ class BusinessStaff {
     dateOfJoining = j["dateOfJoining"];
     expertise.addAll(
         j["expertise"].map((e) => BusinessServiceCategory.fromDoc(myDoc: e)));
-    branch = BusinessBranch(myDoc: j["branch"]);
+    branch = BusinessBranch(myDoc: j["branch"], business: business);
     manager = BusinessStaff.fromDoc(business: business, myDoc: j["manager"]);
     receptionist =
         BusinessStaff.fromDoc(business: business, myDoc: j["receptionist"]);

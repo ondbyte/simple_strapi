@@ -59,7 +59,7 @@ abstract class _ThemeStore with Store {
       //////////////////////////////
 
       brightness: Brightness.light,
-      indicatorColor: Colors.black,
+      indicatorColor: Colors.white,
 
       backgroundColor: Colors.white,
       scaffoldBackgroundColor: Colors.white,
