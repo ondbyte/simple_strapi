@@ -63,5 +63,5 @@ dependencies{
     implementation 'com.google.firebase:firebase-storage:19.2.0'
     implementation 'com.google.firebase:firebase-crashlytics:17.2.2'
     implementation 'com.google.firebase:firebase-dynamic-links:19.1.1'
-
+    implementation 'com.google.firebase:firebase-messaging:20.3.0'
 }

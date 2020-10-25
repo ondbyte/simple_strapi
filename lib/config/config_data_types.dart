@@ -1,7 +1,16 @@
 import 'package:bapp/stores/auth_store.dart';
 import 'package:flutter/material.dart';
 
-enum UserType { customer, businessStaff, businessOwner, sales, manager, sudo }
+enum UserType {
+  customer,
+  businessStaff,
+  businessReceptionist,
+  businessManager,
+  businessOwner,
+  sales,
+  manager,
+  sudo
+}
 
 enum MenuItemKind {
   logIn,

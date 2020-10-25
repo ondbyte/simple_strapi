@@ -9,37 +9,40 @@ part of 'themestore.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$ThemeStore on _ThemeStore, Store {
-  final _$selectedThemeDataAtom = Atom(name: '_ThemeStore.selectedThemeData');
+  Computed<ThemeData> _$selectedThemeDataComputed;
 
   @override
-  ThemeData get selectedThemeData {
-    _$selectedThemeDataAtom.reportRead();
-    return super.selectedThemeData;
+  ThemeData get selectedThemeData => (_$selectedThemeDataComputed ??=
+          Computed<ThemeData>(() => super.selectedThemeData,
+              name: '_ThemeStore.selectedThemeData'))
+      .value;
+
+  final _$brightnessAtom = Atom(name: '_ThemeStore.brightness');
+
+  @override
+  Brightness get brightness {
+    _$brightnessAtom.reportRead();
+    return super.brightness;
   }
 
   @override
-  set selectedThemeData(ThemeData value) {
-    _$selectedThemeDataAtom.reportWrite(value, super.selectedThemeData, () {
-      super.selectedThemeData = value;
+  set brightness(Brightness value) {
+    _$brightnessAtom.reportWrite(value, super.brightness, () {
+      super.brightness = value;
     });
   }
 
-  final _$_ThemeStoreActionController = ActionController(name: '_ThemeStore');
+  final _$initAsyncAction = AsyncAction('_ThemeStore.init');
 
   @override
-  void flipTheme() {
-    final _$actionInfo = _$_ThemeStoreActionController.startAction(
-        name: '_ThemeStore.flipTheme');
-    try {
-      return super.flipTheme();
-    } finally {
-      _$_ThemeStoreActionController.endAction(_$actionInfo);
-    }
+  Future<dynamic> init() {
+    return _$initAsyncAction.run(() => super.init());
   }
 
   @override
   String toString() {
     return '''
+brightness: ${brightness},
 selectedThemeData: ${selectedThemeData}
     ''';
   }

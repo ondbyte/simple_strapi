@@ -35,6 +35,11 @@ class BusinessServices {
     }
   }
 
+  bool anyServiceDependsOn(BusinessServiceCategory category) {
+    return all.any((s) =>
+        s.category.value.categoryName.value == category.categoryName.value);
+  }
+
   Future addAService({
     String serviceName,
     double price,
@@ -94,19 +99,28 @@ class BusinessService {
   final duration = Observable<Duration>(Duration.zero);
   final description = Observable<String>("");
   final category = Observable<BusinessServiceCategory>(null);
-  final images = ObservableMap<String,bool>();
+  final images = ObservableMap<String, bool>();
   final DocumentReference myDoc;
 
+  List<ReactionDisposer> _disposers = [];
   BusinessService({this.myDoc});
+
+  _setupReactions() {
+    _disposers.add(reaction((_) => category.value, (_) {
+      print("satting");
+      print(category.value?.categoryName?.value ?? "no name");
+    }));
+  }
 
   BusinessService.fromJson({this.myDoc, Map<String, dynamic> j}) {
     serviceName.value = j["serviceName"];
     price.value = j["price"];
     duration.value = Duration(milliseconds: j["duration"]);
     description.value = j["description"];
-    category.value = BusinessServiceCategory(myDoc: j["category"]);
-    final tmp = Map.fromEntries(List.castFrom(j["images"]).map((e) => MapEntry(e, true)));
-    images.addAll({...tmp});
+    category.value = BusinessServiceCategory.fromDoc(myDoc: j["category"]);
+    final tmp = Map.fromIterable(j["images"],
+        key: (s) => s as String, value: (_) => true);
+    images.addAll(tmp);
   }
 
   Future saveService() async {
@@ -114,6 +128,9 @@ class BusinessService {
   }
 
   Future delete() async {
+    _disposers.forEach((element) {
+      element.call();
+    });
     await myDoc.delete();
   }
 
@@ -123,7 +140,7 @@ class BusinessService {
       "price": price.value,
       "duration": duration.value.inMilliseconds,
       "description": description.value,
-      "category": category.value,
+      "category": category.value.myDoc,
       "images": images.keys.toList(),
       "myDoc": myDoc
     };
@@ -133,16 +150,29 @@ class BusinessService {
 class BusinessServiceCategory {
   final categoryName = Observable<String>("");
   final description = Observable<String>("");
-  final images = ObservableMap<String,bool>();
+  final images = ObservableMap<String, bool>();
   final DocumentReference myDoc;
 
   BusinessServiceCategory({this.myDoc});
 
-  BusinessServiceCategory.fromJson({this.myDoc, Map<String, dynamic> j}) {
+  BusinessServiceCategory.fromDoc({this.myDoc}) {
+    myDoc.get().then((value) {
+      if (value.exists) {
+        _fromJson(value.data());
+      }
+    });
+  }
+
+  _fromJson(Map<String, dynamic> j) {
     this.categoryName.value = j["categoryName"];
     this.description.value = j["description"];
-    final tmp = Map.fromEntries(List.castFrom(j["images"]).map((e) => MapEntry(e, true)));
-    this.images.addAll({...tmp});
+    final tmp = Map.fromIterable(j["images"],
+        key: (s) => s as String, value: (_) => true);
+    this.images.addAll(tmp);
+  }
+
+  BusinessServiceCategory.fromJson({this.myDoc, Map<String, dynamic> j}) {
+    _fromJson(j);
   }
 
   Future saveServiceCategory() async {

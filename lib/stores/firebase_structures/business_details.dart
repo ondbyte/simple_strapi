@@ -89,9 +89,11 @@ class BusinessDetails {
     this.uid.value = j["uid"] as String;
     final tmp = j["branches"] as List;
     if (tmp != null) {
-      this.branches.value = tmp.map((e) => BusinessBranch(myDoc: e)).toList();
+      this.branches.value =
+          tmp.map((e) => BusinessBranch(myDoc: e, business: this)).toList();
     }
-    this.selectedBranch.value = BusinessBranch(myDoc: j["selectedBranch"]);
+    this.selectedBranch.value =
+        BusinessBranch(myDoc: j["selectedBranch"], business: this);
     this.email.value = j["email"];
     this.myDoc.value = j["myDoc"];
     this.businessTimings.value = BusinessTimings(myDoc: j["businessTimings"]);
@@ -141,9 +143,9 @@ class BusinessDetails {
     final imgs =
         await uploadImagesToStorageAndReturnStringList(imagesWithFiltered);
 
-    final branch = BusinessBranch()
-      ..business.value = myDoc.value
-      ..staff.value = []
+    final branch = BusinessBranch(
+      business: this,
+    )
       ..manager.value = null
       ..receptionist.value = null
       ..latlong.value = pickedLocation.latLong

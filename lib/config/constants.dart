@@ -38,3 +38,6 @@ const kHolidayTypes = [
   "type B",
   "change the options in constants",
 ];
+
+///global setting to track whether ios notification is enabled
+bool kNotifEnabled = false;

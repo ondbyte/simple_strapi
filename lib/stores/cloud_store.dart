@@ -1,16 +1,21 @@
+import 'dart:io';
+
 import 'package:bapp/classes/location.dart';
 import 'package:bapp/config/config_data_types.dart';
+import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:country_pickers/country_pickers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:thephonenumber/thephonenumber.dart';
 
+import '../FCM.dart';
 import 'auth_store.dart';
 import 'business_store.dart';
 import 'firebase_structures/business_branch.dart';
@@ -38,14 +43,16 @@ abstract class _CloudStore with Store {
   UserType userType;
   @observable
   UserType alterEgo;
-
+  @observable
   User _user;
+  String fcmToken = "";
 
   String _previousUID = "";
 
   AuthStore _authStore;
 
   Future init(BuildContext context) async {
+    await _initFCM();
     await ThePhoneNumberLib.init();
     _user = _auth.currentUser;
     _authStore = Provider.of<AuthStore>(context, listen: false);
@@ -147,6 +154,14 @@ abstract class _CloudStore with Store {
     );
   }
 
+  Future setMyOtherUserData() async {
+    var doc = _fireStore.doc("users/${_user.uid}");
+    await doc.update({
+      "contactNumber": theNumber?.internationalNumber,
+      "fcmToken": fcmToken
+    });
+  }
+
   @action
   Future getMytLocation() async {
     if (myData.containsKey("my_location")) {
@@ -220,6 +235,40 @@ abstract class _CloudStore with Store {
         await setMyAlterEgo();
       }),
     );
+    _disposers.add(
+      reaction((_) => _user, (_) async {
+        await setMyOtherUserData();
+      }),
+    );
+  }
+
+  bool _isFcmInitialized = false;
+  _initFCM() async {
+    if (!_isFcmInitialized) {
+      final _fcm = FirebaseMessaging();
+      if (Platform.isIOS) {
+        kNotifEnabled = await _fcm.requestNotificationPermissions();
+      } else {
+        kNotifEnabled = true;
+      }
+      _fcm.configure(
+        onBackgroundMessage: myBackgroundMessageHandler,
+        onLaunch: (Map<String, dynamic> lMessage) async {
+          print("[ON_LAUNCH] " + lMessage.toString());
+        },
+        onResume: (Map<String, dynamic> rMessage) async {
+          print("[ON_RESUME] " + rMessage.toString());
+        },
+        onMessage: (Map<String, dynamic> message) async {
+          print("[ON_MESSAGE] " + message.toString());
+        },
+      );
+      _fcm.onTokenRefresh.listen((event) {
+        fcmToken = event;
+        print("fcmToken " + fcmToken);
+      });
+      _isFcmInitialized = true;
+    }
   }
 
 /*   @action

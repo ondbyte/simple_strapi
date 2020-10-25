@@ -355,7 +355,7 @@ class BusinessExpandingPanelConfigs {
           name: "Manage Staff",
           iconData: FeatherIcons.alertOctagon,
           onClickRoute: RouteManager.businessManageStaffScreen,
-          enabled: false,
+          enabled: true,
         ),
         BusinessExpandingTile(
           name: "Leaves",

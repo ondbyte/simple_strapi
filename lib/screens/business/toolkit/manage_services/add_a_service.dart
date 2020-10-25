@@ -19,6 +19,7 @@ class BusinessAddAServiceScreen extends StatefulWidget {
 
 class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
   final _key = GlobalKey<FormState>();
+  BusinessServiceCategory _category;
   @override
   Widget build(BuildContext context) {
     return LoadingStackWidget(
@@ -33,8 +34,8 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                 businessStore.business.businessServices.value.myCollec;
             final BusinessService _service = BusinessService(
               myDoc: FirebaseFirestore.instance.collection(collecPath).doc(
-                kUUIDGen.v1(),
-              ),
+                    kUUIDGen.v1(),
+                  ),
             );
             return Form(
               key: _key,
@@ -54,12 +55,12 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                               return DropdownButtonFormField<
                                   BusinessServiceCategory>(
                                 decoration:
-                                InputDecoration(labelText: "Category"),
+                                    InputDecoration(labelText: "Category"),
                                 items: <
                                     DropdownMenuItem<BusinessServiceCategory>>[
                                   ...List.generate(
                                     categories.length,
-                                        (index) => DropdownMenuItem(
+                                    (index) => DropdownMenuItem(
                                       child: Text(
                                         categories[index].categoryName.value,
                                       ),
@@ -75,7 +76,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                                 },
                                 onChanged: (c) {
                                   act(() {
-                                    _service.category.value = c;
+                                    _category = c;
                                   });
                                   FocusScope.of(context).nextFocus();
                                 },
@@ -86,8 +87,8 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                             height: 20,
                           ),
                           TextFormField(
-                            decoration:
-                            InputDecoration(labelText: "Name of the product"),
+                            decoration: InputDecoration(
+                                labelText: "Name of the product"),
                             validator: (s) {
                               if (s.isEmpty) {
                                 return "Please enter the name of the product";
@@ -156,7 +157,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                                   onChanged: (s) {
                                     final number = int.tryParse(s);
                                     act(
-                                          () {
+                                      () {
                                         _service.duration.value =
                                             Duration(minutes: number);
                                       },
@@ -185,7 +186,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                             },
                             onChanged: (s) {
                               act(
-                                    () {
+                                () {
                                   _service.description.value = s;
                                 },
                               );
@@ -202,9 +203,9 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                             title: "Add a Image",
                             subTitle: "(optional)",
                             maxImage: 1,
-                            padding:EdgeInsets.zero,
+                            padding: EdgeInsets.zero,
                             existingImages: _service.images,
-                            onImagesSelected: (imgs){
+                            onImagesSelected: (imgs) {
                               _service.images.clear();
                               _service.images.addAll(imgs);
                             },
@@ -216,20 +217,23 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                             "Apply",
                             onPressed: () async {
                               if (_key.currentState.validate()) {
-                                act((){
+                                act(() {
                                   kLoading.value = true;
                                 });
-                                await _service.saveService();
-                                await businessStore.business.businessServices.value.addAService(
-                                    images: _service.images,
-                                    category: _service.category.value,
-                                    duration: _service.duration.value,
-                                    description: _service.description.value,
-                                    price: _service.price.value,
-                                    serviceName: _service.serviceName.value
-                                );
-                                Navigator.of(context).pop();
-                                act((){
+                                act(() {
+                                  businessStore.business.businessServices.value
+                                      .addAService(
+                                          images: _service.images,
+                                          category: _category,
+                                          duration: _service.duration.value,
+                                          description:
+                                              _service.description.value,
+                                          price: _service.price.value,
+                                          serviceName:
+                                              _service.serviceName.value);
+                                  Navigator.of(context).pop();
+                                });
+                                act(() {
                                   kLoading.value = false;
                                 });
                               }

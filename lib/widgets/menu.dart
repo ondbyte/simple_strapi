@@ -5,6 +5,7 @@ import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/stores/themestore.dart';
 import 'package:bapp/widgets/bapp_bar.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
@@ -34,17 +35,39 @@ class _MenuState extends State<Menu> {
             ),
           ),
         ),
-        body: Consumer2<CloudStore,AuthStore>(
-          builder: (_,cloudStore,authStore,__){
+        body: Consumer2<CloudStore, AuthStore>(
+          builder: (_, cloudStore, authStore, __) {
             return Observer(
-              builder: (_){
-                final items = Helper.filterMenuItems(cloudStore.userType, cloudStore.alterEgo, authStore.status);
+              builder: (_) {
+                final items = Helper.filterMenuItems(
+                    cloudStore.userType, cloudStore.alterEgo, authStore.status);
                 return ListView(
                   children: [
                     SizedBox(
                       height: 20,
                     ),
-                    ..._getMenuItems(context,items)
+                    ..._getMenuItems(context, items),
+                    Consumer<ThemeStore>(
+                      builder: (_, themeStore, __) {
+                        return Observer(
+                          builder: (_) {
+                            return ListTile(
+                              title: Text("Dark mode"),
+                              trailing: Switch(
+                                value: themeStore.brightness == Brightness.dark,
+                                onChanged: (b) {
+                                  if (b) {
+                                    themeStore.brightness = Brightness.dark;
+                                  } else {
+                                    themeStore.brightness = Brightness.light;
+                                  }
+                                },
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    )
                   ],
                 );
               },
@@ -55,12 +78,12 @@ class _MenuState extends State<Menu> {
     );
   }
 
-  List<Widget> _getMenuItems(BuildContext context,List<List<MenuItem>> items) {
+  List<Widget> _getMenuItems(BuildContext context, List<List<MenuItem>> items) {
     var ws = <Widget>[];
     items.forEach(
-          (element) {
+      (element) {
         element.forEach(
-              (e) {
+          (e) {
             ws.add(
               ListTile(
                 title: Text(

@@ -89,39 +89,24 @@ abstract class _BusinessStore with Store {
     final businessHolidays =
         BusinessHolidays(myCollection: mainBusinessHolidaysCollection.path);
 
-    final branch = BusinessBranch()
-      ..business.value = businessDoc
-      ..staff.value = []
-      ..manager.value = null
-      ..receptionist.value = null
-      ..latlong.value = latlong
-      ..address.value = address
-      ..name.value = businessName
-      ..images.value = []
-      ..contactNumber.value = contactNumber
-      ..email.value = FirebaseAuth.instance.currentUser.email
-      ..businessServices.value = businessServices
-      ..businessTimings.value = businessTimings
-      ..businessHolidays.value = businessHolidays
-      ..rating.value = 0.0
-      ..status.value = BusinessBranchActiveStatus.justApplied;
-
-    await branch.saveBranch();
-
     final ap = BusinessDetails.from(
       businessName: businessName,
       address: address,
       category: category,
-      branches: [branch],
       contactNumber: contactNumber,
       latlong: latlong,
-      selectedBranch: branch,
       uid: FirebaseAuth.instance.currentUser.uid,
       email: FirebaseAuth.instance.currentUser.email,
       myDoc: businessDoc,
       businessTimings: businessTimings,
       businessServices: businessServices,
       businessHolidays: businessHolidays,
+    );
+
+    await ap.addABranch(
+      branchName: businessName,
+      imagesWithFiltered: {},
+      pickedLocation: PickedLocation(latlong, address),
     );
 
     await ap.saveBusiness();

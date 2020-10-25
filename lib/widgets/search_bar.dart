@@ -19,32 +19,33 @@ class SearchBarWidget extends StatelessWidget {
         Navigator.of(context).pushNamed(RouteManager.searchInsideBapp);
       },
       child: Container(
-        height: 50,
-        width: double.maxFinite,
-        alignment: Alignment.centerLeft,
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: Theme.of(context).primaryColorDark.withOpacity(.1),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            possibilities.isNotEmpty
-                ? RotateAnimatedTextKit(
-              totalRepeatCount: 4,
-              repeatForever: true, //this will ignore [totalRepeatCount]
-              text: possibilities,
-              textStyle: Theme.of(context).textTheme.subtitle1.apply(
-                  color: Theme.of(context).primaryColorDark.withOpacity(0.6)),
-              pause: const Duration(milliseconds: 500),
-              displayFullTextOnTap: true,
-            )
-                : SizedBox(),
-            Icon(Icons.search)
-          ],
-        )
-      ),
+          height: 50,
+          width: double.maxFinite,
+          alignment: Alignment.centerLeft,
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).indicatorColor.withOpacity(.1),
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              possibilities.isNotEmpty
+                  ? RotateAnimatedTextKit(
+                      totalRepeatCount: 4,
+                      repeatForever: true, //this will ignore [totalRepeatCount]
+                      text: possibilities,
+                      textStyle: Theme.of(context).textTheme.subtitle1.apply(
+                          color: Theme.of(context)
+                              .indicatorColor
+                              .withOpacity(0.6)),
+                      pause: const Duration(milliseconds: 500),
+                      displayFullTextOnTap: true,
+                    )
+                  : SizedBox(),
+              Icon(Icons.search)
+            ],
+          )),
     );
   }
 }

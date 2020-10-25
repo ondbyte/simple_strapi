@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:mobx/mobx.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 
 part 'themestore.g.dart';
 
@@ -7,17 +10,39 @@ class ThemeStore = _ThemeStore with _$ThemeStore;
 
 abstract class _ThemeStore with Store {
   ///default theme, false means light theme
-  bool _flipped = false;
-  @observable
-  ThemeData selectedThemeData = getLightThemeData();
 
-  ///call this to change the theme to alternate one
+  @observable
+  var brightness = SchedulerBinding.instance.window.platformBrightness;
+
+  List<ReactionDisposer> _disposers = [];
+
   @action
-  void flipTheme() {
-    _flipped = !_flipped;
-    _flipped
-        ? selectedThemeData = getDarkThemeData()
-        : selectedThemeData = getLightThemeData();
+  Future init() async {
+    final dir = await getApplicationSupportDirectory();
+    Hive.init(dir.path);
+    final box = await Hive.openLazyBox("brigtness.box");
+    final dark = await box.get("dark", defaultValue: false);
+    if (dark) {
+      if (brightness != Brightness.dark) {
+        brightness = Brightness.dark;
+      }
+    } else {
+      if (brightness != Brightness.light) {
+        brightness = Brightness.light;
+      }
+    }
+    _disposers.add(reaction((_) => brightness, (_) {
+      box.put("dark", brightness == Brightness.dark);
+    }));
+  }
+
+  @computed
+  ThemeData get selectedThemeData {
+    if (brightness == Brightness.dark) {
+      return getDarkThemeData();
+    } else {
+      return getLightThemeData();
+    }
   }
 
   ///changes to the light theme should be done here
@@ -32,6 +57,9 @@ abstract class _ThemeStore with Store {
       ),
 
       //////////////////////////////
+
+      brightness: Brightness.light,
+      indicatorColor: Colors.black,
 
       backgroundColor: Colors.white,
       scaffoldBackgroundColor: Colors.white,
@@ -159,9 +187,7 @@ abstract class _ThemeStore with Store {
         // color: Colors.white,
         elevation: 0,
         centerTitle: false,
-        actionsIconTheme: IconThemeData(
-          color: Colors.black
-        ),
+        actionsIconTheme: IconThemeData(color: Colors.black),
         textTheme: TextTheme(
           headline6: TextStyle(
               fontSize: 22,
@@ -223,6 +249,16 @@ abstract class _ThemeStore with Store {
   ///changes to the dark theme should be done here
   static ThemeData getDarkThemeData() {
     return ThemeData(
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        selectedItemColor: Colors.teal,
+        showUnselectedLabels: true,
+        showSelectedLabels: true,
+        unselectedItemColor: Colors.white,
+        backgroundColor: Colors.black,
+      ),
+      brightness: Brightness.dark,
+
+      indicatorColor: Colors.white,
       backgroundColor: Colors.black,
       scaffoldBackgroundColor: Colors.black,
       primaryColor: Colors.teal,
@@ -232,7 +268,7 @@ abstract class _ThemeStore with Store {
 
       ///changes
       //buttonColor: Colors.teal,
-      canvasColor: Colors.white,
+      canvasColor: Colors.black,
       cardColor: Color(0xFF212524),
       disabledColor: Colors.grey[700],
       bottomAppBarColor: Colors.black,
@@ -245,7 +281,7 @@ abstract class _ThemeStore with Store {
       iconTheme: IconThemeData(color: Colors.grey[500], opacity: 0.9),
       textTheme: TextTheme(
         headline1: TextStyle(
-          fontSize: 24,
+          fontSize: 22,
           color: Colors.grey[400],
           letterSpacing: 0,
           height: 1.1,
@@ -253,7 +289,7 @@ abstract class _ThemeStore with Store {
           fontFamily: 'Lato',
         ),
         headline2: TextStyle(
-          fontSize: 24,
+          fontSize: 22,
           color: Colors.grey[400],
           letterSpacing: 0,
           height: 1.1,
@@ -261,7 +297,7 @@ abstract class _ThemeStore with Store {
           fontFamily: 'Lato',
         ),
         headline3: TextStyle(
-          fontSize: 22,
+          fontSize: 20,
           color: Colors.grey[400],
           letterSpacing: 0,
           height: 1.4,
@@ -269,7 +305,7 @@ abstract class _ThemeStore with Store {
           fontFamily: 'Lato',
         ),
         headline4: TextStyle(
-          fontSize: 22,
+          fontSize: 20,
           color: Colors.grey[400],
           letterSpacing: 0,
           height: 1.4,

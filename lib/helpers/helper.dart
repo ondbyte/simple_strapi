@@ -89,9 +89,9 @@ bool isNullOrEmpty(dynamic variable) {
   return false;
 }
 
-dynamic act(Function fn) {
-  return Action(() {
-    return fn();
+dynamic act(Function fn) async {
+  return Action(() async {
+    return await fn();
   }).call();
 }
 

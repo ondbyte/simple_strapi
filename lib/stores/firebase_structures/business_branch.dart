@@ -3,12 +3,16 @@ import 'dart:typed_data';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/firebase_structures/business_services.dart';
 import 'package:bapp/stores/firebase_structures/business_holidays.dart';
+import 'package:bapp/stores/firebase_structures/business_staff.dart';
 import 'package:bapp/stores/firebase_structures/business_timings.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mobx/mobx.dart';
+
+import 'business_details.dart';
 
 class BusinessBranch {
   DocumentReference myDoc;
@@ -17,20 +21,21 @@ class BusinessBranch {
   final name = Observable<String>("");
   final address = Observable<String>("");
   final latlong = Observable<GeoPoint>(null);
-  final staff = Observable<List<DocumentReference>>([]);
-  final manager = Observable<DocumentReference>(null);
-  final receptionist = Observable<DocumentReference>(null);
-  final business = Observable<DocumentReference>(null);
+  final staff = ObservableList<BusinessStaff>();
+  final manager = Observable<BusinessStaff>(null);
+  final receptionist = Observable<BusinessStaff>(null);
+  final business = Observable<BusinessDetails>(null);
   final contactNumber = Observable<String>("");
   final email = Observable<String>("");
   final rating = Observable<double>(0.0);
   final businessServices = Observable<BusinessServices>(null);
   final businessTimings = Observable<BusinessTimings>(null);
   final businessHolidays = Observable<BusinessHolidays>(null);
-  final status = Observable<BusinessBranchActiveStatus>(
-      BusinessBranchActiveStatus.justApplied);
+  final status =
+      Observable<BusinessBranchActiveStatus>(BusinessBranchActiveStatus.lead);
 
-  BusinessBranch({this.myDoc}) {
+  BusinessBranch({this.myDoc, @required BusinessDetails business}) {
+    this.business.value = business;
     _getBranch(myDoc);
   }
 
@@ -96,10 +101,14 @@ class BusinessBranch {
       this.name.value = j["name"];
       this.address.value = j["address"];
       this.latlong.value = j["latlong"];
-      this.staff.value = List.castFrom(j["staff"]);
-      this.manager.value = j["manager"];
-      this.receptionist.value = j["receptionist"];
-      this.business.value = j["business"];
+      this.staff.clear();
+      this.staff.addAll(List.castFrom(j["staff"]).map((e) =>
+          BusinessStaff.fromDoc(
+              business: business.value, myDoc: j["manager"])));
+      this.manager.value =
+          BusinessStaff.fromDoc(business: business.value, myDoc: j["manager"]);
+      this.receptionist.value = BusinessStaff.fromDoc(
+          business: business.value, myDoc: j["receptionist"]);
       this.contactNumber.value = j["contactNumber"];
       this.email.value = j["email"];
       this.rating.value = j["rating"];
@@ -121,10 +130,10 @@ class BusinessBranch {
       "name": name.value,
       "address": address.value,
       "latlong": latlong.value,
-      "staff": staff.value,
-      "manager": manager.value,
-      "receptionist": receptionist.value,
-      "business": business.value,
+      "staff": staff.map((element) => element.myDoc).toList(),
+      "manager": manager.value?.myDoc,
+      "receptionist": receptionist.value?.myDoc,
+      "business": business.value.myDoc,
       "myDoc": myDoc,
       "contactNumber": contactNumber.value,
       "email": email.value,
@@ -147,7 +156,7 @@ class BusinessBranch {
   }
 
   Future saveBranch() async {
-    final collec = business.value.collection("businessBranches");
+    final collec = business.value.myDoc.value.collection("businessBranches");
     final doc = await collec.add(toMap());
     await act(() {
       this.myDoc = doc;
@@ -156,7 +165,7 @@ class BusinessBranch {
 }
 
 enum BusinessBranchActiveStatus {
-  justApplied,
+  lead,
   draft,
   documentVerification,
   published,

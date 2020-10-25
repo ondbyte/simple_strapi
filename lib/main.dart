@@ -8,6 +8,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
 import 'stores/business_store.dart';
@@ -45,12 +46,19 @@ class App extends StatelessWidget {
         ),
       ],
       builder: (context, w) {
-        return MaterialApp(
-          title: "Bapp",
-          theme:
-              Provider.of<ThemeStore>(context, listen: false).selectedThemeData,
-          initialRoute: "/",
-          onGenerateRoute: RouteManager.onGenerate,
+        return Consumer<ThemeStore>(
+          builder: (_, themeStore, __) {
+            return Observer(
+              builder: (_) {
+                return MaterialApp(
+                  title: "Bapp",
+                  theme: themeStore.selectedThemeData,
+                  initialRoute: "/",
+                  onGenerateRoute: RouteManager.onGenerate,
+                );
+              },
+            );
+          },
         );
       },
     );

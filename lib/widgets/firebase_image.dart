@@ -24,44 +24,48 @@ class FirebaseStorageImage extends StatefulWidget {
 class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(6),
-      child: Builder(
-        builder: (_) {
-          return widget.storagePathOrURL.endsWith("svg")
-              ? SvgPicture.asset(
-                  widget.storagePathOrURL,
-                  fit: BoxFit.contain,
-                  width: widget.width,
-                  height: widget.height,
-                )
-              : FutureBuilder<String>(
-                  future: () async {
-                    final i = FirebaseStorage.instance;
-                    final s = await i
-                        .ref()
-                        .child(widget.storagePathOrURL)
-                        .getDownloadURL();
-                    return s as String;
-                  }(),
-                  builder: (_, snap) {
-                    if (snap.hasData) {
-                      return CachedNetworkImage(
-                        imageUrl: snap.data,
-                        fit: widget.fit,
+    return SizedBox(
+      width: widget.width,
+      height: widget.height,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(6),
+        child: Builder(
+          builder: (_) {
+            return widget.storagePathOrURL.endsWith("svg")
+                ? SvgPicture.asset(
+                    widget.storagePathOrURL,
+                    fit: BoxFit.contain,
+                    width: widget.width,
+                    height: widget.height,
+                  )
+                : FutureBuilder<String>(
+                    future: () async {
+                      final i = FirebaseStorage.instance;
+                      final s = await i
+                          .ref()
+                          .child(widget.storagePathOrURL)
+                          .getDownloadURL();
+                      return s as String;
+                    }(),
+                    builder: (_, snap) {
+                      if (snap.hasData) {
+                        return CachedNetworkImage(
+                          imageUrl: snap.data,
+                          fit: widget.fit,
+                          width: widget.width,
+                          height: widget.height,
+                        );
+                      }
+                      return SvgPicture.asset(
+                        kTemporaryBusinessImage,
+                        fit: BoxFit.contain,
                         width: widget.width,
                         height: widget.height,
                       );
-                    }
-                    return SvgPicture.asset(
-                      kTemporaryBusinessImage,
-                      fit: BoxFit.contain,
-                      width: widget.width,
-                      height: widget.height,
-                    );
-                  },
-                );
-        },
+                    },
+                  );
+          },
+        ),
       ),
     );
   }

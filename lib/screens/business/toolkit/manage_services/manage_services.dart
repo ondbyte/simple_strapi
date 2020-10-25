@@ -1,8 +1,10 @@
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/business_store.dart';
+import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/firebase_image.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -65,8 +67,16 @@ class _BusinessProductsPricingScreenState
             builder: (_) {
               return TabBarView(
                 children: [
-                  _getServices(context),
-                  _getCategories(context),
+                  BusinessServicesTab(
+                    shouldIDie: () {
+                      return mounted;
+                    },
+                  ),
+                  BusinessServiceCategoriesTab(
+                    shouldIDie: () {
+                      return mounted;
+                    },
+                  ),
                 ],
               );
             },
@@ -75,27 +85,122 @@ class _BusinessProductsPricingScreenState
       }),
     );
   }
+}
 
-  Widget _getServices(
-    BuildContext context,
-  ) {
-    return Consumer<BusinessStore>(
-      builder: (_, businessStore, __) {
+class BusinessServicesTab extends StatefulWidget {
+  final Function shouldIDie;
+  BusinessServicesTab({Key key, @required this.shouldIDie}) : super(key: key);
+
+  @override
+  _BusinessServicesTabState createState() => _BusinessServicesTabState();
+}
+
+class _BusinessServicesTabState extends State<BusinessServicesTab>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Consumer2<BusinessStore, CloudStore>(
+      builder: (_, businessStore, cloudStore, __) {
         return Observer(
           builder: (_) {
             return CustomScrollView(
               slivers: [
-                SliverList(
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate(
+                      [
+                        ...List.generate(
+                          businessStore
+                              .business.businessServices.value.all.length,
+                          (index) {
+                            final t = businessStore
+                                .business.businessServices.value.all[index];
+                            return ListTile(
+                              title: Text(t.serviceName.value),
+                              subtitle: Text(
+                                cloudStore.theNumber.currency +
+                                    " " +
+                                    t.price.value.ceil().toInt().toString() +
+                                    ", " +
+                                    t.duration.value.inMinutes.toString() +
+                                    " Minutes" +
+                                    "\n" +
+                                    "Category : " +
+                                    t.category.value.categoryName.value,
+                              ),
+                              leading: FirebaseStorageImage(
+                                width: 64,
+                                height: 64,
+                                storagePathOrURL: t.images.isNotEmpty
+                                    ? t.images.keys.elementAt(0)
+                                    : t.category.value.images.isNotEmpty
+                                        ? t.category.value.images.keys
+                                            .elementAt(0)
+                                        : kTemporaryBusinessImage,
+                              ),
+                              trailing: IconButton(
+                                icon: Icon(Icons.delete_forever),
+                                onPressed: () async {
+                                  await businessStore
+                                      .business.businessServices.value
+                                      .removeService(t);
+                                },
+                              ),
+                            );
+                          },
+                        )
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  @override
+  bool get wantKeepAlive => widget.shouldIDie();
+}
+
+class BusinessServiceCategoriesTab extends StatefulWidget {
+  final Function shouldIDie;
+  BusinessServiceCategoriesTab({Key key, @required this.shouldIDie})
+      : super(key: key);
+
+  @override
+  _BusinessServiceCategoriesTabState createState() =>
+      _BusinessServiceCategoriesTabState();
+}
+
+class _BusinessServiceCategoriesTabState
+    extends State<BusinessServiceCategoriesTab>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Consumer<BusinessStore>(
+      builder: (_, businessStore, __) {
+        return Observer(builder: (_) {
+          return CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                sliver: SliverList(
                   delegate: SliverChildListDelegate(
                     [
                       ...List.generate(
-                        businessStore
-                            .business.businessServices.value.all.length,
+                        businessStore.business.businessServices.value
+                            .allCategories.length,
                         (index) {
-                          final t = businessStore
-                              .business.businessServices.value.all[index];
+                          final t = businessStore.business.businessServices
+                              .value.allCategories[index];
                           return ListTile(
-                            title: Text(t.serviceName.value),
+                            title: Text(t.categoryName.value),
                             subtitle: Text(t.description.value),
                             leading: FirebaseStorageImage(
                               width: 64,
@@ -107,9 +212,19 @@ class _BusinessProductsPricingScreenState
                             trailing: IconButton(
                               icon: Icon(Icons.delete_forever),
                               onPressed: () async {
+                                if (businessStore
+                                    .business.businessServices.value
+                                    .anyServiceDependsOn(t)) {
+                                  Flushbar(
+                                    message:
+                                        "There are some services that depend on this category please remove them first",
+                                    duration: const Duration(seconds: 2),
+                                  ).show(context);
+                                  return;
+                                }
                                 await businessStore
                                     .business.businessServices.value
-                                    .removeService(t);
+                                    .removeCategory(t);
                               },
                             ),
                           );
@@ -117,52 +232,6 @@ class _BusinessProductsPricingScreenState
                       )
                     ],
                   ),
-                )
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Widget _getCategories(BuildContext context) {
-    return Consumer<BusinessStore>(
-      builder: (_, businessStore, __) {
-        return Observer(builder: (_) {
-          return CustomScrollView(
-            slivers: [
-              SliverList(
-                delegate: SliverChildListDelegate(
-                  [
-                    ...List.generate(
-                      businessStore
-                          .business.businessServices.value.allCategories.length,
-                      (index) {
-                        final t = businessStore.business.businessServices.value
-                            .allCategories[index];
-                        return ListTile(
-                          title: Text(t.categoryName.value),
-                          subtitle: Text(t.description.value),
-                          leading: FirebaseStorageImage(
-                            width: 64,
-                            height: 64,
-                            storagePathOrURL: t.images.isNotEmpty
-                                ? t.images.keys.elementAt(0)
-                                : kTemporaryBusinessImage,
-                          ),
-                          trailing: IconButton(
-                            icon: Icon(Icons.delete_forever),
-                            onPressed: () async {
-                              await businessStore
-                                  .business.businessServices.value
-                                  .removeCategory(t);
-                            },
-                          ),
-                        );
-                      },
-                    )
-                  ],
                 ),
               )
             ],
@@ -171,4 +240,7 @@ class _BusinessProductsPricingScreenState
       },
     );
   }
+
+  @override
+  bool get wantKeepAlive => widget.shouldIDie();
 }
