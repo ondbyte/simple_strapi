@@ -63,11 +63,12 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
                 children: List.generate(
                     BusinessExpandingPanelConfigs.cfgs.length, (i) {
                   return ExpansionPanel(
+                    canTapOnHeader: true,
                     isExpanded: i == _expandedPanel,
                     headerBuilder: (_, expanded) {
                       return ListTile(
-                        tileColor: Theme.of(context).backgroundColor,
-                        selectedTileColor: Theme.of(context).backgroundColor,
+                        //tileColor: Theme.of(context).backgroundColor,
+                        //selectedTileColor: Theme.of(context).backgroundColor,
                         contentPadding: EdgeInsets.zero,
                         onTap: () {
                           setState(

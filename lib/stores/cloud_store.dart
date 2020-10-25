@@ -53,7 +53,6 @@ abstract class _CloudStore with Store {
 
   Future init(BuildContext context) async {
     await _initFCM();
-    await ThePhoneNumberLib.init();
     _user = _auth.currentUser;
     _authStore = Provider.of<AuthStore>(context, listen: false);
     if (_user == null) {
@@ -156,10 +155,9 @@ abstract class _CloudStore with Store {
 
   Future setMyOtherUserData() async {
     var doc = _fireStore.doc("users/${_user.uid}");
-    await doc.update({
-      "contactNumber": theNumber?.internationalNumber,
-      "fcmToken": fcmToken
-    });
+    await doc.set(
+        {"contactNumber": theNumber?.internationalNumber, "fcmToken": fcmToken},
+        SetOptions(merge: true));
   }
 
   @action
@@ -236,8 +234,10 @@ abstract class _CloudStore with Store {
       }),
     );
     _disposers.add(
-      reaction((_) => _user, (_) async {
-        await setMyOtherUserData();
+      reaction((_) => theNumber, (_) async {
+        if (_user != null) {
+          await setMyOtherUserData();
+        }
       }),
     );
   }

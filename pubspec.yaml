@@ -62,6 +62,8 @@ dependencies:
   expandable: ^4.1.4
   date_range_picker: ^1.0.6
   time_range_picker: ^1.1.0
+  chips_choice: ^2.0.1
+
 
   # MAPS
   google_maps_flutter: ^1.0.2

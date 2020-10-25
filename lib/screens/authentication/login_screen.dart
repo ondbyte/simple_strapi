@@ -29,12 +29,12 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _askOTP = false;
   List<Completer<String>> _otpFutureCompleters = [];
 
-
   @override
   void dispose() {
     _otpFutureCompleters = null;
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return StoreProvider<CloudStore>(
@@ -43,26 +43,22 @@ class _LoginScreenState extends State<LoginScreen> {
         return StoreProvider<AuthStore>(
           store: Provider.of<AuthStore>(context, listen: false),
           builder: (_, authStore) {
-            return Scaffold(
-              appBar: AppBar(
-                leading: CloseButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ),
-              body: LayoutBuilder(
-                builder: (_,c){
-                  return Center(
-                    child: SingleChildScrollView(
-                      child: !_askOTP
-                          ? _getNumberWidget(authStore, cloudStore)
-                          : _getOTPWidget(authStore, cloudStore),
-                    )
-                  );
+            return Scaffold(appBar: AppBar(
+              leading: CloseButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
                 },
-              )
-            );
+              ),
+            ), body: LayoutBuilder(
+              builder: (_, c) {
+                return Center(
+                    child: SingleChildScrollView(
+                  child: !_askOTP
+                      ? _getNumberWidget(authStore, cloudStore)
+                      : _getOTPWidget(authStore, cloudStore),
+                ));
+              },
+            ));
           },
         );
       },
@@ -144,8 +140,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           ).show(context);
                         },
                         onVerified: () {
-                          if(isNullOrEmpty(authStore.user.email)||isNullOrEmpty(authStore.user.displayName)){
-                            Navigator.pushReplacementNamed(context, RouteManager.createProfileScreen);
+                          if (isNullOrEmpty(authStore.user.email) ||
+                              isNullOrEmpty(authStore.user.displayName)) {
+                            Navigator.pushReplacementNamed(
+                                context, RouteManager.createProfileScreen);
                           } else {
                             Navigator.pop(context);
                           }
@@ -238,6 +236,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           autoFocus: true,
                           enablePinAutofill: true,
                           textStyle: Theme.of(context).textTheme.headline1,
+                          backgroundColor: Theme.of(context).backgroundColor,
                           pinTheme: PinTheme(
                             activeColor: Theme.of(context).primaryColor,
                             selectedColor: Theme.of(context).primaryColor,

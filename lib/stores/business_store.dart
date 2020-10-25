@@ -55,7 +55,8 @@ abstract class _BusinessStore with Store {
   }
 
   userRelatedUpdate() {
-    businessDoc = _fireStore.doc("businesses/${_user.uid}");
+    businessDoc =
+        _fireStore.doc("businesses/${FirebaseAuth.instance.currentUser.uid}");
   }
 
   @action
@@ -69,23 +70,23 @@ abstract class _BusinessStore with Store {
     ///create the first branch
 
     final firstBranchname = businessName;
-    final firstBranchDoc = _fireStore
-        .doc("businesses/${_user.uid}/businessBranches/$firstBranchname");
+    final firstBranchDoc = _fireStore.doc(
+        "businesses/${FirebaseAuth.instance.currentUser.uid}/businessBranches/$firstBranchname");
 
     ///create the first default timing set
-    final mainBusinessTimingDoc =
-        _fireStore.doc("businesses/${_user.uid}/businessTimings/main");
+    final mainBusinessTimingDoc = _fireStore.doc(
+        "businesses/${FirebaseAuth.instance.currentUser.uid}/businessTimings/main");
     final businessTimings = BusinessTimings(myDoc: mainBusinessTimingDoc);
 
     ///create the deafult empty services set
-    final mainBusinessServicesCollec =
-        _fireStore.collection("businesses/${_user.uid}/businessServices");
+    final mainBusinessServicesCollec = _fireStore.collection(
+        "businesses/${FirebaseAuth.instance.currentUser.uid}/businessServices");
     final businessServices =
         BusinessServices(myCollec: mainBusinessServicesCollec.path);
 
     ///create the deafult empty holidays set
-    final mainBusinessHolidaysCollection =
-        _fireStore.collection("businesses/${_user.uid}/businessHolidays");
+    final mainBusinessHolidaysCollection = _fireStore.collection(
+        "businesses/${FirebaseAuth.instance.currentUser.uid}/businessHolidays");
     final businessHolidays =
         BusinessHolidays(myCollection: mainBusinessHolidaysCollection.path);
 
@@ -118,8 +119,9 @@ abstract class _BusinessStore with Store {
 
   @action
   Future getMyBusiness() async {
-    final businessDetails =
-        await _fireStore.doc("businesses/${_user.uid}").get();
+    final businessDetails = await _fireStore
+        .doc("businesses/${FirebaseAuth.instance.currentUser.uid}")
+        .get();
 
     if (businessDetails.exists) {
       final data = businessDetails.data();

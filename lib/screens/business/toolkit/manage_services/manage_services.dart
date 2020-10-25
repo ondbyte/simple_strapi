@@ -58,8 +58,18 @@ class _BusinessProductsPricingScreenState
               indicatorSize: TabBarIndicatorSize.tab,
               labelPadding: EdgeInsets.all(8),
               tabs: [
-                Text("Services"),
-                Text("Categories"),
+                Text(
+                  "Services",
+                  style: Theme.of(context).textTheme.button.apply(
+                        color: Theme.of(context).indicatorColor,
+                      ),
+                ),
+                Text(
+                  "Categories",
+                  style: Theme.of(context).textTheme.button.apply(
+                        color: Theme.of(context).indicatorColor,
+                      ),
+                ),
               ],
             ),
           ),
@@ -68,12 +78,12 @@ class _BusinessProductsPricingScreenState
               return TabBarView(
                 children: [
                   BusinessServicesTab(
-                    shouldIDie: () {
+                    keepAlive: () {
                       return mounted;
                     },
                   ),
                   BusinessServiceCategoriesTab(
-                    shouldIDie: () {
+                    keepAlive: () {
                       return mounted;
                     },
                   ),
@@ -88,8 +98,8 @@ class _BusinessProductsPricingScreenState
 }
 
 class BusinessServicesTab extends StatefulWidget {
-  final Function shouldIDie;
-  BusinessServicesTab({Key key, @required this.shouldIDie}) : super(key: key);
+  final Function keepAlive;
+  BusinessServicesTab({Key key, @required this.keepAlive}) : super(key: key);
 
   @override
   _BusinessServicesTabState createState() => _BusinessServicesTabState();
@@ -164,12 +174,12 @@ class _BusinessServicesTabState extends State<BusinessServicesTab>
   }
 
   @override
-  bool get wantKeepAlive => widget.shouldIDie();
+  bool get wantKeepAlive => widget.keepAlive();
 }
 
 class BusinessServiceCategoriesTab extends StatefulWidget {
-  final Function shouldIDie;
-  BusinessServiceCategoriesTab({Key key, @required this.shouldIDie})
+  final Function keepAlive;
+  BusinessServiceCategoriesTab({Key key, @required this.keepAlive})
       : super(key: key);
 
   @override
@@ -242,5 +252,5 @@ class _BusinessServiceCategoriesTabState
   }
 
   @override
-  bool get wantKeepAlive => widget.shouldIDie();
+  bool get wantKeepAlive => widget.keepAlive();
 }

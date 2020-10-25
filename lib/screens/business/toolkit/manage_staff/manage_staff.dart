@@ -1,3 +1,4 @@
+import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -18,6 +19,11 @@ class _BusinessManageStaffScreenState extends State<BusinessManageStaffScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: true,
         title: Text("Staff manager"),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).pushNamed(RouteManager.businessAddAStaffScreen);
+        },
       ),
       body: Consumer<BusinessStore>(
         builder: (_, businessStore, __) {

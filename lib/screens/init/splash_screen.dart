@@ -17,6 +17,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
+import 'package:thephonenumber/thephonenumber.dart';
 
 import '../../FCM.dart';
 import '../../route_manager.dart';
@@ -32,6 +33,7 @@ class _SplashScreenState extends State<SplashScreen> {
     return InitWidget(
       initializer: () async {
         ///init authentication store / load user
+        await ThePhoneNumberLib.init();
         await Provider.of<ThemeStore>(context, listen: false).init();
         await Provider.of<AuthStore>(context, listen: false).init();
         await _initCrashlytics();
