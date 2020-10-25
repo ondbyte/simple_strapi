@@ -56,7 +56,7 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
           [
             Theme(
               data: Theme.of(context)
-                  .copyWith(cardColor: Theme.of(context).primaryColorLight),
+                  .copyWith(cardColor: Theme.of(context).backgroundColor),
               child: ExpansionPanelList(
                 elevation: 0,
                 dividerColor: Colors.transparent,
@@ -66,8 +66,8 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
                     isExpanded: i == _expandedPanel,
                     headerBuilder: (_, expanded) {
                       return ListTile(
-                        tileColor: Theme.of(context).primaryColorLight,
-                        selectedTileColor: Theme.of(context).primaryColorLight,
+                        tileColor: Theme.of(context).backgroundColor,
+                        selectedTileColor: Theme.of(context).backgroundColor,
                         contentPadding: EdgeInsets.zero,
                         onTap: () {
                           setState(
@@ -96,29 +96,34 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
                                       3)
                                   .ceil(),
                           width: cons.maxWidth,
-                          child: GridView.count(
-                            crossAxisSpacing: 16,
-                            mainAxisSpacing: 16,
-                            physics: const NeverScrollableScrollPhysics(),
-                            crossAxisCount: 3,
-                            children: List.generate(
-                              BusinessExpandingPanelConfigs
-                                  .cfgs[i].tiles.length,
-                              (index) => _getTile(
-                                context: context,
-                                name: BusinessExpandingPanelConfigs
-                                    .cfgs[i].tiles[index].name,
-                                icon: Icon(BusinessExpandingPanelConfigs
-                                    .cfgs[i].tiles[index].iconData),
-                                onClick: BusinessExpandingPanelConfigs
-                                        .cfgs[i].tiles[index].enabled
-                                    ? () {
-                                        Navigator.of(context).pushNamed(
-                                          BusinessExpandingPanelConfigs.cfgs[i]
-                                              .tiles[index].onClickRoute,
-                                        );
-                                      }
-                                    : null,
+                          child: Container(
+                            color: Theme.of(context).backgroundColor,
+                            child: GridView.count(
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                              physics: const NeverScrollableScrollPhysics(),
+                              crossAxisCount: 3,
+                              children: List.generate(
+                                BusinessExpandingPanelConfigs
+                                    .cfgs[i].tiles.length,
+                                (index) => _getTile(
+                                  context: context,
+                                  name: BusinessExpandingPanelConfigs
+                                      .cfgs[i].tiles[index].name,
+                                  icon: Icon(BusinessExpandingPanelConfigs
+                                      .cfgs[i].tiles[index].iconData),
+                                  onClick: BusinessExpandingPanelConfigs
+                                          .cfgs[i].tiles[index].enabled
+                                      ? () {
+                                          Navigator.of(context).pushNamed(
+                                            BusinessExpandingPanelConfigs
+                                                .cfgs[i]
+                                                .tiles[index]
+                                                .onClickRoute,
+                                          );
+                                        }
+                                      : null,
+                                ),
                               ),
                             ),
                           ),
@@ -253,12 +258,12 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
                       onTap: docuVerification
                           ? null
                           : () {
-                              Navigator.of(context).pushNamed(RouteManager
-                                  .businessVerificationScreen);
+                              Navigator.of(context).pushNamed(
+                                  RouteManager.businessVerificationScreen);
                             },
                     ),
                   )
-                : Divider();
+                : SizedBox();
           },
         );
       },
