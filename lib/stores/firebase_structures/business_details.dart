@@ -21,7 +21,7 @@ class BusinessDetails {
   final Observable<GeoPoint> latlong = Observable<GeoPoint>(null);
   final Observable<String> uid = Observable<String>("");
   final branches = Observable<List<BusinessBranch>>([]);
-  final selectedBranch = Observable<BusinessBranch>(BusinessBranch());
+  final selectedBranch = Observable<BusinessBranch>(null);
   final email = Observable<String>("");
   final myDoc = Observable<DocumentReference>(null);
   final businessTimings = Observable<BusinessTimings>(null);
@@ -34,8 +34,14 @@ class BusinessDetails {
       reaction(
         (_) => selectedBranch.value,
         (_) {
-          if (myDoc.value != null) {
-            myDoc.value.update({"selectedBranch": selectedBranch.value.myDoc});
+          if (myDoc.value != null && selectedBranch.value != null) {
+            try {
+              myDoc.value.set(
+                  {"selectedBranch": selectedBranch.value.myDoc.value},
+                  SetOptions(merge: true));
+            } catch (e) {
+              print("Expected ERROR ; ${e.toString()}");
+            }
           }
         },
       ),
@@ -113,8 +119,8 @@ class BusinessDetails {
       "address": address.value,
       "latLong": latlong.value,
       "uid": uid.value,
-      "branches": branches.value.map((e) => e.myDoc).toList(),
-      "selectedBranch": selectedBranch.value.myDoc,
+      "branches": branches.value.map((e) => e.myDoc.value).toList(),
+      "selectedBranch": selectedBranch.value.myDoc.value,
       "email": email.value,
       "myDoc": myDoc.value,
       "businessTimings": businessTimings.value.myDoc,
@@ -126,7 +132,7 @@ class BusinessDetails {
   Future removeBranch(BusinessBranch branch) async {
     final old = branches.value;
     old.remove(branch);
-    await branch.myDoc.delete();
+    await branch.myDoc.value.delete();
     await act(() async {
       branches.value = old; //new
       if (branch.myDoc == selectedBranch.value.myDoc) {
@@ -158,7 +164,7 @@ class BusinessDetails {
       ..businessTimings.value = businessTimings.value
       ..businessHolidays.value = businessHolidays.value
       ..rating.value = 0.0
-      ..status.value = BusinessBranchActiveStatus.draft;
+      ..status.value = BusinessBranchActiveStatus.lead;
 
     await branch.saveBranch();
 

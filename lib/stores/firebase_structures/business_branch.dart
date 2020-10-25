@@ -15,7 +15,7 @@ import 'package:mobx/mobx.dart';
 import 'business_details.dart';
 
 class BusinessBranch {
-  DocumentReference myDoc;
+  final myDoc = Observable<DocumentReference>(null);
 
   final images = Observable<List<String>>([]);
   final name = Observable<String>("");
@@ -34,19 +34,30 @@ class BusinessBranch {
   final status =
       Observable<BusinessBranchActiveStatus>(BusinessBranchActiveStatus.lead);
 
-  BusinessBranch({this.myDoc, @required BusinessDetails business}) {
+  BusinessBranch(
+      {DocumentReference myDoc, @required BusinessDetails business}) {
     this.business.value = business;
     _getBranch(myDoc);
+    _setupReactions();
   }
 
   var _disposers = <ReactionDisposer>[];
   _setupReactions() {
     _disposers.add(
       reaction(
+        (_) => myDoc.value,
+        (_) async {
+          await myDoc.value.update({"myDoc": myDoc.value});
+        },
+      ),
+    );
+
+    _disposers.add(
+      reaction(
         (_) => status.value,
         (_) async {
-          await myDoc
-              .update({"status": EnumToString.convertToString(status.value)});
+          await myDoc.value
+              ?.update({"status": EnumToString.convertToString(status.value)});
         },
       ),
     );
@@ -55,7 +66,7 @@ class BusinessBranch {
       reaction(
         (_) => address.value,
         (_) async {
-          await myDoc.update({"address": address.value});
+          await myDoc.value?.update({"address": address.value});
         },
       ),
     );
@@ -64,7 +75,7 @@ class BusinessBranch {
       reaction(
         (_) => name.value,
         (_) async {
-          await myDoc.update({"name": name.value});
+          await myDoc.value?.update({"name": name.value});
         },
       ),
     );
@@ -73,7 +84,7 @@ class BusinessBranch {
       reaction(
         (_) => email.value,
         (_) async {
-          await myDoc.update({"email": email.value});
+          await myDoc.value?.update({"email": email.value});
         },
       ),
     );
@@ -82,7 +93,7 @@ class BusinessBranch {
       reaction(
         (_) => contactNumber.value,
         (_) async {
-          await myDoc.update({"contactNumber": contactNumber.value});
+          await myDoc.value?.update({"contactNumber": contactNumber.value});
         },
       ),
     );
@@ -105,10 +116,13 @@ class BusinessBranch {
       this.staff.addAll(List.castFrom(j["staff"]).map((e) =>
           BusinessStaff.fromDoc(
               business: business.value, myDoc: j["manager"])));
-      this.manager.value =
-          BusinessStaff.fromDoc(business: business.value, myDoc: j["manager"]);
-      this.receptionist.value = BusinessStaff.fromDoc(
-          business: business.value, myDoc: j["receptionist"]);
+      this.manager.value = j["manager"] != null
+          ? BusinessStaff.fromDoc(business: business.value, myDoc: j["manager"])
+          : null;
+      this.receptionist.value = j["receptionist"] != null
+          ? BusinessStaff.fromDoc(
+              business: business.value, myDoc: j["receptionist"])
+          : null;
       this.contactNumber.value = j["contactNumber"];
       this.email.value = j["email"];
       this.rating.value = j["rating"];
@@ -119,8 +133,6 @@ class BusinessBranch {
           BusinessHolidays(myCollection: j["businessHolidays"]);
       this.status.value = EnumToString.fromString(
           BusinessBranchActiveStatus.values, j["status"]);
-
-      _setupReactions();
     }
   }
 
@@ -133,8 +145,8 @@ class BusinessBranch {
       "staff": staff.map((element) => element.myDoc).toList(),
       "manager": manager.value?.myDoc,
       "receptionist": receptionist.value?.myDoc,
-      "business": business.value.myDoc,
-      "myDoc": myDoc,
+      "business": business.value.myDoc.value,
+      "myDoc": myDoc.value,
       "contactNumber": contactNumber.value,
       "email": email.value,
       "rating": rating.value,
@@ -152,14 +164,14 @@ class BusinessBranch {
       images.value = list;
     });
 
-    await myDoc.set({"images": list}, SetOptions(merge: true));
+    await myDoc.value?.set({"images": list}, SetOptions(merge: true));
   }
 
   Future saveBranch() async {
     final collec = business.value.myDoc.value.collection("businessBranches");
     final doc = await collec.add(toMap());
     await act(() {
-      this.myDoc = doc;
+      this.myDoc.value = doc;
     });
   }
 }
