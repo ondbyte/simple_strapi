@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:bapp/classes/location.dart';
@@ -5,12 +6,14 @@ import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/auth_store.dart';
+import 'package:bapp/stores/firebase_structures/bapp_user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:country_pickers/country_pickers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:thephonenumber/thephonenumber.dart';
@@ -52,7 +55,6 @@ abstract class _CloudStore with Store {
   AuthStore _authStore;
 
   Future init(BuildContext context) async {
-    await _initFCM();
     _user = _auth.currentUser;
     _authStore = Provider.of<AuthStore>(context, listen: false);
     if (_user == null) {
@@ -176,7 +178,7 @@ abstract class _CloudStore with Store {
 
   ///will run auto when the location is updated
   Future setMyLocation() async {
-    var doc = _fireStore.doc("users/${_user.uid}");
+    final doc = _fireStore.doc("users/${_user.uid}");
     await doc.set({"my_location": myLocation.toMap()}, SetOptions(merge: true));
   }
 
@@ -220,6 +222,20 @@ abstract class _CloudStore with Store {
     );
   }
 
+  Future<BappUser> getkAnotherUserOnBapp(ThePhoneNumber phoneNumber) async {
+    final usersCollec = FirebaseFirestore.instance.collection("users");
+    final query = usersCollec.where("contactNumber",
+        isEqualTo: phoneNumber.internationalNumber);
+    final snaps = await query.get();
+    if (snaps.size == 0) {
+      return null;
+    } else {}
+    final doc = snaps.docs.toList()[0];
+    final u = BappUser.fromJson(myDoc: doc.reference, j: doc.data());
+
+    return u;
+  }
+
   void _setupAutoRun() {
     _disposers.add(
       reaction((_) => myLocation, (_) async {
@@ -243,48 +259,11 @@ abstract class _CloudStore with Store {
         }
       }),
     );
+    _disposers.add(
+      reaction((_) => BappFCM().fcmToken.value, (val) async {
+        fcmToken = val;
+        await setMyOtherUserData();
+      }, fireImmediately: true),
+    );
   }
-
-  bool _isFcmInitialized = false;
-  _initFCM() async {
-    if (!_isFcmInitialized) {
-      final _fcm = FirebaseMessaging();
-      if (Platform.isIOS) {
-        kNotifEnabled = await _fcm.requestNotificationPermissions();
-      } else {
-        kNotifEnabled = true;
-      }
-      _fcm.configure(
-        onBackgroundMessage: myBackgroundMessageHandler,
-        onLaunch: (Map<String, dynamic> lMessage) async {
-          print("[ON_LAUNCH] " + lMessage.toString());
-        },
-        onResume: (Map<String, dynamic> rMessage) async {
-          print("[ON_RESUME] " + rMessage.toString());
-        },
-        onMessage: (Map<String, dynamic> message) async {
-          print("[ON_MESSAGE] " + message.toString());
-        },
-      );
-      _fcm.onTokenRefresh.listen((event) {
-        fcmToken = event;
-        print("fcmToken " + fcmToken);
-      });
-      _isFcmInitialized = true;
-    }
-  }
-
-/*   @action
-  Future requestCurrentPosition({bool askPermission = false}) async {
-    if (askPermission) {
-      if(! (await Permission.location.request().isGranted)){
-        currentPosition = await getCurrentPosition();
-      }
-    } else {
-      if(await Permission.location.isGranted){
-        currentPosition = await getCurrentPosition();
-      }
-    }
-  } */
-
 }

@@ -12,6 +12,7 @@ class BusinessStaff {
   UserType role;
   String name;
   DateTime dateOfJoining;
+  Map<String, bool> images = {};
   final expertise = ObservableList<BusinessServiceCategory>();
 
   BusinessBranch branch;
@@ -32,6 +33,7 @@ class BusinessStaff {
     this.fcmToken,
     this.name,
     this.dateOfJoining,
+    this.images = const {},
   });
 
   toMap() {
@@ -47,6 +49,7 @@ class BusinessStaff {
       "receptionist": receptionist.myDoc,
       "uid": uid,
       "fcmToken": fcmToken,
+      "images": images.keys.toList(),
     };
   }
 
@@ -62,6 +65,9 @@ class BusinessStaff {
         BusinessStaff.fromDoc(business: business, myDoc: j["receptionist"]);
     uid = j["uid"];
     fcmToken = j["fcmToken"];
+    images = Map.fromIterable(j["images"],
+            key: (v) => v as String, value: (_) => true) ??
+        {};
   }
 
   BusinessStaff.fromDoc({@required this.myDoc, @required this.business}) {

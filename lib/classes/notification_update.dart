@@ -1,4 +1,3 @@
-
 import 'dart:ui';
 
 import 'package:bapp/config/config.dart';
@@ -7,33 +6,50 @@ import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/foundation.dart';
 
 ///firebase notification update structure
-class NotificationUpdate{
+class NotificationUpdate {
   String title;
   String description;
-  String html;
   int orderId;
   NotificationUpdateType type;
+  String fromToken;
   Timestamp at;
   bool viewed;
-  String id;
-  Color myColor;
+  String state;
 
-  NotificationUpdate(this.id,this.title, this.description, this.html, this.orderId, this.type,this.at,this.viewed,);
+  NotificationUpdate({
+    this.state,
+    this.title,
+    this.description,
+    this.orderId,
+    this.type,
+    this.at,
+    this.viewed = false,
+    this.fromToken,
+  });
 
-  NotificationUpdate.fromJson(String id,Map<String,dynamic> j){
-    this.id = id;
+  NotificationUpdate.fromJson(Map<String, dynamic> j) {
+    this.state = j["state"];
     this.title = j["title"];
-    this.html = j["html"];
     this.description = j["description"];
-    this.type = EnumToString.fromString(NotificationUpdateType.values, j["type"]);
-    this.orderId = j["orderId"] as int;
-    this.at = j["at"] as Timestamp;
+    this.type =
+        EnumToString.fromString(NotificationUpdateType.values, j["type"]);
+    this.orderId = j["orderId"] as int ?? -1;
+    this.at = Timestamp.fromMillisecondsSinceEpoch(j["at"]);
     this.viewed = j["viewed"] as bool;
-    this.myColor = CardsColor.next();
+    this.fromToken = j["fromToken"] as String;
   }
 
+  toStringMap() {
+    return <String, String>{
+      "state": state.toString(),
+      "title": title,
+      "description": description,
+      "type": EnumToString.convertToString(type),
+      "orderId": orderId.toString(),
+      "at": at.millisecondsSinceEpoch.toString(),
+      "fromToken": fromToken,
+    };
+  }
 }
-enum NotificationUpdateType{
-  orderUpdate,
-  news
-}
+
+enum NotificationUpdateType { orderUpdate, news, staffing }

@@ -34,6 +34,7 @@ class _SplashScreenState extends State<SplashScreen> {
       initializer: () async {
         ///init authentication store / load user
         await ThePhoneNumberLib.init();
+        BappFCM().initForAndroid();
         await Provider.of<ThemeStore>(context, listen: false).init();
         await Provider.of<AuthStore>(context, listen: false).init();
         await _initCrashlytics();

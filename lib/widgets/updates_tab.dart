@@ -187,7 +187,6 @@ class NotificationUpdateTileWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: update.myColor,
         borderRadius: BorderRadius.circular(6),
       ),
       padding: EdgeInsets.all(10),

@@ -24,21 +24,25 @@ class Bapp extends StatelessWidget {
         //await Provider.of<BusinessStore>(context, listen: false).init(context);
       },
       builder: (_, cloudStore) {
-        return Observer(
-          builder: (_) {
-            switch (cloudStore.userType) {
-              case UserType.customer:
-                return CustomerHome();
-              case UserType.businessOwner:
-                return BusinessHome();
-              case UserType.businessStaff:
-                return SizedBox();
-              default:
-                return Container(
-                  color: Colors.red,
-                );
-            }
-          },
+        return Stack(
+          children: [
+            Observer(
+              builder: (_) {
+                switch (cloudStore.userType) {
+                  case UserType.customer:
+                    return CustomerHome();
+                  case UserType.businessOwner:
+                    return BusinessHome();
+                  case UserType.businessStaff:
+                    return SizedBox();
+                  default:
+                    return Container(
+                      color: Colors.red,
+                    );
+                }
+              },
+            ),
+          ],
         );
       },
     );

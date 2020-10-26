@@ -35,18 +35,18 @@ abstract class _UpdatesStore with Store {
   @action
   Future remove(NotificationUpdate u) async {
     if (u.type == NotificationUpdateType.news) {
-      news.remove(u.id);
+      news.remove(u.state);
     } else if (u.type == NotificationUpdateType.orderUpdate) {
-      updates.remove(u.id);
+      updates.remove(u.state);
     }
   }
 
   @action
   Future undoRemove(NotificationUpdate u) async {
     if (u.type == NotificationUpdateType.news) {
-      news[u.id] = u;
+      news[u.state] = u;
     } else if (u.type == NotificationUpdateType.orderUpdate) {
-      updates[u.id] = u;
+      updates[u.state] = u;
     }
   }
 
@@ -57,7 +57,7 @@ abstract class _UpdatesStore with Store {
       return;
     }
     await _fireStore
-        .doc("users/${_user.uid}/updates/${update.id}")
+        .doc("users/${_user.uid}/updates/${update.state}")
         .update({"viewed": true});
   }
 
@@ -82,7 +82,7 @@ abstract class _UpdatesStore with Store {
     final snaps = await updatesQuery.get();
     //print(snaps.docs);
     final allUpdates = snaps.docs.map(
-      (e) => NotificationUpdate.fromJson(e.id, e.data()),
+      (e) => NotificationUpdate.fromJson(e.data()),
     );
     _segregate(allUpdates.toList());
   }
@@ -92,12 +92,12 @@ abstract class _UpdatesStore with Store {
     allUpdates.forEach(
       (element) {
         if (element.viewed) {
-          viewed[element.id] = element;
+          viewed[element.state] = element;
         } else {
           if (element.type == NotificationUpdateType.news) {
-            news[element.id] = element;
+            news[element.state] = element;
           } else {
-            updates[element.id] = element;
+            updates[element.state] = element;
           }
         }
       },

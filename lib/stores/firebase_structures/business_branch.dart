@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/firebase_structures/business_services.dart';
 import 'package:bapp/stores/firebase_structures/business_holidays.dart';
@@ -180,6 +181,14 @@ class BusinessBranch {
       this.myDoc.value = doc;
     });
   }
+
+  Future addAStaff({
+    UserType role,
+    BusinessBranch branch,
+    BusinessDetails busines,
+    BusinessStaff manager,
+    BusinessStaff receptionist,
+  }) {}
 }
 
 enum BusinessBranchActiveStatus {
