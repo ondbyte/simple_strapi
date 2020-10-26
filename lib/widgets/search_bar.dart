@@ -24,7 +24,7 @@ class SearchBarWidget extends StatelessWidget {
           alignment: Alignment.centerLeft,
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           decoration: BoxDecoration(
-            color: Theme.of(context).indicatorColor.withOpacity(.1),
+            color: Theme.of(context).cardColor,
             borderRadius: BorderRadius.circular(6),
           ),
           child: Row(
@@ -37,7 +37,7 @@ class SearchBarWidget extends StatelessWidget {
                       text: possibilities,
                       textStyle: Theme.of(context).textTheme.subtitle1.apply(
                           color: Theme.of(context)
-                              .indicatorColor
+                              .textTheme.subtitle1.color
                               .withOpacity(0.6)),
                       pause: const Duration(milliseconds: 500),
                       displayFullTextOnTap: true,

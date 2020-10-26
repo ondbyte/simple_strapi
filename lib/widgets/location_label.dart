@@ -17,7 +17,8 @@ class LocationLabelWidget extends StatelessWidget {
         children: [
           Icon(
             FeatherIcons.mapPin,
-            color: Theme.of(context).indicatorColor,
+            color: Theme.of(context).iconTheme.color,
+            size: 16,
           ),
           SizedBox(
             width: 10,

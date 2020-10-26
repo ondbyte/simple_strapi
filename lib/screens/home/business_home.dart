@@ -31,7 +31,8 @@ class _BusinessHomeState extends State<BusinessHome> {
         index: _selectedPage,
       ),
       bottomNavigationBar: BottomNavigationBar(
-        selectedFontSize: 16,
+        type: BottomNavigationBarType.fixed,
+        // selectedFontSize: 14,
         onTap: (i) {
           setState(() {
             _selectedPage = i;
