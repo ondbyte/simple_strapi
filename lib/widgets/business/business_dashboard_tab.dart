@@ -1,5 +1,6 @@
-import 'package:bapp/stores/auth_store.dart';
+
 import 'package:bapp/stores/business_store.dart';
+import 'package:bapp/stores/cloud_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
@@ -32,7 +33,7 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
                             SizedBox(
                               height: 16,
                             ),
-                            Consumer<AuthStore>(
+                            Consumer<CloudStore>(
                               builder: (_, authStore, __) {
                                 return Text(
                                     "Hello " + authStore.user.displayName,

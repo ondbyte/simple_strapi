@@ -5,17 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mobx/mobx.dart';
 
 class BusinessTimings {
-  final DocumentReference myDoc;
   final allDayTimings = Observable(ObservableList<DayTiming>());
-
-  BusinessTimings({this.myDoc}) {
-    _getTimings(myDoc);
-  }
-
-  Future saveTimings() async {
-    final map = toMap();
-    await myDoc.set(map);
-  }
 
   Map<String, dynamic> toMap() {
     return allDayTimings.value.fold(
@@ -27,26 +17,27 @@ class BusinessTimings {
     );
   }
 
-  Future _getTimings(DocumentReference myDoc) async {
-    if (myDoc == null) {
-      return;
-    }
-    final snap = await myDoc.get();
-    if (snap.exists) {
-      final data = snap.data();
-      data.forEach(
+  BusinessTimings.empty(){
+    allDayTimings.value.addAll(kDays.map((e) => DayTiming({}, dayName: e)));
+    _sort();
+  }
+
+  BusinessTimings.fromJson(Map<String,dynamic> j) {
+    if (j!=null) {
+      j.forEach(
         (key, value) {
           allDayTimings.value.add(
             DayTiming(value, dayName: key),
           );
         },
       );
-    } else {
-      allDayTimings.value.addAll(kDays.map((e) => DayTiming({}, dayName: e)));
-      await saveTimings();
     }
+    _sort();
+  }
+
+  _sort(){
     allDayTimings.value.sort(
-      (a, b) {
+          (a, b) {
         final aa = kDays.indexOf(a.dayName);
         final bb = kDays.indexOf(b.dayName);
         if (aa > bb) {

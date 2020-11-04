@@ -1,5 +1,4 @@
 import 'package:bapp/route_manager.dart';
-import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/storage_store.dart';
 import 'package:bapp/stores/themestore.dart';
@@ -28,12 +27,6 @@ class App extends StatelessWidget {
       providers: [
         Provider<ThemeStore>(
           create: (_) => ThemeStore(),
-        ),
-        Provider<AuthStore>(
-          create: (_) => AuthStore(),
-        ),
-        Provider<StorageStore>(
-          create: (_) => StorageStore(),
         ),
         Provider<CloudStore>(
           create: (_) => CloudStore(),

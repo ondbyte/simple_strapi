@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
-import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/buttons.dart';
 import 'package:bapp/widgets/store_provider.dart';
@@ -37,35 +36,33 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return StoreProvider<CloudStore>(
-      store: Provider.of<CloudStore>(context, listen: false),
-      builder: (_, cloudStore) {
-        return StoreProvider<AuthStore>(
-          store: Provider.of<AuthStore>(context, listen: false),
-          builder: (_, authStore) {
-            return Scaffold(appBar: AppBar(
-              leading: CloseButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ), body: LayoutBuilder(
-              builder: (_, c) {
-                return Center(
-                    child: SingleChildScrollView(
-                  child: !_askOTP
-                      ? _getNumberWidget(authStore, cloudStore)
-                      : _getOTPWidget(authStore, cloudStore),
-                ));
+    return Consumer<CloudStore>(
+      builder: (_,cloudStore,__){
+        return Scaffold(
+          appBar: AppBar(
+            leading: CloseButton(
+              onPressed: () {
+                Navigator.of(context).pop();
               },
-            ));
-          },
+            ),
+          ),
+          body: LayoutBuilder(
+            builder: (_, c) {
+              return Center(
+                child: SingleChildScrollView(
+                  child: !_askOTP
+                      ? _getNumberWidget(cloudStore)
+                      : _getOTPWidget(cloudStore),
+                ),
+              );
+            },
+          ),
         );
       },
     );
   }
 
-  Widget _getNumberWidget(AuthStore authStore, CloudStore cloudStore) {
+  Widget _getNumberWidget(CloudStore cloudStore) {
     return Padding(
       padding: EdgeInsets.all(16),
       child: Center(
@@ -104,7 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               ignoreBlank: true,
               initialValue: _number == null
-                  ? PhoneNumber(isoCode: cloudStore.myLocation.country)
+                  ? PhoneNumber(isoCode: cloudStore.myAddress.country.iso2)
                   : _number,
             ),
             SizedBox(
@@ -114,7 +111,7 @@ class _LoginScreenState extends State<LoginScreen> {
               "Verify",
               onPressed: _canVerify
                   ? () {
-                      authStore.loginOrSignUpWithNumber(
+                      cloudStore.loginOrSignUpWithNumber(
                         number: _number,
                         onAskOTP: (bool b) async {
                           if (b) {
@@ -140,12 +137,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           ).show(context);
                         },
                         onVerified: () {
-                          if (isNullOrEmpty(authStore.user.email) ||
-                              isNullOrEmpty(authStore.user.displayName)) {
+                          if (isNullOrEmpty(cloudStore.user.email) ||
+                              isNullOrEmpty(cloudStore.user.displayName)) {
                             Navigator.pushReplacementNamed(
                                 context, RouteManager.createProfileScreen);
                           } else {
-                            Navigator.pop(context);
+                            Navigator.pop(context,true);
                           }
                         },
                       );
@@ -195,13 +192,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   String _otp = "";
-  Widget _getOTPWidget(AuthStore authStore, CloudStore cloudStore) {
+  Widget _getOTPWidget(CloudStore cloudStore) {
     return Padding(
       padding: EdgeInsets.all(16),
       child: Center(
         child: Observer(
           builder: (_) {
-            return authStore.loadingForOTP
+            return cloudStore.loadingForOTP
                 ? CircularProgressIndicator()
                 : Column(
                     mainAxisSize: MainAxisSize.min,
@@ -257,7 +254,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 }
                               },
                             );
-                          }),
+                          },),
                       SizedBox(
                         height: 20,
                       ),
@@ -281,3 +278,4 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
+

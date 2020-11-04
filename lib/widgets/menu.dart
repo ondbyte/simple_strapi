@@ -3,7 +3,6 @@ import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
-import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/themestore.dart';
 import 'package:bapp/widgets/bapp_bar.dart';
@@ -35,12 +34,12 @@ class _MenuState extends State<Menu> {
             )
           ],
         ),
-        body: Consumer2<CloudStore, AuthStore>(
-          builder: (_, cloudStore, authStore, __) {
+        body: Consumer<CloudStore>(
+          builder: (_, cloudStore, __) {
             return Observer(
               builder: (_) {
                 final items = Helper.filterMenuItems(
-                    cloudStore.userType, cloudStore.alterEgo, authStore.status);
+                    cloudStore.userType, cloudStore.alterEgo, cloudStore.status);
                 return ListView(
                   children: [
                     SizedBox(
@@ -138,7 +137,7 @@ class _MenuState extends State<Menu> {
       case MenuItemKind.logOut:
         {
           () async {
-            await Provider.of<AuthStore>(context, listen: false).signOut();
+            await Provider.of<CloudStore>(context, listen: false).signOut();
             Navigator.of(context)
                 .pushNamedAndRemoveUntil("/", (route) => false);
           }();

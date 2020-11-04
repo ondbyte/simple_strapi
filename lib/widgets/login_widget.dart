@@ -13,44 +13,49 @@ class AskToLoginWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.all(16),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SvgPicture.asset(
-            "assets/svg/login.svg",
-            width: 128,
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          Text(
-            "$loginReason",
-            style: Theme.of(context).textTheme.headline1,
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          Text(
-            "$secondaryReason",
-            style: Theme.of(context).textTheme.bodyText1,
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(
-            height: 20,
-          ),
-          FlatButton(
-            onPressed: () {
-              Navigator.of(context).pushNamed(RouteManager.loginScreen);
-            },
-            color: Theme.of(context).primaryColor,
-            child: Text(
-              "Sign In or Sign Up",
-              style: Theme.of(context).textTheme.button.apply(
-                    color: Theme.of(context).indicatorColor,
-                  ),
+      child: OrientationBuilder(
+        builder: (_,o){
+          return SizedBox(
+            width: double.maxFinite,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SvgPicture.asset(
+                  "assets/svg/login.svg",
+                  height: o==Orientation.landscape? 32:128,
+                ),
+                SizedBox(
+                  height: 20,
+                  width: 20,
+                ),
+                Text(
+                  "$loginReason",
+                  style: Theme.of(context).textTheme.headline1,
+                ),
+                SizedBox(
+                  height: 20,
+                  width: 20,
+                ),
+                Text(
+                  "$secondaryReason",
+                  style: Theme.of(context).textTheme.bodyText1,
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(
+                  height: 20,
+                  width: 20,
+                ),
+                PrimaryButton("Sign In or Sign Up",
+                  fullWidth: false,
+                  onPressed: () {
+                    Navigator.of(context).pushNamed(RouteManager.loginScreen);
+                  },
+                ),
+              ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }

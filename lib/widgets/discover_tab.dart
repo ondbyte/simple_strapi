@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
-import 'package:bapp/stores/auth_store.dart';
+
 import 'search_bar.dart';
 import 'store_provider.dart';
 
@@ -18,8 +18,8 @@ class DiscoverTab extends StatefulWidget {
 class _DiscoverTabState extends State<DiscoverTab> {
   @override
   Widget build(BuildContext context) {
-    return StoreProvider<AuthStore>(
-      store: context.watch<AuthStore>(),
+    return StoreProvider<CloudStore>(
+      store: context.watch<CloudStore>(),
       builder: (_, authStore) {
         return Observer(builder: (_) {
           return CustomScrollView(
@@ -29,7 +29,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                 sliver: SliverList(
                   delegate: SliverChildListDelegate(
                     [
-                      Consumer<AuthStore>(builder: (_, authStore, __) {
+                      Consumer<CloudStore>(builder: (_, authStore, __) {
                         return Observer(
                           builder: (_) {
                             final name = authStore.user?.displayName ?? "user";
@@ -142,18 +142,18 @@ class _DiscoverTabState extends State<DiscoverTab> {
         title: Text(
           "Own A Business",
           style: Theme.of(context).textTheme.subtitle1.apply(
-                color: Theme.of(context).indicatorColor,
+                color: Colors.white,
               ),
         ),
         subtitle: Text(
           "List your business on Bapp",
           style: Theme.of(context).textTheme.bodyText1.apply(
-                color: Theme.of(context).indicatorColor,
+                color: Colors.white,
               ),
         ),
         trailing: Icon(
           Icons.arrow_forward_ios,
-          color: Theme.of(context).indicatorColor,
+          color: Colors.white,
         ),
       ),
     );
@@ -189,7 +189,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                 children: [
                   Icon(
                     e.icon,
-                    color: Theme.of(context).indicatorColor,
+                    color: Colors.white,
                   ),
                   SizedBox(
                     height: 6,
@@ -197,7 +197,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   Text(
                     e.title,
                     style: Theme.of(context).textTheme.headline3.apply(
-                          color: Theme.of(context).indicatorColor,
+                          color: Colors.white,
                         ),
                   ),
                 ],

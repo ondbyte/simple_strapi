@@ -11,7 +11,7 @@ class LocationLabelWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).pushNamed(RouteManager.pickAPlace, arguments: 0);
+        Navigator.of(context).pushNamed(RouteManager.pickAPlace);
       },
       child: Row(
         children: [
@@ -28,9 +28,9 @@ class LocationLabelWidget extends StatelessWidget {
               return Observer(
                 builder: (_) {
                   return Text(
-                    cloudStore.myLocation.locality.isNotEmpty
-                        ? cloudStore.myLocation.locality
-                        : cloudStore.myLocation.state,
+                    cloudStore.myAddress.locality != null
+                        ? cloudStore.myAddress.locality.name
+                        : cloudStore.myAddress.city.name,
                     style: Theme.of(context).textTheme.subtitle1,
                   );
                 },

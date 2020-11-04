@@ -17,65 +17,33 @@ mixin _$CloudStore on _CloudStore, Store {
               name: '_CloudStore.theNumber'))
           .value;
 
-  final _$myLocationAtom = Atom(name: '_CloudStore.myLocation');
+  final _$myAddressAtom = Atom(name: '_CloudStore.myAddress');
 
   @override
-  Location get myLocation {
-    _$myLocationAtom.reportRead();
-    return super.myLocation;
+  MyAddress get myAddress {
+    _$myAddressAtom.reportRead();
+    return super.myAddress;
   }
 
   @override
-  set myLocation(Location value) {
-    _$myLocationAtom.reportWrite(value, super.myLocation, () {
-      super.myLocation = value;
+  set myAddress(MyAddress value) {
+    _$myAddressAtom.reportWrite(value, super.myAddress, () {
+      super.myAddress = value;
     });
   }
 
-  final _$activeCountriesAtom = Atom(name: '_CloudStore.activeCountries');
+  final _$countriesAtom = Atom(name: '_CloudStore.countries');
 
   @override
-  List<String> get activeCountries {
-    _$activeCountriesAtom.reportRead();
-    return super.activeCountries;
+  List<Country> get countries {
+    _$countriesAtom.reportRead();
+    return super.countries;
   }
 
   @override
-  set activeCountries(List<String> value) {
-    _$activeCountriesAtom.reportWrite(value, super.activeCountries, () {
-      super.activeCountries = value;
-    });
-  }
-
-  final _$activeCountriesNamesAtom =
-      Atom(name: '_CloudStore.activeCountriesNames');
-
-  @override
-  List<String> get activeCountriesNames {
-    _$activeCountriesNamesAtom.reportRead();
-    return super.activeCountriesNames;
-  }
-
-  @override
-  set activeCountriesNames(List<String> value) {
-    _$activeCountriesNamesAtom.reportWrite(value, super.activeCountriesNames,
-        () {
-      super.activeCountriesNames = value;
-    });
-  }
-
-  final _$availableLocationsAtom = Atom(name: '_CloudStore.availableLocations');
-
-  @override
-  Map<String, List<Location>> get availableLocations {
-    _$availableLocationsAtom.reportRead();
-    return super.availableLocations;
-  }
-
-  @override
-  set availableLocations(Map<String, List<Location>> value) {
-    _$availableLocationsAtom.reportWrite(value, super.availableLocations, () {
-      super.availableLocations = value;
+  set countries(List<Country> value) {
+    _$countriesAtom.reportWrite(value, super.countries, () {
+      super.countries = value;
     });
   }
 
@@ -109,18 +77,48 @@ mixin _$CloudStore on _CloudStore, Store {
     });
   }
 
-  final _$_userAtom = Atom(name: '_CloudStore._user');
+  final _$userAtom = Atom(name: '_CloudStore.user');
 
   @override
-  User get _user {
-    _$_userAtom.reportRead();
-    return super._user;
+  User get user {
+    _$userAtom.reportRead();
+    return super.user;
   }
 
   @override
-  set _user(User value) {
-    _$_userAtom.reportWrite(value, super._user, () {
-      super._user = value;
+  set user(User value) {
+    _$userAtom.reportWrite(value, super.user, () {
+      super.user = value;
+    });
+  }
+
+  final _$statusAtom = Atom(name: '_CloudStore.status');
+
+  @override
+  AuthStatus get status {
+    _$statusAtom.reportRead();
+    return super.status;
+  }
+
+  @override
+  set status(AuthStatus value) {
+    _$statusAtom.reportWrite(value, super.status, () {
+      super.status = value;
+    });
+  }
+
+  final _$loadingForOTPAtom = Atom(name: '_CloudStore.loadingForOTP');
+
+  @override
+  bool get loadingForOTP {
+    _$loadingForOTPAtom.reportRead();
+    return super.loadingForOTP;
+  }
+
+  @override
+  set loadingForOTP(bool value) {
+    _$loadingForOTPAtom.reportWrite(value, super.loadingForOTP, () {
+      super.loadingForOTP = value;
     });
   }
 
@@ -138,11 +136,11 @@ mixin _$CloudStore on _CloudStore, Store {
     return _$getMyUserTypesAsyncAction.run(() => super.getMyUserTypes());
   }
 
-  final _$getMytLocationAsyncAction = AsyncAction('_CloudStore.getMytLocation');
+  final _$getMyAddressAsyncAction = AsyncAction('_CloudStore.getMyAddress');
 
   @override
-  Future<dynamic> getMytLocation() {
-    return _$getMytLocationAsyncAction.run(() => super.getMytLocation());
+  Future<dynamic> getMyAddress() {
+    return _$getMyAddressAsyncAction.run(() => super.getMyAddress());
   }
 
   final _$getActiveCountriesAsyncAction =
@@ -154,24 +152,23 @@ mixin _$CloudStore on _CloudStore, Store {
         .run(() => super.getActiveCountries());
   }
 
-  final _$getLocationsInCountryAsyncAction =
-      AsyncAction('_CloudStore.getLocationsInCountry');
+  final _$signOutAsyncAction = AsyncAction('_CloudStore.signOut');
 
   @override
-  Future<dynamic> getLocationsInCountry(String c) {
-    return _$getLocationsInCountryAsyncAction
-        .run(() => super.getLocationsInCountry(c));
+  Future<dynamic> signOut() {
+    return _$signOutAsyncAction.run(() => super.signOut());
   }
 
   @override
   String toString() {
     return '''
-myLocation: ${myLocation},
-activeCountries: ${activeCountries},
-activeCountriesNames: ${activeCountriesNames},
-availableLocations: ${availableLocations},
+myAddress: ${myAddress},
+countries: ${countries},
 userType: ${userType},
 alterEgo: ${alterEgo},
+user: ${user},
+status: ${status},
+loadingForOTP: ${loadingForOTP},
 theNumber: ${theNumber}
     ''';
   }

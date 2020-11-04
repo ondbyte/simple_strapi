@@ -47,7 +47,9 @@ abstract class _BusinessStore with Store {
     userRelatedUpdate();
     _auth.userChanges().listen((u) {
       _user = u;
-      userRelatedUpdate();
+      if(_user!=null){
+        userRelatedUpdate();
+      }
     });
 
     _cloudStore = Provider.of<CloudStore>(context, listen: false);
@@ -69,14 +71,10 @@ abstract class _BusinessStore with Store {
   }) async {
     ///create the first branch
 
-    final firstBranchname = businessName;
-    final firstBranchDoc = _fireStore.doc(
-        "businesses/${FirebaseAuth.instance.currentUser.uid}/businessBranches/$firstBranchname");
-
     ///create the first default timing set
     final mainBusinessTimingDoc = _fireStore.doc(
         "businesses/${FirebaseAuth.instance.currentUser.uid}/businessTimings/main");
-    final businessTimings = BusinessTimings(myDoc: mainBusinessTimingDoc);
+    final businessTimings = BusinessTimings.empty();
 
     ///create the deafult empty services set
     final mainBusinessServicesCollec = _fireStore.collection(

@@ -1,6 +1,5 @@
 import 'package:bapp/config/config.dart';
 import 'package:bapp/helpers/helper.dart';
-import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/buttons.dart';
 import 'package:bapp/widgets/loading.dart';
@@ -24,12 +23,11 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: StoreProvider<AuthStore>(
-        store: context.watch<AuthStore>(),
-        builder: (context, authStore) {
+      body: Consumer<CloudStore>(
+        builder: (_, cloudStore, __) {
           return Observer(
             builder: (context) {
-              return authStore.status == AuthStatus.unsure
+              return cloudStore.status == AuthStatus.unsure
                   ? LoadingWidget()
                   : Padding(
                       padding: EdgeInsets.all(16),
@@ -139,12 +137,11 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
           hide: index != OnBoardingConfig.slides.length - 1,
           onPressed: () async {
             ///first time so sign in anonymously
-            await context.read<AuthStore>().signInAnonymous();
+            await context.read<CloudStore>().signInAnonymous();
+            //Navigator.of(context).pop();
+
             ///setup user data
             //await await context.read<CloudStore>().init(context.read<AuthStore>());
-            ///ask a place
-            Navigator.of(context)
-                .pushReplacementNamed(RouteManager.pickAPlace, arguments: 0);
           },
         )
       ],

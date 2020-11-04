@@ -85,11 +85,12 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
             store: Provider.of<CloudStore>(context, listen: false),
             init: (cloudStore) {},
             builder: (_, cloudStore) {
-              if (cloudStore.myLocation == null) {
+              if (cloudStore.myAddress.locality == null&&cloudStore.myAddress.city == null) {
                 return Center(
                   child: CircularProgressIndicator(),
                 );
               }
+              final latLong = cloudStore.myAddress.locality==null?cloudStore.myAddress.city.localities.first.latLong:cloudStore.myAddress.locality.latLong;
               return GoogleMap(
                 myLocationButtonEnabled: false,
                 buildingsEnabled: true,
@@ -97,15 +98,15 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
                 initialCameraPosition: CameraPosition(
                   zoom: 18,
                   target: LatLng(
-                    cloudStore.myLocation.latLong.latitude,
-                    cloudStore.myLocation.latLong.longitude,
+                    latLong.latitude,
+                    latLong.longitude,
                   ),
                 ),
                 zoomControlsEnabled: true,
                 zoomGesturesEnabled: true,
                 onMapCreated: (GoogleMapController controller) {
                   _pickedLocation =
-                      PickedLocation(cloudStore.myLocation.latLong, "");
+                      PickedLocation(latLong, "");
                   if (!_controller.isCompleted) {
                     _controller.complete(controller);
                   }

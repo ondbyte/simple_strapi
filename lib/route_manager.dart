@@ -295,7 +295,7 @@ class RouteManager {
       case pickAPlace:
         return MaterialPageRoute(
           builder: (_) {
-            return PickAPlaceScreen(settings.arguments);
+            return PickAPlaceScreen(country: settings.arguments,);
           },
         );
       default:

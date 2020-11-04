@@ -1,5 +1,5 @@
 import 'package:bapp/config/config.dart';
-import 'package:bapp/stores/auth_store.dart';
+import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/login_widget.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
@@ -28,27 +28,24 @@ class _BookingsTabState extends State<BookingsTab> {
 
   @override
   Widget build(BuildContext context) {
-    return StoreProvider<AuthStore>(
-      store: context.watch<AuthStore>(),
-      builder: (_, authStore) {
-        return Observer(builder: (_){
-          return authStore.status == AuthStatus.anonymousUser
-              ? AskToLoginWidget(
-            loginReason: LoginConfig.bookingTabLoginReason.primary,
-            secondaryReason: LoginConfig.bookingTabLoginReason.secondary,
-          )
-              : CustomScrollView(
-            slivers: <Widget>[
-              SliverList(
-                delegate: SliverChildListDelegate([
-                  _buildTableCalendar(),
-                ]),
-              )
-            ],
-          );
-        });
-      },
-    );
+    return Consumer<CloudStore>(builder:(_, cloudStore,__) {
+      return Observer(builder: (_){
+        return cloudStore.status == AuthStatus.anonymousUser
+            ? AskToLoginWidget(
+          loginReason: LoginConfig.bookingTabLoginReason.primary,
+          secondaryReason: LoginConfig.bookingTabLoginReason.secondary,
+        )
+            : CustomScrollView(
+          slivers: <Widget>[
+            SliverList(
+              delegate: SliverChildListDelegate([
+                _buildTableCalendar(),
+              ]),
+            )
+          ],
+        );
+      },);
+    },);
   }
 
   Widget _buildTableCalendar() {

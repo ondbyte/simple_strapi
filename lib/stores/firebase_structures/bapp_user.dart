@@ -10,7 +10,7 @@ class BappUser {
   final fcmToken = Observable<String>("");
   final my_alter_ego = Observable<UserType>(null);
   final my_user_type = Observable<UserType>(null);
-  final my_location = Observable<Location>(null);
+  final my_location = Observable<Locality>(null);
 
   BappUser({this.myDoc});
 
@@ -34,6 +34,6 @@ class BappUser {
     fcmToken.value = j["fcmToken"];
     my_alter_ego.value = UserType.values[j["my_alter_ego"]];
     my_user_type.value = UserType.values[j["my_user_type"]];
-    my_location.value = Location.fromJson(j["my_location"]);
+    my_location.value = Locality.fromJson(j["my_location"]);
   }
 }

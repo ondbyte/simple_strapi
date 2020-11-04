@@ -1,7 +1,6 @@
 import 'package:bapp/classes/location.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
-import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/store_provider.dart';
@@ -10,15 +9,15 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
 class PickAPlaceScreen extends StatelessWidget {
-  final int screen;
-  const PickAPlaceScreen(this.screen, {Key key}) : super(key: key);
+  final Country country;
+  const PickAPlaceScreen({this.country, Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    if (screen == 0) {
+    if (country == null) {
       return _showCountries(context);
     }
-    if (screen == 1) {
+    if (country != null) {
       return _showLocations(context);
     }
     throw FlutterError("only countries and location screen supported");
@@ -29,8 +28,8 @@ class PickAPlaceScreen extends StatelessWidget {
       store: Provider.of<CloudStore>(context, listen: false),
       init: (cloudStore) async {
         ///initialize user data
-        await cloudStore.init(context);
-        await cloudStore.getActiveCountries();
+        //await cloudStore.init(context);
+        //await cloudStore.getActiveCountries();
       },
       builder: (_, cloudStore) {
         return Observer(
@@ -43,18 +42,18 @@ class PickAPlaceScreen extends StatelessWidget {
                   style: Theme.of(context).textTheme.subtitle1,
                 ),
               ),
-              body: cloudStore.activeCountriesNames != null
+              body: cloudStore.countries != null
                   ? ListView(
                       children: <Widget>[
-                        ...cloudStore.activeCountriesNames.map(
+                        ...cloudStore.countries.map(
                           (e) => ListTile(
-                            title: Text("$e"),
+                            title: Text(e.thePhoneNumber.englishName),
                             trailing: Icon(Icons.arrow_forward_ios),
                             onTap: () async {
-                              cloudStore.getLocationsInCountry(e);
+                              //cloudStore.getLocationsInCountry(e);
                               Navigator.of(context).pushNamed(
                                 RouteManager.pickAPlace,
-                                arguments: 1,
+                                arguments: e,
                               );
                             },
                           ),
@@ -83,18 +82,19 @@ class PickAPlaceScreen extends StatelessWidget {
                   style: Theme.of(context).textTheme.subtitle1,
                 ),
               ),
-              body: cloudStore.availableLocations != null &&cloudStore.availableLocations.isNotEmpty
-                  ? ListView(
-                      children: List.generate(
-                        cloudStore.availableLocations.length,
-                        (index) => _getSubLocationWidget(
-                          context,
-                          cloudStore.availableLocations.keys.elementAt(index),
-                          cloudStore.availableLocations.values.elementAt(index),
-                        ),
+              body:Builder(
+                builder: (_){
+                  final cities = country.cities;
+                  return ListView(
+                    children: List.generate(
+                      cities.length,
+                          (index) => _getSubLocationWidget(
+                        context,cities[index],
                       ),
-                    )
-                  : LoadingWidget(),
+                    ),
+                  );
+                },
+              ),
             );
           },
         );
@@ -103,42 +103,39 @@ class PickAPlaceScreen extends StatelessWidget {
   }
 
   Widget _getSubLocationWidget(
-      BuildContext context, String city, List<Location> locations) {
-    return Column(
+      BuildContext context, City city) {
+    return city.enabled? Column(
       children: [
         ListTile(
           trailing: Icon(Icons.arrow_forward_ios),
           title: Text(
-            "All of $city",
+            "All of ${city.name}",
             style: Theme.of(context).textTheme.subtitle1,
           ),
           onTap: () {
-            Provider.of<CloudStore>(context, listen: false).myLocation =
-                Location(
-              "",
-              city,
-              locations[0].state,
-              locations[0].country,
-                  locations[0].latLong,
-            );
+            Provider.of<CloudStore>(context, listen: false).myAddress =
+                MyAddress(
+                  city: city,
+                  country: country,
+                );
             Navigator.of(context)
                 .pushNamedAndRemoveUntil(RouteManager.home, (_) => false);
           },
         ),
         ...List.generate(
-          locations.length,
+          city.localities.length,
           (index) => ListTile(
             trailing: Icon(Icons.arrow_forward_ios),
-            title: Text(locations[index].locality,
+            title: Text(city.localities[index].name,
                 style: Theme.of(context).textTheme.subtitle2),
             onTap: () {
-              context.read<CloudStore>().myLocation = locations[index];
+              context.read<CloudStore>().myAddress = MyAddress(country: country,city: city,locality: city.localities[index]);
               Navigator.of(context)
                   .pushNamedAndRemoveUntil(RouteManager.home, (_) => false,);
             },
           ),
         ),
       ],
-    );
+    ):SizedBox();
   }
 }

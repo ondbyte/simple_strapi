@@ -102,7 +102,7 @@ class BusinessDetails {
         BusinessBranch(myDoc: j["selectedBranch"], business: this);
     this.email.value = j["email"];
     this.myDoc.value = j["myDoc"];
-    this.businessTimings.value = BusinessTimings(myDoc: j["businessTimings"]);
+    this.businessTimings.value = BusinessTimings.fromJson(j["businessTimings"]);
     this.businessServices.value =
         BusinessServices(myCollec: j["businessServices"]);
     this.businessHolidays.value =
@@ -123,7 +123,7 @@ class BusinessDetails {
       "selectedBranch": selectedBranch.value.myDoc.value,
       "email": email.value,
       "myDoc": myDoc.value,
-      "businessTimings": businessTimings.value.myDoc,
+      "businessTimings": businessTimings.value.toMap(),
       "businessServices": businessServices.value.myCollec,
       "businessHolidays": businessHolidays.value.myCollection,
     };
@@ -177,6 +177,9 @@ class BusinessDetails {
 
   Future saveBusiness() async {
     await myDoc.value.set(toMap());
+  }
+  Future saveTimings() async {
+    await myDoc.value.set({"businessTimings":businessTimings.value.toMap()});
   }
 
   bool anyBranchInDraft() {

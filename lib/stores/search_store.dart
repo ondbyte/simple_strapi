@@ -14,7 +14,7 @@ abstract class _SearchStore with Store {
 class BusinessShop{
   final String name;
   final String address;
-  final Location locality;
+  final Locality locality;
   final double stars;
   final List<String> reviews;
 
