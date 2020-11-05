@@ -134,10 +134,10 @@ class BusinessBranch {
       this.email.value = j["email"];
       this.rating.value = j["rating"];
       this.businessServices.value =
-          BusinessServices(myCollec: j["businessServices"]);
+          BusinessServices.fromJsonList(j["businessServices"], business: business.value);
       this.businessTimings.value = BusinessTimings.fromJson(j["businessTimings"]);
       this.businessHolidays.value =
-          BusinessHolidays(myCollection: j["businessHolidays"]);
+          BusinessHolidays.fromJsonList(j["businessHolidays"], business: business.value);
       this.status.value = EnumToString.fromString(
           BusinessBranchActiveStatus.values, j["status"]);
     }
@@ -157,9 +157,9 @@ class BusinessBranch {
       "contactNumber": contactNumber.value,
       "email": email.value,
       "rating": rating.value,
-      "businessServices": businessServices.value.myCollec,
+      "businessServices": businessServices.value.toList(),
       "businessTimings": businessTimings.value.toMap(),
-      "businessHolidays": businessHolidays.value.myCollection,
+      "businessHolidays": businessHolidays.value.toList(),
       "status": EnumToString.convertToString(status.value),
     };
   }

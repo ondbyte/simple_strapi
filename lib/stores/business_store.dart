@@ -70,23 +70,10 @@ abstract class _BusinessStore with Store {
     BusinessCategory category,
   }) async {
     ///create the first branch
+    businessDoc =
+        _fireStore.doc("businesses/${FirebaseAuth.instance.currentUser.uid}");
 
-    ///create the first default timing set
-    final mainBusinessTimingDoc = _fireStore.doc(
-        "businesses/${FirebaseAuth.instance.currentUser.uid}/businessTimings/main");
-    final businessTimings = BusinessTimings.empty();
 
-    ///create the deafult empty services set
-    final mainBusinessServicesCollec = _fireStore.collection(
-        "businesses/${FirebaseAuth.instance.currentUser.uid}/businessServices");
-    final businessServices =
-        BusinessServices(myCollec: mainBusinessServicesCollec.path);
-
-    ///create the deafult empty holidays set
-    final mainBusinessHolidaysCollection = _fireStore.collection(
-        "businesses/${FirebaseAuth.instance.currentUser.uid}/businessHolidays");
-    final businessHolidays =
-        BusinessHolidays(myCollection: mainBusinessHolidaysCollection.path);
 
     final ap = BusinessDetails.from(
       businessName: businessName,
@@ -97,9 +84,6 @@ abstract class _BusinessStore with Store {
       uid: FirebaseAuth.instance.currentUser.uid,
       email: FirebaseAuth.instance.currentUser.email,
       myDoc: businessDoc,
-      businessTimings: businessTimings,
-      businessServices: businessServices,
-      businessHolidays: businessHolidays,
     );
 
     await ap.addABranch(

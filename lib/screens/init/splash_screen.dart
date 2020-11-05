@@ -43,11 +43,11 @@ class _SplashScreenState extends State<SplashScreen> with AutomaticKeepAliveClie
           onLogin: () async {
             //await FirebaseAuth.instance.signOut();
             final cloudStore = Provider.of<CloudStore>(context, listen: false);
+            await Provider.of<BusinessStore>(context, listen: false)
+                .init(context);
 
             if (cloudStore.myAddress != null) {
               ///customer is not a first timer
-              await Provider.of<BusinessStore>(context, listen: false)
-                  .init(context);
               Navigator.of(context).pushNamedAndRemoveUntil(RouteManager.home,(route) => false);
               killState = !killState;
               return;

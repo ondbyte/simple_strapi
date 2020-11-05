@@ -30,13 +30,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
         ),
         body: Consumer2<BusinessStore, CloudStore>(
           builder: (_, businessStore, cloudStore, __) {
-            final collecPath =
-                businessStore.business.businessServices.value.myCollec;
-            final BusinessService _service = BusinessService(
-              myDoc: FirebaseFirestore.instance.collection(collecPath).doc(
-                    kUUIDGen.v1(),
-                  ),
-            );
+            final BusinessService _service = BusinessService.empty();
             return Form(
               key: _key,
               child: CustomScrollView(
@@ -155,7 +149,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                                     return null;
                                   },
                                   onChanged: (s) {
-                                    final number = int.tryParse(s);
+                                    final number = int.tryParse(s)??0;
                                     act(
                                       () {
                                         _service.duration.value =

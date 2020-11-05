@@ -21,6 +21,12 @@ class _SearchAPlaceScreenState extends State<SearchAPlaceScreen> {
   final TextEditingController _controller = TextEditingController();
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ListView(
       shrinkWrap: true,

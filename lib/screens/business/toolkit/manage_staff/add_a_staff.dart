@@ -277,7 +277,7 @@ class _BusinessAskUserForStaffingWidgetState
     return Consumer2<CloudStore, BusinessStore>(
       builder: (_, cloudStore, businessStore, __) {
         return FutureBuilder<BappUser>(
-          future: cloudStore.getkAnotherUserOnBapp(widget.thePhoneNumber),
+          future: cloudStore.getAuthorizationForStaffing(widget.thePhoneNumber),
           builder: (context, snapshot) {
             return Column(
               mainAxisSize: MainAxisSize.min,

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:bapp/classes/notification_update.dart';
+import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'config/constants.dart';
@@ -114,4 +115,24 @@ class BappFCM {
       ),
     );
   }
+}
+
+class BappFCMMessage{
+  final BappFCMMessageType type;
+  final Map<String,dynamic> data;
+
+  BappFCMMessage({this.type, this.data});
+
+  static BappFCMMessage fromStringData(String s){
+    final data = jsonDecode(s);
+    return BappFCMMessage(type: EnumToString.fromString(BappFCMMessageType.values, data["type"]),data: data);
+  }
+
+  toMap(){
+
+  }
+}
+
+enum BappFCMMessageType{
+  staffAuthorization
 }

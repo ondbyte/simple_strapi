@@ -18,6 +18,7 @@ dependencies:
   firebase_crashlytics: ^0.2.0
   firebase_core: ^0.5.0
   cloud_firestore: ^0.14.0+2
+  cloud_functions: ^0.7.0
 
   #STATE MANAGEMENT
   provider: ^4.3.2+2

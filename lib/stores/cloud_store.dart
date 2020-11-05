@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:bapp/classes/location.dart';
@@ -9,13 +10,14 @@ import 'package:bapp/stores/firebase_structures/bapp_user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:country_pickers/country_pickers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:thephonenumber/thephonenumber.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 import '../FCM.dart';
 import 'business_store.dart';
@@ -235,18 +237,13 @@ abstract class _CloudStore with Store {
     //activeCountries = map((e) => e.id);
   }
 
-  Future<BappUser> getkAnotherUserOnBapp(ThePhoneNumber phoneNumber) async {
-    final usersCollec = FirebaseFirestore.instance.collection("users");
-    final query = usersCollec.where("contactNumber",
-        isEqualTo: phoneNumber.internationalNumber);
-    final snaps = await query.get();
-    if (snaps.size == 0) {
-      return null;
-    } else {}
-    final doc = snaps.docs.toList()[0];
-    final u = BappUser.fromJson(myDoc: doc.reference, j: doc.data());
-
-    return u;
+  Future<BappUser> getAuthorizationForStaffing(ThePhoneNumber phoneNumber) async {
+    final functions = FirebaseFunctions.instance;
+    final callable = functions.httpsCallable(BappFunctions.authorizeForStaffing);
+    callable.call({
+      "to":phoneNumber.internationalNumber,
+      "bappdata": jsonEncode()
+    });
   }
 
   void _setupAutoRun() {

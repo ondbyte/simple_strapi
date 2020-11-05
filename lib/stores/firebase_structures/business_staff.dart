@@ -42,7 +42,7 @@ class BusinessStaff {
       "role": EnumToString.convertToString(role),
       "name": name,
       "dateOfJoining": dateOfJoining,
-      "expertise": expertise.map((element) => element.myDoc),
+      "expertise": expertise.map((category) => category.toMap()),
       "branch": branch.myDoc,
       "business": business.myDoc,
       "manager": manager.myDoc,
@@ -58,7 +58,7 @@ class BusinessStaff {
     name = j["name"];
     dateOfJoining = j["dateOfJoining"];
     expertise.addAll(
-        j["expertise"].map((e) => BusinessServiceCategory.fromDoc(myDoc: e)));
+        j["expertise"].map((e) => BusinessServiceCategory.fromJson(e)));
     branch = BusinessBranch(myDoc: j["branch"], business: business);
     manager = BusinessStaff.fromDoc(business: business, myDoc: j["manager"]);
     receptionist =

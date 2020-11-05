@@ -37,6 +37,12 @@ class _BusinessAddAHolidayScreenState extends State<BusinessAddAHolidayScreen> {
   final _key = GlobalKey<FormState>();
 
   @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
