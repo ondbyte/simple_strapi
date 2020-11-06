@@ -22,6 +22,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import '../FCM.dart';
 import 'business_store.dart';
 import 'firebase_structures/business_branch.dart';
+import 'firebase_structures/business_details.dart';
 
 part 'cloud_store.g.dart';
 
@@ -46,21 +47,18 @@ abstract class _CloudStore with Store {
   @observable
   User user;
 
-  Function _onLogin,_onNotLogin;
-
+  Function _onLogin, _onNotLogin;
 
   @observable
   AuthStatus status = AuthStatus.unsure;
   @observable
   bool loadingForOTP = false;
 
-
   String fcmToken = "";
 
   String _previousUID = "";
 
-
-  Future init({Function onLogin,Function onNotLogin}) async {
+  Future init({Function onLogin, Function onNotLogin}) async {
     _onLogin = onLogin;
     _onNotLogin = onNotLogin;
     _listenForUserChange();
@@ -74,9 +72,9 @@ abstract class _CloudStore with Store {
     _setupAutoRun();
   }
 
-  _listenForUserChange(){
+  _listenForUserChange() {
     _auth.userChanges().listen(
-          (u) async {
+      (u) async {
         user = u;
         if (user != null) {
           if (user.isAnonymous) {
@@ -86,15 +84,15 @@ abstract class _CloudStore with Store {
           }
           if (_previousUID != user?.uid) {
             await _init();
-            if(_onLogin!=null){
+            if (_onLogin != null) {
               _onLogin();
-              _onLogin=null;
+              _onLogin = null;
             }
           }
         } else {
           status = AuthStatus.userNotPresent;
           _previousUID = "";
-          if(_onNotLogin!=null){
+          if (_onNotLogin != null) {
             _onNotLogin();
             _onNotLogin = null;
           }
@@ -203,8 +201,11 @@ abstract class _CloudStore with Store {
             (city) {
               if (city.name == locationData["city"] &&
                   country.iso2 == locationData["iso2"]) {
-                final local = city.localities.firstWhere((loc) => loc.name==locationData["locality"],orElse: ()=>null);
-                myAddress = MyAddress(locality: local, city: city, country: country);
+                final local = city.localities.firstWhere(
+                    (loc) => loc.name == locationData["locality"],
+                    orElse: () => null);
+                myAddress =
+                    MyAddress(locality: local, city: city, country: country);
               }
             },
           );
@@ -237,13 +238,50 @@ abstract class _CloudStore with Store {
     //activeCountries = map((e) => e.id);
   }
 
-  Future<BappUser> getAuthorizationForStaffing(ThePhoneNumber phoneNumber) async {
+  Future<String> getAuthorizationForStaffing({
+      ThePhoneNumber phoneNumber, BusinessDetails business,Function(BappFCMMessage) onReplyRecieved}) async {
     final functions = FirebaseFunctions.instance;
-    final callable = functions.httpsCallable(BappFunctions.authorizeForStaffing);
-    callable.call({
-      "to":phoneNumber.internationalNumber,
-      "bappdata": jsonEncode()
-    });
+    final callable =
+        functions.httpsCallable(BappFunctions.sendBappMessage);
+    final called = await callable.call(
+      BappFCMMessage(
+        type: BappFCMMessageType.staffAuthorizationAsk,
+        title: "You are being added as a Staff",
+        body: business.businessName.value +
+            " is adding you as their staff, acknowledge this to authorize adding",
+        to: phoneNumber.internationalNumber,
+        frm: theNumber.internationalNumber,
+      ).toMap(),
+    );
+    final resultData = jsonDecode(called.data) as Map;
+    final String resultString = resultData["result"];
+    if(resultString==BappFunctionsResponse.multiUser){
+      Helper.printLog("multi user found at firestore/users");
+    }
+    final c = Completer<String>();
+    c.complete(resultString);
+
+    if(resultString==BappFunctionsResponse.singleUser){
+      BappFCM().listenForStaffingAuthorizationOnce((bappMessage){
+        onReplyRecieved(bappMessage);
+      });
+    }
+    return c.future;
+  }
+
+  Future<void> giveAuthorizationForStaffing(BappFCMMessage message,
+      {bool authorized = false}) async {
+    final bappmessage = BappFCMMessage(
+      to: message.frm,
+      frm: theNumber.internationalNumber,
+      title: "Acknowledged",
+      data: {},
+      body: "Acknowledged",
+      click_action: "",
+      type: authorized
+          ? BappFCMMessageType.staffAuthorizationAskAcknowledge
+          : BappFCMMessageType.staffAuthorizationAskDeny,
+    );
   }
 
   void _setupAutoRun() {
@@ -279,9 +317,9 @@ abstract class _CloudStore with Store {
 
   Future updateProfile(
       {String displayName,
-        String email,
-        @required Function(FirebaseAuthException) onFail,
-        @required Function() onSuccess}) async {
+      String email,
+      @required Function(FirebaseAuthException) onFail,
+      @required Function() onSuccess}) async {
     if (user.displayName != displayName) {
       await user.updateProfile(displayName: displayName);
     }
@@ -294,7 +332,7 @@ abstract class _CloudStore with Store {
         onFail(e);
       }
     } else {
-      onFail(FirebaseAuthException(message:"same-email",code: "same-email"));
+      onFail(FirebaseAuthException(message: "same-email", code: "same-email"));
     }
   }
 
@@ -319,14 +357,14 @@ abstract class _CloudStore with Store {
       codeSent: (String verificationID, int resendToken) async {
         var askAgain = false;
         Future.doWhile(
-              () async {
+          () async {
             var otp = await onAskOTP(askAgain);
             askAgain = true;
             loadingForOTP = true;
 
             PhoneAuthCredential phoneAuthCredential =
-            PhoneAuthProvider.credential(
-                verificationId: verificationID, smsCode: otp);
+                PhoneAuthProvider.credential(
+                    verificationId: verificationID, smsCode: otp);
             final linked = await _link(phoneAuthCredential);
             Helper.printLog(linked.toString());
             if (linked) {
@@ -347,13 +385,13 @@ abstract class _CloudStore with Store {
       await _auth.currentUser.linkWithCredential(phoneAuthCredential);
       return true;
     } on FirebaseAuthException catch (e) {
-      Helper.printLog("359"+e.code);
+      Helper.printLog("359" + e.code);
       print(e);
       if (e.code.toLowerCase() == "credential-already-in-use") {
         return await signIn(phoneAuthCredential);
       } else if (e.code.toLowerCase() == "invalid-verification-code") {
         return false;
-      } else if(e.message.contains("User has already been linked")){
+      } else if (e.message.contains("User has already been linked")) {
         return await signIn(phoneAuthCredential);
       }
     }
@@ -365,7 +403,7 @@ abstract class _CloudStore with Store {
       await _auth.signInWithCredential(phoneAuthCredential);
       return true;
     } on FirebaseAuthException catch (e) {
-      Helper.printLog("374"+e.code);
+      Helper.printLog("374" + e.code);
       print(e);
       if (e.code.toLowerCase() == "invalid-verification-code") {
         return false;

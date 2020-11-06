@@ -44,5 +44,11 @@ const kHolidayTypes = [
 bool kNotifEnabled = false;
 
 class BappFunctions{
-  static String authorizeForStaffing = "authorizeForStaffing";
+  static String sendBappMessage = "sendBappMessage";
+}
+
+class BappFunctionsResponse{
+  static String singleUser = "singleUser";
+  static String multiUser = "multiUser";
+  static String noUser = "noUser";
 }
