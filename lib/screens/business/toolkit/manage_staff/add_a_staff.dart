@@ -1,12 +1,9 @@
 import 'package:bapp/FCM.dart';
-import 'package:bapp/classes/notification_update.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
-import 'package:bapp/stores/firebase_structures/bapp_user.dart';
-import 'package:bapp/stores/firebase_structures/business_category.dart';
 import 'package:bapp/stores/firebase_structures/business_services.dart';
 import 'package:bapp/stores/firebase_structures/business_staff.dart';
 import 'package:bapp/widgets/add_image_sliver.dart';
@@ -14,17 +11,13 @@ import 'package:bapp/widgets/buttons.dart';
 import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/loading_stack.dart';
 import 'package:bapp/widgets/multiple_option_chips.dart';
-import 'package:bapp/widgets/padded_text.dart';
 import 'package:bapp/widgets/shake_widget.dart';
-import 'package:chips_choice/chips_choice.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
-import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
-import 'package:provider/provider.dart';
 import 'package:mobx/mobx.dart';
+import 'package:provider/provider.dart';
 import 'package:thephonenumber/thephonenumber.dart';
 
 class BusinessAddAStaffScreen extends StatefulWidget {
@@ -268,8 +261,8 @@ class BusinessAskUserForStaffingWidget extends StatefulWidget {
 
 class _BusinessAskUserForStaffingWidgetState
     extends State<BusinessAskUserForStaffingWidget> {
-
-  bool _loading = false;
+  bool _loading = false, _waiting = false;
+  Widget _finallyWidget;
 
   @override
   void initState() {
@@ -278,37 +271,164 @@ class _BusinessAskUserForStaffingWidgetState
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<CloudStore, BusinessStore>(
-      builder: (_, cloudStore, businessStore, __) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-                "Press ask now to ask the Bapp user with the number ${widget.thePhoneNumber.internationalNumber} to join your business on Bapp"),
-            SizedBox(
-              height: 20,
-            ),
-            _loading?LoadingWidget():PrimaryButton(
-              "Ask now",
-              onPressed: () async {
-                _loading = false;
-                final response = await cloudStore.getAuthorizationForStaffing(
-                  phoneNumber: widget.thePhoneNumber,
-                  business: businessStore.business,
-                  onReplyRecieved: (bappMessage) {
-                    if(bappMessage==null){
-                      Navigator.of(context).pop();
-                      Flushbar(message: "Time out",duration: const Duration(seconds: 2),).show(context);
-                    } else {
-                      if(bappMessage.type==BappFCMMessageType.ac)
-                    }
-                  },
-                );
-              },
-            ),
-          ],
-        );
+    return WillPopScope(
+      onWillPop: () async {
+        return !_waiting;
       },
+      child: Consumer2<CloudStore, BusinessStore>(
+        builder: (_, cloudStore, businessStore, __) {
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                  "Press ask now to ask the Bapp user with the number ${widget.thePhoneNumber.internationalNumber} to join your business on Bapp"),
+              SizedBox(
+                height: 20,
+              ),
+              _loading
+                  ? LoadingWidget()
+                  : _finallyWidget == null
+                      ? PrimaryButton(
+                          "Ask now",
+                          onPressed: () async {
+                            _loading = true;
+                            final response =
+                                await _askNow(businessStore, cloudStore);
+                            if (response == BappFunctionsResponse.multiUser ||
+                                response == BappFunctionsResponse.noUser) {
+                              _finallyWidget = Column(
+                                children: [
+                                  Text(
+                                      "User is on not on Bapp, please ask the user to sign up."),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
+                                  PrimaryButton(
+                                    "Go back",
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                    },
+                                  ),
+                                ],
+                              );
+                            } else if (response ==
+                                BappFunctionsResponse.singleUser) {
+                              _finallyWidget = Column(
+                                children: [
+                                  Text(
+                                      "User is on Bapp, we are reaching them out, please wait"),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
+                                  LoadingWidget(),
+                                ],
+                              );
+                            }
+                            setState(() {
+                              _loading = false;
+                            });
+                          },
+                        )
+                      : _finallyWidget,
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Future<String> _askNow(
+      BusinessStore businessStore, CloudStore cloudStore) async {
+    _waiting = true;
+    final response = await cloudStore.getAuthorizationForStaffing(
+      phoneNumber: widget.thePhoneNumber,
+      business: businessStore.business,
+      onReplyRecieved: (bappMessage) {
+        if (bappMessage == null) {
+          _finallyWidget = _onNull(businessStore, cloudStore);
+        } else {
+          if (bappMessage.type ==
+              BappFCMMessageType.staffAuthorizationAskDeny) {
+            _finallyWidget = _onDeny(businessStore, cloudStore);
+          } else if (bappMessage.type ==
+              BappFCMMessageType.staffAuthorizationAskAcknowledge) {
+            _finallyWidget = _onAcknowledge(businessStore, cloudStore);
+          }
+        }
+        setState(() {
+          _loading = false;
+        });
+      },
+    );
+    return response;
+  }
+
+  Widget _onAcknowledge(BusinessStore businessStore, CloudStore cloudStore) {
+    return Column(
+      children: [
+        Text(
+          "User acknowledged",
+          style: Theme.of(context).textTheme.headline1.apply(color: Colors.red),
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        PrimaryButton(
+          "Go back",
+          onPressed: () {
+            Navigator.of(context).pop(true);
+          },
+        )
+      ],
+    );
+  }
+
+  Widget _onDeny(BusinessStore businessStore, CloudStore cloudStore) {
+    return Column(
+      children: [
+        Text(
+          "User denied your offer",
+          style: Theme.of(context).textTheme.headline1.apply(color: Colors.red),
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        PrimaryButton(
+          "Go back",
+          onPressed: () {
+            Navigator.of(context).pop(false);
+          },
+        )
+      ],
+    );
+  }
+
+  Widget _onNull(BusinessStore businessStore, CloudStore cloudStore) {
+    return Column(
+      children: [
+        Text(
+          "Times up,",
+          style: Theme.of(context).textTheme.headline1,
+        ),
+        SizedBox(
+          height: 20,
+        ),
+        PrimaryButton(
+          "Ask again",
+          onPressed: () {
+            _loading = true;
+            _askNow(businessStore, cloudStore);
+          },
+        ),
+        SizedBox.expand(
+          child: FlatButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text("Go back"),
+          ),
+        )
+      ],
     );
   }
 }

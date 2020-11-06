@@ -1,14 +1,11 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:bapp/classes/notification_update.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:mobx/mobx.dart';
 
 import 'config/constants.dart';
-import 'package:mobx/mobx.dart';
-import 'package:http/http.dart' as http;
-
 
 Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) async {
   if (message.containsKey('data')) {
@@ -35,21 +32,22 @@ class BappFCM {
   bool _isFcmInitialized = false;
 
   BappFCM._once();
-  
-  void listenForStaffingAuthorizationOnce(Function(BappFCMMessage) fn,{Duration duration= const Duration(seconds: 60)}){
-    if(_staffingAuthorizationListener!=null){
+
+  void listenForStaffingAuthorizationOnce(Function(BappFCMMessage) fn,
+      {Duration duration = const Duration(seconds: 60)}) {
+    if (_staffingAuthorizationListener != null) {
       throw Exception("this should never be the case @BappFCM");
     }
     _staffingAuthorizationListener = fn;
-    Future.delayed(duration,(){
-      if(_staffingAuthorizationListener!=null){
+    Future.delayed(duration, () {
+      if (_staffingAuthorizationListener != null) {
         _staffingAuthorizationListener(null);
         _staffingAuthorizationListener = null;
       }
     });
   }
 
-  void listenForBappMessages(Function(BappFCMMessage) fn){
+  void listenForBappMessages(Function(BappFCMMessage) fn) {
     _bappMessagesListener = fn;
   }
 
@@ -70,15 +68,17 @@ class BappFCM {
     _init(_fcm);
   }
 
-  onMessage(Map<String,dynamic> message){
-    if(message.containsKey("data")){
+  Future onMessage(Map<String, dynamic> message) async {
+    if (message.containsKey("data")) {
       final bappMessage = BappFCMMessage.fromStringData(message["data"]);
-      if(bappMessage.type==BappFCMMessageType.staffAuthorizationAskAcknowledge||bappMessage.type==BappFCMMessageType.staffAuthorizationAskDeny){
-        if(_staffingAuthorizationListener!=null){
+      if (bappMessage.type ==
+              BappFCMMessageType.staffAuthorizationAskAcknowledge ||
+          bappMessage.type == BappFCMMessageType.staffAuthorizationAskDeny) {
+        if (_staffingAuthorizationListener != null) {
           _staffingAuthorizationListener(bappMessage);
           _staffingAuthorizationListener = null;
         }
-      } else if(_bappMessagesListener!=null){
+      } else if (_bappMessagesListener != null) {
         _bappMessagesListener(bappMessage);
       }
     }
@@ -106,41 +106,47 @@ class BappFCMMessage {
   final String title;
   final String body;
   final Map<String, dynamic> data;
+
   ///international number
   final String to;
+
   ///international number
   final String frm;
   final String click_action;
-  final BappFCMMessagePriority priority ;
+  final BappFCMMessagePriority priority;
 
   BappFCMMessage(
-      {this.title,
-      this.body,
+      {this.title = "",
+      this.body = "",
       this.type,
       this.data,
-      this.frm,
-      this.to,this.priority = BappFCMMessagePriority.high,this.click_action = "BAPP_NOTIFICATION_CLICK" }) {
-    data.remove("type");
-    data.remove("title");
-    data.remove("body");
-    data.remove("frm");
-    data.remove("to");
-    data.remove("priority");
-    data.remove("click_action");
+      this.frm = "",
+      this.to = "",
+      this.priority = BappFCMMessagePriority.high,
+      this.click_action = "BAPP_NOTIFICATION_CLICK"}) {
+    data?.remove("type");
+    data?.remove("title");
+    data?.remove("body");
+    data?.remove("frm");
+    data?.remove("to");
+    data?.remove("priority");
+    data?.remove("click_action");
   }
 
   static BappFCMMessage fromStringData(String s) {
     final data = jsonDecode(s);
     return BappFCMMessage(
-      type: EnumToString.fromString(BappFCMMessageType.values, data["type"]),
-      title: data["title"],
-      body: data["body"],
-      frm: data["frm"],
-      to: data["to"],
-      data: data,
-      priority: EnumToString.fromString(BappFCMMessagePriority.values, data["priority"],),
-      click_action: data["click_action"]
-    );
+        type: EnumToString.fromString(BappFCMMessageType.values, data["type"]),
+        title: data["title"],
+        body: data["body"],
+        frm: data["frm"],
+        to: data["to"],
+        data: data,
+        priority: EnumToString.fromString(
+          BappFCMMessagePriority.values,
+          data["priority"],
+        ),
+        click_action: data["click_action"]);
   }
 
   toMap() {
@@ -151,12 +157,16 @@ class BappFCMMessage {
       "frm": frm,
       "to": to,
       "data": data,
-      "priority":EnumToString.convertToString(priority),
-      "click_action":click_action,
+      "priority": EnumToString.convertToString(priority),
+      "click_action": click_action,
     };
   }
 }
 
-enum BappFCMMessageType { staffAuthorizationAsk,staffAuthorizationAskAcknowledge,staffAuthorizationAskDeny }
+enum BappFCMMessageType {
+  staffAuthorizationAsk,
+  staffAuthorizationAskAcknowledge,
+  staffAuthorizationAskDeny
+}
 
-enum BappFCMMessagePriority{ high }
+enum BappFCMMessagePriority { high }

@@ -20,6 +20,10 @@ exports.sendBappMessage = functions.https.onRequest(async (req, res) => {
     res.json({result:resultString});
 
     if(snaps.size===1){
+        var doc = snaps.docs[0];
+        var docData = doc.data();
+
+        query.uid = doc.id;
         const staffingRequest = {
             "notification": {
                 "body": query.body,
@@ -28,9 +32,6 @@ exports.sendBappMessage = functions.https.onRequest(async (req, res) => {
             },
             "data": query,
         }
-
-        var doc = snaps.docs[0];
-        var docData = doc.data();
         admin.messaging().sendToDevice(docData.fcmToken, staffingRequest);
     }
   });

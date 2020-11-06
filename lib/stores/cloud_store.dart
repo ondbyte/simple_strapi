@@ -1,23 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:bapp/classes/location.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
-import 'package:bapp/stores/firebase_structures/bapp_user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:country_pickers/country_pickers.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:thephonenumber/thephonenumber.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 
 import '../FCM.dart';
 import 'business_store.dart';
@@ -238,11 +234,12 @@ abstract class _CloudStore with Store {
     //activeCountries = map((e) => e.id);
   }
 
-  Future<String> getAuthorizationForStaffing({
-      ThePhoneNumber phoneNumber, BusinessDetails business,Function(BappFCMMessage) onReplyRecieved}) async {
+  Future<String> getAuthorizationForStaffing(
+      {ThePhoneNumber phoneNumber,
+      BusinessDetails business,
+      Function(BappFCMMessage) onReplyRecieved}) async {
     final functions = FirebaseFunctions.instance;
-    final callable =
-        functions.httpsCallable(BappFunctions.sendBappMessage);
+    final callable = functions.httpsCallable(BappFunctions.sendBappMessage);
     final called = await callable.call(
       BappFCMMessage(
         type: BappFCMMessageType.staffAuthorizationAsk,
@@ -255,18 +252,16 @@ abstract class _CloudStore with Store {
     );
     final resultData = jsonDecode(called.data) as Map;
     final String resultString = resultData["result"];
-    if(resultString==BappFunctionsResponse.multiUser){
+    if (resultString == BappFunctionsResponse.multiUser) {
       Helper.printLog("multi user found at firestore/users");
     }
-    final c = Completer<String>();
-    c.complete(resultString);
 
-    if(resultString==BappFunctionsResponse.singleUser){
-      BappFCM().listenForStaffingAuthorizationOnce((bappMessage){
+    if (resultString == BappFunctionsResponse.singleUser) {
+      BappFCM().listenForStaffingAuthorizationOnce((bappMessage) {
         onReplyRecieved(bappMessage);
       });
     }
-    return c.future;
+    return resultString;
   }
 
   Future<void> giveAuthorizationForStaffing(BappFCMMessage message,
