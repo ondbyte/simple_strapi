@@ -3,7 +3,7 @@ const admin = require('firebase-admin');
 
 admin.initializeApp();
 
-exports.authorizeForStaffing = functions.https.onRequest(async (req, res) => {
+exports.sendBappMessage = functions.https.onRequest(async (req, res) => {
     ///number of the bapp user
     const query = req.query;
     
