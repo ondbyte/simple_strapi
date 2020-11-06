@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:bapp/classes/feedback.dart';
 import 'package:bapp/classes/notification_update.dart';
 import 'package:bapp/config/config.dart' hide Tab;
-import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/updates_store.dart';
 import 'package:bapp/widgets/undo_widget.dart';
@@ -99,22 +98,26 @@ class _UpdatesTabState extends State<UpdatesTab> {
   ///empty updates
   Widget _getEmpty() {
     return Center(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SvgPicture.asset(
-            "assets/svg/empty-list.svg",
-            width: 300,
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Text(
-            "You are up to date",
-            style: Theme.of(context).textTheme.subtitle1,
-          ),
-        ],
+      child: OrientationBuilder(
+        builder: (_,o){
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset(
+                "assets/svg/empty-list.svg",
+                width: o==Orientation.landscape?100: 300,
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Text(
+                "You are up to date",
+                style: Theme.of(context).textTheme.subtitle1,
+              ),
+            ],
+          );
+        },
       ),
     );
   }

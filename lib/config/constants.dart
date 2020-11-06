@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:bapp/config/config_data_types.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
 
@@ -41,3 +42,13 @@ const kHolidayTypes = [
 
 ///global setting to track whether ios notification is enabled
 bool kNotifEnabled = false;
+
+class BappFunctions{
+  static String sendBappMessage = "sendBappMessage";
+}
+
+class BappFunctionsResponse{
+  static String singleUser = "singleUser";
+  static String multiUser = "multiUser";
+  static String noUser = "noUser";
+}

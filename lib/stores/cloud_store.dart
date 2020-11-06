@@ -1,27 +1,28 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:bapp/classes/location.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
-import 'package:bapp/stores/auth_store.dart';
 import 'package:bapp/stores/firebase_structures/bapp_user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:country_pickers/country_pickers.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:thephonenumber/thephonenumber.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 import '../FCM.dart';
-import 'auth_store.dart';
 import 'business_store.dart';
 import 'firebase_structures/business_branch.dart';
+import 'firebase_structures/business_details.dart';
 
 part 'cloud_store.g.dart';
 
@@ -35,64 +36,83 @@ abstract class _CloudStore with Store {
   List<ReactionDisposer> _disposers = [];
 
   @observable
-  Location myLocation;
+  MyAddress myAddress;
   @observable
-  List<String> activeCountries;
-  @observable
-  List<String> activeCountriesNames;
-  @observable
-  Map<String, List<Location>> availableLocations;
+  List<Country> countries;
+
   @observable
   UserType userType;
   @observable
   UserType alterEgo;
   @observable
-  User _user;
+  User user;
+
+  Function _onLogin, _onNotLogin;
+
+  @observable
+  AuthStatus status = AuthStatus.unsure;
+  @observable
+  bool loadingForOTP = false;
+
   String fcmToken = "";
 
   String _previousUID = "";
 
-  AuthStore _authStore;
-
-  Future init(BuildContext context) async {
-    _user = _auth.currentUser;
-    _authStore = Provider.of<AuthStore>(context, listen: false);
-    if (_user == null) {
-      throw FlutterError("this should never be the case");
-    }
-
-    _auth.userChanges().listen(
-      (u) {
-        _user = u;
-        if (_user != null) {
-          if (_previousUID != _user?.uid) {
-            _init();
-          }
-        }
-      },
-    );
-
-    await _init();
-    _setupAutoRun();
+  Future init({Function onLogin, Function onNotLogin}) async {
+    _onLogin = onLogin;
+    _onNotLogin = onNotLogin;
+    _listenForUserChange();
   }
 
   _init() async {
     await getUserData();
-    await getMytLocation();
+    await getActiveCountries();
+    await getMyAddress();
     await getMyUserTypes();
+    _setupAutoRun();
+  }
+
+  _listenForUserChange() {
+    _auth.userChanges().listen(
+      (u) async {
+        user = u;
+        if (user != null) {
+          if (user.isAnonymous) {
+            status = AuthStatus.anonymousUser;
+          } else {
+            status = AuthStatus.userPresent;
+          }
+          if (_previousUID != user?.uid) {
+            await _init();
+            if (_onLogin != null) {
+              _onLogin();
+              _onLogin = null;
+            }
+          }
+        } else {
+          status = AuthStatus.userNotPresent;
+          _previousUID = "";
+          if (_onNotLogin != null) {
+            _onNotLogin();
+            _onNotLogin = null;
+          }
+        }
+        Helper.printLog("user change: $user");
+      },
+    );
   }
 
   Future getUserData() async {
-    var snap = await _fireStore.doc("users/${_user.uid}").get();
+    var snap = await _fireStore.doc("users/${user.uid}").get();
     myData = snap.data() ?? {};
   }
 
   @computed
   ThePhoneNumber get theNumber {
     final tmp =
-        ThePhoneNumberLib.parseNumber(internationalNumber: _user.phoneNumber);
+        ThePhoneNumberLib.parseNumber(internationalNumber: user.phoneNumber);
     if (tmp == null) {
-      return ThePhoneNumber(iso2Code: myLocation.country);
+      return ThePhoneNumber(iso2Code: myAddress.country.iso2);
     }
     return tmp;
   }
@@ -142,7 +162,7 @@ abstract class _CloudStore with Store {
 
   ///will auto run on change
   Future setMyUserType() async {
-    var doc = _fireStore.doc("users/${_user.uid}");
+    var doc = _fireStore.doc("users/${user.uid}");
     await doc.set(
       {"my_user_type": userType.index},
       SetOptions(merge: true),
@@ -151,95 +171,123 @@ abstract class _CloudStore with Store {
 
   ///will auto run on change
   Future setMyAlterEgo() async {
-    var doc = _fireStore.doc("users/${_user.uid}");
+    var doc = _fireStore.doc("users/${user.uid}");
     await doc.set(
       {"my_alter_ego": alterEgo.index},
       SetOptions(merge: true),
     );
   }
 
-  Future setMyOtherUserData() async {
-    var doc = _fireStore.doc("users/${_user.uid}");
-    await doc.set(
-        {"contactNumber": theNumber?.internationalNumber, "fcmToken": fcmToken},
-        SetOptions(merge: true));
+  Future setMyNumber() async {
+    var doc = _fireStore.doc("users/${user.uid}");
+    await doc.set({
+      "contactNumber": theNumber?.internationalNumber,
+    }, SetOptions(merge: true));
+  }
+
+  Future setMyFcmToken() async {
+    var doc = _fireStore.doc("users/${user.uid}");
+    await doc.set({"fcmToken": fcmToken}, SetOptions(merge: true));
   }
 
   @action
-  Future getMytLocation() async {
-    if (myData.containsKey("my_location")) {
-      var locationData = myData["my_location"];
+  Future getMyAddress() async {
+    if (myData.containsKey("myAddress")) {
+      var locationData = myData["myAddress"];
 
-      ///id will be name of the
-      myLocation = Location.fromJson(locationData);
+      countries.forEach(
+        (country) {
+          country.cities.forEach(
+            (city) {
+              if (city.name == locationData["city"] &&
+                  country.iso2 == locationData["iso2"]) {
+                final local = city.localities.firstWhere(
+                    (loc) => loc.name == locationData["locality"],
+                    orElse: () => null);
+                myAddress =
+                    MyAddress(locality: local, city: city, country: country);
+              }
+            },
+          );
+        },
+      );
+      //final myCountry = countries.firstWhere((element) => element.cities.firstWhere((el) => el.localities.firstWhere((e) => e.name==locationData["locality"]))));
+
       //Helper.printLog(myLocation.toString());
     }
   }
 
   ///will run auto when the location is updated
-  Future setMyLocation() async {
-    final doc = _fireStore.doc("users/${_user.uid}");
-    await doc.set({"my_location": myLocation.toMap()}, SetOptions(merge: true));
+  Future setMyAddress() async {
+    final doc = _fireStore.doc("users/${user.uid}");
+    await doc.set({"myAddress": myAddress.toMap()}, SetOptions(merge: true));
   }
 
   @action
   Future getActiveCountries() async {
     var countriesCollection = _fireStore.collection("active_countries");
-    var countriesDocs = await countriesCollection.get();
-    activeCountries = [];
-    activeCountriesNames = [];
+    var countriesDocs =
+        await countriesCollection.where("enabled", isEqualTo: true).get();
+    countries = [];
+
     countriesDocs.docs.toList().forEach(
       (element) {
-        activeCountries.add(element.id);
-        final name = CountryPickerUtils.getCountryByIsoCode(element.id);
-        activeCountriesNames.add(
-          name.name,
-        );
+        countries.add(Country.fromJson(element.data()));
       },
     );
     //activeCountries = map((e) => e.id);
   }
 
-  @action
-  Future getLocationsInCountry(String c) async {
-    availableLocations = {};
-    final country = CountryPickerUtils.getCountryByName(c);
-    final locationsCollection = _fireStore.collection("locations");
-    final locationsQuery =
-        locationsCollection.where("country", isEqualTo: "${country.isoCode}");
-    final snaps = await locationsQuery.get();
-    var allLocations = snaps.docs.map((e) => Location.fromJson(e.data()));
-    availableLocations = {};
-    allLocations.forEach(
-      (element) {
-        final key = element.city;
-        if (availableLocations.containsKey(key)) {
-          availableLocations[key].add(element);
-        } else {
-          availableLocations[key] = [element];
-        }
-      },
+  Future<String> getAuthorizationForStaffing({
+      ThePhoneNumber phoneNumber, BusinessDetails business,Function(BappFCMMessage) onReplyRecieved}) async {
+    final functions = FirebaseFunctions.instance;
+    final callable =
+        functions.httpsCallable(BappFunctions.sendBappMessage);
+    final called = await callable.call(
+      BappFCMMessage(
+        type: BappFCMMessageType.staffAuthorizationAsk,
+        title: "You are being added as a Staff",
+        body: business.businessName.value +
+            " is adding you as their staff, acknowledge this to authorize adding",
+        to: phoneNumber.internationalNumber,
+        frm: theNumber.internationalNumber,
+      ).toMap(),
     );
+    final resultData = jsonDecode(called.data) as Map;
+    final String resultString = resultData["result"];
+    if(resultString==BappFunctionsResponse.multiUser){
+      Helper.printLog("multi user found at firestore/users");
+    }
+    final c = Completer<String>();
+    c.complete(resultString);
+
+    if(resultString==BappFunctionsResponse.singleUser){
+      BappFCM().listenForStaffingAuthorizationOnce((bappMessage){
+        onReplyRecieved(bappMessage);
+      });
+    }
+    return c.future;
   }
 
-  Future<BappUser> getkAnotherUserOnBapp(ThePhoneNumber phoneNumber) async {
-    final usersCollec = FirebaseFirestore.instance.collection("users");
-    final query = usersCollec.where("contactNumber",
-        isEqualTo: phoneNumber.internationalNumber);
-    final snaps = await query.get();
-    if (snaps.size == 0) {
-      return null;
-    } else {}
-    final doc = snaps.docs.toList()[0];
-    final u = BappUser.fromJson(myDoc: doc.reference, j: doc.data());
-
-    return u;
+  Future<void> giveAuthorizationForStaffing(BappFCMMessage message,
+      {bool authorized = false}) async {
+    final bappmessage = BappFCMMessage(
+      to: message.frm,
+      frm: theNumber.internationalNumber,
+      title: "Acknowledged",
+      data: {},
+      body: "Acknowledged",
+      click_action: "",
+      type: authorized
+          ? BappFCMMessageType.staffAuthorizationAskAcknowledge
+          : BappFCMMessageType.staffAuthorizationAskDeny,
+    );
   }
 
   void _setupAutoRun() {
     _disposers.add(
-      reaction((_) => myLocation, (_) async {
-        await setMyLocation();
+      reaction((_) => myAddress, (_) async {
+        await setMyAddress();
       }),
     );
     _disposers.add(
@@ -254,16 +302,130 @@ abstract class _CloudStore with Store {
     );
     _disposers.add(
       reaction((_) => theNumber, (_) async {
-        if (_user != null) {
-          await setMyOtherUserData();
+        if (user != null) {
+          await setMyNumber();
         }
       }),
     );
     _disposers.add(
       reaction((_) => BappFCM().fcmToken.value, (val) async {
         fcmToken = val;
-        await setMyOtherUserData();
+        await setMyFcmToken();
       }, fireImmediately: true),
     );
   }
+
+  Future updateProfile(
+      {String displayName,
+      String email,
+      @required Function(FirebaseAuthException) onFail,
+      @required Function() onSuccess}) async {
+    if (user.displayName != displayName) {
+      await user.updateProfile(displayName: displayName);
+    }
+    Helper.printLog(email);
+    if (user.email != null && user.email != email) {
+      try {
+        await user.updateEmail(email);
+        onSuccess();
+      } on FirebaseAuthException catch (e) {
+        onFail(e);
+      }
+    } else {
+      onFail(FirebaseAuthException(message: "same-email", code: "same-email"));
+    }
+  }
+
+  Future loginOrSignUpWithNumber({
+    PhoneNumber number,
+    Function onVerified,
+    Function(FirebaseAuthException) onFail,
+    Future<String> Function(bool) onAskOTP,
+    Function onResendOTPPossible,
+  }) async {
+    loadingForOTP = false;
+    await _auth.verifyPhoneNumber(
+      phoneNumber: number.phoneNumber,
+      verificationCompleted: (PhoneAuthCredential phoneAuthCredential) async {
+        onVerified();
+        await _link(phoneAuthCredential);
+      },
+      verificationFailed: (FirebaseAuthException exception) {
+        onFail(exception);
+        Helper.printLog(exception);
+      },
+      codeSent: (String verificationID, int resendToken) async {
+        var askAgain = false;
+        Future.doWhile(
+          () async {
+            var otp = await onAskOTP(askAgain);
+            askAgain = true;
+            loadingForOTP = true;
+
+            PhoneAuthCredential phoneAuthCredential =
+                PhoneAuthProvider.credential(
+                    verificationId: verificationID, smsCode: otp);
+            final linked = await _link(phoneAuthCredential);
+            Helper.printLog(linked.toString());
+            if (linked) {
+              onVerified();
+            } else {
+              loadingForOTP = false;
+            }
+            return !linked;
+          },
+        );
+      },
+      codeAutoRetrievalTimeout: (String verificationId) {},
+    );
+  }
+
+  Future<bool> _link(PhoneAuthCredential phoneAuthCredential) async {
+    try {
+      await _auth.currentUser.linkWithCredential(phoneAuthCredential);
+      return true;
+    } on FirebaseAuthException catch (e) {
+      Helper.printLog("359" + e.code);
+      print(e);
+      if (e.code.toLowerCase() == "credential-already-in-use") {
+        return await signIn(phoneAuthCredential);
+      } else if (e.code.toLowerCase() == "invalid-verification-code") {
+        return false;
+      } else if (e.message.contains("User has already been linked")) {
+        return await signIn(phoneAuthCredential);
+      }
+    }
+    return false;
+  }
+
+  Future<bool> signIn(PhoneAuthCredential phoneAuthCredential) async {
+    try {
+      await _auth.signInWithCredential(phoneAuthCredential);
+      return true;
+    } on FirebaseAuthException catch (e) {
+      Helper.printLog("374" + e.code);
+      print(e);
+      if (e.code.toLowerCase() == "invalid-verification-code") {
+        return false;
+      }
+    }
+    return false;
+  }
+
+  Future signInAnonymous() async {
+    status = AuthStatus.unsure;
+    var auth = FirebaseAuth.instance;
+    await auth.signInAnonymously();
+  }
+
+  @action
+  Future signOut() async {
+    if (user.isAnonymous) {
+      return;
+    }
+    await FirebaseAuth.instance.signOut();
+    //await FirebaseAuth.instance.signInAnonymously();
+  }
 }
+
+enum AuthStatus { unsure, userPresent, userNotPresent, anonymousUser }

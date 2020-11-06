@@ -1,4 +1,5 @@
-import 'package:bapp/stores/auth_store.dart';
+
+import 'package:bapp/stores/cloud_store.dart';
 import 'package:flutter/material.dart';
 
 enum UserType {

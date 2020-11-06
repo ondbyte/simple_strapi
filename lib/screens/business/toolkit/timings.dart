@@ -25,7 +25,7 @@ class _BusinessTimingsScreenState extends State<BusinessTimingsScreen> {
         onWillPop: () async {
           final businessStore =
               Provider.of<BusinessStore>(context, listen: false);
-          businessStore.business.businessTimings.value.saveTimings();
+          businessStore.business.saveTimings();
           return true;
         },
         child: Consumer<BusinessStore>(

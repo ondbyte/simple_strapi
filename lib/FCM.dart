@@ -2,31 +2,31 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:bapp/classes/notification_update.dart';
+import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 import 'config/constants.dart';
 import 'package:mobx/mobx.dart';
 import 'package:http/http.dart' as http;
 
-Function({dynamic data, dynamic notif}) kFCMListener;
 
 Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) async {
-  if (kFCMListener != null) {
-    if (message.containsKey('data')) {
-      final dynamic data = message['data'];
-      kFCMListener(data: data);
-    }
+  if (message.containsKey('data')) {
+    final dynamic data = message['data'];
+    print(data);
+  }
 
-    if (message.containsKey('notification')) {
-      final dynamic notification = message['notification'];
-      kFCMListener(notif: notification);
-    }
+  if (message.containsKey('notification')) {
+    final dynamic notification = message['notification'];
+    print(notification);
   }
 }
 
 class BappFCM {
   static final BappFCM _bappFCM = BappFCM._once();
   final fcmToken = Observable("");
+  Function(BappFCMMessage) _staffingAuthorizationListener;
+  Function(BappFCMMessage) _bappMessagesListener;
 
   factory BappFCM() {
     return _bappFCM;
@@ -35,6 +35,23 @@ class BappFCM {
   bool _isFcmInitialized = false;
 
   BappFCM._once();
+  
+  void listenForStaffingAuthorizationOnce(Function(BappFCMMessage) fn,{Duration duration= const Duration(seconds: 60)}){
+    if(_staffingAuthorizationListener!=null){
+      throw Exception("this should never be the case @BappFCM");
+    }
+    _staffingAuthorizationListener = fn;
+    Future.delayed(duration,(){
+      if(_staffingAuthorizationListener!=null){
+        _staffingAuthorizationListener(null);
+        _staffingAuthorizationListener = null;
+      }
+    });
+  }
+
+  void listenForBappMessages(Function(BappFCMMessage) fn){
+    _bappMessagesListener = fn;
+  }
 
   initForAndroid() {
     if (!_isFcmInitialized) {
@@ -53,27 +70,26 @@ class BappFCM {
     _init(_fcm);
   }
 
+  onMessage(Map<String,dynamic> message){
+    if(message.containsKey("data")){
+      final bappMessage = BappFCMMessage.fromStringData(message["data"]);
+      if(bappMessage.type==BappFCMMessageType.staffAuthorizationAskAcknowledge||bappMessage.type==BappFCMMessageType.staffAuthorizationAskDeny){
+        if(_staffingAuthorizationListener!=null){
+          _staffingAuthorizationListener(bappMessage);
+          _staffingAuthorizationListener = null;
+        }
+      } else if(_bappMessagesListener!=null){
+        _bappMessagesListener(bappMessage);
+      }
+    }
+  }
+
   _init(FirebaseMessaging _fcm) {
     _fcm.configure(
       onBackgroundMessage: myBackgroundMessageHandler,
-      onLaunch: (Map<String, dynamic> lMessage) async {
-        //print("[ON_LAUNCH] " + lMessage.toString());
-        if (kFCMListener != null) {
-          kFCMListener(data: lMessage["data"], notif: lMessage["notification"]);
-        }
-      },
-      onResume: (Map<String, dynamic> rMessage) async {
-        //print("[ON_RESUME] " + rMessage.toString());
-        if (kFCMListener != null) {
-          kFCMListener(data: rMessage["data"], notif: rMessage["notification"]);
-        }
-      },
-      onMessage: (Map<String, dynamic> message) async {
-        //print("[ON_MESSAGE] " + message.toString());
-        if (kFCMListener != null) {
-          kFCMListener(data: message["data"], notif: message["notification"]);
-        }
-      },
+      onLaunch: onMessage,
+      onResume: onMessage,
+      onMessage: onMessage,
     );
     _fcm.onTokenRefresh.listen((event) {
       fcmToken.value = event;
@@ -83,35 +99,64 @@ class BappFCM {
     kNotifEnabled = true;
     print("FCM initialized for " + Platform.operatingSystem);
   }
+}
 
-  ///this is sensitive data
-  ///initially we are hardcoding to the app
-  ///should be removed in future
-  final _fcmSkey =
-      "AAAAtsRvSvM:APA91bFjKAqKAtMFQGMkRIevlHmsoSO-2oNOicRcRPJotvLLDvM0lmfA1R2kx2AOhRDbD9cSohmbo8QOUwZ_IOMirAbOL0Xu2XY2FVY9h9j_6X-vUwf6-L44ydHW5I3oBe1Ih056VUe8";
+class BappFCMMessage {
+  final BappFCMMessageType type;
+  final String title;
+  final String body;
+  final Map<String, dynamic> data;
+  ///international number
+  final String to;
+  ///international number
+  final String frm;
+  final String click_action;
+  final BappFCMMessagePriority priority ;
 
-  send({NotificationUpdate notificationUpdate, String toFcmToken}) async {
-    await http.post(
-      'https://fcm.googleapis.com/fcm/send',
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-        'Authorization': 'key=$_fcmSkey',
-      },
-      body: jsonEncode(
-        <String, dynamic>{
-          "notification": <String, dynamic>{
-            "body": "this is body",
-            "title": "this is a title",
-            "click_action": "BAPP_NOTIFICATION_CLICK",
-          },
-          "priority": "high",
-          "data": <String, dynamic>{
-            "click_action": "BAPP_NOTIFICATION_CLICK",
-            ...notificationUpdate.toStringMap(),
-          },
-          "to": toFcmToken
-        },
-      ),
+  BappFCMMessage(
+      {this.title,
+      this.body,
+      this.type,
+      this.data,
+      this.frm,
+      this.to,this.priority = BappFCMMessagePriority.high,this.click_action = "BAPP_NOTIFICATION_CLICK" }) {
+    data.remove("type");
+    data.remove("title");
+    data.remove("body");
+    data.remove("frm");
+    data.remove("to");
+    data.remove("priority");
+    data.remove("click_action");
+  }
+
+  static BappFCMMessage fromStringData(String s) {
+    final data = jsonDecode(s);
+    return BappFCMMessage(
+      type: EnumToString.fromString(BappFCMMessageType.values, data["type"]),
+      title: data["title"],
+      body: data["body"],
+      frm: data["frm"],
+      to: data["to"],
+      data: data,
+      priority: EnumToString.fromString(BappFCMMessagePriority.values, data["priority"],),
+      click_action: data["click_action"]
     );
   }
+
+  toMap() {
+    return {
+      "type": EnumToString.convertToString(type),
+      "title": title,
+      "body": body,
+      "frm": frm,
+      "to": to,
+      "data": data,
+      "priority":EnumToString.convertToString(priority),
+      "click_action":click_action,
+    };
+  }
 }
+
+enum BappFCMMessageType { staffAuthorizationAsk,staffAuthorizationAskAcknowledge,staffAuthorizationAskDeny }
+
+enum BappFCMMessagePriority{ high }

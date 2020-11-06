@@ -2,7 +2,7 @@ import 'dart:isolate';
 
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
-import 'package:bapp/stores/auth_store.dart';
+
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/storage_store.dart';
@@ -27,46 +27,43 @@ class SplashScreen extends StatefulWidget {
   _SplashScreenState createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> {
+class _SplashScreenState extends State<SplashScreen> with AutomaticKeepAliveClientMixin {
+  bool killState = false;
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return InitWidget(
       initializer: () async {
         ///init authentication store / load user
         await ThePhoneNumberLib.init();
         BappFCM().initForAndroid();
         await Provider.of<ThemeStore>(context, listen: false).init();
-        await Provider.of<AuthStore>(context, listen: false).init();
         await _initCrashlytics();
-        //await context.read<FeedbackStore>().init();
-      },
-      onInitComplete: () async {
-        //await FirebaseAuth.instance.signOut();
-        final authStore = Provider.of<AuthStore>(context, listen: false);
-        final cloudStore = Provider.of<CloudStore>(context, listen: false);
-
-        ///show on-boarding screens if first time customer
-        if (authStore.status == AuthStatus.userNotPresent) {
-          Navigator.of(context)
-              .pushReplacementNamed(RouteManager.onBoardingScreen);
-          return;
-        }
-        if (authStore.status == AuthStatus.anonymousUser ||
-            authStore.status == AuthStatus.userPresent) {
-          await cloudStore.init(context);
-
-          ///show place selection if no place selected
-          if (cloudStore.myLocation == null) {
-            Navigator.of(context)
-                .pushReplacementNamed(RouteManager.pickAPlace, arguments: 0);
-            return;
-          } else {
-            ///customer is not a first timer
+        await Provider.of<CloudStore>(context, listen: false).init(
+          onLogin: () async {
+            //await FirebaseAuth.instance.signOut();
+            final cloudStore = Provider.of<CloudStore>(context, listen: false);
             await Provider.of<BusinessStore>(context, listen: false)
                 .init(context);
-            Navigator.of(context).pushReplacementNamed(RouteManager.home);
+
+            if (cloudStore.myAddress != null) {
+              ///customer is not a first timer
+              Navigator.of(context).pushNamedAndRemoveUntil(RouteManager.home,(route) => false);
+              killState = !killState;
+              return;
+            } else {
+              Navigator.of(context).pushNamedAndRemoveUntil(RouteManager.pickAPlace, (route) => false);
+              killState = !killState;
+              return;
+            }
+          },
+          onNotLogin: () async {
+            Navigator.of(context)
+                .pushNamed(RouteManager.onBoardingScreen);
+            return;
           }
-        }
+        );
+        //await context.read<FeedbackStore>().init();
       },
 
       ///show splash screen while everything happens behind the scenes
@@ -135,4 +132,7 @@ class _SplashScreenState extends State<SplashScreen> {
       }).sendPort);
     }
   }
+
+  @override
+  bool get wantKeepAlive => !killState;
 }

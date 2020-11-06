@@ -1,6 +1,6 @@
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
-import 'package:bapp/stores/auth_store.dart';
+
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/firebase_structures/business_category.dart';

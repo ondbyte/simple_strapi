@@ -2,37 +2,27 @@ import 'package:bapp/config/config.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/firebase_structures/business_category.dart';
+import 'package:bapp/stores/firebase_structures/business_details.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:mobx/mobx.dart';
 
 class BusinessServices {
-  final String myCollec;
+  final BusinessDetails business;
   final all = ObservableList<BusinessService>();
   final allCategories = ObservableList<BusinessServiceCategory>();
 
-  BusinessServices({this.myCollec}) {
-    _getServices(myCollec);
-  }
+  BusinessServices.empty({this.business});
 
-  Future _getServices(String myCollec) async {
-    final snaps = await FirebaseFirestore.instance.collection(myCollec).get();
-    if (snaps.docs.isNotEmpty) {
-      snaps.docs.toList().forEach(
-        (snap) {
-          final data = snap.data();
-          if (data.containsKey("serviceName")) {
-            all.add(BusinessService.fromJson(myDoc: snap.reference, j: data));
-          } else if (data.containsKey("categoryName")) {
-            allCategories.add(
-              BusinessServiceCategory.fromJson(
-                myDoc: snap.reference,
-                j: data,
-              ),
-            );
-          }
-        },
-      );
-    }
+  BusinessServices.fromJsonList(List<dynamic> l,{@required this.business}){
+    l.forEach((i) {
+      final item = i as Map<String,dynamic>;
+      if(item.keys.contains("serviceName")){
+        all.add(BusinessService.fromJson(item));
+      } else if(item.keys.contains("categoryname")){
+        allCategories.add(BusinessServiceCategory.fromJson(item));
+      }
+    });
   }
 
   bool anyServiceDependsOn(BusinessServiceCategory category) {
@@ -49,9 +39,7 @@ class BusinessServices {
     Map<String, bool> images,
   }) async {
     final imgs = await uploadImagesToStorageAndReturnStringList(images);
-    final service = BusinessService(
-        myDoc:
-            FirebaseFirestore.instance.collection(myCollec).doc(kUUIDGen.v1()))
+    final service = BusinessService.empty()
       ..category.value = category
       ..serviceName.value = serviceName
       ..price.value = price
@@ -61,12 +49,14 @@ class BusinessServices {
       ..images.addAll(Map.fromEntries(imgs.map((e) => MapEntry(e, true))));
 
     all.add(service);
-    await service.saveService();
+    await business.myDoc.value.update({"businessServices":FieldValue.arrayUnion([service.toMap()])});
+    await business.selectedBranch.value.myDoc.value.update({"businessServices":FieldValue.arrayUnion([service.toMap()])});
   }
 
   Future removeService(BusinessService service) async {
     all.remove(service);
-    await service.delete();
+    await business.myDoc.value.update({"businessServices":FieldValue.arrayRemove([service.toMap()])});
+    await business.selectedBranch.value.myDoc.value.update({"businessServices":FieldValue.arrayRemove([service.toMap()])});
   }
 
   Future addACategory({
@@ -75,21 +65,30 @@ class BusinessServices {
     Map<String, bool> images,
   }) async {
     final imgs = await uploadImagesToStorageAndReturnStringList(images);
-    final category = BusinessServiceCategory(
-        myDoc:
-            FirebaseFirestore.instance.collection(myCollec).doc(kUUIDGen.v1()))
+    final category = BusinessServiceCategory.empty()
       ..categoryName.value = categoryName
       ..description.value = description
       ..images.clear()
       ..images.addAll(Map.fromEntries(imgs.map((e) => MapEntry(e, true))));
 
     allCategories.add(category);
-    await category.saveServiceCategory();
+    await business.selectedBranch.value.myDoc.value.update({"businessServices":FieldValue.arrayUnion([category.toMap()])});
   }
 
   Future removeCategory(BusinessServiceCategory category) async {
     allCategories.remove(category);
-    await category.delete();
+    business.selectedBranch.value.myDoc.value.update({"businessServices":FieldValue.arrayRemove([category.toMap()])});
+  }
+
+  toList(){
+    final l = [];
+    all.forEach((element) {
+      l.add(element.toMap());
+    });
+    allCategories.forEach((element) {
+      l.add(element.toMap());
+    });
+    return l;
   }
 }
 
@@ -100,49 +99,28 @@ class BusinessService {
   final description = Observable<String>("");
   final category = Observable<BusinessServiceCategory>(null);
   final images = ObservableMap<String, bool>();
-  final DocumentReference myDoc;
 
-  List<ReactionDisposer> _disposers = [];
-  BusinessService({this.myDoc});
+  BusinessService.empty();
 
-  _setupReactions() {
-    _disposers.add(reaction((_) => category.value, (_) {
-      print("satting");
-      print(category.value?.categoryName?.value ?? "no name");
-    }));
-  }
-
-  BusinessService.fromJson({this.myDoc, Map<String, dynamic> j}) {
-    serviceName.value = j["serviceName"];
-    price.value = j["price"];
-    duration.value = Duration(milliseconds: j["duration"]);
-    description.value = j["description"];
-    category.value = BusinessServiceCategory.fromDoc(myDoc: j["category"]);
+  BusinessService.fromJson(Map<String, dynamic> j) {
+    serviceName.value = j["serviceName"]??"";
+    price.value = j["price"]??0.0;
+    duration.value = Duration(minutes: j["duration"]??0);
+    description.value = j["description"]??"";
+    category.value = BusinessServiceCategory.fromJson(j["category"]);
     final tmp = Map.fromIterable(j["images"],
         key: (s) => s as String, value: (_) => true);
     images.addAll(tmp);
-  }
-
-  Future saveService() async {
-    await myDoc.set(toMap());
-  }
-
-  Future delete() async {
-    _disposers.forEach((element) {
-      element.call();
-    });
-    await myDoc.delete();
   }
 
   toMap() {
     return {
       "serviceName": serviceName.value,
       "price": price.value,
-      "duration": duration.value.inMilliseconds,
+      "duration": duration.value.inMinutes,
       "description": description.value,
-      "category": category.value.myDoc,
+      "category": category.value.toMap(),
       "images": images.keys.toList(),
-      "myDoc": myDoc
     };
   }
 }
@@ -151,36 +129,19 @@ class BusinessServiceCategory {
   final categoryName = Observable<String>("");
   final description = Observable<String>("");
   final images = ObservableMap<String, bool>();
-  final DocumentReference myDoc;
 
-  BusinessServiceCategory({this.myDoc});
+  BusinessServiceCategory.empty();
 
-  BusinessServiceCategory.fromDoc({this.myDoc}) {
-    myDoc.get().then((value) {
-      if (value.exists) {
-        _fromJson(value.data());
-      }
-    });
-  }
-
-  _fromJson(Map<String, dynamic> j) {
-    this.categoryName.value = j["categoryName"];
-    this.description.value = j["description"];
-    final tmp = Map.fromIterable(j["images"],
-        key: (s) => s as String, value: (_) => true);
-    this.images.addAll(tmp);
-  }
-
-  BusinessServiceCategory.fromJson({this.myDoc, Map<String, dynamic> j}) {
+  BusinessServiceCategory.fromJson(Map<String,dynamic> j) {
     _fromJson(j);
   }
 
-  Future saveServiceCategory() async {
-    await myDoc.set(toMap());
-  }
-
-  Future delete() async {
-    await myDoc.delete();
+  _fromJson(Map<String, dynamic> j) {
+    this.categoryName.value = j["categoryName"]??"";
+    this.description.value = j["description"]??"";
+    final tmp = Map.fromIterable(j["images"],
+        key: (s) => s as String, value: (_) => true);
+    this.images.addAll(tmp);
   }
 
   toMap() {
@@ -188,7 +149,6 @@ class BusinessServiceCategory {
       "categoryName": categoryName.value,
       "description": description.value,
       "images": images.keys.toList(),
-      "myDoc": myDoc
     };
   }
 }

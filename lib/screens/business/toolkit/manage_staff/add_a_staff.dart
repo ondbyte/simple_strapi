@@ -19,6 +19,7 @@ import 'package:bapp/widgets/shake_widget.dart';
 import 'package:chips_choice/chips_choice.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
@@ -267,6 +268,9 @@ class BusinessAskUserForStaffingWidget extends StatefulWidget {
 
 class _BusinessAskUserForStaffingWidgetState
     extends State<BusinessAskUserForStaffingWidget> {
+
+  bool _loading = false;
+
   @override
   void initState() {
     super.initState();
@@ -276,59 +280,33 @@ class _BusinessAskUserForStaffingWidgetState
   Widget build(BuildContext context) {
     return Consumer2<CloudStore, BusinessStore>(
       builder: (_, cloudStore, businessStore, __) {
-        return FutureBuilder<BappUser>(
-          future: cloudStore.getkAnotherUserOnBapp(widget.thePhoneNumber),
-          builder: (context, snapshot) {
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.thePhoneNumber.internationalNumber,
-                  style: Theme.of(context).textTheme.headline1,
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                snapshot.connectionState == ConnectionState.waiting
-                    ? Text(
-                        "Checking for Bapp user",
-                      )
-                    : snapshot.hasData
-                        ? Text("User is on Bapp")
-                        : Text(
-                            "User is not on Bapp, please ask them to sign up now and check back"),
-                SizedBox(
-                  height: 20,
-                ),
-                snapshot.connectionState == ConnectionState.waiting
-                    ? LoadingWidget()
-                    : snapshot.hasData
-                        ? PrimaryButton(
-                            "Request now",
-                            onPressed: () {
-                              final user = snapshot.data;
-                              BappFCM().send(
-                                notificationUpdate: NotificationUpdate(
-                                  at: Timestamp.now(),
-                                  description: businessStore
-                                          .business.businessName.value +
-                                      " would like to onboard you as their staff",
-                                  title: "Hi",
-                                  fromToken: businessStore
-                                      .business.contactNumber.value,
-                                  state: kUUIDGen.v1(),
-                                  orderId: -1,
-                                  type: NotificationUpdateType.staffing,
-                                  viewed: false,
-                                ),
-                              );
-                            },
-                          )
-                        : SizedBox()
-              ],
-            );
-          },
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+                "Press ask now to ask the Bapp user with the number ${widget.thePhoneNumber.internationalNumber} to join your business on Bapp"),
+            SizedBox(
+              height: 20,
+            ),
+            _loading?LoadingWidget():PrimaryButton(
+              "Ask now",
+              onPressed: () async {
+                _loading = false;
+                final response = await cloudStore.getAuthorizationForStaffing(
+                  phoneNumber: widget.thePhoneNumber,
+                  business: businessStore.business,
+                  onReplyRecieved: (bappMessage) {
+                    if(bappMessage==null){
+                      Navigator.of(context).pop();
+                      Flushbar(message: "Time out",duration: const Duration(seconds: 2),).show(context);
+                    } else {
+                      if(bappMessage.type==BappFCMMessageType.ac)
+                    }
+                  },
+                );
+              },
+            ),
+          ],
         );
       },
     );

@@ -29,6 +29,14 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
   final _controller = TextEditingController();
   bool _loading = false;
 
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -167,11 +175,5 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
                     },
             ),
     );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
   }
 }

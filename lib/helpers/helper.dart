@@ -3,7 +3,8 @@ import 'dart:typed_data';
 
 import 'package:bapp/config/config.dart';
 import 'package:bapp/config/config_data_types.dart';
-import 'package:bapp/stores/auth_store.dart';
+import 'package:bapp/stores/cloud_store.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info/device_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,7 +20,7 @@ import '../config/constants.dart';
 
 class Helper {
   static stringifyAddresse(Address adr) {
-    return '''${adr.subLocality}\n${adr.locality}\n${adr.addressLine}\n${adr.adminArea}\n${adr.postalCode}'''
+    return '''${adr.subLocality??""}\n${adr.locality??""}\n${adr.addressLine??""}\n${adr.adminArea??""}\n${adr.postalCode??""}'''
         .split("\n")
         .join(", ");
   }

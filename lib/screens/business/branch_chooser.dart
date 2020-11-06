@@ -30,13 +30,8 @@ class BranchChooserScreen extends StatelessWidget {
                     onTap: () {
                       act(
                         () {
+                          //businessStore.business.branches.value.removeWhere((element) => element.myDoc.value==branches[i].myDoc.value)
                           final neww = branches[i];
-                          final old = businessStore.business.selectedBranch.value;
-                          if(neww.myDoc==old.myDoc){
-                            return;
-                          }
-                          branches.removeWhere((b) => b.myDoc==old.myDoc);
-                          businessStore.business.branches.value = [...branches,old];
                           businessStore.business.selectedBranch.value = neww;
                         },
                       );

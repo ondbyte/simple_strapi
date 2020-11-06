@@ -134,10 +134,10 @@ class BusinessBranch {
       this.email.value = j["email"];
       this.rating.value = j["rating"];
       this.businessServices.value =
-          BusinessServices(myCollec: j["businessServices"]);
-      this.businessTimings.value = BusinessTimings(myDoc: j["businessTimings"]);
+          BusinessServices.fromJsonList(j["businessServices"], business: business.value);
+      this.businessTimings.value = BusinessTimings.fromJson(j["businessTimings"]);
       this.businessHolidays.value =
-          BusinessHolidays(myCollection: j["businessHolidays"]);
+          BusinessHolidays.fromJsonList(j["businessHolidays"], business: business.value);
       this.status.value = EnumToString.fromString(
           BusinessBranchActiveStatus.values, j["status"]);
     }
@@ -157,9 +157,9 @@ class BusinessBranch {
       "contactNumber": contactNumber.value,
       "email": email.value,
       "rating": rating.value,
-      "businessServices": businessServices.value.myCollec,
-      "businessTimings": businessTimings.value.myDoc,
-      "businessHolidays": businessHolidays.value.myCollection,
+      "businessServices": businessServices.value.toList(),
+      "businessTimings": businessTimings.value.toMap(),
+      "businessHolidays": businessHolidays.value.toList(),
       "status": EnumToString.convertToString(status.value),
     };
   }
@@ -175,17 +175,21 @@ class BusinessBranch {
   }
 
   Future saveBranch() async {
-    final collec = business.value.myDoc.value.collection("businessBranches");
-    final doc = await collec.add(toMap());
-    await act(() {
-      this.myDoc.value = doc;
-    });
+    if(myDoc.value==null){
+      final collec = business.value.myDoc.value.parent;
+      final doc = await collec.add(toMap());
+      await act((){
+        this.myDoc.value = doc;
+      });
+    } else {
+      await myDoc.value.set(toMap());
+    }
   }
 
   Future addAStaff({
     UserType role,
     BusinessBranch branch,
-    BusinessDetails busines,
+    BusinessDetails business,
     BusinessStaff manager,
     BusinessStaff receptionist,
   }) {}

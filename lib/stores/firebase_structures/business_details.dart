@@ -60,9 +60,6 @@ class BusinessDetails {
     BusinessBranch selectedBranch,
     String email = "",
     DocumentReference myDoc,
-    BusinessTimings businessTimings,
-    BusinessServices businessServices,
-    BusinessHolidays businessHolidays,
   }) {
     this.category.value = category;
     this.businessName.value = businessName;
@@ -74,9 +71,9 @@ class BusinessDetails {
     this.selectedBranch.value = selectedBranch;
     this.email.value = email;
     this.myDoc.value = myDoc;
-    this.businessTimings.value = businessTimings;
-    this.businessServices.value = businessServices;
-    this.businessHolidays.value = businessHolidays;
+    this.businessTimings.value = BusinessTimings.empty();
+    this.businessServices.value = BusinessServices.empty(business: this);
+    this.businessHolidays.value = BusinessHolidays.empty(business: this);
 
     setupReactions();
   }
@@ -102,11 +99,11 @@ class BusinessDetails {
         BusinessBranch(myDoc: j["selectedBranch"], business: this);
     this.email.value = j["email"];
     this.myDoc.value = j["myDoc"];
-    this.businessTimings.value = BusinessTimings(myDoc: j["businessTimings"]);
+    this.businessTimings.value = BusinessTimings.fromJson(j["businessTimings"]);
     this.businessServices.value =
-        BusinessServices(myCollec: j["businessServices"]);
+        BusinessServices.fromJsonList(j["businessServices"], business: this);
     this.businessHolidays.value =
-        BusinessHolidays(myCollection: j["businessHolidays"]);
+        BusinessHolidays.fromJsonList(j["businessHolidays"], business: this);
 
     setupReactions();
   }
@@ -123,9 +120,9 @@ class BusinessDetails {
       "selectedBranch": selectedBranch.value.myDoc.value,
       "email": email.value,
       "myDoc": myDoc.value,
-      "businessTimings": businessTimings.value.myDoc,
-      "businessServices": businessServices.value.myCollec,
-      "businessHolidays": businessHolidays.value.myCollection,
+      "businessTimings": businessTimings.value.toMap(),
+      "businessServices": businessServices.value.toList(),
+      "businessHolidays": businessHolidays.value.toList(),
     };
   }
 
@@ -177,6 +174,10 @@ class BusinessDetails {
 
   Future saveBusiness() async {
     await myDoc.value.set(toMap());
+  }
+  Future saveTimings() async {
+    await myDoc.value.set({"businessTimings":businessTimings.value.toMap()},SetOptions(merge: true,));
+    await selectedBranch.value.myDoc.value.set({"businessTimings":businessTimings.value.toMap()},SetOptions(merge: true,));
   }
 
   bool anyBranchInDraft() {
