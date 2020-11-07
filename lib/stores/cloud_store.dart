@@ -249,7 +249,9 @@ abstract class _CloudStore with Store {
         to: phoneNumber.internationalNumber,
         frm: theNumber.internationalNumber,
       ).toMap(),
-    );
+    ).catchError((e,s){
+      Helper.printLog(e.toString()+"\n"+s.toString());
+    });
     final resultData = jsonDecode(called.data) as Map;
     final String resultString = resultData["result"];
     if (resultString == BappFunctionsResponse.multiUser) {
