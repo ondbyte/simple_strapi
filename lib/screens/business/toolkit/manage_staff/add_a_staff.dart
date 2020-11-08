@@ -420,13 +420,11 @@ class _BusinessAskUserForStaffingWidgetState
             _askNow(businessStore, cloudStore);
           },
         ),
-        SizedBox.expand(
-          child: FlatButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            child: Text("Go back"),
-          ),
+        FlatButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text("Go back"),
         )
       ],
     );

@@ -1,10 +1,9 @@
 import 'package:bapp/FCM.dart';
 import 'package:bapp/config/config_data_types.dart';
-import 'package:bapp/stores/business_store.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/updates_store.dart';
 import 'package:bapp/widgets/buttons.dart';
-import 'package:bapp/widgets/feedback_layer_widget.dart';
 import 'package:bapp/widgets/store_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -14,7 +13,12 @@ import 'package:provider/provider.dart';
 import 'business_home.dart';
 import 'customer_home.dart';
 
-class Bapp extends StatelessWidget {
+class Bapp extends StatefulWidget {
+  @override
+  _BappState createState() => _BappState();
+}
+
+class _BappState extends State<Bapp> {
   @override
   Widget build(BuildContext context) {
     return StoreProvider<CloudStore>(
@@ -22,6 +26,20 @@ class Bapp extends StatelessWidget {
       init: (cloudStore) async {
         await Provider.of<UpdatesStore>(context, listen: false).init(context);
         //await Provider.of<BusinessStore>(context, listen: false).init(context);
+        Helper.printLog("setting up message layer");
+        BappFCM().listenForBappMessages(
+          (bappMessage) {
+            Helper.printLog("bappMessage");
+            print(bappMessage.toMap());
+            setState(() {
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                return BappFCMMesssageLayerWidget(
+                  latestMessage: bappMessage,
+                );
+              }));
+            });
+          },
+        );
       },
       builder: (_, cloudStore) {
         return Stack(
@@ -42,7 +60,6 @@ class Bapp extends StatelessWidget {
                 }
               },
             ),
-            BappFCMMesssageLayerWidget()
           ],
         );
       },
@@ -51,6 +68,10 @@ class Bapp extends StatelessWidget {
 }
 
 class BappFCMMesssageLayerWidget extends StatefulWidget {
+  final BappFCMMessage latestMessage;
+
+  const BappFCMMesssageLayerWidget({Key key, this.latestMessage})
+      : super(key: key);
   @override
   _BappFCMMesssageLayerWidgetState createState() =>
       _BappFCMMesssageLayerWidgetState();
@@ -59,26 +80,19 @@ class BappFCMMesssageLayerWidget extends StatefulWidget {
 class _BappFCMMesssageLayerWidgetState
     extends State<BappFCMMesssageLayerWidget> {
   BappFCMMessage _latestMessage;
-
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback(
-      (timeStamp) {
-        BappFCM().listenForBappMessages(
-          (bappMessage) {
-            setState(() {
-              _latestMessage = bappMessage;
-            });
-          },
-        );
-      },
-    );
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      setState(() {
+        _latestMessage = widget.latestMessage;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    if(_latestMessage==null){
+    if (_latestMessage == null) {
       return SizedBox();
     }
     return AlertDialog(
@@ -86,16 +100,18 @@ class _BappFCMMesssageLayerWidgetState
       content: Column(
         children: [
           Text(_latestMessage.body),
-          SizedBox(height: 20,),
+          SizedBox(
+            height: 20,
+          ),
           _buttonize(_latestMessage)
         ],
       ),
     );
   }
 
-  _buttonize(BappFCMMessage message){
-    if(message.type==BappFCMMessageType.staffAuthorizationAsk){
-      return PrimaryButton("Acknowledge", onPressed: (){
+  _buttonize(BappFCMMessage message) {
+    if (message.type == BappFCMMessageType.staffAuthorizationAsk) {
+      return PrimaryButton("Acknowledge", onPressed: () {
         Provider.of<CloudStore>(context).giveAuthorizationForStaffing(message);
         setState(() {
           _latestMessage = null;

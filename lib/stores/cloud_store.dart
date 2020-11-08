@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:bapp/classes/location.dart';
 import 'package:bapp/config/config_data_types.dart';
@@ -240,7 +239,8 @@ abstract class _CloudStore with Store {
       Function(BappFCMMessage) onReplyRecieved}) async {
     final functions = FirebaseFunctions.instance;
     final callable = functions.httpsCallable(BappFunctions.sendBappMessage);
-    final called = await callable.call(
+    final called = await callable
+        .call(
       BappFCMMessage(
         type: BappFCMMessageType.staffAuthorizationAsk,
         title: "You are being added as a Staff",
@@ -249,11 +249,15 @@ abstract class _CloudStore with Store {
         to: phoneNumber.internationalNumber,
         frm: theNumber.internationalNumber,
       ).toMap(),
-    ).catchError((e,s){
-      Helper.printLog(e.toString()+"\n"+s.toString());
+    )
+        .catchError((e, s) {
+      Helper.printLog("error from fun");
+      print(e);
+      print(s);
     });
-    final resultData = jsonDecode(called.data) as Map;
-    final String resultString = resultData["result"];
+    //Helper.printLog("resopnse from fun");
+    //print(called.data);
+    final String resultString = called.data["result"];
     if (resultString == BappFunctionsResponse.multiUser) {
       Helper.printLog("multi user found at firestore/users");
     }

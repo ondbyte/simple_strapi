@@ -1,6 +1,6 @@
-import 'dart:convert';
 import 'dart:io';
 
+import 'package:bapp/helpers/helper.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:mobx/mobx.dart';
@@ -70,17 +70,23 @@ class BappFCM {
 
   Future onMessage(Map<String, dynamic> message) async {
     if (message.containsKey("data")) {
-      final bappMessage = BappFCMMessage.fromStringData(message["data"]);
+      Helper.printLog("before bapp message");
+      final bappMessage = BappFCMMessage.fromJson(message["data"]);
+      Helper.printLog("after bapp message");
       if (bappMessage.type ==
               BappFCMMessageType.staffAuthorizationAskAcknowledge ||
           bappMessage.type == BappFCMMessageType.staffAuthorizationAskDeny) {
+        Helper.printLog("authorization message");
         if (_staffingAuthorizationListener != null) {
           _staffingAuthorizationListener(bappMessage);
           _staffingAuthorizationListener = null;
         }
       } else if (_bappMessagesListener != null) {
+        Helper.printLog("General message");
         _bappMessagesListener(bappMessage);
       }
+    } else {
+      Helper.printLog("no data on message");
     }
   }
 
@@ -102,18 +108,18 @@ class BappFCM {
 }
 
 class BappFCMMessage {
-  final BappFCMMessageType type;
-  final String title;
-  final String body;
-  final Map<String, dynamic> data;
+  BappFCMMessageType type;
+  String title;
+  String body;
+  Map<String, String> data;
 
   ///international number
-  final String to;
+  String to;
 
   ///international number
-  final String frm;
-  final String click_action;
-  final BappFCMMessagePriority priority;
+  String frm;
+  String click_action;
+  BappFCMMessagePriority priority;
 
   BappFCMMessage(
       {this.title = "",
@@ -133,33 +139,34 @@ class BappFCMMessage {
     data?.remove("click_action");
   }
 
-  static BappFCMMessage fromStringData(String s) {
-    final data = jsonDecode(s);
-    return BappFCMMessage(
-        type: EnumToString.fromString(BappFCMMessageType.values, data["type"]),
-        title: data["title"],
-        body: data["body"],
-        frm: data["frm"],
-        to: data["to"],
-        data: data,
-        priority: EnumToString.fromString(
-          BappFCMMessagePriority.values,
-          data["priority"],
-        ),
-        click_action: data["click_action"]);
+  BappFCMMessage.fromJson(Map<String, String> j) {
+    type = EnumToString.fromString(BappFCMMessageType.values, j["type"]);
+    title = j.remove("title");
+    body = j.remove("body");
+    frm = j.remove("frm");
+    to = j.remove("to");
+    priority = EnumToString.fromString(
+      BappFCMMessagePriority.values,
+      j.remove("priority"),
+    );
+    click_action = j.remove("click_action");
+    data = j;
   }
 
-  toMap() {
-    return {
+  Map<String, String> toMap() {
+    final m = {
       "type": EnumToString.convertToString(type),
       "title": title,
       "body": body,
       "frm": frm,
       "to": to,
-      "data": data,
       "priority": EnumToString.convertToString(priority),
       "click_action": click_action,
     };
+    data?.forEach((key, value) {
+      m.addAll({key: value});
+    });
+    return m;
   }
 }
 
