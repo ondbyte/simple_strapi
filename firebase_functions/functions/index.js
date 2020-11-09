@@ -4,22 +4,23 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 
 
+
 var bappFCMMessageType = {
     staffAuthorizationAsk: "staffAuthorizationAsk",
     staffAuthorizationAskAcknowledge: "staffAuthorizationAskAcknowledge",
     staffAuthorizationAskDeny: "staffAuthorizationAskDeny",
-    reminder:"reminder"
+    reminder: "reminder"
 };
 
 exports.sendBappMessage = functions.https.onCall(async (j, context) => {
     "use-strict";
     var resultString = "";
     try {
-        if(j.type === bappFCMMessageType.staffAuthorizationAsk){
+        if (j.type === bappFCMMessageType.staffAuthorizationAsk) {
             resultString = await ask(j);
-        } else if(j.type === bappFCMMessageType.staffAuthorizationAskAcknowledge||j.type===bappFCMMessageType.staffAuthorizationAskDeny){
+        } else if (j.type === bappFCMMessageType.staffAuthorizationAskAcknowledge || j.type === bappFCMMessageType.staffAuthorizationAskDeny) {
             resultString = await denyOrAcknowledge(j);
-        } else if(j.type === bappFCMMessageType.reminder){
+        } else if (j.type === bappFCMMessageType.reminder) {
             ///implement a reminder
             resultString = "notImplemented";
         }
@@ -31,7 +32,7 @@ exports.sendBappMessage = functions.https.onCall(async (j, context) => {
     return { result: resultString };
 });
 
-async function denyOrAcknowledge(j){    
+async function denyOrAcknowledge(j) {
     var resultString = "";
     const snaps = await admin.firestore().collection('users').where("contactNumber", "==", j.to).get();
 

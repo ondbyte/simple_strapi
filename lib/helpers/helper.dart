@@ -1,11 +1,10 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:bapp/config/config.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/stores/cloud_store.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:device_info/device_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -13,14 +12,11 @@ import 'package:flutter/cupertino.dart' hide Action;
 import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mobx/mobx.dart' show Action;
-import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:provider/provider.dart';
-
-import '../config/constants.dart';
 
 class Helper {
   static stringifyAddresse(Address adr) {
-    return '''${adr.subLocality??""}\n${adr.locality??""}\n${adr.addressLine??""}\n${adr.adminArea??""}\n${adr.postalCode??""}'''
+    return '''${adr.subLocality ?? ""}\n${adr.locality ?? ""}\n${adr.addressLine ?? ""}\n${adr.adminArea ?? ""}\n${adr.postalCode ?? ""}'''
         .split("\n")
         .join(", ");
   }
@@ -160,4 +156,17 @@ Future uploadBusinessBranchApprovalPDF({File fileToUpload}) async {
   final task = file.putFile(fileToUpload);
   await task.onComplete;
   print("File Uploaded");
+}
+
+bool nuked = false;
+Future nukeFirebase() async {
+  if (nuked) {
+    return;
+  }
+  final functions = FirebaseFunctions.instance;
+  final callable = functions.httpsCallable("nuke");
+  final response = await callable.call();
+  Helper.printLog("nuked");
+  print(response.data);
+  nuked = true;
 }

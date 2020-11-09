@@ -257,7 +257,8 @@ abstract class _CloudStore with Store {
     });
     //Helper.printLog("resopnse from fun");
     //print(called.data);
-    final String resultString = called.data["result"];
+    final resultString = called.data["result"];
+    print(resultString);
     if (resultString == BappFunctionsResponse.multiUser) {
       Helper.printLog("multi user found at firestore/users");
     }
@@ -393,6 +394,10 @@ abstract class _CloudStore with Store {
       Helper.printLog("359" + e.code);
       print(e);
       if (e.code.toLowerCase() == "credential-already-in-use") {
+        await FirebaseFirestore.instance
+            .doc("users/${FirebaseAuth.instance.currentUser.uid}")
+            .delete();
+        await FirebaseAuth.instance.currentUser.delete();
         return await signIn(phoneAuthCredential);
       } else if (e.code.toLowerCase() == "invalid-verification-code") {
         return false;
