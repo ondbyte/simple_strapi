@@ -262,7 +262,7 @@ abstract class _CloudStore with Store {
       Helper.printLog("multi user found at firestore/users");
     }
 
-    if (resultString == BappFunctionsResponse.singleUser) {
+    if (resultString == BappFunctionsResponse.success) {
       BappFCM().listenForStaffingAuthorizationOnce((bappMessage) {
         onReplyRecieved(bappMessage);
       });
@@ -283,6 +283,10 @@ abstract class _CloudStore with Store {
           ? BappFCMMessageType.staffAuthorizationAskAcknowledge
           : BappFCMMessageType.staffAuthorizationAskDeny,
     );
+    final functions = FirebaseFunctions.instance;
+    final callable = functions.httpsCallable(BappFunctions.sendBappMessage);
+    final called = await callable.call(bappmessage.toMap());
+    print(called.data);
   }
 
   void _setupAutoRun() {
@@ -324,8 +328,8 @@ abstract class _CloudStore with Store {
     if (user.displayName != displayName) {
       await user.updateProfile(displayName: displayName);
     }
-    Helper.printLog(email);
-    if (user.email != null && user.email != email) {
+    Helper.printLog(email.toUpperCase());
+    if (user.email == null || user.email != email) {
       try {
         await user.updateEmail(email);
         onSuccess();

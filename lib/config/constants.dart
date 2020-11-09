@@ -48,7 +48,7 @@ class BappFunctions{
 }
 
 class BappFunctionsResponse{
-  static String singleUser = "singleUser";
+  static String success = "success";
   static String multiUser = "multiUser";
   static String noUser = "noUser";
 }

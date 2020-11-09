@@ -99,6 +99,23 @@ class BusinessBranch {
         },
       ),
     );
+
+    _disposers.add(
+      reaction(
+        (_) => staff.length,
+        (_) async {
+          final list = [];
+          staff.forEach(
+            (element) {
+              list.add(element.toMap());
+            },
+          );
+          await myDoc.value?.update(
+            {"staff": list},
+          );
+        },
+      ),
+    );
   }
 
   ///get current data from firestore
@@ -120,24 +137,26 @@ class BusinessBranch {
       this.address.value = j["address"];
       this.latlong.value = j["latlong"];
       this.staff.clear();
-      this.staff.addAll(List.castFrom(j["staff"]).map((e) =>
-          BusinessStaff.fromDoc(
-              business: business.value, myDoc: j["manager"])));
+      this.staff.addAll(List.castFrom(j["staff"])
+          .map((e) => BusinessStaff.fromJson(business: business.value, j: e)));
       this.manager.value = j["manager"] != null
-          ? BusinessStaff.fromDoc(business: business.value, myDoc: j["manager"])
+          ? BusinessStaff.fromJson(business: business.value, j: j["manager"])
           : null;
       this.receptionist.value = j["receptionist"] != null
-          ? BusinessStaff.fromDoc(
-              business: business.value, myDoc: j["receptionist"])
+          ? BusinessStaff.fromJson(
+              business: business.value, j: j["receptionist"])
           : null;
       this.contactNumber.value = j["contactNumber"];
       this.email.value = j["email"];
       this.rating.value = j["rating"];
-      this.businessServices.value =
-          BusinessServices.fromJsonList(j["businessServices"], business: business.value);
-      this.businessTimings.value = BusinessTimings.fromJson(j["businessTimings"]);
-      this.businessHolidays.value =
-          BusinessHolidays.fromJsonList(j["businessHolidays"], business: business.value);
+      this.businessServices.value = BusinessServices.fromJsonList(
+          j["businessServices"],
+          business: business.value);
+      this.businessTimings.value =
+          BusinessTimings.fromJson(j["businessTimings"]);
+      this.businessHolidays.value = BusinessHolidays.fromJsonList(
+          j["businessHolidays"],
+          business: business.value);
       this.status.value = EnumToString.fromString(
           BusinessBranchActiveStatus.values, j["status"]);
     }
@@ -149,9 +168,9 @@ class BusinessBranch {
       "name": name.value,
       "address": address.value,
       "latlong": latlong.value,
-      "staff": staff.map((element) => element.myDoc).toList(),
-      "manager": manager.value?.myDoc,
-      "receptionist": receptionist.value?.myDoc,
+      "staff": staff.map((element) => element.toMap()).toList(),
+      "manager": manager.value?.toMap(),
+      "receptionist": receptionist.value?.toMap(),
       "business": business.value.myDoc.value,
       "myDoc": myDoc.value,
       "contactNumber": contactNumber.value,
@@ -175,10 +194,10 @@ class BusinessBranch {
   }
 
   Future saveBranch() async {
-    if(myDoc.value==null){
+    if (myDoc.value == null) {
       final collec = business.value.myDoc.value.parent;
       final doc = await collec.add(toMap());
-      await act((){
+      await act(() {
         this.myDoc.value = doc;
       });
     } else {
@@ -188,11 +207,21 @@ class BusinessBranch {
 
   Future addAStaff({
     UserType role,
-    BusinessBranch branch,
-    BusinessDetails business,
-    BusinessStaff manager,
-    BusinessStaff receptionist,
-  }) {}
+    String uid,
+    String name,
+    DateTime dateOfJoining,
+    Map<String, bool> images,
+  }) {
+    final s = BusinessStaff(
+        business: this.business.value,
+        name: name,
+        uid: uid,
+        branch: business.value.selectedBranch.value,
+        role: role,
+        dateOfJoining: dateOfJoining,
+        images: images);
+    staff.add(s);
+  }
 }
 
 enum BusinessBranchActiveStatus {

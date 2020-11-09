@@ -29,7 +29,7 @@ class BappFCM {
     return _bappFCM;
   }
 
-  bool _isFcmInitialized = false;
+  bool isFcmInitialized = false;
 
   BappFCM._once();
 
@@ -52,7 +52,7 @@ class BappFCM {
   }
 
   initForAndroid() {
-    if (!_isFcmInitialized) {
+    if (!isFcmInitialized) {
       if (Platform.isAndroid) {
         _init(FirebaseMessaging());
       }
@@ -61,20 +61,26 @@ class BappFCM {
 
   Future initForIOS() async {
     final _fcm = FirebaseMessaging();
-    await _fcm.requestNotificationPermissions(
+    final enabled = await _fcm.requestNotificationPermissions(
       const IosNotificationSettings(
           sound: true, badge: true, alert: true, provisional: false),
     );
-    _init(_fcm);
+    if(enabled){
+      _init(_fcm);
+    }
+    return enabled;
   }
 
   Future onMessage(Map<String, dynamic> message) async {
     if (message.containsKey("data")) {
-      Helper.printLog("before bapp message");
-      final bappMessage = BappFCMMessage.fromJson(message["data"]);
-      Helper.printLog("after bapp message");
-      if (bappMessage.type ==
-              BappFCMMessageType.staffAuthorizationAskAcknowledge ||
+      print(message["data"]);
+      var bappMessage;
+      try{
+        bappMessage = BappFCMMessage.fromJson(j:Map.castFrom(message["data"]));
+      } catch (e){
+        Helper.printLog(e.toString());
+      }
+      if (bappMessage.type == BappFCMMessageType.staffAuthorizationAskAcknowledge ||
           bappMessage.type == BappFCMMessageType.staffAuthorizationAskDeny) {
         Helper.printLog("authorization message");
         if (_staffingAuthorizationListener != null) {
@@ -82,7 +88,6 @@ class BappFCM {
           _staffingAuthorizationListener = null;
         }
       } else if (_bappMessagesListener != null) {
-        Helper.printLog("General message");
         _bappMessagesListener(bappMessage);
       }
     } else {
@@ -101,7 +106,7 @@ class BappFCM {
       fcmToken.value = event;
       print("fcmToken " + fcmToken.value);
     });
-    _isFcmInitialized = true;
+    isFcmInitialized = true;
     kNotifEnabled = true;
     print("FCM initialized for " + Platform.operatingSystem);
   }
@@ -120,6 +125,7 @@ class BappFCMMessage {
   String frm;
   String click_action;
   BappFCMMessagePriority priority;
+  DateTime remindTime;
 
   BappFCMMessage(
       {this.title = "",
@@ -139,7 +145,11 @@ class BappFCMMessage {
     data?.remove("click_action");
   }
 
-  BappFCMMessage.fromJson(Map<String, String> j) {
+  toReminderMessage({DateTime remindTime}){
+    this.remindTime = remindTime;
+  }
+
+  BappFCMMessage.fromJson({Map<String, String> j}) {
     type = EnumToString.fromString(BappFCMMessageType.values, j["type"]);
     title = j.remove("title");
     body = j.remove("body");
@@ -154,6 +164,9 @@ class BappFCMMessage {
   }
 
   Map<String, String> toMap() {
+    if(type==BappFCMMessageType.reminder){
+      assert(remindTime!=null,"reminder message must have a reminding time");
+    }
     final m = {
       "type": EnumToString.convertToString(type),
       "title": title,
@@ -162,6 +175,7 @@ class BappFCMMessage {
       "to": to,
       "priority": EnumToString.convertToString(priority),
       "click_action": click_action,
+      "remindTime":remindTime!=null?remindTime.toIso8601String():"",
     };
     data?.forEach((key, value) {
       m.addAll({key: value});
@@ -173,7 +187,8 @@ class BappFCMMessage {
 enum BappFCMMessageType {
   staffAuthorizationAsk,
   staffAuthorizationAskAcknowledge,
-  staffAuthorizationAskDeny
+  staffAuthorizationAskDeny,
+  reminder,
 }
 
 enum BappFCMMessagePriority { high }

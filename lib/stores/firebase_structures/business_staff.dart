@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:mobx/mobx.dart';
 
 class BusinessStaff {
-  DocumentReference myDoc;
   UserType role;
   String name;
   DateTime dateOfJoining;
@@ -20,17 +19,12 @@ class BusinessStaff {
   BusinessStaff manager;
   BusinessStaff receptionist;
   String uid;
-  String fcmToken;
 
   BusinessStaff({
-    this.myDoc,
     this.role,
     this.branch,
     this.business,
-    this.manager,
-    this.receptionist,
     this.uid,
-    this.fcmToken,
     this.name,
     this.dateOfJoining,
     this.images = const {},
@@ -38,17 +32,13 @@ class BusinessStaff {
 
   toMap() {
     return {
-      "myDoc": myDoc,
       "role": EnumToString.convertToString(role),
       "name": name,
       "dateOfJoining": dateOfJoining,
       "expertise": expertise.map((category) => category.toMap()),
       "branch": branch.myDoc,
       "business": business.myDoc,
-      "manager": manager.myDoc,
-      "receptionist": receptionist.myDoc,
       "uid": uid,
-      "fcmToken": fcmToken,
       "images": images.keys.toList(),
     };
   }
@@ -59,27 +49,15 @@ class BusinessStaff {
     dateOfJoining = j["dateOfJoining"];
     expertise.addAll(
         j["expertise"].map((e) => BusinessServiceCategory.fromJson(e)));
-    branch = BusinessBranch(myDoc: j["branch"], business: business);
-    manager = BusinessStaff.fromDoc(business: business, myDoc: j["manager"]);
-    receptionist =
-        BusinessStaff.fromDoc(business: business, myDoc: j["receptionist"]);
+    branch = business.branches.value.firstWhere((b) => b.myDoc.value==j["branch"]);
     uid = j["uid"];
-    fcmToken = j["fcmToken"];
     images = Map.fromIterable(j["images"],
             key: (v) => v as String, value: (_) => true) ??
         {};
   }
 
-  BusinessStaff.fromDoc({@required this.myDoc, @required this.business}) {
-    myDoc.get().then((value) {
-      if (value.exists) {
-        _fromJson(value.data());
-      }
-    });
-  }
-
   BusinessStaff.fromJson(
-      {@required this.myDoc, @required this.business, Map<String, dynamic> j}) {
+      {@required this.business, Map<String, dynamic> j}) {
     _fromJson(j);
   }
 }

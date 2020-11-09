@@ -31,13 +31,18 @@ class _BappState extends State<Bapp> {
           (bappMessage) {
             Helper.printLog("bappMessage");
             print(bappMessage.toMap());
-            setState(() {
-              Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-                return BappFCMMesssageLayerWidget(
-                  latestMessage: bappMessage,
+            setState(
+              () async {
+                final result = await showDialog(
+                  context: context,
+                  builder: (_) {
+                    return BappFCMMesssageLayerWidget(
+                      latestMessage: bappMessage,
+                    );
+                  },
                 );
-              }));
-            });
+              },
+            );
           },
         );
       },
@@ -98,12 +103,14 @@ class _BappFCMMesssageLayerWidgetState
     return AlertDialog(
       title: Text(_latestMessage.title),
       content: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(_latestMessage.body),
           SizedBox(
             height: 20,
           ),
-          _buttonize(_latestMessage)
+          _buttonize(_latestMessage),
+          _cancelButtonize(_latestMessage),
         ],
       ),
     );
@@ -111,12 +118,29 @@ class _BappFCMMesssageLayerWidgetState
 
   _buttonize(BappFCMMessage message) {
     if (message.type == BappFCMMessageType.staffAuthorizationAsk) {
-      return PrimaryButton("Acknowledge", onPressed: () {
-        Provider.of<CloudStore>(context).giveAuthorizationForStaffing(message);
-        setState(() {
+      return PrimaryButton(
+        "Acknowledge",
+        onPressed: () {
+          Provider.of<CloudStore>(context,listen: false)
+              .giveAuthorizationForStaffing(message,authorized: true);
           _latestMessage = null;
-        });
-      });
+          Navigator.pop(context, true);
+        },
+      );
+    }
+  }
+
+  _cancelButtonize(BappFCMMessage message) {
+    if (message.type == BappFCMMessageType.staffAuthorizationAsk) {
+      return FlatButton(
+        child: Text("Not interested"),
+        onPressed: () {
+          Provider.of<CloudStore>(context,listen: false)
+              .giveAuthorizationForStaffing(message);
+          _latestMessage = null;
+          Navigator.pop(context, false);
+        },
+      );
     }
   }
 }

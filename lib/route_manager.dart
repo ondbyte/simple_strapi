@@ -19,6 +19,7 @@ import 'package:bapp/screens/location/pick_a_place.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/screens/onboarding/onboardingscreen.dart';
 import 'package:bapp/screens/search/show_results.dart';
+import 'package:bapp/screens/settings/settings.dart';
 import 'package:bapp/stores/firebase_structures/business_holidays.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -208,6 +209,14 @@ class RouteManager {
         return MaterialPageRoute(
           builder: (_) {
             return BranchChooserScreen();
+          },
+        );
+
+
+      case settingsScreen:
+        return MaterialPageRoute(
+          builder: (_) {
+            return SettingsScreen();
           },
         );
       case createProfileScreen:

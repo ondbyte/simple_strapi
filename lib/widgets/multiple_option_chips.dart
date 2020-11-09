@@ -42,6 +42,7 @@ class MultipleChipOptionsFormField<T> extends FormField<List<T>> {
                     labelText,
                   ),
                   ChipsChoice<T>.multiple(
+                    placeholder: "Please add categories for yor business services to select the user\'s expertise",
                     value: selectedItems,
                     onChanged: (val) {
                       state.didChange(val);

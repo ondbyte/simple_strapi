@@ -13,6 +13,8 @@ import 'package:bapp/widgets/loading_stack.dart';
 import 'package:bapp/widgets/multiple_option_chips.dart';
 import 'package:bapp/widgets/shake_widget.dart';
 import 'package:enum_to_string/enum_to_string.dart';
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
@@ -33,6 +35,8 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
   final _staff = BusinessStaff();
   var selected = -1;
   final _doShakeImage = Observable(false);
+  String authorizedUid = "";
+  bool _numberValidated = false;
   ThePhoneNumber _theNumber;
   @override
   Widget build(BuildContext context) {
@@ -98,17 +102,68 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                             inputDecoration:
                                 InputDecoration(labelText: "Bapp user"),
                             countries: [cloudStore.theNumber.iso2Code],
+                            validator: (s){
+                              if(_numberValidated&&authorizedUid.isNotEmpty){
+                                return null;
+                              } else {
+                                return "Get authorization for the number";
+                              }
+                            },
                             onInputChanged: (pn) {
                               _theNumber = ThePhoneNumberLib.parseNumber(
                                   internationalNumber: pn.phoneNumber);
                             },
                             onInputValidated: (b) async {
-                              if (b) {
-                                await _getStaffAuthorization();
+                              if (b != _numberValidated) {
+                                setState(() {
+                                  _numberValidated = b;
+                                });
                               }
                             },
                           );
                         },
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      FlatButton.icon(
+                        onPressed: authorizedUid.isNotEmpty
+                            ? _numberValidated
+                                ? () {
+                                    Flushbar(
+                                      message:
+                                          "User acknowledged the staffing request",
+                                      duration: const Duration(seconds: 2),
+                                    ).show(context);
+                                  }
+                                : null
+                            : _numberValidated
+                                ? () async {
+                                    if (_theNumber.internationalNumber ==
+                                        Provider.of<CloudStore>(context,listen: false)
+                                            .theNumber
+                                            .internationalNumber) {
+                                      ///cannot use own number
+                                      Flushbar(
+                                        message: "Cannot be your number",
+                                        duration: const Duration(seconds: 2),
+                                      ).show(context);
+                                      return;
+                                    }
+                                    authorizedUid =
+                                        (await _getStaffAuthorization()) ??
+                                            "";
+                                    setState(() {});
+                                  }
+                                : null,
+                        icon: Icon(FeatherIcons.user),
+                        textTheme: ButtonTextTheme.primary,
+                        label: Text(
+                          authorizedUid.isNotEmpty ? "Authorized" : "Ask Authorization",
+                        ),
+                        color: authorizedUid.isNotEmpty
+                            ? Colors.green
+                            : Theme.of(context).errorColor,
                       ),
                       SizedBox(
                         height: 20,
@@ -216,10 +271,17 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                             act(() {
                               kLoading.value = true;
                             });
-                            final branch = Provider.of<BusinessStore>(context)
+                            final branch = Provider.of<BusinessStore>(context,listen: false)
                                 .business
                                 .selectedBranch
                                 .value;
+                            branch.addAStaff(
+                              uid: authorizedUid,
+                              name: _staff.name,
+                              role: _staff.role,
+                              dateOfJoining: _staff.dateOfJoining,
+                              images: _staff.images,
+                            );
                           }
                         },
                       )
@@ -234,8 +296,8 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
     );
   }
 
-  Future _getStaffAuthorization() async {
-    await showDialog(
+  Future<bool> _getStaffAuthorization() async {
+    return await showDialog<bool>(
       context: context,
       builder: (_) {
         return AlertDialog(
@@ -280,10 +342,13 @@ class _BusinessAskUserForStaffingWidgetState
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                  "Press ask now to ask the Bapp user with the number ${widget.thePhoneNumber.internationalNumber} to join your business on Bapp"),
+              _finallyWidget == null
+                  ? Text(
+                      "Press ask now to ask the Bapp user with the number ${widget.thePhoneNumber.internationalNumber} to join your business on Bapp",
+                    )
+                  : SizedBox(),
               SizedBox(
-                height: 20,
+                height: _finallyWidget == null ? 20 : 0,
               ),
               _loading
                   ? LoadingWidget()
@@ -291,7 +356,9 @@ class _BusinessAskUserForStaffingWidgetState
                       ? PrimaryButton(
                           "Ask now",
                           onPressed: () async {
-                            _loading = true;
+                            setState(() {
+                              _loading = true;
+                            });
                             final response =
                                 await _askNow(businessStore, cloudStore);
                             if (response == BappFunctionsResponse.multiUser ||
@@ -299,7 +366,7 @@ class _BusinessAskUserForStaffingWidgetState
                               _finallyWidget = Column(
                                 children: [
                                   Text(
-                                      "User is on not on Bapp, please ask the user to sign up."),
+                                      "User is not on Bapp, please ask the user to sign up."),
                                   SizedBox(
                                     height: 20,
                                   ),
@@ -312,7 +379,7 @@ class _BusinessAskUserForStaffingWidgetState
                                 ],
                               );
                             } else if (response ==
-                                BappFunctionsResponse.singleUser) {
+                                BappFunctionsResponse.success) {
                               _finallyWidget = Column(
                                 children: [
                                   Text(
@@ -352,7 +419,8 @@ class _BusinessAskUserForStaffingWidgetState
             _finallyWidget = _onDeny(businessStore, cloudStore);
           } else if (bappMessage.type ==
               BappFCMMessageType.staffAuthorizationAskAcknowledge) {
-            _finallyWidget = _onAcknowledge(businessStore, cloudStore);
+            //_finallyWidget = _onAcknowledge(businessStore, cloudStore);
+            Navigator.of(context).pop(bappMessage.data["uid"]);
           }
         }
         setState(() {
@@ -362,13 +430,14 @@ class _BusinessAskUserForStaffingWidgetState
     );
     return response;
   }
-
+/*
   Widget _onAcknowledge(BusinessStore businessStore, CloudStore cloudStore) {
     return Column(
       children: [
         Text(
           "User acknowledged",
-          style: Theme.of(context).textTheme.headline1.apply(color: Colors.red),
+          style:
+              Theme.of(context).textTheme.headline1.apply(color: Colors.green),
         ),
         SizedBox(
           height: 20,
@@ -376,12 +445,12 @@ class _BusinessAskUserForStaffingWidgetState
         PrimaryButton(
           "Go back",
           onPressed: () {
-            Navigator.of(context).pop(true);
+            Navigator.of(context).pop("");
           },
         )
       ],
     );
-  }
+  }*/
 
   Widget _onDeny(BusinessStore businessStore, CloudStore cloudStore) {
     return Column(
@@ -396,7 +465,7 @@ class _BusinessAskUserForStaffingWidgetState
         PrimaryButton(
           "Go back",
           onPressed: () {
-            Navigator.of(context).pop(false);
+            Navigator.of(context).pop("");
           },
         )
       ],
@@ -422,7 +491,7 @@ class _BusinessAskUserForStaffingWidgetState
         ),
         FlatButton(
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.of(context).pop("");
           },
           child: Text("Go back"),
         )
