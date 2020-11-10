@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 
 import 'package:bapp/classes/location.dart';
 import 'package:bapp/config/config_data_types.dart';
@@ -158,7 +157,7 @@ abstract class _CloudStore with Store {
 
   ///will auto run on change
   Future setMyUserType() async {
-    var doc = _fireStore.doc("users/${user.uid}");
+    var doc = _fireStore.doc("users/${FirebaseAuth.instance.currentUser.uid}");
     await doc.set(
       {"my_user_type": userType.index},
       SetOptions(merge: true),
@@ -167,7 +166,7 @@ abstract class _CloudStore with Store {
 
   ///will auto run on change
   Future setMyAlterEgo() async {
-    var doc = _fireStore.doc("users/${user.uid}");
+    var doc = _fireStore.doc("users/${FirebaseAuth.instance.currentUser.uid}");
     await doc.set(
       {"my_alter_ego": alterEgo.index},
       SetOptions(merge: true),
@@ -269,9 +268,10 @@ abstract class _CloudStore with Store {
         onReplyRecieved(bappMessage);
       });
     }
-    if(resultString.runtimeType==String){
+    if (resultString.runtimeType == String) {
       return resultString;
-    } return resultString["errorInfo"]["code"];
+    }
+    return resultString["errorInfo"]["code"];
   }
 
   Future<void> giveAuthorizationForStaffing(BappFCMMessage message,

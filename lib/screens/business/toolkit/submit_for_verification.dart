@@ -3,18 +3,19 @@ import 'dart:io';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/firebase_structures/business_branch.dart';
 import 'package:bapp/widgets/add_image_sliver.dart';
 import 'package:bapp/widgets/buttons.dart';
-import 'package:bapp/widgets/loading.dart';
+import 'package:bapp/widgets/loading_stack.dart';
 import 'package:bapp/widgets/padded_text.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BusinessSubmitBranchForVerification extends StatefulWidget {
   BusinessSubmitBranchForVerification({Key key}) : super(key: key);
@@ -28,97 +29,119 @@ class _BusinessSubmitBranchForVerificationState
     extends State<BusinessSubmitBranchForVerification> {
   final Map<String, bool> _businessDocs = {};
   final Map<String, bool> _ownerDoc = {};
-  bool _loading = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: true,
-      ),
-      body: _loading
-          ? LoadingWidget()
-          : CustomScrollView(
-              slivers: [
-                SliverList(
-                  delegate: SliverChildListDelegate(
-                    [
-                      PaddedText(
-                        "Ready to recieve bookings?",
-                        style: Theme.of(context).textTheme.headline1,
-                      ),
-                      PaddedText(
-                        "We verify business before customers could see them, Send us below documents.",
-                        style: Theme.of(context).textTheme.bodyText1,
-                      ),
-                      Divider(),
-                      AddImageTileWidget(
-                        maxImage: 4,
-                        title: "Photos of incorporation",
-                        subTitle: "Photo of trade license or establishment ID",
-                        onImagesSelected: (images) {
-                          _businessDocs.addAll(images);
-                        },
-                      ),
-                      Divider(),
-                      AddImageTileWidget(
-                        maxImage: 2,
-                        title: "Owner\'s ID",
-                        subTitle: "Both sides of the owner\'s ID card",
-                        onImagesSelected: (images) {
-                          _ownerDoc.addAll(images);
-                        },
-                      ),
-                      Divider(),
-                      ListTile(
-                        title: Text("Terms of service"),
-                        subtitle: Text(
-                          "Make sure you are aware of the terms of our service.",
+        appBar: AppBar(
+          automaticallyImplyLeading: true,
+        ),
+        body: Consumer<BusinessStore>(
+          builder: (_, businessStore, __) {
+            return LoadingStackWidget(
+              child: isNotShowable(businessStore)
+                  ? ContextualMessageScreen(
+                      buttonText: "Go back",
+                      init: () {},
+                      message:
+                          "Your selected branch is disabled or in process of verification",
+                      onButtonPressed: () {
+                        Navigator.pop(context);
+                      },
+                    )
+                  : CustomScrollView(
+                      slivers: [
+                        SliverList(
+                          delegate: SliverChildListDelegate(
+                            [
+                              PaddedText(
+                                "Ready to recieve bookings?",
+                                style: Theme.of(context).textTheme.headline1,
+                              ),
+                              PaddedText(
+                                "We verify business before customers could see them, Send us below documents.",
+                                style: Theme.of(context).textTheme.bodyText1,
+                              ),
+                              Divider(),
+                              AddImageTileWidget(
+                                maxImage: 4,
+                                title: "Photos of incorporation",
+                                subTitle:
+                                    "Photo of trade license or establishment ID",
+                                onImagesSelected: (images) {
+                                  _businessDocs.addAll(images);
+                                },
+                              ),
+                              Divider(),
+                              AddImageTileWidget(
+                                maxImage: 2,
+                                title: "Owner\'s ID",
+                                subTitle: "Both sides of the owner\'s ID card",
+                                onImagesSelected: (images) {
+                                  _ownerDoc.addAll(images);
+                                },
+                              ),
+                              Divider(),
+                              ListTile(
+                                title: Text("Terms of service"),
+                                subtitle: Text(
+                                  "Make sure you are aware of the terms of our service.",
+                                ),
+                                onTap: () {
+                                  launch(kTerms);
+                                },
+                              ),
+                              Divider(),
+                              ListTile(
+                                title: Text("Privacy Policy"),
+                                subtitle: Text(
+                                  "Read the privacy policy here.",
+                                ),
+                                onTap: () {
+                                  launch(kPrivacy);
+                                },
+                              ),
+                              Divider(),
+                              PaddedText(
+                                "By clicking submit, you are agreeing to our terms of service and privacy policy.",
+                                style: Theme.of(context).textTheme.caption,
+                              ),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16),
+                                child: PrimaryButton(
+                                  "Verify & Publish",
+                                  onPressed: () {
+                                    _apply();
+                                  },
+                                ),
+                              ),
+                              SizedBox(
+                                height: 20,
+                              ),
+                            ],
+                          ),
                         ),
-                        onTap: () {
-                          launch(kTerms);
-                        },
-                      ),
-                      Divider(),
-                      ListTile(
-                        title: Text("Privacy Policy"),
-                        subtitle: Text(
-                          "Read the privacy policy here.",
-                        ),
-                        onTap: () {
-                          launch(kPrivacy);
-                        },
-                      ),
-                      Divider(),
-                      PaddedText(
-                        "By clicking submit, you are agreeing to our terms of service and privacy policy.",
-                        style: Theme.of(context).textTheme.caption,
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                        child: PrimaryButton(
-                          "Verify & Publish",
-                          onPressed: () {
-                            _apply();
-                          },
-                        ),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-    );
+                      ],
+                    ),
+            );
+          },
+        ));
+  }
+
+  bool isNotShowable(BusinessStore businessStore) {
+    return businessStore.business.selectedBranch.value.status.value ==
+            BusinessBranchActiveStatus.documentVerification ||
+        businessStore.business.selectedBranch.value.status.value ==
+            BusinessBranchActiveStatus.published ||
+        businessStore.business.selectedBranch.value.status.value ==
+            BusinessBranchActiveStatus.unPublished;
   }
 
   _apply() async {
-    setState(() {
-      _loading = true;
+    act(() {
+      kLoading.value = true;
     });
     final pdf = pw.Document();
     final business =
@@ -238,8 +261,6 @@ class _BusinessSubmitBranchForVerificationState
 
     await uploadBusinessBranchApprovalPDF(fileToUpload: theFileToUpload);
 
-    _loading = false;
-
     Navigator.of(context)
         .popAndPushNamed(RouteManager.contextualMessage, arguments: [
       () {
@@ -257,5 +278,8 @@ class _BusinessSubmitBranchForVerificationState
       },
       "Thank you for sending the documents, we will contact you on your registered number to update you the status."
     ]);
+    act(() {
+      kLoading.value = true;
+    });
   }
 }

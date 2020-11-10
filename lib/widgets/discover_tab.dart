@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
-
 import 'search_bar.dart';
 import 'store_provider.dart';
 
@@ -99,13 +98,23 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   ),
                 ),
               ),
+              SliverList(delegate: SliverChildListDelegate([
+                _getNearestFeatured(context);
+              ]))
             ],
           );
         });
       },
     );
   }
-
+  Widget _getNearestFeatured(BuildContext context){
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        
+      ),
+    );
+  }
   Widget _getSearchBar() {
     return StoreProvider<BusinessStore>(
       store: Provider.of<BusinessStore>(context),

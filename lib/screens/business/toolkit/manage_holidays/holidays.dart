@@ -37,7 +37,8 @@ class _BusinessManageHolidaysScreenState
       ),
       body: Consumer<BusinessStore>(
         builder: (_, businessStore, __) {
-          final holidays = businessStore.business.businessHolidays.value;
+          final holidays = businessStore
+              .business.selectedBranch.value.businessHolidays.value;
           return Observer(
             builder: (_) {
               return CustomScrollView(
@@ -66,6 +67,14 @@ class _BusinessManageHolidaysScreenState
                               },
                               child: HolidayWidget(
                                 holiday: holidays.all[index],
+                                onSwitch: (b) {
+                                  act(
+                                    () {
+                                      holidays.all[index].enabled.value = b;
+                                      holidays.save();
+                                    },
+                                  );
+                                },
                               ),
                             ),
                           ),
@@ -85,8 +94,9 @@ class _BusinessManageHolidaysScreenState
 
 class HolidayWidget extends StatefulWidget {
   final BusinesssHoliday holiday;
+  final Function(bool) onSwitch;
 
-  const HolidayWidget({Key key, this.holiday}) : super(key: key);
+  const HolidayWidget({Key key, this.holiday, this.onSwitch}) : super(key: key);
 
   _HolidayWidgetState createState() => _HolidayWidgetState();
 }
@@ -107,13 +117,7 @@ class _HolidayWidgetState extends State<HolidayWidget> {
           ),
           trailing: Switch(
             value: widget.holiday.enabled.value,
-            onChanged: (b) {
-              act(
-                () {
-                  widget.holiday.enabled.value = b;
-                },
-              );
-            },
+            onChanged: widget.onSwitch,
           ),
         );
       },

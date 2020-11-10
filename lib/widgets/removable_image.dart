@@ -1,12 +1,9 @@
-import 'dart:typed_data';
-
 import 'package:bapp/widgets/firebase_image.dart';
 import 'package:flutter/material.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 
 class RemovableImageWidget extends StatelessWidget {
   final Asset asset;
-  final Uint8List data;
   final String storageUrlOrPath;
   final BoxFit fit;
   final Function onRemove;
@@ -17,8 +14,7 @@ class RemovableImageWidget extends StatelessWidget {
       this.fit = BoxFit.cover,
       this.onRemove,
       this.isThumbNail = true,
-      this.data,
-      this.storageUrlOrPath = ""})
+      @required this.storageUrlOrPath})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -32,31 +28,14 @@ class RemovableImageWidget extends StatelessWidget {
               borderRadius: BorderRadius.circular(6),
               child: Builder(
                 builder: (_) {
-                  if (storageUrlOrPath.isNotEmpty) {
-                    if (storageUrlOrPath.startsWith("local")) {
-                      return Image.asset(
-                        storageUrlOrPath.replaceFirst("local", ""),
-                        fit: fit,
-                      );
-                    }
-                    return FirebaseStorageImage(
-                        storagePathOrURL: storageUrlOrPath);
+                  if (storageUrlOrPath.startsWith("local")) {
+                    return Image.asset(
+                      storageUrlOrPath.replaceFirst("local", ""),
+                      fit: fit,
+                    );
                   }
-                  return FutureBuilder<ByteData>(
-                    future: asset != null
-                        ? asset.getByteData()
-                        : data.buffer.asByteData(),
-                    builder: (_, snap) {
-                      return snap.hasData
-                          ? Image.memory(
-                              snap.data.buffer.asUint8List(),
-                              fit: fit,
-                            )
-                          : Center(
-                              child: Icon(Icons.image_sharp),
-                            );
-                    },
-                  );
+                  return FirebaseStorageImage(
+                      storagePathOrURL: storageUrlOrPath);
                 },
               ),
             ),

@@ -1,5 +1,3 @@
-import 'package:bapp/config/constants.dart';
-import 'package:bapp/stores/firebase_structures/business_branch.dart';
 import 'package:bapp/stores/firebase_structures/business_details.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,13 +9,13 @@ class BusinessHolidays {
 
   BusinessHolidays.empty({@required this.business});
 
-  BusinessHolidays.fromJsonList(List<dynamic> l,{@required this.business}){
+  BusinessHolidays.fromJsonList(List<dynamic> l, {@required this.business}) {
     l.forEach((element) {
-      BusinesssHoliday.fromJson(element);
+      all.add(BusinesssHoliday.fromJson(element));
     });
   }
 
-  toList(){
+  toList() {
     final l = [];
     all.forEach((element) {
       l.add(element.toMap());
@@ -30,17 +28,29 @@ class BusinessHolidays {
       String type,
       String details,
       List<DateTime> fromToDate}) async {
-    final holiday = BusinesssHoliday(dates:fromToDate,name: name, type:type, details:details,);
+    final holiday = BusinesssHoliday(
+      dates: fromToDate,
+      name: name,
+      type: type,
+      details: details,
+    );
     all.add(holiday);
+    await save();
+  }
 
-    await business.myDoc.value.update({"businessHolidays":FieldValue.arrayUnion([holiday.toMap()])});
-    await business.selectedBranch.value.myDoc.value.update({"businessHolidays":FieldValue.arrayUnion([holiday.toMap()])});
+  Future save() async {
+    final list = all.fold<List>([], (previousValue, h) {
+      previousValue.add(h.toMap());
+      return previousValue;
+    });
+    await business.myDoc.value.update({"businessHolidays": list});
+    await business.selectedBranch.value.myDoc.value
+        .update({"businessHolidays": list});
   }
 
   Future removeHoliday(BusinesssHoliday holiday) async {
     all.remove(holiday);
-    await business.myDoc.value.update({"businessHolidays":FieldValue.arrayRemove([holiday.toMap()])});
-    await business.selectedBranch.value.myDoc.value.update({"businessHolidays":FieldValue.arrayRemove([holiday.toMap()])});
+    await save();
   }
 }
 
@@ -51,22 +61,21 @@ class BusinesssHoliday {
   final String details;
   final enabled = Observable(false);
 
-  BusinesssHoliday(
-    {this.dates,
+  BusinesssHoliday({
+    this.dates,
     this.name,
     this.type,
-    this.details,}
-  );
+    this.details,
+  });
 
   static fromJson(Map<String, dynamic> j) {
     return BusinesssHoliday(
       dates: (j["dates"] as List).map((e) => e.toDate() as DateTime).toList(),
-      name:j["name"],
-      type:j["type"],
-      details:j["details"],
+      name: j["name"],
+      type: j["type"],
+      details: j["details"],
     )..enabled.value = j["enabled"];
   }
-
 
   toMap() {
     return {

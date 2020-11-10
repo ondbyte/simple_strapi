@@ -1,12 +1,9 @@
-import 'dart:typed_data';
-
 import 'package:bapp/widgets/removable_image.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_absolute_path/flutter_absolute_path.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
-import 'package:thephonenumber/data.dart';
 
 class AddImageTileWidget extends StatefulWidget {
   final Function(Map<String, bool>) onImagesSelected;
@@ -33,7 +30,6 @@ class AddImageTileWidget extends StatefulWidget {
 class _AddImageTileWidgetState extends State<AddImageTileWidget> {
   final List<Asset> _pickedImages = [];
   final Map<String, bool> _existingImages = {};
-  _AddImageTileWidgetState();
 
   @override
   void initState() {

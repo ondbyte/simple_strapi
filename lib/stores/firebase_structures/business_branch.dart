@@ -1,15 +1,11 @@
-import 'dart:typed_data';
-
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/helper.dart';
-import 'package:bapp/stores/firebase_structures/business_services.dart';
 import 'package:bapp/stores/firebase_structures/business_holidays.dart';
+import 'package:bapp/stores/firebase_structures/business_services.dart';
 import 'package:bapp/stores/firebase_structures/business_staff.dart';
 import 'package:bapp/stores/firebase_structures/business_timings.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mobx/mobx.dart';
 import 'package:thephonenumber/thephonenumber.dart';
@@ -19,7 +15,7 @@ import 'business_details.dart';
 class BusinessBranch {
   final myDoc = Observable<DocumentReference>(null);
 
-  final images = ObservableMap<String,bool>();
+  final images = ObservableMap<String, bool>();
   final name = Observable<String>("");
   final address = Observable<String>("");
   final latlong = Observable<GeoPoint>(null);
@@ -132,7 +128,8 @@ class BusinessBranch {
     if (snap.exists) {
       final j = snap.data();
 
-      this.images.addAll(Map.fromEntries(List.castFrom(j["images"]).map((e) => MapEntry(e, true))));
+      this.images.addAll(Map.fromEntries(
+          List.castFrom(j["images"]).map((e) => MapEntry(e, true))));
       this.name.value = j["name"];
       this.address.value = j["address"];
       this.latlong.value = j["latlong"];
@@ -157,6 +154,8 @@ class BusinessBranch {
       this.businessHolidays.value = BusinessHolidays.fromJsonList(
           j["businessHolidays"],
           business: business.value);
+      Helper.printLog("bHolidays");
+      print(j["businessHolidays"]);
       this.status.value = EnumToString.fromString(
           BusinessBranchActiveStatus.values, j["status"]);
     }
@@ -191,7 +190,8 @@ class BusinessBranch {
       images.addAll(list);
     });
 
-    await myDoc.value?.set({"images": list.keys.toList()}, SetOptions(merge: true));
+    await myDoc.value
+        ?.set({"images": list.keys.toList()}, SetOptions(merge: true));
   }
 
   Future saveBranch() async {
@@ -206,24 +206,24 @@ class BusinessBranch {
     }
   }
 
-  Future addAStaff({
-    UserType role,
-    ThePhoneNumber userPhoneNumber,
-    String name,
-    DateTime dateOfJoining,
-    Map<String, bool> images,
-    List<BusinessServiceCategory> expertise
-  }) async {
+  Future addAStaff(
+      {UserType role,
+      ThePhoneNumber userPhoneNumber,
+      String name,
+      DateTime dateOfJoining,
+      Map<String, bool> images,
+      List<BusinessServiceCategory> expertise}) async {
     final imgs = await uploadImagesToStorageAndReturnStringList(images);
     final s = BusinessStaff(
-        business: this.business.value,
-        contactNumber: userPhoneNumber,
-        name: name,
-        branch: business.value.selectedBranch.value,
-        role: role,
-        dateOfJoining: dateOfJoining,
-        expertise: expertise,
-        images: imgs,);
+      business: this.business.value,
+      contactNumber: userPhoneNumber,
+      name: name,
+      branch: business.value.selectedBranch.value,
+      role: role,
+      dateOfJoining: dateOfJoining,
+      expertise: expertise,
+      images: imgs,
+    );
     staff.add(s);
   }
 
