@@ -5,6 +5,7 @@ import 'package:bapp/stores/firebase_structures/business_category.dart';
 import 'package:bapp/stores/firebase_structures/business_details.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 
 class BusinessServices {
@@ -19,7 +20,7 @@ class BusinessServices {
       final item = i as Map<String,dynamic>;
       if(item.keys.contains("serviceName")){
         all.add(BusinessService.fromJson(item));
-      } else if(item.keys.contains("categoryname")){
+      } else if(item.keys.contains("categoryName")){
         allCategories.add(BusinessServiceCategory.fromJson(item));
       }
     });
@@ -46,7 +47,7 @@ class BusinessServices {
       ..duration.value = duration
       ..description.value = description
       ..images.clear()
-      ..images.addAll(Map.fromEntries(imgs.map((e) => MapEntry(e, true))));
+      ..images.addAll(imgs);
 
     all.add(service);
     await business.myDoc.value.update({"businessServices":FieldValue.arrayUnion([service.toMap()])});
@@ -69,7 +70,7 @@ class BusinessServices {
       ..categoryName.value = categoryName
       ..description.value = description
       ..images.clear()
-      ..images.addAll(Map.fromEntries(imgs.map((e) => MapEntry(e, true))));
+      ..images.addAll(imgs);
 
     allCategories.add(category);
     await business.selectedBranch.value.myDoc.value.update({"businessServices":FieldValue.arrayUnion([category.toMap()])});
@@ -152,3 +153,4 @@ class BusinessServiceCategory {
     };
   }
 }
+

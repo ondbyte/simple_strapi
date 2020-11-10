@@ -58,12 +58,13 @@ dependencies:
   flushbar: ^1.10.4
   table_calendar: ^2.2.3
   carousel_slider: ^2.2.1
-  flutter_svg: ^0.19.0
+  flutter_svg: ^0.18.0
   cached_network_image: ^2.3.2+1
   expandable: ^4.1.4
   date_range_picker: ^1.0.6
   time_range_picker: ^1.1.0
   chips_choice: ^2.0.1
+  flutter_svg_provider: ^0.1.6
 
 
   # MAPS

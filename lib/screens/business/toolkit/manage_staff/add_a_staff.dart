@@ -2,6 +2,7 @@ import 'package:bapp/FCM.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/firebase_structures/business_services.dart';
@@ -32,7 +33,7 @@ class BusinessAddAStaffScreen extends StatefulWidget {
 
 class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
   final _key = GlobalKey<FormState>();
-  final _staff = BusinessStaff();
+  final _staff = BusinessStaff(dateOfJoining: DateTime.now());
   var selected = -1;
   final _doShakeImage = Observable(false);
   String authorizedUid = "";
@@ -56,6 +57,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                   delegate: SliverChildListDelegate(
                     [
                       DropdownButtonFormField<UserType>(
+                        value: _staff.role??null,
                         items: [
                           DropdownMenuItem(
                             child: Text(
@@ -102,17 +104,11 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                             inputDecoration:
                                 InputDecoration(labelText: "Bapp user"),
                             countries: [cloudStore.theNumber.iso2Code],
-                            validator: (s){
-                              if(_numberValidated&&authorizedUid.isNotEmpty){
-                                return null;
-                              } else {
-                                return "Get authorization for the number";
-                              }
-                            },
                             onInputChanged: (pn) {
                               _theNumber = ThePhoneNumberLib.parseNumber(
                                   internationalNumber: pn.phoneNumber);
                             },
+                            initialValue: PhoneNumber(phoneNumber: _theNumber?.internationalNumber??""),
                             onInputValidated: (b) async {
                               if (b != _numberValidated) {
                                 setState(() {
@@ -120,13 +116,19 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                                 });
                               }
                             },
+                            validator: (s){
+                              if(_numberValidated){
+                                return null;
+                              }
+                              return "Enter a valid number";
+                            },
                           );
                         },
                       ),
                       SizedBox(
                         height: 20,
                       ),
-                      FlatButton.icon(
+                      /*FlatButton.icon(
                         onPressed: authorizedUid.isNotEmpty
                             ? _numberValidated
                                 ? () {
@@ -140,7 +142,8 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                             : _numberValidated
                                 ? () async {
                                     if (_theNumber.internationalNumber ==
-                                        Provider.of<CloudStore>(context,listen: false)
+                                        Provider.of<CloudStore>(context,
+                                                listen: false)
                                             .theNumber
                                             .internationalNumber) {
                                       ///cannot use own number
@@ -151,20 +154,23 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                                       return;
                                     }
                                     authorizedUid =
-                                        (await _getStaffAuthorization()) ??
-                                            "";
-                                    setState(() {});
+                                        (await _getStaffAuthorization()) ?? "";
+                                    setState(() {
+
+                                    });
                                   }
                                 : null,
                         icon: Icon(FeatherIcons.user),
                         textTheme: ButtonTextTheme.primary,
                         label: Text(
-                          authorizedUid.isNotEmpty ? "Authorized" : "Ask Authorization",
+                          authorizedUid.isNotEmpty
+                              ? "Authorized"
+                              : "Ask Authorization",
                         ),
                         color: authorizedUid.isNotEmpty
                             ? Colors.green
                             : Theme.of(context).errorColor,
-                      ),
+                      ),*/
                       SizedBox(
                         height: 20,
                       ),
@@ -189,6 +195,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                         firstDate: DateTime(2000),
                         initialDate: DateTime.now(),
                         lastDate: DateTime.now(),
+
                         onDateSubmitted: (date) {
                           _staff.dateOfJoining = date;
                         },
@@ -206,24 +213,31 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                               return MultipleChipOptionsFormField<
                                   BusinessServiceCategory>(
                                 labelText: "Select staff expertise",
+                                placeHolder: "No service categories",
+                                onAddPressed: () async {
+                                  await Navigator.of(context).pushNamed((RouteManager.businessAddAServiceCategoryScreen));
+                                  setState(() {
+
+                                  });
+                                },
                                 itemLabel: (_, cat) {
                                   return cat.categoryName.value;
                                 },
                                 validator: (s) {
                                   if (s.isEmpty) {
-                                    return "Select atleast a expertise";
+                                    return "Select at-least a expertise";
                                   }
                                   return null;
                                 },
                                 onSaved: (s) {
-                                  _staff.expertise.clear();
-                                  _staff.expertise.addAll(s);
                                 },
                                 onChanged: (val) {
                                   selected.clear();
                                   selected.addAll(val);
+                                  _staff.expertise.clear();
+                                  _staff.expertise.addAll(val);
                                 },
-                                items: businessStore.business.businessServices
+                                items: businessStore.business.selectedBranch.value.businessServices
                                     .value.allCategories,
                                 selectedItems: selected,
                               );
@@ -248,6 +262,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                               subTitle: "maximum of 1 image",
                               padding: EdgeInsets.zero,
                               maxImage: 1,
+                              existingImages: _staff.images,
                               onImagesSelected: (imgs) {
                                 _staff.images = imgs;
                               },
@@ -260,7 +275,8 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                       ),
                       PrimaryButton(
                         "Add",
-                        onPressed: () {
+                        onPressed: () async {
+                          FocusScope.of(context).unfocus();
                           if (_key.currentState.validate()) {
                             if (_staff.images.isEmpty) {
                               act(() {
@@ -268,20 +284,31 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                               });
                               return;
                             }
-                            act(() {
-                              kLoading.value = true;
-                            });
-                            final branch = Provider.of<BusinessStore>(context,listen: false)
+                            final branch = Provider.of<BusinessStore>(context,
+                                listen: false)
                                 .business
                                 .selectedBranch
                                 .value;
-                            branch.addAStaff(
-                              uid: authorizedUid,
+                            if(branch.staff.isNotEmpty&&branch.staff.any((s) => s?.name==_staff.name||s.contactNumber?.internationalNumber==_theNumber?.internationalNumber)){
+                              Flushbar(message: "That user details exists",duration: const Duration(seconds: 2),).show(context);
+                              return;
+                            }
+                            act(() {
+                              kLoading.value = true;
+                            });
+                            assert(_theNumber?.internationalNumber!=null,"number missing");
+                            await branch.addAStaff(
+                              userPhoneNumber: _theNumber,
                               name: _staff.name,
                               role: _staff.role,
                               dateOfJoining: _staff.dateOfJoining,
                               images: _staff.images,
+                              expertise: _staff.expertise,
                             );
+                            Navigator.of(context).pop();
+                            act((){
+                              kLoading.value = false;
+                            });
                           }
                         },
                       )
@@ -295,9 +322,9 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
       ),
     );
   }
-
-  Future<bool> _getStaffAuthorization() async {
-    return await showDialog<bool>(
+/*
+  Future<String> _getStaffAuthorization() async {
+    return await showDialog<String>(
       context: context,
       builder: (_) {
         return AlertDialog(
@@ -308,8 +335,9 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
         );
       },
     );
-  }
+  }*/
 }
+/*
 
 class BusinessAskUserForStaffingWidget extends StatefulWidget {
   final ThePhoneNumber thePhoneNumber;
@@ -355,45 +383,8 @@ class _BusinessAskUserForStaffingWidgetState
                   : _finallyWidget == null
                       ? PrimaryButton(
                           "Ask now",
-                          onPressed: () async {
-                            setState(() {
-                              _loading = true;
-                            });
-                            final response =
-                                await _askNow(businessStore, cloudStore);
-                            if (response == BappFunctionsResponse.multiUser ||
-                                response == BappFunctionsResponse.noUser) {
-                              _finallyWidget = Column(
-                                children: [
-                                  Text(
-                                      "User is not on Bapp, please ask the user to sign up."),
-                                  SizedBox(
-                                    height: 20,
-                                  ),
-                                  PrimaryButton(
-                                    "Go back",
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
-                                  ),
-                                ],
-                              );
-                            } else if (response ==
-                                BappFunctionsResponse.success) {
-                              _finallyWidget = Column(
-                                children: [
-                                  Text(
-                                      "User is on Bapp, we are reaching them out, please wait"),
-                                  SizedBox(
-                                    height: 20,
-                                  ),
-                                  LoadingWidget(),
-                                ],
-                              );
-                            }
-                            setState(() {
-                              _loading = false;
-                            });
+                          onPressed: (){
+                            _onPressed(businessStore, cloudStore);
                           },
                         )
                       : _finallyWidget,
@@ -402,6 +393,65 @@ class _BusinessAskUserForStaffingWidgetState
         },
       ),
     );
+  }
+
+  _onPressed(BusinessStore businessStore, CloudStore cloudStore) async {
+    setState(() {
+      _loading = true;
+    });
+    final response = await _askNow(businessStore, cloudStore);
+    if (response == BappFunctionsResponse.multiUser ||
+        response == BappFunctionsResponse.noUser) {
+      _finallyWidget = Column(
+        children: [
+          Text("User is not on Bapp, please ask the user to sign up."),
+          SizedBox(
+            height: 20,
+          ),
+          PrimaryButton(
+            "Go back",
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      );
+    } else if (response == BappFunctionsResponse.success) {
+      _finallyWidget = Column(
+        children: [
+          Text("User is on Bapp, we are reaching them out, please wait"),
+          SizedBox(
+            height: 20,
+          ),
+          LoadingWidget(),
+        ],
+      );
+    } else if (response.contains(BappFunctionsResponse.invalidRecipient)) {
+      _finallyWidget = Column(
+        children: [
+          Text(
+              "Ask the user enable the notification in settings and press ask again"),
+          SizedBox(
+            height: 20,
+          ),
+          PrimaryButton(
+            "Ask again",
+            onPressed: (){
+              _onPressed(businessStore, cloudStore);
+            },
+          ),
+          FlatButton(
+            onPressed: (){
+              Navigator.of(context).pop();
+            },
+            child: Text("Go back"),
+          )
+        ],
+      );
+    }
+    setState(() {
+      _loading = false;
+    });
   }
 
   Future<String> _askNow(
@@ -420,6 +470,8 @@ class _BusinessAskUserForStaffingWidgetState
           } else if (bappMessage.type ==
               BappFCMMessageType.staffAuthorizationAskAcknowledge) {
             //_finallyWidget = _onAcknowledge(businessStore, cloudStore);
+            Helper.printLog("UID");
+            print(bappMessage.data["uid"]);
             Navigator.of(context).pop(bappMessage.data["uid"]);
           }
         }
@@ -430,6 +482,7 @@ class _BusinessAskUserForStaffingWidgetState
     );
     return response;
   }
+*/
 /*
   Widget _onAcknowledge(BusinessStore businessStore, CloudStore cloudStore) {
     return Column(
@@ -450,7 +503,8 @@ class _BusinessAskUserForStaffingWidgetState
         )
       ],
     );
-  }*/
+  }*//*
+
 
   Widget _onDeny(BusinessStore businessStore, CloudStore cloudStore) {
     return Column(
@@ -484,9 +538,8 @@ class _BusinessAskUserForStaffingWidgetState
         ),
         PrimaryButton(
           "Ask again",
-          onPressed: () {
-            _loading = true;
-            _askNow(businessStore, cloudStore);
+          onPressed: (){
+            _onPressed(businessStore, cloudStore);
           },
         ),
         FlatButton(
@@ -499,3 +552,4 @@ class _BusinessAskUserForStaffingWidgetState
     );
   }
 }
+*/

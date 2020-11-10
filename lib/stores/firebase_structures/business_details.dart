@@ -95,8 +95,7 @@ class BusinessDetails {
       this.branches.value =
           tmp.map((e) => BusinessBranch(myDoc: e, business: this)).toList();
     }
-    this.selectedBranch.value =
-        BusinessBranch(myDoc: j["selectedBranch"], business: this);
+    this.selectedBranch.value = this.branches.value.firstWhere((b) => b.myDoc.value==j["selectedBranch"]);
     this.email.value = j["email"];
     this.myDoc.value = j["myDoc"];
     this.businessTimings.value = BusinessTimings.fromJson(j["businessTimings"]);
@@ -154,7 +153,7 @@ class BusinessDetails {
       ..latlong.value = pickedLocation.latLong
       ..address.value = pickedLocation.address
       ..name.value = branchName
-      ..images.value = imgs
+      ..images.addAll(imgs)
       ..contactNumber.value = contactNumber.value
       ..email.value = email.value
       ..businessServices.value = businessServices.value

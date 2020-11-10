@@ -103,15 +103,15 @@ String removeNewLines(String s) {
   return s.split("\n").join(", ");
 }
 
-Future<List<String>> uploadImagesToStorageAndReturnStringList(
+Future<Map<String,bool>> uploadImagesToStorageAndReturnStringList(
     Map<String, bool> imagesWithFiltered,
     {String path = ""}) async {
   if (imagesWithFiltered == null || imagesWithFiltered.isEmpty) {
-    return [];
+    return {};
   }
   final f = FirebaseStorage.instance;
   final a = FirebaseAuth.instance;
-  final List<String> storagePaths = [];
+  final Map<String,bool> storagePaths = {};
 
   final folder = path.isEmpty
       ? f.ref().child(a.currentUser.uid)
@@ -126,9 +126,9 @@ Future<List<String>> uploadImagesToStorageAndReturnStringList(
         final file = File(removeLocalFromPath(entry.key));
         final task = folder.child(nameFromPath(entry.key)).putFile(file);
         final done = await task.onComplete;
-        storagePaths.add(done.ref.path);
+        storagePaths.addAll({done.ref.path:true});
       } else {
-        storagePaths.add(entry.key);
+        storagePaths.addAll({entry.key:entry.value});
       }
     }
   });

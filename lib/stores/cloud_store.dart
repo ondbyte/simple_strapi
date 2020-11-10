@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:bapp/classes/location.dart';
 import 'package:bapp/config/config_data_types.dart';
@@ -268,7 +269,9 @@ abstract class _CloudStore with Store {
         onReplyRecieved(bappMessage);
       });
     }
-    return resultString;
+    if(resultString.runtimeType==String){
+      return resultString;
+    } return resultString["errorInfo"]["code"];
   }
 
   Future<void> giveAuthorizationForStaffing(BappFCMMessage message,

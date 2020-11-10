@@ -123,30 +123,30 @@ class _BusinessServicesTabState extends State<BusinessServicesTab>
                       [
                         ...List.generate(
                           businessStore
-                              .business.businessServices.value.all.length,
+                              .business.selectedBranch.value.businessServices.value.all.length,
                           (index) {
-                            final t = businessStore
-                                .business.businessServices.value.all[index];
+                            final service = businessStore
+                                .business.selectedBranch.value.businessServices.value.all[index];
                             return ListTile(
-                              title: Text(t.serviceName.value),
+                              title: Text(service.serviceName.value),
                               subtitle: Text(
                                 cloudStore.theNumber.currency +
                                     " " +
-                                    t.price.value.ceil().toInt().toString() +
+                                    service.price.value.ceil().toInt().toString() +
                                     ", " +
-                                    t.duration.value.inMinutes.toString() +
+                                    service.duration.value.inMinutes.toString() +
                                     " Minutes" +
                                     "\n" +
                                     "Category : " +
-                                    t.category.value.categoryName.value,
+                                    service.category.value.categoryName.value,
                               ),
                               leading: FirebaseStorageImage(
                                 width: 64,
                                 height: 64,
-                                storagePathOrURL: t.images.isNotEmpty
-                                    ? t.images.keys.elementAt(0)
-                                    : t.category.value.images.isNotEmpty
-                                        ? t.category.value.images.keys
+                                storagePathOrURL: service.images.isNotEmpty
+                                    ? service.images.keys.elementAt(0)
+                                    : service.category.value.images.isNotEmpty
+                                        ? service.category.value.images.keys
                                             .elementAt(0)
                                         : kTemporaryBusinessImage,
                               ),
@@ -154,8 +154,8 @@ class _BusinessServicesTabState extends State<BusinessServicesTab>
                                 icon: Icon(Icons.delete_forever),
                                 onPressed: () async {
                                   await businessStore
-                                      .business.businessServices.value
-                                      .removeService(t);
+                                      .business.selectedBranch.value.businessServices.value
+                                      .removeService(service);
                                 },
                               ),
                             );
@@ -204,10 +204,10 @@ class _BusinessServiceCategoriesTabState
                   delegate: SliverChildListDelegate(
                     [
                       ...List.generate(
-                        businessStore.business.businessServices.value
+                        businessStore.business.selectedBranch.value.businessServices.value
                             .allCategories.length,
                         (index) {
-                          final t = businessStore.business.businessServices
+                          final t = businessStore.business.selectedBranch.value.businessServices
                               .value.allCategories[index];
                           return ListTile(
                             title: Text(t.categoryName.value),
@@ -223,7 +223,7 @@ class _BusinessServiceCategoriesTabState
                               icon: Icon(Icons.delete_forever),
                               onPressed: () async {
                                 if (businessStore
-                                    .business.businessServices.value
+                                    .business.selectedBranch.value.businessServices.value
                                     .anyServiceDependsOn(t)) {
                                   Flushbar(
                                     message:
@@ -233,7 +233,7 @@ class _BusinessServiceCategoriesTabState
                                   return;
                                 }
                                 await businessStore
-                                    .business.businessServices.value
+                                    .business.selectedBranch.value.businessServices.value
                                     .removeCategory(t);
                               },
                             ),

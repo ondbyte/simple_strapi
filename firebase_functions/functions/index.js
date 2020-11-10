@@ -40,6 +40,7 @@ async function denyOrAcknowledge(j) {
         var doc = snaps.docs[0];
         var docData = doc.data();
 
+        j.uid = doc.id;
         const staffingAuth = {
             "notification": {
                 "body": j.body,

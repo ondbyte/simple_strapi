@@ -50,7 +50,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     value: BappFCM().isFcmInitialized,
                   ),
                 ),
-                ..._getDebugSettings()
               ]),
             ),
           )

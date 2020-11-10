@@ -78,7 +78,7 @@ class _BookingsTabState extends State<BookingsTab> {
           markersMaxAmount: 1),
       onDaySelected: (
         day,
-        events,
+        events,__
       ) {
         _selectedDay = day;
       },

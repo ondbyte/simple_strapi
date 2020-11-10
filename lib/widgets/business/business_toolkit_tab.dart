@@ -187,10 +187,10 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
                 borderRadius: BorderRadius.circular(6),
                 child: FirebaseStorageImage(
                   storagePathOrURL: businessStore.business.selectedBranch.value
-                              .images.value.length >
+                              .images.length >
                           0
                       ? businessStore
-                          .business.selectedBranch.value.images.value[0]
+                          .business.selectedBranch.value.images.keys.elementAt(0)
                       : kTemporaryBusinessImage,
                   height: 80,
                   width: 80,

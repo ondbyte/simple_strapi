@@ -12,13 +12,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mobx/mobx.dart';
+import 'package:thephonenumber/thephonenumber.dart';
 
 import 'business_details.dart';
 
 class BusinessBranch {
   final myDoc = Observable<DocumentReference>(null);
 
-  final images = Observable<List<String>>([]);
+  final images = ObservableMap<String,bool>();
   final name = Observable<String>("");
   final address = Observable<String>("");
   final latlong = Observable<GeoPoint>(null);
@@ -40,7 +41,6 @@ class BusinessBranch {
     this.business.value = business;
     this.myDoc.value = myDoc;
     _getBranch(myDoc);
-    _setupReactions();
   }
 
   var _disposers = <ReactionDisposer>[];
@@ -132,7 +132,7 @@ class BusinessBranch {
     if (snap.exists) {
       final j = snap.data();
 
-      this.images.value = List.castFrom(j["images"]);
+      this.images.addAll(Map.fromEntries(List.castFrom(j["images"]).map((e) => MapEntry(e, true))));
       this.name.value = j["name"];
       this.address.value = j["address"];
       this.latlong.value = j["latlong"];
@@ -160,11 +160,12 @@ class BusinessBranch {
       this.status.value = EnumToString.fromString(
           BusinessBranchActiveStatus.values, j["status"]);
     }
+    _setupReactions();
   }
 
   Map<String, dynamic> toMap() {
     return {
-      "images": images.value,
+      "images": images.keys.toList(),
       "name": name.value,
       "address": address.value,
       "latlong": latlong.value,
@@ -187,10 +188,10 @@ class BusinessBranch {
     final list = await uploadImagesToStorageAndReturnStringList(imgs);
 
     act(() {
-      images.value = list;
+      images.addAll(list);
     });
 
-    await myDoc.value?.set({"images": list}, SetOptions(merge: true));
+    await myDoc.value?.set({"images": list.keys.toList()}, SetOptions(merge: true));
   }
 
   Future saveBranch() async {
@@ -207,20 +208,27 @@ class BusinessBranch {
 
   Future addAStaff({
     UserType role,
-    String uid,
+    ThePhoneNumber userPhoneNumber,
     String name,
     DateTime dateOfJoining,
     Map<String, bool> images,
-  }) {
+    List<BusinessServiceCategory> expertise
+  }) async {
+    final imgs = await uploadImagesToStorageAndReturnStringList(images);
     final s = BusinessStaff(
         business: this.business.value,
+        contactNumber: userPhoneNumber,
         name: name,
-        uid: uid,
         branch: business.value.selectedBranch.value,
         role: role,
         dateOfJoining: dateOfJoining,
-        images: images);
+        expertise: expertise,
+        images: imgs,);
     staff.add(s);
+  }
+
+  Future removeAStaff(BusinessStaff s) async {
+    staff.remove(s);
   }
 }
 

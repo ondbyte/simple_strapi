@@ -44,7 +44,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                           Observer(
                             builder: (_) {
                               final categories = businessStore
-                                  .business.businessServices.value.allCategories
+                                  .business.selectedBranch.value.businessServices.value.allCategories
                                   .toList();
                               return DropdownButtonFormField<
                                   BusinessServiceCategory>(
@@ -215,7 +215,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                                   kLoading.value = true;
                                 });
                                 act(() {
-                                  businessStore.business.businessServices.value
+                                  businessStore.business.selectedBranch.value.businessServices.value
                                       .addAService(
                                           images: _service.images,
                                           category: _category,

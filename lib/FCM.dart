@@ -65,8 +65,17 @@ class BappFCM {
       const IosNotificationSettings(
           sound: true, badge: true, alert: true, provisional: false),
     );
-    if(enabled){
+    if (enabled) {
       _init(_fcm);
+      _fcm.setAutoInitEnabled(true);
+    } else {
+      if (!isFcmInitialized) {
+        _fcm.onIosSettingsRegistered.listen(
+          (event) {
+            initForIOS();
+          },
+        );
+      }
     }
     return enabled;
   }
@@ -75,12 +84,13 @@ class BappFCM {
     if (message.containsKey("data")) {
       print(message["data"]);
       var bappMessage;
-      try{
-        bappMessage = BappFCMMessage.fromJson(j:Map.castFrom(message["data"]));
-      } catch (e){
+      try {
+        bappMessage = BappFCMMessage.fromJson(j: Map.castFrom(message["data"]));
+      } catch (e) {
         Helper.printLog(e.toString());
       }
-      if (bappMessage.type == BappFCMMessageType.staffAuthorizationAskAcknowledge ||
+      if (bappMessage.type ==
+              BappFCMMessageType.staffAuthorizationAskAcknowledge ||
           bappMessage.type == BappFCMMessageType.staffAuthorizationAskDeny) {
         Helper.printLog("authorization message");
         if (_staffingAuthorizationListener != null) {
@@ -97,7 +107,7 @@ class BappFCM {
 
   _init(FirebaseMessaging _fcm) {
     _fcm.configure(
-      onBackgroundMessage: myBackgroundMessageHandler,
+      onBackgroundMessage: Platform.isAndroid?myBackgroundMessageHandler:null,
       onLaunch: onMessage,
       onResume: onMessage,
       onMessage: onMessage,
@@ -145,7 +155,7 @@ class BappFCMMessage {
     data?.remove("click_action");
   }
 
-  toReminderMessage({DateTime remindTime}){
+  toReminderMessage({DateTime remindTime}) {
     this.remindTime = remindTime;
   }
 
@@ -164,8 +174,8 @@ class BappFCMMessage {
   }
 
   Map<String, String> toMap() {
-    if(type==BappFCMMessageType.reminder){
-      assert(remindTime!=null,"reminder message must have a reminding time");
+    if (type == BappFCMMessageType.reminder) {
+      assert(remindTime != null, "reminder message must have a reminding time");
     }
     final m = {
       "type": EnumToString.convertToString(type),
@@ -175,7 +185,7 @@ class BappFCMMessage {
       "to": to,
       "priority": EnumToString.convertToString(priority),
       "click_action": click_action,
-      "remindTime":remindTime!=null?remindTime.toIso8601String():"",
+      "remindTime": remindTime != null ? remindTime.toIso8601String() : "",
     };
     data?.forEach((key, value) {
       m.addAll({key: value});

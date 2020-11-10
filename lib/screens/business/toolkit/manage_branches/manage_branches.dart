@@ -60,8 +60,8 @@ class _BusinessManageBranchesScreenState
                 itemBuilder: (_, i) {
                   return ListTile(
                     leading: FirebaseStorageImage(
-                      storagePathOrURL: branches[i].images.value.isNotEmpty
-                          ? branches[i].images.value[0]
+                      storagePathOrURL: branches[i].images.isNotEmpty
+                          ? branches[i].images.keys.elementAt(0)
                           : kTemporaryBusinessImage,
                       height: 80,
                       width: 80,

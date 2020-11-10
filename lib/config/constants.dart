@@ -51,4 +51,5 @@ class BappFunctionsResponse{
   static String success = "success";
   static String multiUser = "multiUser";
   static String noUser = "noUser";
+  static String invalidRecipient = "messaging/invalid-recipient";
 }

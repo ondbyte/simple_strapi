@@ -56,9 +56,9 @@ class _BusinessManageMediaScreenState extends State<BusinessManageMediaScreen> {
                   return Observer(
                     builder: (_) {
                       final images = businessStore
-                          .business.selectedBranch.value.images.value;
+                          .business.selectedBranch.value.images;
                       return AddImageTileWidget(
-                        existingImages: Map.fromIterable(images,
+                        existingImages: Map.fromIterable(images.keys,
                             key: (k) => k, value: (k) => true),
                         maxImage: 6,
                         title: "Add Images",
