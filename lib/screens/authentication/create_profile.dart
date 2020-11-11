@@ -1,6 +1,5 @@
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
-
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/buttons.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -131,11 +130,11 @@ class _CreateYourProfileScreenState extends State<CreateYourProfileScreen> {
                                         displayName: _name,
                                         email: _email,
                                         onSuccess: () {
-                                          Helper.printLog("Success");
+                                          //Helper.printLog("Success");
                                           Navigator.of(context).pop();
                                         },
                                         onFail: (e) {
-                                          Helper.printLog("Fail");
+                                          //Helper.printLog("Fail");
                                           setState(() {
                                             _loading = false;
                                           });
@@ -144,7 +143,7 @@ class _CreateYourProfileScreenState extends State<CreateYourProfileScreen> {
                                               {
                                                 Flushbar(
                                                   message:
-                                                  "The email is invalid",
+                                                      "The email is invalid",
                                                   duration: const Duration(
                                                       seconds: 2),
                                                 ).show(context);
@@ -153,8 +152,7 @@ class _CreateYourProfileScreenState extends State<CreateYourProfileScreen> {
                                             case "same-email":
                                               {
                                                 Flushbar(
-                                                  message:
-                                                  "Existing email",
+                                                  message: "Existing email",
                                                   duration: const Duration(
                                                       seconds: 2),
                                                 ).show(context);
@@ -178,16 +176,29 @@ class _CreateYourProfileScreenState extends State<CreateYourProfileScreen> {
                                                   duration: const Duration(
                                                       seconds: 4),
                                                   mainButton: FlatButton(
-                                                      onPressed: () async {
-                                                        final loggedIn = await Navigator.of(context)
-                                                            .pushNamed(
-                                                          RouteManager.loginScreen,
-                                                        );
-                                                        if(loggedIn){
-                                                          Flushbar(message: "Logged in",duration: const Duration(seconds: 2),).show(context);
-                                                        }
-                                                      },
-                                                      child: Text("Login",style: TextStyle(color: Colors.white),),),
+                                                    onPressed: () async {
+                                                      final loggedIn =
+                                                          await Navigator.of(
+                                                                  context)
+                                                              .pushNamed(
+                                                        RouteManager
+                                                            .loginScreen,
+                                                      );
+                                                      if (loggedIn) {
+                                                        Flushbar(
+                                                          message: "Logged in",
+                                                          duration:
+                                                              const Duration(
+                                                                  seconds: 2),
+                                                        ).show(context);
+                                                      }
+                                                    },
+                                                    child: Text(
+                                                      "Login",
+                                                      style: TextStyle(
+                                                          color: Colors.white),
+                                                    ),
+                                                  ),
                                                 ).show(context);
                                                 break;
                                               }

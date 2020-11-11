@@ -83,7 +83,7 @@ class _AddImageTileWidgetState extends State<AddImageTileWidget> {
             await Future.forEach(picked, (element) async {
               final absPath =
                   await FlutterAbsolutePath.getAbsolutePath(element.identifier);
-              print(absPath);
+              //print(absPath);
               _existingImages["local" + absPath] = true;
             });
             setState(() {});

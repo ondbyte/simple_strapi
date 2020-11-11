@@ -1,4 +1,3 @@
-import 'package:bapp/classes/location.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/firebase_structures/business_holidays.dart';
@@ -174,14 +173,14 @@ class BusinessBranch {
       j["businessHolidays"],
       business: business.value,
     );
-    Helper.printLog("bHolidays");
-    print(j["businessHolidays"]);
+    //Helper.printLog("bHolidays");
+    //print(j["businessHolidays"]);
     status.value =
         EnumToString.fromString(BusinessBranchActiveStatus.values, j["status"]);
-    iso2 = j["assignedAddress.iso2"];
-    city = j["assignedAddress.city"];
-    locality = j["assignedAddress.locality"];
-    if(iso2!=null){
+    if (status.value == BusinessBranchActiveStatus.published) {
+      iso2 = j["assignedAddress.iso2"];
+      city = j["assignedAddress.city"];
+      locality = j["assignedAddress.locality"];
       misc = ThePhoneNumber(iso2Code: iso2);
     }
   }

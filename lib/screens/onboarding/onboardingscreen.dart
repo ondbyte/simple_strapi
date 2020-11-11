@@ -1,17 +1,13 @@
 import 'package:bapp/config/config.dart';
-import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/buttons.dart';
 import 'package:bapp/widgets/loading.dart';
-import 'package:bapp/widgets/store_provider.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-
-import '../../route_manager.dart';
 
 class OnBoardingScreen extends StatefulWidget {
   @override
@@ -55,7 +51,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                               onPageChanged: (index, reason) {
                                 setState(
                                   () {
-                                    print(index);
+                                    //print(index);
                                     _selected = index;
                                   },
                                 );

@@ -9,7 +9,8 @@ class BusinessTileBigWidget extends StatelessWidget {
   final Widget tag;
   final Function onTap;
 
-  const BusinessTileBigWidget({Key key, this.branch,@required this.tag, this.onTap})
+  const BusinessTileBigWidget(
+      {Key key, this.branch, @required this.tag, this.onTap})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -21,9 +22,9 @@ class BusinessTileBigWidget extends StatelessWidget {
           children: [
             SizedBox(
               width: cons.maxWidth,
-              height: cons.maxWidth*(9/16),
+              height: cons.maxWidth * (9 / 16),
               child: AspectRatio(
-                aspectRatio: 9/16,
+                aspectRatio: 9 / 16,
                 child: Stack(
                   alignment: Alignment.bottomLeft,
                   children: [
@@ -32,12 +33,19 @@ class BusinessTileBigWidget extends StatelessWidget {
                           ? branch.images.keys.elementAt(0)
                           : kTemporaryBusinessImage,
                     ),
-                    Padding(padding: const EdgeInsets.only(left: 16,bottom: 8),child: tag,)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 16, bottom: 8),
+                      child: tag,
+                    )
                   ],
                 ),
               ),
             ),
-            BusinessTileWidget(branch: branch,onTap: (){},padding: const EdgeInsets.symmetric(vertical: 8),),
+            BusinessTileWidget(
+              branch: branch,
+              onTap: () {},
+              padding: const EdgeInsets.symmetric(vertical: 8),
+            ),
           ],
         ),
       );
@@ -46,19 +54,27 @@ class BusinessTileBigWidget extends StatelessWidget {
 }
 
 class BusinessTileWidget extends StatelessWidget {
-   final BusinessBranch branch;
+  final BusinessBranch branch;
   final Function onTap;
   final EdgeInsets padding;
+  final TextStyle titleStyle;
 
-  const BusinessTileWidget({Key key, @required this.branch, @required this.onTap, this.padding}) : super(key: key);
+  const BusinessTileWidget(
+      {Key key,
+      @required this.branch,
+      @required this.onTap,
+      this.padding,
+      this.titleStyle})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       onTap: onTap,
-      contentPadding: padding??EdgeInsets.zero,
+      contentPadding: padding ?? EdgeInsets.zero,
       title: Text(
         branch.name.value,
+        style: titleStyle,
         maxLines: 1,
       ),
       subtitle: Text(
@@ -68,7 +84,10 @@ class BusinessTileWidget extends StatelessWidget {
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.star,color: Colors.yellow[500],),
+          Icon(
+            Icons.star,
+            color: Colors.yellow[500],
+          ),
           const SizedBox(
             height: 2,
           ),
@@ -81,4 +100,3 @@ class BusinessTileWidget extends StatelessWidget {
     );
   }
 }
-

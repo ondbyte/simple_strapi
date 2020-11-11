@@ -1,6 +1,5 @@
 import 'package:bapp/FCM.dart';
 import 'package:bapp/config/config_data_types.dart';
-import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/updates_store.dart';
 import 'package:bapp/widgets/buttons.dart';
@@ -26,11 +25,11 @@ class _BappState extends State<Bapp> {
       init: (cloudStore) async {
         await Provider.of<UpdatesStore>(context, listen: false).init(context);
         //await Provider.of<BusinessStore>(context, listen: false).init(context);
-        Helper.printLog("setting up message layer");
+        //Helper.printLog("setting up message layer");
         BappFCM().listenForBappMessages(
           (bappMessage) {
-            Helper.printLog("bappMessage");
-            print(bappMessage.toMap());
+            //Helper.printLog("bappMessage");
+            //print(bappMessage.toMap());
             setState(
               () async {
                 final result = await showDialog(
@@ -121,8 +120,8 @@ class _BappFCMMesssageLayerWidgetState
       return PrimaryButton(
         "Acknowledge",
         onPressed: () {
-          Provider.of<CloudStore>(context,listen: false)
-              .giveAuthorizationForStaffing(message,authorized: true);
+          Provider.of<CloudStore>(context, listen: false)
+              .giveAuthorizationForStaffing(message, authorized: true);
           _latestMessage = null;
           Navigator.pop(context, true);
         },
@@ -135,7 +134,7 @@ class _BappFCMMesssageLayerWidgetState
       return FlatButton(
         child: Text("Not interested"),
         onPressed: () {
-          Provider.of<CloudStore>(context,listen: false)
+          Provider.of<CloudStore>(context, listen: false)
               .giveAuthorizationForStaffing(message);
           _latestMessage = null;
           Navigator.pop(context, false);

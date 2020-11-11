@@ -1,4 +1,3 @@
-import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/widgets/add_image_sliver.dart';
 import 'package:bapp/widgets/loading.dart';
@@ -58,8 +57,8 @@ class _BusinessManageMediaScreenState extends State<BusinessManageMediaScreen> {
                     builder: (_) {
                       final images =
                           businessStore.business.selectedBranch.value.images;
-                      Helper.printLog("FSTORAGE");
-                      print(images);
+                      //Helper.printLog("FSTORAGE");
+                      //print(images);
                       return AddImageTileWidget(
                         existingImages: Map.fromIterable(images.keys,
                             key: (k) => k, value: (k) => true),

@@ -185,34 +185,26 @@ abstract class _CloudStore with Store {
     await doc.set({"fcmToken": fcmToken}, SetOptions(merge: true));
   }
 
-  MyAddress getAddressFor(
-      {String iso2Name, String cityName, String localityName}) {
-    countries.forEach(
-      (country) {
-        country.cities.forEach(
-          (city) {
-            if (city.name == cityName && country.iso2 == iso2Name) {
-              final local = city.localities.firstWhere(
-                (loc) => loc.name == localityName,
-                orElse: () => null,
-              );
-              return MyAddress(locality: local, city: city, country: country);
-            }
-          },
-        );
-      },
-    );
-    return null;
-  }
-
   @action
   Future getMyAddress() async {
     if (myData.containsKey("myAddress")) {
       var locationData = myData["myAddress"];
-      myAddress = getAddressFor(
-        cityName: locationData["city"],
-        localityName: locationData["locality"],
-        iso2Name: locationData["iso2"],
+
+      countries.forEach(
+        (country) {
+          country.cities.forEach(
+            (city) {
+              if (city.name == locationData["city"] &&
+                  country.iso2 == locationData["iso2"]) {
+                final local = city.localities.firstWhere(
+                    (loc) => loc.name == locationData["locality"],
+                    orElse: () => null);
+                myAddress =
+                    MyAddress(locality: local, city: city, country: country);
+              }
+            },
+          );
+        },
       );
       //final myCountry = countries.firstWhere((element) => element.cities.firstWhere((el) => el.localities.firstWhere((e) => e.name==locationData["locality"]))));
 
@@ -340,7 +332,7 @@ abstract class _CloudStore with Store {
     if (user.displayName != displayName) {
       await user.updateProfile(displayName: displayName);
     }
-    Helper.printLog(email.toUpperCase());
+    //Helper.printLog(email.toUpperCase());
     if (user.email == null || user.email != email) {
       try {
         await user.updateEmail(email);
@@ -383,7 +375,7 @@ abstract class _CloudStore with Store {
                 PhoneAuthProvider.credential(
                     verificationId: verificationID, smsCode: otp);
             final linked = await _link(phoneAuthCredential);
-            Helper.printLog(linked.toString());
+            //Helper.printLog(linked.toString());
             if (linked) {
               onVerified();
             } else {
@@ -402,7 +394,7 @@ abstract class _CloudStore with Store {
       await _auth.currentUser.linkWithCredential(phoneAuthCredential);
       return true;
     } on FirebaseAuthException catch (e) {
-      Helper.printLog("359" + e.code);
+      //Helper.printLog("359" + e.code);
       print(e);
       if (e.code.toLowerCase() == "credential-already-in-use") {
         await FirebaseFirestore.instance
@@ -424,7 +416,7 @@ abstract class _CloudStore with Store {
       await _auth.signInWithCredential(phoneAuthCredential);
       return true;
     } on FirebaseAuthException catch (e) {
-      Helper.printLog("374" + e.code);
+      //Helper.printLog("374" + e.code);
       print(e);
       if (e.code.toLowerCase() == "invalid-verification-code") {
         return false;

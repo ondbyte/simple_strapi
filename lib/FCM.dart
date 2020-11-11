@@ -92,7 +92,7 @@ class BappFCM {
       if (bappMessage.type ==
               BappFCMMessageType.staffAuthorizationAskAcknowledge ||
           bappMessage.type == BappFCMMessageType.staffAuthorizationAskDeny) {
-        Helper.printLog("authorization message");
+        //Helper.printLog("authorization message");
         if (_staffingAuthorizationListener != null) {
           _staffingAuthorizationListener(bappMessage);
           _staffingAuthorizationListener = null;
@@ -107,7 +107,8 @@ class BappFCM {
 
   _init(FirebaseMessaging _fcm) {
     _fcm.configure(
-      onBackgroundMessage: Platform.isAndroid?myBackgroundMessageHandler:null,
+      onBackgroundMessage:
+          Platform.isAndroid ? myBackgroundMessageHandler : null,
       onLaunch: onMessage,
       onResume: onMessage,
       onMessage: onMessage,

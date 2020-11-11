@@ -137,11 +137,12 @@ class _DiscoverTabState extends State<DiscoverTab> {
                                 child: BusinessTileBigWidget(
                                   branch: snap.data[i],
                                   onTap: () {
+                                    Provider.of<BookingFlow>(context,
+                                            listen: false)
+                                        .branch = snap.data[i];
                                     Navigator.of(context).pushNamed(
                                         RouteManager.businessProfileScreen,
                                         arguments: [snap.data[i]]);
-                                    Provider.of<BookingFlow>(context).branch =
-                                        snap.data[i];
                                   },
                                   tag: Chip(
                                     backgroundColor:

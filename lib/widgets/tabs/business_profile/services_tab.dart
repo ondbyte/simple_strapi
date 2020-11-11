@@ -1,34 +1,44 @@
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/firebase_structures/business_services.dart';
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class BusinessServicesTab extends StatefulWidget {
-
-  const BusinessServicesTab({Key key,}) : super(key: key);
+class BusinessProfileServicesTab extends StatefulWidget {
+  const BusinessProfileServicesTab({
+    Key key,
+  }) : super(key: key);
   @override
-  _BusinessServicesTabState createState() => _BusinessServicesTabState();
+  _BusinessProfileServicesTabState createState() =>
+      _BusinessProfileServicesTabState();
 }
 
-class _BusinessServicesTabState extends State<BusinessServicesTab> {
-
-  BookingFlow get flow => Provider.of<BookingFlow>(context,listen: false);
+class _BusinessProfileServicesTabState
+    extends State<BusinessProfileServicesTab> {
+  BookingFlow get flow => Provider.of<BookingFlow>(context, listen: false);
 
   @override
   Widget build(BuildContext context) {
-    final sorted = <BusinessServiceCategory,List<BusinessService>>{};
-    final services = flow.branch.businessServices.value;
-    services.allCategories.forEach((cat) {
-      final all = services.all.where((serv) => serv.category.value.categoryName==cat.categoryName);
-      sorted.addAll({cat:all});
+    final sorted = <BusinessServiceCategory, List<BusinessService>>{};
+    final services = flow.branch.businessServices.value.all;
+    final categories = flow.branch.businessServices.value.allCategories;
+    categories.forEach((cat) {
+      final all = services.where((serv) =>
+          serv.category.value.categoryName.value == cat.categoryName.value);
+      if (all.isNotEmpty) {
+        sorted.addAll({cat: all.toList()});
+      }
     });
-    return ListView.builder(itemBuilder: (_,i){
-      return BusinessCategoryContainerWidget(
-        category: sorted.keys.elementAt(i),
-        services: sorted.values.elementAt(i),
-      );
-    });
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ...List.generate(sorted.length, (i) {
+          return BusinessCategoryContainerWidget(
+            category: sorted.keys.elementAt(i),
+            services: sorted.values.elementAt(i),
+          );
+        })
+      ],
+    );
   }
 }
 
@@ -48,9 +58,10 @@ class _BusinessCategoryContainerWidgetState
   @override
   Widget build(BuildContext context) {
     return ListView(
+      shrinkWrap: true,
       children: [
         Text(
-          EnumToString.convertToString(widget.category.categoryName.value),
+          widget.category.categoryName.value,
           style: Theme.of(context).textTheme.headline1,
         ),
         const SizedBox(
@@ -61,7 +72,7 @@ class _BusinessCategoryContainerWidgetState
     );
   }
 
-  BookingFlow get flow => Provider.of<BookingFlow>(context,listen: false);
+  BookingFlow get flow => Provider.of<BookingFlow>(context, listen: false);
 
   List<Widget> _getServicesTiles() {
     bool _booked(BusinessService s) {
@@ -115,7 +126,7 @@ class BusinessServiceChildWidget extends StatelessWidget {
   }
 
   Widget _makeSubTitle(BuildContext context) {
-    final flow = Provider.of<BookingFlow>(context,listen: false);
+    final flow = Provider.of<BookingFlow>(context, listen: false);
     final s = service.price.value.toString() +
         " " +
         flow.branch.misc.currency +

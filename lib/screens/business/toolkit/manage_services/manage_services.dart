@@ -4,7 +4,6 @@ import 'package:bapp/screens/business_profile/business_profile.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/firebase_image.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -45,20 +44,23 @@ class _BusinessProductsPricingScreenState
           appBar: AppBar(
             automaticallyImplyLeading: true,
             title: Text("Manage services"),
-            bottom: getBappTabBar(context, [
-              Text(
-                "Services",
-                style: Theme.of(context).textTheme.button.apply(
-                  color: Theme.of(context).indicatorColor,
+            bottom: getBappTabBar(
+              context,
+              [
+                Text(
+                  "Services",
+                  style: Theme.of(context).textTheme.button.apply(
+                        color: Theme.of(context).indicatorColor,
+                      ),
                 ),
-              ),
-              Text(
-                "Categories",
-                style: Theme.of(context).textTheme.button.apply(
-                  color: Theme.of(context).indicatorColor,
+                Text(
+                  "Categories",
+                  style: Theme.of(context).textTheme.button.apply(
+                        color: Theme.of(context).indicatorColor,
+                      ),
                 ),
-              ),
-            ],),
+              ],
+            ),
           ),
           body: Builder(
             builder: (_) {
@@ -101,58 +103,53 @@ class _BusinessServicesTabState extends State<BusinessServicesTab>
       builder: (_, businessStore, cloudStore, __) {
         return Observer(
           builder: (_) {
-            return CustomScrollView(
-              slivers: [
-                SliverPadding(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate(
-                      [
-                        ...List.generate(
-                          businessStore
-                              .business.selectedBranch.value.businessServices.value.all.length,
-                          (index) {
-                            final service = businessStore
-                                .business.selectedBranch.value.businessServices.value.all[index];
-                            return ListTile(
-                              title: Text(service.serviceName.value),
-                              subtitle: Text(
-                                cloudStore.theNumber.currency +
-                                    " " +
-                                    service.price.value.ceil().toInt().toString() +
-                                    ", " +
-                                    service.duration.value.inMinutes.toString() +
-                                    " Minutes" +
-                                    "\n" +
-                                    "Category : " +
-                                    service.category.value.categoryName.value,
-                              ),
-                              leading: FirebaseStorageImage(
-                                width: 64,
-                                height: 64,
-                                storagePathOrURL: service.images.isNotEmpty
-                                    ? service.images.keys.elementAt(0)
-                                    : service.category.value.images.isNotEmpty
-                                        ? service.category.value.images.keys
-                                            .elementAt(0)
-                                        : kTemporaryBusinessImage,
-                              ),
-                              trailing: IconButton(
-                                icon: Icon(Icons.delete_forever),
-                                onPressed: () async {
-                                  await businessStore
-                                      .business.selectedBranch.value.businessServices.value
-                                      .removeService(service);
-                                },
-                              ),
-                            );
+            return Padding(
+              padding: EdgeInsets.symmetric(vertical: 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  ...List.generate(
+                    businessStore.business.selectedBranch.value.businessServices
+                        .value.all.length,
+                    (index) {
+                      final service = businessStore.business.selectedBranch
+                          .value.businessServices.value.all[index];
+                      return ListTile(
+                        title: Text(service.serviceName.value),
+                        subtitle: Text(
+                          cloudStore.theNumber.currency +
+                              " " +
+                              service.price.value.ceil().toInt().toString() +
+                              ", " +
+                              service.duration.value.inMinutes.toString() +
+                              " Minutes" +
+                              "\n" +
+                              "Category : " +
+                              service.category.value.categoryName.value,
+                        ),
+                        leading: FirebaseStorageImage(
+                          width: 64,
+                          height: 64,
+                          storagePathOrURL: service.images.isNotEmpty
+                              ? service.images.keys.elementAt(0)
+                              : service.category.value.images.isNotEmpty
+                                  ? service.category.value.images.keys
+                                      .elementAt(0)
+                                  : kTemporaryBusinessImage,
+                        ),
+                        trailing: IconButton(
+                          icon: Icon(Icons.delete_forever),
+                          onPressed: () async {
+                            await businessStore.business.selectedBranch.value
+                                .businessServices.value
+                                .removeService(service);
                           },
-                        )
-                      ],
-                    ),
-                  ),
-                )
-              ],
+                        ),
+                      );
+                    },
+                  )
+                ],
+              ),
             );
           },
         );
@@ -191,11 +188,11 @@ class _BusinessServiceCategoriesTabState
                   delegate: SliverChildListDelegate(
                     [
                       ...List.generate(
-                        businessStore.business.selectedBranch.value.businessServices.value
-                            .allCategories.length,
+                        businessStore.business.selectedBranch.value
+                            .businessServices.value.allCategories.length,
                         (index) {
-                          final t = businessStore.business.selectedBranch.value.businessServices
-                              .value.allCategories[index];
+                          final t = businessStore.business.selectedBranch.value
+                              .businessServices.value.allCategories[index];
                           return ListTile(
                             title: Text(t.categoryName.value),
                             subtitle: Text(t.description.value),
@@ -209,8 +206,8 @@ class _BusinessServiceCategoriesTabState
                             trailing: IconButton(
                               icon: Icon(Icons.delete_forever),
                               onPressed: () async {
-                                if (businessStore
-                                    .business.selectedBranch.value.businessServices.value
+                                if (businessStore.business.selectedBranch.value
+                                    .businessServices.value
                                     .anyServiceDependsOn(t)) {
                                   Flushbar(
                                     message:
@@ -219,8 +216,8 @@ class _BusinessServiceCategoriesTabState
                                   ).show(context);
                                   return;
                                 }
-                                await businessStore
-                                    .business.selectedBranch.value.businessServices.value
+                                await businessStore.business.selectedBranch
+                                    .value.businessServices.value
                                     .removeCategory(t);
                               },
                             ),

@@ -4,7 +4,6 @@ import 'package:bapp/config/config.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:device_info/device_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -103,7 +102,7 @@ String removeNewLines(String s) {
   return s.split("\n").join(", ");
 }
 
-Future<Map<String,bool>> uploadImagesToStorageAndReturnStringList(
+Future<Map<String, bool>> uploadImagesToStorageAndReturnStringList(
     Map<String, bool> imagesWithFiltered,
     {String path = ""}) async {
   if (imagesWithFiltered == null || imagesWithFiltered.isEmpty) {
@@ -111,7 +110,7 @@ Future<Map<String,bool>> uploadImagesToStorageAndReturnStringList(
   }
   final f = FirebaseStorage.instance;
   final a = FirebaseAuth.instance;
-  final Map<String,bool> storagePaths = {};
+  final Map<String, bool> storagePaths = {};
 
   final folder = path.isEmpty
       ? f.ref().child(a.currentUser.uid)
@@ -126,9 +125,9 @@ Future<Map<String,bool>> uploadImagesToStorageAndReturnStringList(
         final file = File(removeLocalFromPath(entry.key));
         final task = folder.child(nameFromPath(entry.key)).putFile(file);
         final done = await task.onComplete;
-        storagePaths.addAll({done.ref.path:true});
+        storagePaths.addAll({done.ref.path: true});
       } else {
-        storagePaths.addAll({entry.key:entry.value});
+        storagePaths.addAll({entry.key: entry.value});
       }
     }
   });
@@ -156,17 +155,4 @@ Future uploadBusinessBranchApprovalPDF({File fileToUpload}) async {
   final task = file.putFile(fileToUpload);
   await task.onComplete;
   print("File Uploaded");
-}
-
-bool nuked = false;
-Future nukeFirebase() async {
-  if (nuked) {
-    return;
-  }
-  final functions = FirebaseFunctions.instance;
-  final callable = functions.httpsCallable("nuke");
-  final response = await callable.call();
-  Helper.printLog("nuked");
-  print(response.data);
-  nuked = true;
 }
