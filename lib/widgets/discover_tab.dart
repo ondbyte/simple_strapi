@@ -1,7 +1,10 @@
 import 'package:bapp/config/config.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/stores/firebase_structures/business_branch.dart';
+import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -24,7 +27,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
           return CustomScrollView(
             slivers: <Widget>[
               SliverPadding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate(
                     [
@@ -36,39 +39,39 @@ class _DiscoverTabState extends State<DiscoverTab> {
                           },
                         );
                       }),
-                      SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
                       Text(
-                        "What can we help you book?",
+                        'What can we help you book?',
                         style: Theme.of(context).textTheme.headline1,
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 20,
                       ),
                       _getSearchBar(),
-                      SizedBox(
+                      const SizedBox(
                         height: 20,
                       ),
-                      Text("Or Browse Categories"),
+                      const Text("Or Browse Categories"),
                     ],
                   ),
                 ),
               ),
               SliverList(
                 delegate: SliverChildListDelegate([
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   _getCategoriesScroller(context),
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
                   _getFeaturedScroller(context),
                 ]),
               ),
               SliverPadding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate(
                     [
@@ -76,7 +79,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                         _getCompleteOrder(context),
                       if (authStore.status == AuthStatus.userPresent)
                         _getHowWasYourExperience(context),
-                      SizedBox(
+                      const SizedBox(
                         height: 20,
                       ),
                       Consumer<CloudStore>(
@@ -90,7 +93,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                                           .anyBranchInPublished() ||
                                       businessStore.business
                                           .anyBranchInUnPublished()))
-                              ? SizedBox()
+                              ? const SizedBox()
                               : _getOwnABusiness(context);
                         },
                       ),
@@ -98,23 +101,77 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   ),
                 ),
               ),
-              SliverList(delegate: SliverChildListDelegate([
-                _getNearestFeatured(context);
-              ]))
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    _getNearestFeatured(context),
+                  ],
+                ),
+              ),
             ],
           );
         });
       },
     );
   }
-  Widget _getNearestFeatured(BuildContext context){
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        
-      ),
+
+  Widget _getNearestFeatured(BuildContext context) {
+    return Consumer<CloudStore>(
+      builder: (_, cloudStore, __) {
+        return FutureBuilder<List<BusinessBranch>>(
+          future: cloudStore.getNearestFeatured(),
+          builder: (_, snap) {
+            return LayoutBuilder(builder: (_, cons) {
+              return Padding(
+                padding: const EdgeInsets.all(16),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: snap.hasData
+                      ? Row(
+                          children: [
+                            ...List.generate(snap.data.length, (i) {
+                              return Container(
+                                width: snap.data.length == 1
+                                    ? cons.maxWidth - 32
+                                    : cons.maxWidth * 0.8,
+                                child: BusinessTileBigWidget(
+                                  branch: snap.data[i],
+                                  onTap: () {
+                                    Navigator.of(context).pushNamed(
+                                        RouteManager.businessProfileScreen,
+                                        arguments: [snap.data[i]]);
+                                    Provider.of<BookingFlow>(context).branch =
+                                        snap.data[i];
+                                  },
+                                  tag: Chip(
+                                    backgroundColor:
+                                        CardsColor.colors["lightGreen"],
+                                    label: Text(
+                                      "Featured",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyText1
+                                          .apply(
+                                            color: Theme.of(context)
+                                                .backgroundColor,
+                                          ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            })
+                          ],
+                        )
+                      : const SizedBox(),
+                ),
+              );
+            });
+          },
+        );
+      },
     );
   }
+
   Widget _getSearchBar() {
     return StoreProvider<BusinessStore>(
       store: Provider.of<BusinessStore>(context),
@@ -160,7 +217,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                 color: Colors.white,
               ),
         ),
-        trailing: Icon(
+        trailing: const Icon(
           Icons.arrow_forward_ios,
           color: Colors.white,
         ),
@@ -181,15 +238,15 @@ class _DiscoverTabState extends State<DiscoverTab> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          SizedBox(
+          const SizedBox(
             width: 16,
           ),
           ...HomeScreenFeaturedConfig.slides.map(
             (e) => Container(
               height: 125,
               width: 142,
-              margin: EdgeInsets.only(right: 20),
-              padding: EdgeInsets.all(14),
+              margin: const EdgeInsets.only(right: 20),
+              padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                   color: e.cardColor, borderRadius: BorderRadius.circular(6)),
               child: Column(
@@ -200,7 +257,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     e.icon,
                     color: Colors.white,
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 6,
                   ),
                   Text(

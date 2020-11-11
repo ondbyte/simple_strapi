@@ -14,6 +14,7 @@ import 'package:bapp/screens/business/toolkit/manage_staff/add_a_staff.dart';
 import 'package:bapp/screens/business/toolkit/manage_staff/manage_staff.dart';
 import 'package:bapp/screens/business/toolkit/store_name_address.dart';
 import 'package:bapp/screens/business/toolkit/timings.dart';
+import 'package:bapp/screens/business_profile/business_profile.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:bapp/screens/location/pick_a_place.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';
@@ -49,6 +50,8 @@ class RouteManager {
   static const String searchInsideBapp = "/sib";
   static const String showResultsScreen = "/srs";
   static const String businessBranchChooserScreen = "/bbcs";
+
+  static const String businessProfileScreen = "/businessProfileScreen";
 
   ///business expansion tiles routes
 
@@ -97,7 +100,16 @@ class RouteManager {
 
   static Route<dynamic> onGenerate(RouteSettings settings) {
     print("route called: ${settings.name}");
+
     switch (settings.name) {
+      ///business customer end view
+      case businessProfileScreen:
+        return MaterialPageRoute(
+          builder: (_) {
+            final s = settings.arguments as List;
+            return BusinessProfileScreen();
+          },
+        );
 
       ///business
 
@@ -112,13 +124,6 @@ class RouteManager {
         return MaterialPageRoute(
           builder: (_) {
             return BusinessManageStaffScreen();
-          },
-        );
-
-      case businessProductsPricingScreen:
-        return MaterialPageRoute(
-          builder: (_) {
-            return BusinessProductsPricingScreen();
           },
         );
 

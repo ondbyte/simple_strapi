@@ -1,4 +1,5 @@
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/storage_store.dart';
 import 'package:bapp/stores/themestore.dart';
@@ -36,6 +37,9 @@ class App extends StatelessWidget {
         ),
         Provider<BusinessStore>(
           create: (_) => BusinessStore(),
+        ),
+        Provider<BookingFlow>(
+          create: (_) => BookingFlow(),
         ),
       ],
       builder: (context, w) {

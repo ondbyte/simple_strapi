@@ -185,26 +185,34 @@ abstract class _CloudStore with Store {
     await doc.set({"fcmToken": fcmToken}, SetOptions(merge: true));
   }
 
+  MyAddress getAddressFor(
+      {String iso2Name, String cityName, String localityName}) {
+    countries.forEach(
+      (country) {
+        country.cities.forEach(
+          (city) {
+            if (city.name == cityName && country.iso2 == iso2Name) {
+              final local = city.localities.firstWhere(
+                (loc) => loc.name == localityName,
+                orElse: () => null,
+              );
+              return MyAddress(locality: local, city: city, country: country);
+            }
+          },
+        );
+      },
+    );
+    return null;
+  }
+
   @action
   Future getMyAddress() async {
     if (myData.containsKey("myAddress")) {
       var locationData = myData["myAddress"];
-
-      countries.forEach(
-        (country) {
-          country.cities.forEach(
-            (city) {
-              if (city.name == locationData["city"] &&
-                  country.iso2 == locationData["iso2"]) {
-                final local = city.localities.firstWhere(
-                    (loc) => loc.name == locationData["locality"],
-                    orElse: () => null);
-                myAddress =
-                    MyAddress(locality: local, city: city, country: country);
-              }
-            },
-          );
-        },
+      myAddress = getAddressFor(
+        cityName: locationData["city"],
+        localityName: locationData["locality"],
+        iso2Name: locationData["iso2"],
       );
       //final myCountry = countries.firstWhere((element) => element.cities.firstWhere((el) => el.localities.firstWhere((e) => e.name==locationData["locality"]))));
 
@@ -365,7 +373,7 @@ abstract class _CloudStore with Store {
       },
       codeSent: (String verificationID, int resendToken) async {
         var askAgain = false;
-        Future.doWhile(
+        await Future.doWhile(
           () async {
             var otp = await onAskOTP(askAgain);
             askAgain = true;
@@ -438,6 +446,37 @@ abstract class _CloudStore with Store {
     }
     await FirebaseAuth.instance.signOut();
     //await FirebaseAuth.instance.signInAnonymously();
+  }
+
+  Future<List<BusinessBranch>> getNearestFeatured() async {
+    final query = FirebaseFirestore.instance
+        .collection("businesses")
+        .where("status", isEqualTo: "published")
+        .where("assignedAddress.iso2", isEqualTo: myAddress.country.iso2)
+        .where("assignedAddress.city", isEqualTo: myAddress.city.name);
+    if (myAddress.locality != null) {
+      query.where("assignedAddress.locality",
+          isEqualTo: myAddress.locality.name);
+    }
+    final snaps = await query.get();
+    final list = <BusinessBranch>[];
+    final businesses = <DocumentReference, BusinessDetails>{};
+    if (snaps.docs.isNotEmpty) {
+      await Future.forEach(snaps.docs, (doc) async {
+        final DocumentReference businessRef = doc.data()["business"];
+        if (businesses.containsKey(businessRef)) {
+          list.add(BusinessBranch.fromJson(doc.data(),
+              business: businesses[businessRef]));
+        } else {
+          final bSnap = await businessRef.get();
+          final businessDetails = BusinessDetails.fromJson(bSnap.data());
+          list.add(
+              BusinessBranch.fromJson(doc.data(), business: businessDetails));
+          businesses.addAll({businessRef: businessDetails});
+        }
+      });
+    }
+    return list;
   }
 }
 

@@ -7,55 +7,78 @@ import '../firebase_image.dart';
 class BusinessTileBigWidget extends StatelessWidget {
   final BusinessBranch branch;
   final Widget tag;
+  final Function onTap;
 
-  const BusinessTileBigWidget({Key key, this.branch, this.tag})
+  const BusinessTileBigWidget({Key key, this.branch,@required this.tag, this.onTap})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (_, cons) {
-      return Column(
-        children: [
-          AspectRatio(
-            aspectRatio: 16.0 / 9.0,
-            child: Stack(
-              children: [
-                FirebaseStorageImage(
-                  storagePathOrURL: branch.images.isNotEmpty
-                      ? branch.images.keys.elementAt(0)
-                      : kTemporaryBusinessImage,
+      return GestureDetector(
+        onTap: onTap,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: cons.maxWidth,
+              height: cons.maxWidth*(9/16),
+              child: AspectRatio(
+                aspectRatio: 9/16,
+                child: Stack(
+                  alignment: Alignment.bottomLeft,
+                  children: [
+                    FirebaseStorageImage(
+                      storagePathOrURL: branch.images.isNotEmpty
+                          ? branch.images.keys.elementAt(0)
+                          : kTemporaryBusinessImage,
+                    ),
+                    Padding(padding: const EdgeInsets.only(left: 16,bottom: 8),child: tag,)
+                  ],
                 ),
-                tag
-              ],
+              ),
             ),
-          ),
-          SizedBox(
-            height: 8,
-          ),
-          ListTile(
-            contentPadding: EdgeInsets.symmetric(vertical: 8),
-            title: Text(
-              branch.name.value,
-              maxLines: 1,
-            ),
-            subtitle: Text(
-              branch.address.value,
-              maxLines: 1,
-            ),
-            trailing: Column(
-              children: [
-                Icon(Icons.star),
-                SizedBox(
-                  height: 2,
-                ),
-                Text(
-                  branch.rating.value.toString(),
-                  style: Theme.of(context).textTheme.caption,
-                )
-              ],
-            ),
-          ),
-        ],
+            BusinessTileWidget(branch: branch,onTap: (){},padding: const EdgeInsets.symmetric(vertical: 8),),
+          ],
+        ),
       );
     });
   }
 }
+
+class BusinessTileWidget extends StatelessWidget {
+   final BusinessBranch branch;
+  final Function onTap;
+  final EdgeInsets padding;
+
+  const BusinessTileWidget({Key key, @required this.branch, @required this.onTap, this.padding}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      onTap: onTap,
+      contentPadding: padding??EdgeInsets.zero,
+      title: Text(
+        branch.name.value,
+        maxLines: 1,
+      ),
+      subtitle: Text(
+        branch.address.value,
+        maxLines: 1,
+      ),
+      trailing: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.star,color: Colors.yellow[500],),
+          const SizedBox(
+            height: 2,
+          ),
+          Text(
+            branch.rating.value.toString(),
+            style: Theme.of(context).textTheme.caption,
+          )
+        ],
+      ),
+    );
+  }
+}
+

@@ -1,3 +1,4 @@
+import 'package:bapp/classes/location.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/firebase_structures/business_holidays.dart';
@@ -31,6 +32,10 @@ class BusinessBranch {
   final businessHolidays = Observable<BusinessHolidays>(null);
   final status =
       Observable<BusinessBranchActiveStatus>(BusinessBranchActiveStatus.lead);
+  String iso2 = "";
+  String city = "";
+  String locality = "";
+  ThePhoneNumber misc;
 
   BusinessBranch(
       {DocumentReference myDoc, @required BusinessDetails business}) {
@@ -127,39 +132,58 @@ class BusinessBranch {
     final snap = await myDoc.get();
     if (snap.exists) {
       final j = snap.data();
-
-      this.images.addAll(Map.fromEntries(
-          List.castFrom(j["images"]).map((e) => MapEntry(e, true))));
-      this.name.value = j["name"];
-      this.address.value = j["address"];
-      this.latlong.value = j["latlong"];
-      this.staff.clear();
-      this.staff.addAll(List.castFrom(j["staff"])
-          .map((e) => BusinessStaff.fromJson(business: business.value, j: e)));
-      this.manager.value = j["manager"] != null
-          ? BusinessStaff.fromJson(business: business.value, j: j["manager"])
-          : null;
-      this.receptionist.value = j["receptionist"] != null
-          ? BusinessStaff.fromJson(
-              business: business.value, j: j["receptionist"])
-          : null;
-      this.contactNumber.value = j["contactNumber"];
-      this.email.value = j["email"];
-      this.rating.value = j["rating"];
-      this.businessServices.value = BusinessServices.fromJsonList(
-          j["businessServices"],
-          business: business.value);
-      this.businessTimings.value =
-          BusinessTimings.fromJson(j["businessTimings"]);
-      this.businessHolidays.value = BusinessHolidays.fromJsonList(
-          j["businessHolidays"],
-          business: business.value);
-      Helper.printLog("bHolidays");
-      print(j["businessHolidays"]);
-      this.status.value = EnumToString.fromString(
-          BusinessBranchActiveStatus.values, j["status"]);
+      _fromJson(j);
     }
     _setupReactions();
+  }
+
+  BusinessBranch.fromJson(Map<String, dynamic> j,
+      {@required BusinessDetails business}) {
+    this.business.value = business;
+    _fromJson(j);
+  }
+
+  void _fromJson(Map<String, dynamic> j) {
+    images.addAll(
+      Map.fromEntries(
+        List.castFrom(j["images"]).map(
+          (e) => MapEntry(e, true),
+        ),
+      ),
+    );
+    name.value = j["name"];
+    address.value = j["address"];
+    latlong.value = j["latlong"];
+    staff.clear();
+    staff.addAll(List.castFrom(j["staff"])
+        .map((e) => BusinessStaff.fromJson(business: business.value, j: e)));
+    manager.value = j["manager"] != null
+        ? BusinessStaff.fromJson(business: business.value, j: j["manager"])
+        : null;
+    receptionist.value = j["receptionist"] != null
+        ? BusinessStaff.fromJson(business: business.value, j: j["receptionist"])
+        : null;
+    contactNumber.value = j["contactNumber"];
+    email.value = j["email"];
+    rating.value = j["rating"];
+    businessServices.value = BusinessServices.fromJsonList(
+        j["businessServices"],
+        business: business.value);
+    businessTimings.value = BusinessTimings.fromJson(j["businessTimings"]);
+    businessHolidays.value = BusinessHolidays.fromJsonList(
+      j["businessHolidays"],
+      business: business.value,
+    );
+    Helper.printLog("bHolidays");
+    print(j["businessHolidays"]);
+    status.value =
+        EnumToString.fromString(BusinessBranchActiveStatus.values, j["status"]);
+    iso2 = j["assignedAddress.iso2"];
+    city = j["assignedAddress.city"];
+    locality = j["assignedAddress.locality"];
+    if(iso2!=null){
+      misc = ThePhoneNumber(iso2Code: iso2);
+    }
   }
 
   Map<String, dynamic> toMap() {

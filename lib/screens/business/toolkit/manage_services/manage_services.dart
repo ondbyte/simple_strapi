@@ -1,5 +1,6 @@
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/business_profile/business_profile.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/firebase_image.dart';
@@ -44,34 +45,20 @@ class _BusinessProductsPricingScreenState
           appBar: AppBar(
             automaticallyImplyLeading: true,
             title: Text("Manage services"),
-            bottom: TabBar(
-              indicator: UnderlineTabIndicator(
-                borderSide: BorderSide(
-                  color: Theme.of(context).primaryColor,
-                  width: 2,
+            bottom: getBappTabBar(context, [
+              Text(
+                "Services",
+                style: Theme.of(context).textTheme.button.apply(
+                  color: Theme.of(context).indicatorColor,
                 ),
               ),
-              labelColor: Theme.of(context).primaryColorDark,
-              indicatorColor: Theme.of(context).primaryColor,
-              indicatorPadding: EdgeInsets.all(16),
-              indicatorWeight: 6,
-              indicatorSize: TabBarIndicatorSize.tab,
-              labelPadding: EdgeInsets.all(8),
-              tabs: [
-                Text(
-                  "Services",
-                  style: Theme.of(context).textTheme.button.apply(
-                        color: Theme.of(context).indicatorColor,
-                      ),
+              Text(
+                "Categories",
+                style: Theme.of(context).textTheme.button.apply(
+                  color: Theme.of(context).indicatorColor,
                 ),
-                Text(
-                  "Categories",
-                  style: Theme.of(context).textTheme.button.apply(
-                        color: Theme.of(context).indicatorColor,
-                      ),
-                ),
-              ],
-            ),
+              ),
+            ],),
           ),
           body: Builder(
             builder: (_) {
