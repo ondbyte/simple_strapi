@@ -6,6 +6,7 @@ import 'package:bapp/stores/firebase_structures/business_staff.dart';
 import 'package:bapp/stores/firebase_structures/business_timings.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mobx/mobx.dart';
 import 'package:thephonenumber/thephonenumber.dart';
@@ -124,7 +125,11 @@ class BusinessBranch {
   }
 
   Future saveTimings() async {
-    await myDoc.value.set({"businessTimings":businessTimings.value.toMap()},SetOptions(merge: true,));
+    await myDoc.value.set(
+        {"businessTimings": businessTimings.value.toMap()},
+        SetOptions(
+          merge: true,
+        ));
   }
 
   Future _getBranch(DocumentReference myDoc) async {
@@ -181,12 +186,21 @@ class BusinessBranch {
     //print(j["businessHolidays"]);
     status.value =
         EnumToString.fromString(BusinessBranchActiveStatus.values, j["status"]);
-    if (status.value == BusinessBranchActiveStatus.published) {
-      iso2 = j["assignedAddress"]["iso2"];
-      city = j["assignedAddress"]["city"];
-      locality = j["assignedAddress"]["locality"];
-      misc = ThePhoneNumberLib.parseNumber(iso2Code: iso2);
-
+    try {
+      if (status.value == BusinessBranchActiveStatus.published) {
+        iso2 = j["assignedAddress"]["iso2"];
+        city = j["assignedAddress"]["city"];
+        locality = j["assignedAddress"]["locality"];
+        misc = ThePhoneNumberLib.parseNumber(iso2Code: iso2);
+      }
+    } catch (e, s) {
+      FirebaseCrashlytics.instance.recordError(
+        "Business setup error",
+        s,
+        reason:
+            "you have setup a business as published but have not setup the data correctly",
+      );
+      FirebaseCrashlytics.instance.sendUnsentReports();
     }
   }
 
@@ -204,9 +218,10 @@ class BusinessBranch {
       "contactNumber": contactNumber.value,
       "email": email.value,
       "rating": rating.value,
-      "businessServices": businessServices.value.toList(),
-      "businessTimings": businessTimings.value.toMap(),
-      "businessHolidays": businessHolidays.value.toList(),
+      "businessServices": businessServices.value?.toList() ?? [],
+      "businessTimings":
+          businessTimings.value?.toMap() ?? BusinessTimings.empty().toMap(),
+      "businessHolidays": businessHolidays.value?.toList() ?? [],
       "status": EnumToString.convertToString(status.value),
     };
   }

@@ -1,26 +1,14 @@
-import 'dart:typed_data';
-
 import 'package:bapp/config/config_data_types.dart';
-import 'package:bapp/config/constants.dart';
-import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
-import 'package:bapp/stores/firebase_structures/business_services.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
-import 'package:mobx/mobx.dart' show reaction;
 
-import 'firebase_structures/business_branch.dart';
-import 'firebase_structures/business_branch.dart';
-import 'firebase_structures/business_branch.dart';
 import 'firebase_structures/business_category.dart';
 import 'firebase_structures/business_details.dart';
-import 'firebase_structures/business_holidays.dart';
-import 'firebase_structures/business_timings.dart';
 
 part 'business_store.g.dart';
 
@@ -47,7 +35,7 @@ abstract class _BusinessStore with Store {
     userRelatedUpdate();
     _auth.userChanges().listen((u) {
       _user = u;
-      if(_user!=null){
+      if (_user != null) {
         userRelatedUpdate();
       }
     });
@@ -72,8 +60,6 @@ abstract class _BusinessStore with Store {
     ///create the first branch
     businessDoc =
         _fireStore.doc("businesses/${FirebaseAuth.instance.currentUser.uid}");
-
-
 
     final ap = BusinessDetails.from(
       businessName: businessName,
@@ -114,12 +100,10 @@ abstract class _BusinessStore with Store {
 
   @action
   Future getCategories() async {
-    final categorySnaps = await _fireStore.collection("categories").get();
+    final categorySnaps = await _fireStore.doc("categories/categories").get();
     categories.clear();
-    categorySnaps.docs.forEach((element) {
-      categories.add(BusinessCategory(
-          document: element.reference,
-          normalName: element.id.replaceAll("_", " ")));
+    categorySnaps.data().forEach((k, v) {
+      categories.add(BusinessCategory.fromJson(v));
     });
   }
 }

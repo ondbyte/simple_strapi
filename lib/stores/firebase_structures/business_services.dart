@@ -1,7 +1,4 @@
-import 'package:bapp/config/config.dart';
-import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
-import 'package:bapp/stores/firebase_structures/business_category.dart';
 import 'package:bapp/stores/firebase_structures/business_details.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -15,12 +12,12 @@ class BusinessServices {
 
   BusinessServices.empty({this.business});
 
-  BusinessServices.fromJsonList(List<dynamic> l,{@required this.business}){
+  BusinessServices.fromJsonList(List<dynamic> l, {@required this.business}) {
     l.forEach((i) {
-      final item = i as Map<String,dynamic>;
-      if(item.keys.contains("serviceName")){
+      final item = i as Map<String, dynamic>;
+      if (item.keys.contains("serviceName")) {
         all.add(BusinessService.fromJson(item));
-      } else if(item.keys.contains("categoryName")){
+      } else if (item.keys.contains("categoryName")) {
         allCategories.add(BusinessServiceCategory.fromJson(item));
       }
     });
@@ -50,14 +47,22 @@ class BusinessServices {
       ..images.addAll(imgs);
 
     all.add(service);
-    await business.myDoc.value.update({"businessServices":FieldValue.arrayUnion([service.toMap()])});
-    await business.selectedBranch.value.myDoc.value.update({"businessServices":FieldValue.arrayUnion([service.toMap()])});
+    await business.myDoc.value.update({
+      "businessServices": FieldValue.arrayUnion([service.toMap()])
+    });
+    await business.selectedBranch.value.myDoc.value.update({
+      "businessServices": FieldValue.arrayUnion([service.toMap()])
+    });
   }
 
   Future removeService(BusinessService service) async {
     all.remove(service);
-    await business.myDoc.value.update({"businessServices":FieldValue.arrayRemove([service.toMap()])});
-    await business.selectedBranch.value.myDoc.value.update({"businessServices":FieldValue.arrayRemove([service.toMap()])});
+    await business.myDoc.value.update({
+      "businessServices": FieldValue.arrayRemove([service.toMap()])
+    });
+    await business.selectedBranch.value.myDoc.value.update({
+      "businessServices": FieldValue.arrayRemove([service.toMap()])
+    });
   }
 
   Future addACategory({
@@ -73,15 +78,19 @@ class BusinessServices {
       ..images.addAll(imgs);
 
     allCategories.add(category);
-    await business.selectedBranch.value.myDoc.value.update({"businessServices":FieldValue.arrayUnion([category.toMap()])});
+    await business.selectedBranch.value.myDoc.value.update({
+      "businessServices": FieldValue.arrayUnion([category.toMap()])
+    });
   }
 
   Future removeCategory(BusinessServiceCategory category) async {
     allCategories.remove(category);
-    business.selectedBranch.value.myDoc.value.update({"businessServices":FieldValue.arrayRemove([category.toMap()])});
+    business.selectedBranch.value.myDoc.value.update({
+      "businessServices": FieldValue.arrayRemove([category.toMap()])
+    });
   }
 
-  toList(){
+  toList() {
     final l = [];
     all.forEach((element) {
       l.add(element.toMap());
@@ -104,10 +113,10 @@ class BusinessService {
   BusinessService.empty();
 
   BusinessService.fromJson(Map<String, dynamic> j) {
-    serviceName.value = j["serviceName"]??"";
-    price.value = double.parse(j["price"])??0.0;
-    duration.value = Duration(minutes: j["duration"]??0);
-    description.value = j["description"]??"";
+    serviceName.value = j["serviceName"] ?? "";
+    price.value = double.parse(j["price"]) ?? 0.0;
+    duration.value = Duration(minutes: j["duration"] ?? 0);
+    description.value = j["description"] ?? "";
     category.value = BusinessServiceCategory.fromJson(j["category"]);
     final tmp = Map.fromIterable(j["images"],
         key: (s) => s as String, value: (_) => true);
@@ -120,7 +129,7 @@ class BusinessService {
       "price": price.value.toStringAsPrecision(2),
       "duration": duration.value.inMinutes,
       "description": description.value,
-      "category": category.value.toMap(),
+      "category": category.value?.toMap() ?? {},
       "images": images.keys.toList(),
     };
   }
@@ -133,13 +142,13 @@ class BusinessServiceCategory {
 
   BusinessServiceCategory.empty();
 
-  BusinessServiceCategory.fromJson(Map<String,dynamic> j) {
+  BusinessServiceCategory.fromJson(Map<String, dynamic> j) {
     _fromJson(j);
   }
 
   _fromJson(Map<String, dynamic> j) {
-    this.categoryName.value = j["categoryName"]??"";
-    this.description.value = j["description"]??"";
+    this.categoryName.value = j["categoryName"] ?? "";
+    this.description.value = j["description"] ?? "";
     final tmp = Map.fromIterable(j["images"],
         key: (s) => s as String, value: (_) => true);
     this.images.addAll(tmp);
@@ -153,4 +162,3 @@ class BusinessServiceCategory {
     };
   }
 }
-

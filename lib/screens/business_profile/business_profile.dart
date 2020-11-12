@@ -2,7 +2,6 @@ import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/stores/booking_flow.dart';
-import 'package:bapp/widgets/buttons.dart';
 import 'package:bapp/widgets/firebase_image.dart';
 import 'package:bapp/widgets/tabs/business_profile/services_tab.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
@@ -22,14 +21,20 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
     final flow = Provider.of<BookingFlow>(context, listen: false);
     return Scaffold(
       bottomNavigationBar: Observer(
-        builder: (_){
+        builder: (_) {
           return BottomPrimaryButton(
             label: "Book an Appointment",
-            title: flow.services.isNotEmpty?flow.services.length.toString()+" items selected":null,
-            subTitle: flow.services.isNotEmpty?flow.totalDurationMinutes.value.toString()+" Minutes, "+flow.totalPrice.value.toString()+" "+flow.branch.misc.currency:null,
-            onPressed: flow.services.isEmpty?null:(){
-
-            },
+            title: flow.services.isNotEmpty
+                ? flow.services.length.toString() + " items selected"
+                : null,
+            subTitle: flow.services.isNotEmpty
+                ? flow.totalDurationMinutes.value.toString() +
+                    " Minutes, " +
+                    flow.totalPrice.value.toString() +
+                    " " +
+                    flow.branch.misc.currency
+                : null,
+            onPressed: flow.services.isEmpty ? null : () {},
           );
         },
       ),
@@ -43,8 +48,9 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                 expandedHeight: 256,
                 flexibleSpace: FirebaseStorageImage(
                   fit: BoxFit.cover,
-                  storagePathOrURL: flow.branch.images.keys.elementAt(0) ??
-                      kTemporaryBusinessImage,
+                  storagePathOrURL: flow.branch.images.isNotEmpty
+                      ? flow.branch.images.keys.elementAt(0)
+                      : kTemporaryBusinessImage,
                 ),
               ),
               SliverList(
@@ -78,6 +84,4 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
   }
 
   BookingFlow get flow => Provider.of<BookingFlow>(context);
-
 }
-

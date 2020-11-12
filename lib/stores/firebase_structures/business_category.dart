@@ -1,21 +1,17 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 class BusinessCategory {
-  final DocumentReference document;
-  final String normalName;
+  final String name;
+  final bool enabled;
 
-  BusinessCategory({this.normalName, this.document});
+  BusinessCategory({this.name, this.enabled});
 
   static BusinessCategory fromJson(Map<String, dynamic> j) {
-    return BusinessCategory(
-        normalName: j["normalName"] as String,
-        document: j["document"] as DocumentReference);
+    return BusinessCategory(name: j["name"], enabled: j["enabled"]);
   }
 
   Map<String, dynamic> toMap() {
     return {
-      "normalName": normalName,
-      "name": document,
+      "name": name,
+      "enabled": enabled,
     };
   }
 }

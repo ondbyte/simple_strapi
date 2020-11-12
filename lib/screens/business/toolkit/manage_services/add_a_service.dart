@@ -1,4 +1,3 @@
-import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
@@ -6,7 +5,6 @@ import 'package:bapp/stores/firebase_structures/business_services.dart';
 import 'package:bapp/widgets/add_image_sliver.dart';
 import 'package:bapp/widgets/buttons.dart';
 import 'package:bapp/widgets/loading_stack.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -32,22 +30,22 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
         ),
         bottomNavigationBar: BottomPrimaryButton(
           onPressed: () async {
-            final businessStore = Provider.of<BusinessStore>(context);
+            final businessStore =
+                Provider.of<BusinessStore>(context, listen: false);
             if (_key.currentState.validate()) {
               act(() {
                 kLoading.value = true;
               });
               act(() {
-                businessStore.business.selectedBranch.value.businessServices.value
+                businessStore
+                    .business.selectedBranch.value.businessServices.value
                     .addAService(
-                    images: _service.images,
-                    category: _category,
-                    duration: _service.duration.value,
-                    description:
-                    _service.description.value,
-                    price: _service.price.value,
-                    serviceName:
-                    _service.serviceName.value);
+                        images: _service.images,
+                        category: _category,
+                        duration: _service.duration.value,
+                        description: _service.description.value,
+                        price: _service.price.value,
+                        serviceName: _service.serviceName.value);
                 Navigator.of(context).pop();
               });
               act(() {
@@ -73,12 +71,17 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                           Observer(
                             builder: (_) {
                               final categories = businessStore
-                                  .business.selectedBranch.value.businessServices.value.allCategories
+                                  .business
+                                  .selectedBranch
+                                  .value
+                                  .businessServices
+                                  .value
+                                  .allCategories
                                   .toList();
                               return DropdownButtonFormField<
                                   BusinessServiceCategory>(
-                                decoration:
-                                    const InputDecoration(labelText: "Category"),
+                                decoration: const InputDecoration(
+                                    labelText: "Category"),
                                 items: <
                                     DropdownMenuItem<BusinessServiceCategory>>[
                                   ...List.generate(
@@ -178,7 +181,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                                     return null;
                                   },
                                   onChanged: (s) {
-                                    final number = int.tryParse(s)??0;
+                                    final number = int.tryParse(s) ?? 0;
                                     act(
                                       () {
                                         _service.duration.value =
@@ -249,10 +252,17 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
 
 class BottomPrimaryButton extends StatefulWidget {
   final Function onPressed;
-  final String label,title,subTitle;
+  final String label, title, subTitle;
   final EdgeInsets padding;
 
-  const BottomPrimaryButton({Key key, this.onPressed, this.label, this.title, this.subTitle, this.padding}) : super(key: key);
+  const BottomPrimaryButton(
+      {Key key,
+      this.onPressed,
+      this.label,
+      this.title,
+      this.subTitle,
+      this.padding})
+      : super(key: key);
   @override
   _BottomPrimaryButtonState createState() => _BottomPrimaryButtonState();
 }
@@ -260,17 +270,22 @@ class BottomPrimaryButton extends StatefulWidget {
 class _BottomPrimaryButtonState extends State<BottomPrimaryButton> {
   @override
   Widget build(BuildContext context) {
-    assert((widget.title!=null&&widget.subTitle!=null||(widget.title==null&&widget.subTitle==null)));
+    assert((widget.title != null && widget.subTitle != null ||
+        (widget.title == null && widget.subTitle == null)));
     return Container(
-      padding: widget.padding??EdgeInsets.all(16),
+      padding: widget.padding ?? EdgeInsets.all(16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if(widget.title!=null)ListTile(
-            title: Text(widget.title),
-            subtitle: Text(widget.subTitle),
-          ),
-          if(widget.title!=null) const SizedBox(height: 8,),
+          if (widget.title != null)
+            ListTile(
+              title: Text(widget.title),
+              subtitle: Text(widget.subTitle),
+            ),
+          if (widget.title != null)
+            const SizedBox(
+              height: 8,
+            ),
           PrimaryButton(
             widget.label,
             onPressed: widget.onPressed,
@@ -280,4 +295,3 @@ class _BottomPrimaryButtonState extends State<BottomPrimaryButton> {
     );
   }
 }
-

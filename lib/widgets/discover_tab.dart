@@ -186,7 +186,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
               possibilities: Provider.of<BusinessStore>(context, listen: false)
                   .categories
                   .map<String>(
-                    (element) => element.normalName,
+                    (element) => element.name,
                   )
                   .toList(),
             );
@@ -291,7 +291,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     (index) => FlatButton(
                       onPressed: () {},
                       child: Text(
-                        businessStore.categories[index].normalName,
+                        businessStore.categories[index].name,
                         style: Theme.of(context).textTheme.subtitle1,
                       ),
                     ),
