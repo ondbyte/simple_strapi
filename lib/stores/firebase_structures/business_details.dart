@@ -24,9 +24,6 @@ class BusinessDetails {
   final selectedBranch = Observable<BusinessBranch>(null);
   final email = Observable<String>("");
   final myDoc = Observable<DocumentReference>(null);
-  final businessTimings = Observable<BusinessTimings>(null);
-  final businessServices = Observable<BusinessServices>(null);
-  final businessHolidays = Observable<BusinessHolidays>(null);
 
   final List<ReactionDisposer> _disposers = [];
   setupReactions() {
@@ -71,9 +68,6 @@ class BusinessDetails {
     this.selectedBranch.value = selectedBranch;
     this.email.value = email;
     this.myDoc.value = myDoc;
-    this.businessTimings.value = BusinessTimings.empty();
-    this.businessServices.value = BusinessServices.empty(business: this);
-    this.businessHolidays.value = BusinessHolidays.empty(business: this);
 
     setupReactions();
   }
@@ -98,11 +92,6 @@ class BusinessDetails {
     this.selectedBranch.value = this.branches.value.firstWhere((b) => b.myDoc.value==j["selectedBranch"]);
     this.email.value = j["email"];
     this.myDoc.value = j["myDoc"];
-    this.businessTimings.value = BusinessTimings.fromJson(j["businessTimings"]);
-    this.businessServices.value =
-        BusinessServices.fromJsonList(j["businessServices"], business: this);
-    this.businessHolidays.value =
-        BusinessHolidays.fromJsonList(j["businessHolidays"], business: this);
 
     setupReactions();
   }
@@ -119,9 +108,6 @@ class BusinessDetails {
       "selectedBranch": selectedBranch.value.myDoc.value,
       "email": email.value,
       "myDoc": myDoc.value,
-      "businessTimings": businessTimings.value.toMap(),
-      "businessServices": businessServices.value.toList(),
-      "businessHolidays": businessHolidays.value.toList(),
     };
   }
 
@@ -156,9 +142,6 @@ class BusinessDetails {
       ..images.addAll(imgs)
       ..contactNumber.value = contactNumber.value
       ..email.value = email.value
-      ..businessServices.value = businessServices.value
-      ..businessTimings.value = businessTimings.value
-      ..businessHolidays.value = businessHolidays.value
       ..rating.value = 0.0
       ..status.value = BusinessBranchActiveStatus.lead;
 
@@ -173,10 +156,6 @@ class BusinessDetails {
 
   Future saveBusiness() async {
     await myDoc.value.set(toMap());
-  }
-  Future saveTimings() async {
-    await myDoc.value.set({"businessTimings":businessTimings.value.toMap()},SetOptions(merge: true,));
-    await selectedBranch.value.myDoc.value.set({"businessTimings":businessTimings.value.toMap()},SetOptions(merge: true,));
   }
 
   bool anyBranchInDraft() {

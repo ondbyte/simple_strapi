@@ -8,6 +8,7 @@ import 'package:device_info/device_info.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart' hide Action;
+import 'package:flutter/material.dart' hide Action;
 import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mobx/mobx.dart' show Action;
@@ -155,4 +156,23 @@ Future uploadBusinessBranchApprovalPDF({File fileToUpload}) async {
   final task = file.putFile(fileToUpload);
   await task.onComplete;
   print("File Uploaded");
+}
+
+PreferredSizeWidget getBappTabBar(BuildContext context, List<Widget> tabs) {
+  return TabBar(
+    indicator: UnderlineTabIndicator(
+      borderSide: BorderSide(
+        color: Theme.of(context).primaryColor,
+        width: 2,
+      ),
+    ),
+    labelColor: Theme.of(context).primaryColor,
+    unselectedLabelColor: Theme.of(context).primaryColorDark,
+    indicatorColor: Theme.of(context).primaryColor,
+    indicatorPadding: const EdgeInsets.all(16),
+    indicatorWeight: 6,
+    indicatorSize: TabBarIndicatorSize.label,
+    labelPadding: const EdgeInsets.all(8),
+    tabs: tabs,
+  );
 }

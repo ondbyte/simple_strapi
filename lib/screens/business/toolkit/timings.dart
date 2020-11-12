@@ -19,13 +19,13 @@ class _BusinessTimingsScreenState extends State<BusinessTimingsScreen> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: true,
-        title: Text("Manage working hours"),
+        title: const Text("Manage working hours"),
       ),
       body: WillPopScope(
         onWillPop: () async {
           final businessStore =
               Provider.of<BusinessStore>(context, listen: false);
-          businessStore.business.saveTimings();
+          businessStore.business.selectedBranch.value.saveTimings();
           return true;
         },
         child: Consumer<BusinessStore>(
@@ -33,7 +33,7 @@ class _BusinessTimingsScreenState extends State<BusinessTimingsScreen> {
             return Observer(
               builder: (_) {
                 final timings = businessStore
-                    .business.businessTimings.value.allDayTimings.value;
+                    .business.selectedBranch.value.businessTimings.value.allDayTimings.value;
                 return CustomScrollView(
                   slivers: [
                     SliverPadding(
@@ -85,7 +85,7 @@ class _DayTimingsWidgetState extends State<DayTimingsWidget> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

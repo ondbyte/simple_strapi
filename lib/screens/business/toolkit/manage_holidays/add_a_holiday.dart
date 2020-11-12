@@ -1,4 +1,5 @@
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/widgets/buttons.dart';
 import 'package:flushbar/flushbar.dart';
@@ -48,6 +49,52 @@ class _BusinessAddAHolidayScreenState extends State<BusinessAddAHolidayScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: true,
         title: Text("Add Holiday"),
+      ),
+      bottomNavigationBar: BottomPrimaryButton(
+        label: "Add",
+        onPressed: () async {
+          if (_key.currentState.validate()) {
+            final businessStore =
+            Provider.of<BusinessStore>(context,
+                listen: false);
+            if (businessStore
+                .business.selectedBranch.value.businessHolidays.value.all
+                .contains(_name)) {
+              Flushbar(
+                message:
+                "The holiday with that name exists",
+                duration: const Duration(seconds: 2),
+              ).show(context);
+              return;
+            }
+            var b = false;
+            businessStore
+                .business.selectedBranch.value.businessHolidays.value.all
+                .forEach(
+                  (businessHoliday) {
+                if (businessHoliday.dates == _pickedDates) {
+                  b = true;
+                }
+              },
+            );
+            if (b) {
+              Flushbar(
+                message: "The holiday range exists",
+                duration: const Duration(seconds: 2),
+              ).show(context);
+              return;
+            }
+            await businessStore
+                .business.selectedBranch.value.businessHolidays.value
+                .addHoliday(
+              name: _name,
+              type: _type,
+              details: _details,
+              fromToDate: _pickedDates,
+            );
+            Navigator.of(context).pop();
+          }
+        },
       ),
       body: WillPopScope(
         onWillPop: () async {
@@ -168,55 +215,9 @@ class _BusinessAddAHolidayScreenState extends State<BusinessAddAHolidayScreen> {
                               return null;
                             },
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 20,
                           ),
-                          PrimaryButton(
-                            "Apply",
-                            onPressed: () async {
-                              if (_key.currentState.validate()) {
-                                final businessStore =
-                                    Provider.of<BusinessStore>(context,
-                                        listen: false);
-                                if (businessStore
-                                    .business.businessHolidays.value.all
-                                    .contains(_name)) {
-                                  Flushbar(
-                                    message:
-                                        "The holiday with that name exists",
-                                    duration: const Duration(seconds: 2),
-                                  ).show(context);
-                                  return;
-                                }
-                                var b = false;
-                                businessStore
-                                    .business.businessHolidays.value.all
-                                    .forEach(
-                                  (businessHoliday) {
-                                    if (businessHoliday.dates == _pickedDates) {
-                                      b = true;
-                                    }
-                                  },
-                                );
-                                if (b) {
-                                  Flushbar(
-                                    message: "The holiday range exists",
-                                    duration: const Duration(seconds: 2),
-                                  ).show(context);
-                                  return;
-                                }
-                                await businessStore
-                                    .business.businessHolidays.value
-                                    .addHoliday(
-                                  name: _name,
-                                  type: _type,
-                                  details: _details,
-                                  fromToDate: _pickedDates,
-                                );
-                                Navigator.of(context).pop();
-                              }
-                            },
-                          )
                         ],
                       ),
                     )

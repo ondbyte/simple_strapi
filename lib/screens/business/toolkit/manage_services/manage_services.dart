@@ -4,6 +4,7 @@ import 'package:bapp/screens/business_profile/business_profile.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/firebase_image.dart';
+import 'package:bapp/widgets/tabs/business_profile/services_tab.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -127,9 +128,7 @@ class _BusinessServicesTabState extends State<BusinessServicesTab>
                               "Category : " +
                               service.category.value.categoryName.value,
                         ),
-                        leading: FirebaseStorageImage(
-                          width: 64,
-                          height: 64,
+                        leading: ListTileFirebaseImage(
                           storagePathOrURL: service.images.isNotEmpty
                               ? service.images.keys.elementAt(0)
                               : service.category.value.images.isNotEmpty
@@ -196,9 +195,7 @@ class _BusinessServiceCategoriesTabState
                           return ListTile(
                             title: Text(t.categoryName.value),
                             subtitle: Text(t.description.value),
-                            leading: FirebaseStorageImage(
-                              width: 64,
-                              height: 64,
+                            leading: ListTileFirebaseImage(
                               storagePathOrURL: t.images.isNotEmpty
                                   ? t.images.keys.elementAt(0)
                                   : kTemporaryBusinessImage,

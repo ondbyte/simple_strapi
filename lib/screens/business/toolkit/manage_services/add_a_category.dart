@@ -1,4 +1,5 @@
 import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/firebase_structures/business_services.dart';
 import 'package:bapp/widgets/add_image_sliver.dart';
@@ -26,8 +27,40 @@ class _BusinessAddServiceCategoryScreenState
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: true,
-          title: Text("Add a category"),
+          title: const Text("Add a category"),
           actions: [FlatButton(onPressed: () {}, child: Text(""))],
+        ),
+        bottomNavigationBar: BottomPrimaryButton(
+          label: "Add",
+          onPressed: () async {
+            _name = _name.trim();
+            _description = _description.trim();
+            final business =
+                Provider.of<BusinessStore>(context, listen: false)
+                    .business;
+            if (business.selectedBranch.value.businessServices.value.allCategories
+                .any((c) => c.categoryName.value == _name)) {
+              Flushbar(
+                message: "That category exists",
+                duration: const Duration(
+                  seconds: 2,
+                ),
+              ).show(context);
+              return;
+            }
+            act((){
+              kLoading.value = true;
+            });
+            await business.selectedBranch.value.businessServices.value.addACategory(
+              categoryName: _name,
+              description: _description,
+              images: _image,
+            );
+            Navigator.of(context).pop();
+            act((){
+              kLoading.value = false;
+            });
+          },
         ),
         body: CustomScrollView(
           slivers: [
@@ -89,47 +122,6 @@ class _BusinessAddServiceCategoryScreenState
                 ],
               ),
             ),
-            SliverPadding(
-              padding: EdgeInsets.all(16),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate(
-                  [
-                    PrimaryButton(
-                      "Apply",
-                      onPressed: () async {
-                        _name = _name.trim();
-                        _description = _description.trim();
-                        final business =
-                            Provider.of<BusinessStore>(context, listen: false)
-                                .business;
-                        if (business.selectedBranch.value.businessServices.value.allCategories
-                            .any((c) => c.categoryName.value == _name)) {
-                          Flushbar(
-                            message: "That category exists",
-                            duration: const Duration(
-                              seconds: 2,
-                            ),
-                          ).show(context);
-                          return;
-                        }
-                        act((){
-                          kLoading.value = true;
-                        });
-                        await business.selectedBranch.value.businessServices.value.addACategory(
-                          categoryName: _name,
-                          description: _description,
-                          images: _image,
-                        );
-                        Navigator.of(context).pop();
-                        act((){
-                          kLoading.value = false;
-                        });
-                      },
-                    )
-                  ],
-                ),
-              ),
-            )
           ],
         ),
       ),

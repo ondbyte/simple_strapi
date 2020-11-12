@@ -4,6 +4,7 @@ import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/firebase_structures/business_branch.dart';
 import 'package:bapp/widgets/firebase_image.dart';
+import 'package:bapp/widgets/tabs/business_profile/services_tab.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -59,17 +60,15 @@ class _BusinessManageBranchesScreenState
                 itemCount: branches.length,
                 itemBuilder: (_, i) {
                   return ListTile(
-                    leading: FirebaseStorageImage(
+                    leading: ListTileFirebaseImage(
                       storagePathOrURL: branches[i].images.isNotEmpty
                           ? branches[i].images.keys.elementAt(0)
                           : kTemporaryBusinessImage,
-                      height: 80,
-                      width: 80,
                     ),
                     title: Text(branches[i].name.value),
                     subtitle: Text(removeNewLines(branches[i].address.value)),
                     trailing: IconButton(
-                        icon: Icon(Icons.delete_forever),
+                        icon: const Icon(Icons.delete_forever),
                         onPressed: () async {
                           final remove = await showDialog(
                             context: context,

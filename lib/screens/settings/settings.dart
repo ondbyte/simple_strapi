@@ -57,7 +57,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
-
+/*
   List<Widget> _getDebugSettings() {
     return kDebugMode
         ? [
@@ -71,10 +71,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             FlatButton(
                 color: Colors.redAccent,
                 onPressed: () {
-                  nukeFirebase();
                 },
                 child: Text("Nuke firebase"))
           ]
         : [];
-  }
+  }*/
 }

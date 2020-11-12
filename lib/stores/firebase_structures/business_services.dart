@@ -105,7 +105,7 @@ class BusinessService {
 
   BusinessService.fromJson(Map<String, dynamic> j) {
     serviceName.value = j["serviceName"]??"";
-    price.value = j["price"]??0.0;
+    price.value = double.parse(j["price"])??0.0;
     duration.value = Duration(minutes: j["duration"]??0);
     description.value = j["description"]??"";
     category.value = BusinessServiceCategory.fromJson(j["category"]);
@@ -117,7 +117,7 @@ class BusinessService {
   toMap() {
     return {
       "serviceName": serviceName.value,
-      "price": price.value,
+      "price": price.value.toStringAsPrecision(2),
       "duration": duration.value.inMinutes,
       "description": description.value,
       "category": category.value.toMap(),

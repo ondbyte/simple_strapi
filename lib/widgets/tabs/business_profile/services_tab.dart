@@ -1,6 +1,9 @@
+import 'package:bapp/config/constants.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/firebase_structures/business_services.dart';
+import 'package:bapp/widgets/firebase_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
 class BusinessProfileServicesTab extends StatefulWidget {
@@ -28,16 +31,16 @@ class _BusinessProfileServicesTabState
         sorted.addAll({cat: all.toList()});
       }
     });
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ...List.generate(sorted.length, (i) {
-          return BusinessCategoryContainerWidget(
-            category: sorted.keys.elementAt(i),
-            services: sorted.values.elementAt(i),
-          );
-        })
-      ],
+    return ListView.builder(
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: sorted.length,
+      itemBuilder: (_, i) {
+        return BusinessCategoryContainerWidget(
+          category: sorted.keys.elementAt(i),
+          services: sorted.values.elementAt(i),
+        );
+      },
     );
   }
 }
@@ -57,36 +60,46 @@ class _BusinessCategoryContainerWidgetState
     extends State<BusinessCategoryContainerWidget> {
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      shrinkWrap: true,
-      children: [
-        Text(
-          widget.category.categoryName.value,
-          style: Theme.of(context).textTheme.headline1,
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-        ..._getServicesTiles(),
-      ],
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            widget.category.categoryName.value,
+            style: Theme.of(context).textTheme.headline1,
+          ),
+          ..._getServicesTiles(),
+          const SizedBox(
+            height: 20,
+          )
+        ],
+      ),
     );
   }
 
   BookingFlow get flow => Provider.of<BookingFlow>(context, listen: false);
 
   List<Widget> _getServicesTiles() {
-    bool _booked(BusinessService s) {
-      return flow.services
-          .any((element) => element.serviceName == s.serviceName);
-    }
-
     final list = <Widget>[];
-    widget.services.forEach((s) {
-      list.add(BusinessServiceChildWidget(
-        service: s,
-        bookWidget: _booked(s) ? bookButton(s) : cancelBookingButton(s),
-      ));
-    });
+    widget.services.forEach(
+      (s) {
+        list.add(
+          Observer(
+            builder: (_) {
+              return BusinessServiceChildWidget(
+                service: s,
+                bookWidget: flow.services
+                        .any((element) => element.serviceName == s.serviceName)
+                    ? cancelBookingButton(s)
+                    : bookButton(s),
+              );
+            },
+          ),
+        );
+      },
+    );
     return list;
   }
 
@@ -119,9 +132,15 @@ class BusinessServiceChildWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      contentPadding: const EdgeInsets.symmetric(vertical: 8),
       title: Text(service.serviceName.value),
       subtitle: _makeSubTitle(context),
       trailing: bookWidget,
+      leading: ListTileFirebaseImage(
+        storagePathOrURL: service.images.isNotEmpty
+            ? service.images.keys.elementAt(0)
+            : kTemporaryBusinessImage,
+      ),
     );
   }
 
@@ -141,3 +160,21 @@ class BusinessServiceChildWidget extends StatelessWidget {
     );
   }
 }
+
+class ListTileFirebaseImage extends StatelessWidget {
+  final String storagePathOrURL;
+
+  const ListTileFirebaseImage({Key key, this.storagePathOrURL}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(6),
+      child: FirebaseStorageImage(
+        width: 64,
+        height: 64,
+        storagePathOrURL: storagePathOrURL,
+      ),
+    );
+  }
+}
+

@@ -20,17 +20,46 @@ class BusinessAddAServiceScreen extends StatefulWidget {
 class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
   final _key = GlobalKey<FormState>();
   BusinessServiceCategory _category;
+  final _service = BusinessService.empty();
+
   @override
   Widget build(BuildContext context) {
     return LoadingStackWidget(
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: true,
-          title: Text("Add a service"),
+          title: const Text("Add a service"),
+        ),
+        bottomNavigationBar: BottomPrimaryButton(
+          onPressed: () async {
+            final businessStore = Provider.of<BusinessStore>(context);
+            if (_key.currentState.validate()) {
+              act(() {
+                kLoading.value = true;
+              });
+              act(() {
+                businessStore.business.selectedBranch.value.businessServices.value
+                    .addAService(
+                    images: _service.images,
+                    category: _category,
+                    duration: _service.duration.value,
+                    description:
+                    _service.description.value,
+                    price: _service.price.value,
+                    serviceName:
+                    _service.serviceName.value);
+                Navigator.of(context).pop();
+              });
+              act(() {
+                kLoading.value = false;
+              });
+            }
+          },
+          label: "Add",
+          padding: const EdgeInsets.all(16),
         ),
         body: Consumer2<BusinessStore, CloudStore>(
           builder: (_, businessStore, cloudStore, __) {
-            final BusinessService _service = BusinessService.empty();
             return Form(
               key: _key,
               child: CustomScrollView(
@@ -49,7 +78,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                               return DropdownButtonFormField<
                                   BusinessServiceCategory>(
                                 decoration:
-                                    InputDecoration(labelText: "Category"),
+                                    const InputDecoration(labelText: "Category"),
                                 items: <
                                     DropdownMenuItem<BusinessServiceCategory>>[
                                   ...List.generate(
@@ -77,11 +106,11 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                               );
                             },
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 20,
                           ),
                           TextFormField(
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                                 labelText: "Name of the product"),
                             validator: (s) {
                               if (s.isEmpty) {
@@ -98,7 +127,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                               FocusScope.of(context).nextFocus();
                             },
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 20,
                           ),
                           Row(
@@ -128,12 +157,12 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                                   },
                                 ),
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 width: 20,
                               ),
                               Expanded(
                                 child: TextFormField(
-                                  decoration: InputDecoration(
+                                  decoration: const InputDecoration(
                                     labelText: "Duration",
                                     suffix: Text("Minutes"),
                                   ),
@@ -164,11 +193,11 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                               ),
                             ],
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 20,
                           ),
                           TextFormField(
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               labelText: "Description",
                             ),
                             keyboardType: TextInputType.text,
@@ -190,7 +219,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                               _key.currentState.validate();
                             },
                           ),
-                          SizedBox(
+                          const SizedBox(
                             height: 20,
                           ),
                           AddImageTileWidget(
@@ -202,35 +231,6 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                             onImagesSelected: (imgs) {
                               _service.images.clear();
                               _service.images.addAll(imgs);
-                            },
-                          ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          PrimaryButton(
-                            "Apply",
-                            onPressed: () async {
-                              if (_key.currentState.validate()) {
-                                act(() {
-                                  kLoading.value = true;
-                                });
-                                act(() {
-                                  businessStore.business.selectedBranch.value.businessServices.value
-                                      .addAService(
-                                          images: _service.images,
-                                          category: _category,
-                                          duration: _service.duration.value,
-                                          description:
-                                              _service.description.value,
-                                          price: _service.price.value,
-                                          serviceName:
-                                              _service.serviceName.value);
-                                  Navigator.of(context).pop();
-                                });
-                                act(() {
-                                  kLoading.value = false;
-                                });
-                              }
                             },
                           ),
                         ],
@@ -246,3 +246,38 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
     );
   }
 }
+
+class BottomPrimaryButton extends StatefulWidget {
+  final Function onPressed;
+  final String label,title,subTitle;
+  final EdgeInsets padding;
+
+  const BottomPrimaryButton({Key key, this.onPressed, this.label, this.title, this.subTitle, this.padding}) : super(key: key);
+  @override
+  _BottomPrimaryButtonState createState() => _BottomPrimaryButtonState();
+}
+
+class _BottomPrimaryButtonState extends State<BottomPrimaryButton> {
+  @override
+  Widget build(BuildContext context) {
+    assert((widget.title!=null&&widget.subTitle!=null||(widget.title==null&&widget.subTitle==null)));
+    return Container(
+      padding: widget.padding??EdgeInsets.all(16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if(widget.title!=null)ListTile(
+            title: Text(widget.title),
+            subtitle: Text(widget.subTitle),
+          ),
+          if(widget.title!=null) const SizedBox(height: 8,),
+          PrimaryButton(
+            widget.label,
+            onPressed: widget.onPressed,
+          ),
+        ],
+      ),
+    );
+  }
+}
+

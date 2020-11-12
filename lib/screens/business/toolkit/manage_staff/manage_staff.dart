@@ -1,6 +1,7 @@
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/widgets/firebase_image.dart';
+import 'package:bapp/widgets/tabs/business_profile/services_tab.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -49,14 +50,11 @@ class _BusinessManageStaffScreenState extends State<BusinessManageStaffScreen> {
                           trailing: IconButton(icon: Icon(Icons.delete,),onPressed: () async {
                             await businessStore.business.selectedBranch.value.removeAStaff(staffs[index]);
                           },),
-                          leading: FirebaseStorageImage(
-                            circular: true,
-                            width: 64,
-                            height: 64,
+                          leading: ListTileFirebaseImage(
                             storagePathOrURL: staffs[index].images.keys.elementAt(0),
                           ),
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),

@@ -123,6 +123,10 @@ class BusinessBranch {
     await _getBranch(myDoc.value);
   }
 
+  Future saveTimings() async {
+    await myDoc.value.set({"businessTimings":businessTimings.value.toMap()},SetOptions(merge: true,));
+  }
+
   Future _getBranch(DocumentReference myDoc) async {
     if (myDoc == null) {
       print("WARNING: empty docRef");
@@ -178,10 +182,11 @@ class BusinessBranch {
     status.value =
         EnumToString.fromString(BusinessBranchActiveStatus.values, j["status"]);
     if (status.value == BusinessBranchActiveStatus.published) {
-      iso2 = j["assignedAddress.iso2"];
-      city = j["assignedAddress.city"];
-      locality = j["assignedAddress.locality"];
-      misc = ThePhoneNumber(iso2Code: iso2);
+      iso2 = j["assignedAddress"]["iso2"];
+      city = j["assignedAddress"]["city"];
+      locality = j["assignedAddress"]["locality"];
+      misc = ThePhoneNumberLib.parseNumber(iso2Code: iso2);
+
     }
   }
 

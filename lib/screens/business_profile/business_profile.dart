@@ -1,9 +1,13 @@
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/stores/booking_flow.dart';
+import 'package:bapp/widgets/buttons.dart';
 import 'package:bapp/widgets/firebase_image.dart';
 import 'package:bapp/widgets/tabs/business_profile/services_tab.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
 class BusinessProfileScreen extends StatefulWidget {
@@ -17,6 +21,18 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
   Widget build(BuildContext context) {
     final flow = Provider.of<BookingFlow>(context, listen: false);
     return Scaffold(
+      bottomNavigationBar: Observer(
+        builder: (_){
+          return BottomPrimaryButton(
+            label: "Book an Appointment",
+            title: flow.services.isNotEmpty?flow.services.length.toString()+" items selected":null,
+            subTitle: flow.services.isNotEmpty?flow.totalDurationMinutes.value.toString()+" Minutes, "+flow.totalPrice.value.toString()+" "+flow.branch.misc.currency:null,
+            onPressed: flow.services.isEmpty?null:(){
+
+            },
+          );
+        },
+      ),
       body: DefaultTabController(
         length: 4,
         initialIndex: 1,
@@ -37,10 +53,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                   titleStyle: Theme.of(context).textTheme.headline1,
                   branch: flow.branch,
                   onTap: null,
-                  padding: EdgeInsets.all(16),
-                ),
-                SizedBox(
-                  height: 20,
+                  padding: const EdgeInsets.all(16),
                 ),
                 getBappTabBar(context, [
                   const Text("Offers"),
@@ -51,7 +64,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
               ]))
             ];
           },
-          body: TabBarView(
+          body: const TabBarView(
             children: [
               SizedBox(),
               BusinessProfileServicesTab(),
@@ -63,23 +76,8 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
       ),
     );
   }
+
+  BookingFlow get flow => Provider.of<BookingFlow>(context);
+
 }
 
-PreferredSizeWidget getBappTabBar(BuildContext context, List<Widget> tabs) {
-  return TabBar(
-    indicator: UnderlineTabIndicator(
-      borderSide: BorderSide(
-        color: Theme.of(context).primaryColor,
-        width: 2,
-      ),
-    ),
-    labelColor: Theme.of(context).primaryColor,
-    unselectedLabelColor: Theme.of(context).primaryColorDark,
-    indicatorColor: Theme.of(context).primaryColor,
-    indicatorPadding: const EdgeInsets.all(16),
-    indicatorWeight: 6,
-    indicatorSize: TabBarIndicatorSize.label,
-    labelPadding: const EdgeInsets.all(8),
-    tabs: tabs,
-  );
-}
