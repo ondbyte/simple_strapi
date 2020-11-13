@@ -139,7 +139,7 @@ class BusinessServiceChildWidget extends StatelessWidget {
       leading: ListTileFirebaseImage(
         storagePathOrURL: service.images.isNotEmpty
             ? service.images.keys.elementAt(0)
-            : kTemporaryBusinessImage,
+            : kTemporaryPlaceHolderImage,
       ),
     );
   }
@@ -160,21 +160,3 @@ class BusinessServiceChildWidget extends StatelessWidget {
     );
   }
 }
-
-class ListTileFirebaseImage extends StatelessWidget {
-  final String storagePathOrURL;
-
-  const ListTileFirebaseImage({Key key, this.storagePathOrURL}) : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(6),
-      child: FirebaseStorageImage(
-        width: 64,
-        height: 64,
-        storagePathOrURL: storagePathOrURL,
-      ),
-    );
-  }
-}
-

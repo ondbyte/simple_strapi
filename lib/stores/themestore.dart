@@ -62,7 +62,7 @@ abstract class _ThemeStore with Store {
       brightness: Brightness.light,
       indicatorColor: Colors.black,
 
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[200],
       scaffoldBackgroundColor: Colors.white,
       // scaffoldBackgroundColor: Colors.white,
       primaryColor: Colors.teal,
@@ -74,7 +74,7 @@ abstract class _ThemeStore with Store {
       ///changes
       //buttonColor: Colors.teal,
       canvasColor: Colors.white,
-      cardColor: Color(0xFFF0F8F7),
+      cardColor: const Color(0xFFF0F8F7),
       disabledColor: Colors.grey[500],
       bottomAppBarColor: Colors.white,
 
@@ -173,7 +173,7 @@ abstract class _ThemeStore with Store {
           fontFamily: 'Lato',
         ),
       ),
-      bottomAppBarTheme: BottomAppBarTheme(
+      bottomAppBarTheme: const BottomAppBarTheme(
         elevation: 10,
         color: Colors.white,
       ),
@@ -182,7 +182,7 @@ abstract class _ThemeStore with Store {
         backgroundColor: Colors.grey[100],
       ),
       // ),
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         brightness: Brightness.light,
         color: Colors.white,
         // color: Colors.white,
@@ -202,20 +202,20 @@ abstract class _ThemeStore with Store {
           color: Colors.teal,
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: const CardTheme(
         margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         elevation: 0,
         shadowColor: Color(0xFFFFFFF5),
       ),
-      snackBarTheme: SnackBarThemeData(
+      snackBarTheme: const SnackBarThemeData(
           backgroundColor: Colors.black,
           contentTextStyle: TextStyle(color: Colors.white)),
 
       inputDecorationTheme: InputDecorationTheme(
-        focusedBorder: OutlineInputBorder(
+        focusedBorder: const OutlineInputBorder(
           borderSide: BorderSide(color: Colors.indigo, width: 2),
         ),
-        enabledBorder: OutlineInputBorder(
+        enabledBorder: const OutlineInputBorder(
           borderSide: BorderSide(color: Colors.grey, width: 0.5),
         ),
         hintStyle: TextStyle(
@@ -230,7 +230,7 @@ abstract class _ThemeStore with Store {
           height: 1,
           fontFamily: 'Lato',
         ),
-        errorStyle: TextStyle(
+        errorStyle: const TextStyle(
           color: Colors.red,
           fontSize: 14,
           fontWeight: FontWeight.w400,
@@ -250,7 +250,7 @@ abstract class _ThemeStore with Store {
   ///changes to the dark theme should be done here
   static ThemeData getDarkThemeData() {
     return ThemeData(
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         selectedItemColor: Colors.teal,
         showUnselectedLabels: true,
         showSelectedLabels: true,
@@ -260,7 +260,7 @@ abstract class _ThemeStore with Store {
       brightness: Brightness.dark,
 
       indicatorColor: Colors.white,
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.grey[800],
       scaffoldBackgroundColor: Colors.black,
       primaryColor: Colors.teal,
       accentColor: Colors.tealAccent[700],
@@ -270,11 +270,11 @@ abstract class _ThemeStore with Store {
       ///changes
       //buttonColor: Colors.teal,
       canvasColor: Colors.black,
-      cardColor: Color(0xFF212524),
+      cardColor: const Color(0xFF212524),
       disabledColor: Colors.grey[700],
       bottomAppBarColor: Colors.black,
       secondaryHeaderColor: Colors.grey[900],
-      bottomSheetTheme: BottomSheetThemeData(
+      bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: Color(0xFF101225),
       ),
       dividerColor: Colors.white24,
@@ -369,16 +369,16 @@ abstract class _ThemeStore with Store {
           fontFamily: 'Gilmer',
         ),
       ),
-      bottomAppBarTheme: BottomAppBarTheme(elevation: 10, color: Colors.black),
+      bottomAppBarTheme: const BottomAppBarTheme(elevation: 10, color: Colors.black),
       dialogTheme: DialogTheme(
         backgroundColor: Colors.grey[900],
       ),
-      appBarTheme: AppBarTheme(
+      appBarTheme: const AppBarTheme(
         brightness: Brightness.dark,
         color: Colors.black,
         // color: Colors.white,
         elevation: 0,
-        textTheme: TextTheme(
+        textTheme:  TextTheme(
           headline6: TextStyle(
             fontSize: 22,
             letterSpacing: 0,
@@ -392,19 +392,19 @@ abstract class _ThemeStore with Store {
           color: Colors.white,
         ),
       ),
-      cardTheme: CardTheme(
+      cardTheme: const CardTheme(
         margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         elevation: 0,
       ),
-      snackBarTheme: SnackBarThemeData(
+      snackBarTheme: const SnackBarThemeData(
         backgroundColor: Colors.white,
         contentTextStyle: TextStyle(color: Colors.black),
       ),
       inputDecorationTheme: InputDecorationTheme(
-        focusedBorder: UnderlineInputBorder(
+        focusedBorder: const UnderlineInputBorder(
           borderSide: BorderSide(color: Colors.indigo, width: 1),
         ),
-        enabledBorder: UnderlineInputBorder(
+        enabledBorder: const UnderlineInputBorder(
           borderSide: BorderSide(
             color: Colors.grey,
             width: 0.5,
@@ -423,7 +423,7 @@ abstract class _ThemeStore with Store {
           height: 1,
           fontFamily: 'Lato',
         ),
-        errorStyle: TextStyle(
+        errorStyle: const TextStyle(
           color: Colors.red,
           fontSize: 14,
           fontWeight: FontWeight.w400,

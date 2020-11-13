@@ -68,11 +68,11 @@ class _ThankYouForYourInterestScreenState
                           _businessName = s;
                         });
                       },
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         labelText: "Name of your business",
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 10,
                     ),
                     InternationalPhoneNumberInput(
@@ -90,7 +90,7 @@ class _ThankYouForYourInterestScreenState
                           );
                         }
                       },
-                      selectorConfig: SelectorConfig(
+                      selectorConfig: const SelectorConfig(
                         selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
                       ),
                       ignoreBlank: true,
@@ -99,7 +99,7 @@ class _ThankYouForYourInterestScreenState
                         isoCode: cloudStore.theNumber.iso2Code,
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 20,
                     ),
                     ShakeWidget(

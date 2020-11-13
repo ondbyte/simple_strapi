@@ -33,7 +33,7 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
         return widget.storagePathOrURL.endsWith("svg")
             ? widget.circular
                 ? CircleAvatar(
-                    backgroundImage: svg.Svg(kTemporaryBusinessImage),
+                    backgroundImage: svg.Svg(kTemporaryPlaceHolderImage),
                   )
                 : SvgPicture.asset(
                     widget.storagePathOrURL,
@@ -71,11 +71,11 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
                   }
                   if (widget.circular) {
                     return CircleAvatar(
-                      backgroundImage: svg.Svg(kTemporaryBusinessImage),
+                      backgroundImage: svg.Svg(kTemporaryPlaceHolderImage),
                     );
                   }
                   return SvgPicture.asset(
-                    kTemporaryBusinessImage,
+                    kTemporaryPlaceHolderImage,
                     fit: BoxFit.contain,
                     width: widget.width??cons.maxWidth,
                     height: widget.height??cons.maxHeight,
@@ -86,3 +86,38 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
     );
   }
 }
+
+class ListTileFirebaseImage extends StatelessWidget {
+  final String storagePathOrURL;
+
+  const ListTileFirebaseImage({Key key, this.storagePathOrURL}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return RRFirebaseStorageImage(
+      height: 64,
+      width: 64,
+      storagePathOrURL: storagePathOrURL,
+    );
+  }
+}
+
+class RRFirebaseStorageImage extends StatelessWidget {
+  final String storagePathOrURL;
+  final double width,height;
+
+  const RRFirebaseStorageImage({Key key, this.storagePathOrURL, this.width, this.height}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(6),
+      child: FirebaseStorageImage(
+        width: width,
+        height: height,
+        storagePathOrURL: storagePathOrURL,
+      ),
+    );
+  }
+}
+
+

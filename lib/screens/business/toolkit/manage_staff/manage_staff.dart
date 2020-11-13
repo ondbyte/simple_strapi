@@ -1,5 +1,7 @@
+import 'package:bapp/config/constants.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/business_store.dart';
+import 'package:bapp/stores/firebase_structures/business_staff.dart';
 import 'package:bapp/widgets/firebase_image.dart';
 import 'package:bapp/widgets/tabs/business_profile/services_tab.dart';
 import 'package:enum_to_string/enum_to_string.dart';
@@ -44,14 +46,18 @@ class _BusinessManageStaffScreenState extends State<BusinessManageStaffScreen> {
                     [
                       ...List.generate(
                         staffs.length,
-                        (index) => ListTile(
-                          title: Text(staffs[index].name),
-                          subtitle: Text(EnumToString.convertToString(staffs[index].role)),
-                          trailing: IconButton(icon: Icon(Icons.delete,),onPressed: () async {
-                            await businessStore.business.selectedBranch.value.removeAStaff(staffs[index]);
-                          },),
-                          leading: ListTileFirebaseImage(
-                            storagePathOrURL: staffs[index].images.keys.elementAt(0),
+                        (index) => BusinessStaffListTile(
+                          staff: staffs[index],
+                          trailing: IconButton(
+                            icon: const Icon(
+                              Icons.delete,
+                            ),
+                            onPressed: () async {
+                              await businessStore.business.selectedBranch.value
+                                  .removeAStaff(
+                                staffs[index],
+                              );
+                            },
                           ),
                         ),
                       ),
@@ -62,6 +68,25 @@ class _BusinessManageStaffScreenState extends State<BusinessManageStaffScreen> {
             );
           });
         },
+      ),
+    );
+  }
+}
+
+class BusinessStaffListTile extends StatelessWidget {
+  final BusinessStaff staff;
+  final Widget trailing;
+
+  const BusinessStaffListTile({Key key, this.staff, this.trailing})
+      : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(staff.name),
+      subtitle: Text(EnumToString.convertToString(staff.role)),
+      trailing: trailing,
+      leading: ListTileFirebaseImage(
+        storagePathOrURL: staff.images.isNotEmpty?staff.images.keys.elementAt(0):kTemporaryPlaceHolderImage,
       ),
     );
   }

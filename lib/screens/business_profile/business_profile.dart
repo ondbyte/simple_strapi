@@ -24,15 +24,11 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
         builder: (_) {
           return BottomPrimaryButton(
             label: "Book an Appointment",
-            title: flow.services.isNotEmpty
-                ? flow.services.length.toString() + " items selected"
+            title: flow.selectedTitle.value.isNotEmpty
+                ? flow.selectedTitle.value
                 : null,
-            subTitle: flow.services.isNotEmpty
-                ? flow.totalDurationMinutes.value.toString() +
-                    " Minutes, " +
-                    flow.totalPrice.value.toString() +
-                    " " +
-                    flow.branch.misc.currency
+            subTitle: flow.selectedSubTitle.value.isNotEmpty
+                ? flow.selectedSubTitle.value
                 : null,
             onPressed: flow.services.isEmpty ? null : () {},
           );
@@ -50,7 +46,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                   fit: BoxFit.cover,
                   storagePathOrURL: flow.branch.images.isNotEmpty
                       ? flow.branch.images.keys.elementAt(0)
-                      : kTemporaryBusinessImage,
+                      : kTemporaryPlaceHolderImage,
                 ),
               ),
               SliverList(

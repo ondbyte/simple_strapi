@@ -60,13 +60,13 @@ class _BusinessManageContactDetailsScreenState extends State<BusinessManageConta
                   },
                 );
               },),
-              SizedBox(height: 20,),
+              const SizedBox(height: 20,),
               Consumer<BusinessStore>(builder: (_,businessStore,__){
                 _previousNumber = ThePhoneNumberLib.parseNumber(internationalNumber: businessStore.business.selectedBranch.value.contactNumber.value);
                 //print(_enteredNumber);
                 return InternationalPhoneNumberInput(
 
-                  inputDecoration: InputDecoration(
+                  inputDecoration: const InputDecoration(
                     labelText: "phone number",
                   ),
                   onInputChanged: (pn){

@@ -95,14 +95,14 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                           _staff.role = s;
                         },
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 20,
                       ),
                       Consumer<CloudStore>(
                         builder: (_, cloudStore, __) {
                           return InternationalPhoneNumberInput(
                             inputDecoration:
-                                InputDecoration(labelText: "Bapp user"),
+                                const InputDecoration(labelText: "Bapp user"),
                             countries: [cloudStore.theNumber.iso2Code],
                             onInputChanged: (pn) {
                               _theNumber = ThePhoneNumberLib.parseNumber(

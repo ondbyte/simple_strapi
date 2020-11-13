@@ -55,7 +55,7 @@ class BusinessStaff {
     };
   }
 
-  _fromJson(Map<String, dynamic> j) {
+  void _fromJson(Map<String, dynamic> j) {
     role = EnumToString.fromString(UserType.values, j["role"]);
     name = j["name"];
     dateOfJoining = (j["dateOfJoining"] as Timestamp).toDate();

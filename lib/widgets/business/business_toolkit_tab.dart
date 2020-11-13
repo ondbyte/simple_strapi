@@ -191,7 +191,7 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
                           0
                       ? businessStore
                           .business.selectedBranch.value.images.keys.elementAt(0)
-                      : kTemporaryBusinessImage,
+                      : kTemporaryPlaceHolderImage,
                   height: 80,
                   width: 80,
                 ),

@@ -31,7 +31,7 @@ class BusinessTileBigWidget extends StatelessWidget {
                     FirebaseStorageImage(
                       storagePathOrURL: branch.images.isNotEmpty
                           ? branch.images.keys.elementAt(0)
-                          : kTemporaryBusinessImage,
+                          : kTemporaryPlaceHolderImage,
                     ),
                     Padding(
                       padding: const EdgeInsets.only(left: 16, bottom: 8),

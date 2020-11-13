@@ -82,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
               maxLines: 2,
               style: Theme.of(context).textTheme.bodyText1,
             ),
-            SizedBox(
+            const SizedBox(
               height: 20,
             ),
             InternationalPhoneNumberInput(
@@ -233,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           autoFocus: true,
                           enablePinAutofill: true,
                           textStyle: Theme.of(context).textTheme.headline1,
-                          backgroundColor: Theme.of(context).backgroundColor,
+                          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                           pinTheme: PinTheme(
                             activeColor: Theme.of(context).primaryColor,
                             selectedColor: Theme.of(context).primaryColor,

@@ -63,7 +63,7 @@ class _BusinessManageBranchesScreenState
                     leading: ListTileFirebaseImage(
                       storagePathOrURL: branches[i].images.isNotEmpty
                           ? branches[i].images.keys.elementAt(0)
-                          : kTemporaryBusinessImage,
+                          : kTemporaryPlaceHolderImage,
                     ),
                     title: Text(branches[i].name.value),
                     subtitle: Text(removeNewLines(branches[i].address.value)),

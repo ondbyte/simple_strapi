@@ -19,7 +19,7 @@ final kPrivacy = "https://example.com";
 ///currently uses the one from bapp not bapp-dev
 final kMapsKey = "AIzaSyDp-XSgu-pZdyYRgyLdasTR1FEid_Lh_dA";
 
-final kTemporaryBusinessImage = "assets/svg/ico-spa.svg";
+final kTemporaryPlaceHolderImage = "assets/svg/ico-spa.svg";
 final kTemporaryBusinessImageStorageRefPath = "download.jpeg";
 
 final kUUIDGen = Uuid();

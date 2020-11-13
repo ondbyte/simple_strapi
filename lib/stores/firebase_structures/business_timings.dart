@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:bapp/config/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
+import 'package:bapp/helpers/extensions.dart';
 
 class BusinessTimings {
   final allDayTimings = Observable(ObservableList<DayTiming>());
@@ -17,13 +19,13 @@ class BusinessTimings {
     );
   }
 
-  BusinessTimings.empty(){
+  BusinessTimings.empty() {
     allDayTimings.value.addAll(kDays.map((e) => DayTiming({}, dayName: e)));
     _sort();
   }
 
-  BusinessTimings.fromJson(Map<String,dynamic> j) {
-    if (j!=null) {
+  BusinessTimings.fromJson(Map<String, dynamic> j) {
+    if (j != null) {
       j.forEach(
         (key, value) {
           allDayTimings.value.add(
@@ -35,9 +37,9 @@ class BusinessTimings {
     _sort();
   }
 
-  _sort(){
+  _sort() {
     allDayTimings.value.sort(
-          (a, b) {
+      (a, b) {
         final aa = kDays.indexOf(a.dayName);
         final bb = kDays.indexOf(b.dayName);
         if (aa > bb) {
@@ -97,8 +99,13 @@ class FromToTiming {
   }
 
   FromToTiming.fromDates({DateTime from, DateTime to}) {
-    this.from = from;
-    this.to = to;
+    from = from;
+    to = to;
+  }
+
+  FromToTiming.fromTimeStamps({Timestamp from, Timestamp to}) {
+    this.from = from.toDate();
+    this.to = to.toDate();
   }
 
   String toJson() {
@@ -106,5 +113,64 @@ class FromToTiming {
       from.toIso8601String(),
       to.toIso8601String(),
     ]);
+  }
+
+  FromToTiming.today() {
+    final now = DateTime.now();
+    from = DateTime(now.year, now.month, now.day);
+    to = from.add(const Duration(days: 1));
+  }
+
+  List<FromToTiming> splitInto({int stepMinutes}) {
+    final step = Duration(minutes: stepMinutes);
+    final list = <FromToTiming>[];
+    while (true) {
+      final f = from;
+      final t = from.add(step);
+      if (t.isBefore(to)) {
+        list.add(FromToTiming.fromDates(from: f, to: t));
+      } else {
+        break;
+      }
+    }
+    return list;
+  }
+
+  List<FromToTiming> punchHoles(List<FromToTiming> timings) {
+    final list = <FromToTiming>[];
+  }
+
+  List<FromToTiming> punchHole(FromToTiming timing) {
+    final list = <TimeOfDay>[];
+    var _from = from.toTimeOfDay();
+    var _to = to.toTimeOfDay();
+    var _otherFrom = timing.from.toTimeOfDay();
+    var _otherTo = timing.to.toTimeOfDay();
+    if (_from.isSame(_otherFrom)) {
+      if (_to.isSame(_otherTo)) {
+        return [];
+      }
+      return [
+        FromToTiming.fromDates(
+            from: _otherTo.toDateAndTime(), to: _to.toDateAndTime())
+      ];
+    } else {
+      if (_to.isSame(_otherTo)) {
+        [
+          FromToTiming.fromDates(
+              from: _from.toDateAndTime(), to: _otherFrom.toDateAndTime())
+        ];
+      }
+      return [
+        FromToTiming.fromDates(
+          from: _from.toDateAndTime(),
+          to: _otherFrom.toDateAndTime(),
+        ),
+        FromToTiming.fromDates(
+          from: _otherTo.toDateAndTime(),
+          to: _to.toDateAndTime(),
+        )
+      ];
+    }
   }
 }

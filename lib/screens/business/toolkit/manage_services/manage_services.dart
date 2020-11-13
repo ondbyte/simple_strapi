@@ -133,7 +133,7 @@ class _BusinessServicesTabState extends State<BusinessServicesTab>
                               : service.category.value.images.isNotEmpty
                                   ? service.category.value.images.keys
                                       .elementAt(0)
-                                  : kTemporaryBusinessImage,
+                                  : kTemporaryPlaceHolderImage,
                         ),
                         trailing: IconButton(
                           icon: Icon(Icons.delete_forever),
@@ -197,7 +197,7 @@ class _BusinessServiceCategoriesTabState
                             leading: ListTileFirebaseImage(
                               storagePathOrURL: t.images.isNotEmpty
                                   ? t.images.keys.elementAt(0)
-                                  : kTemporaryBusinessImage,
+                                  : kTemporaryPlaceHolderImage,
                             ),
                             trailing: IconButton(
                               icon: Icon(Icons.delete_forever),
