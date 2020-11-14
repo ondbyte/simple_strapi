@@ -6,7 +6,6 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:time_range_picker/time_range_picker.dart';
-import 'package:mobx/mobx.dart';
 
 class BusinessTimingsScreen extends StatefulWidget {
   @override
@@ -32,8 +31,8 @@ class _BusinessTimingsScreenState extends State<BusinessTimingsScreen> {
           builder: (_, businessStore, __) {
             return Observer(
               builder: (_) {
-                final timings = businessStore
-                    .business.selectedBranch.value.businessTimings.value.allDayTimings.value;
+                final timings = businessStore.business.selectedBranch.value
+                    .businessTimings.value.allDayTimings;
                 return CustomScrollView(
                   slivers: [
                     SliverPadding(
@@ -148,14 +147,16 @@ class _DayTimingsWidgetState extends State<DayTimingsWidget> {
                       child: IconButton(
                         icon: Icon(Icons.add_circle_outline),
                         onPressed: () {
-                          act(() {
-                            widget.dayTiming.timings.value.add(
-                              FromToTiming.fromDates(
-                                from: DateTime(2020, 1, 1, 9, 0, 0, 0, 0),
-                                to: DateTime(2020, 1, 1, 18, 0, 0, 0, 0),
-                              ),
-                            );
-                          });
+                          act(
+                            () {
+                              widget.dayTiming.timings.value.add(
+                                FromToTiming.fromDates(
+                                  from: DateTime(2020, 1, 1, 9, 0, 0, 0, 0),
+                                  to: DateTime(2020, 1, 1, 18, 0, 0, 0, 0),
+                                ),
+                              );
+                            },
+                          );
                         },
                       ),
                     );

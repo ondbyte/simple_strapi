@@ -1,57 +1,29 @@
-import 'package:bapp/config/config.dart';
-import 'package:bapp/stores/cloud_store.dart';
-import 'package:bapp/widgets/login_widget.dart';
+import 'package:bapp/stores/booking_flow.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-class BookingsTab extends StatefulWidget {
+class SelectTimeSlotScreen extends StatefulWidget {
   @override
-  _BookingsTabState createState() => _BookingsTabState();
+  _SelectTimeSlotScreenState createState() => _SelectTimeSlotScreenState();
 }
 
-class _BookingsTabState extends State<BookingsTab> {
-  Map<DateTime, List<String>> _bookings = {};
-  Map<DateTime, List<String>> _holidays = {};
-  CalendarController _calendarController = CalendarController();
-  DateTime _selectedDay = DateTime.now();
-
-  @override
-  void dispose() {
-    _calendarController.dispose();
-    super.dispose();
-  }
-
+class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<CloudStore>(
-      builder: (_, cloudStore, __) {
-        return Observer(
-          builder: (_) {
-            return cloudStore.status == AuthStatus.anonymousUser
-                ? AskToLoginWidget(
-                    loginReason: LoginConfig.bookingTabLoginReason.primary,
-                    secondaryReason:
-                        LoginConfig.bookingTabLoginReason.secondary,
-                  )
-                : CustomScrollView(
-                    slivers: <Widget>[
-                      SliverList(
-                        delegate: SliverChildListDelegate([
-                          _buildTableCalendar(),
-                        ]),
-                      )
-                    ],
-                  );
-          },
-        );
-      },
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Select Timeslot"),
+      ),
+      body: Column(
+        children: [_getTableCalender()],
+      ),
     );
   }
 
-  Widget _buildTableCalendar() {
+  var _calendarController = CalendarController();
+  Widget _getTableCalender() {
     return TableCalendar(
       headerStyle: HeaderStyle(
           leftChevronIcon: Icon(FeatherIcons.chevronLeft,
@@ -61,8 +33,7 @@ class _BookingsTabState extends State<BookingsTab> {
       initialCalendarFormat: CalendarFormat.week,
       availableCalendarFormats: {CalendarFormat.week: 'Week'},
       calendarController: _calendarController,
-      events: _bookings,
-      holidays: _holidays,
+      holidays: _getHildays(),
       startingDayOfWeek: StartingDayOfWeek.sunday,
       calendarStyle: CalendarStyle(
           todayColor: Colors.transparent,
@@ -77,12 +48,18 @@ class _BookingsTabState extends State<BookingsTab> {
           selectedColor: Theme.of(context).primaryColor.withOpacity(0.5),
           markersMaxAmount: 1),
       onDaySelected: (day, events, __) {
-        _selectedDay = day;
+        _calendarController.setSelectedDay(day);
       },
       onVisibleDaysChanged: (_, __, ___) {},
       onCalendarCreated: (_, __, ___) {
-        _calendarController.setSelectedDay(_selectedDay);
+        _calendarController.setSelectedDay(flow.timeWindow.value.from);
       },
     );
   }
+
+  Map<DateTime, List> _getHildays() {
+    return {};
+  }
+
+  BookingFlow get flow => Provider.of<BookingFlow>(context);
 }

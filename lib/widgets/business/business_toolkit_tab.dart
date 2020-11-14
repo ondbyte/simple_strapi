@@ -3,12 +3,8 @@ import 'package:bapp/config/constants.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/firebase_structures/business_branch.dart';
-import 'package:bapp/widgets/business/business_branch_switch.dart';
 import 'package:bapp/widgets/firebase_image.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:expandable/expandable.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -55,8 +51,8 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
         delegate: SliverChildListDelegate(
           [
             Theme(
-              data: Theme.of(context)
-                  .copyWith(cardColor: Theme.of(context).backgroundColor),
+              data: Theme.of(context).copyWith(
+                  cardColor: Theme.of(context).scaffoldBackgroundColor),
               child: ExpansionPanelList(
                 elevation: 0,
                 dividerColor: Colors.transparent,
@@ -89,7 +85,8 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
                     },
                     body: LayoutBuilder(
                       builder: (_, cons) {
-                        return SizedBox(
+                        return Container(
+                          color: Theme.of(context).scaffoldBackgroundColor,
                           height: cons.maxWidth /
                               3 *
                               (BusinessExpandingPanelConfigs
@@ -97,34 +94,29 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
                                       3)
                                   .ceil(),
                           width: cons.maxWidth,
-                          child: Container(
-                            color: Theme.of(context).backgroundColor,
-                            child: GridView.count(
-                              crossAxisSpacing: 16,
-                              mainAxisSpacing: 16,
-                              physics: const NeverScrollableScrollPhysics(),
-                              crossAxisCount: 3,
-                              children: List.generate(
-                                BusinessExpandingPanelConfigs
-                                    .cfgs[i].tiles.length,
-                                (index) => _getTile(
-                                  context: context,
-                                  name: BusinessExpandingPanelConfigs
-                                      .cfgs[i].tiles[index].name,
-                                  icon: Icon(BusinessExpandingPanelConfigs
-                                      .cfgs[i].tiles[index].iconData),
-                                  onClick: BusinessExpandingPanelConfigs
-                                          .cfgs[i].tiles[index].enabled
-                                      ? () {
-                                          Navigator.of(context).pushNamed(
-                                            BusinessExpandingPanelConfigs
-                                                .cfgs[i]
-                                                .tiles[index]
-                                                .onClickRoute,
-                                          );
-                                        }
-                                      : null,
-                                ),
+                          child: GridView.count(
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                            physics: const NeverScrollableScrollPhysics(),
+                            crossAxisCount: 3,
+                            children: List.generate(
+                              BusinessExpandingPanelConfigs
+                                  .cfgs[i].tiles.length,
+                              (index) => _getTile(
+                                context: context,
+                                name: BusinessExpandingPanelConfigs
+                                    .cfgs[i].tiles[index].name,
+                                icon: Icon(BusinessExpandingPanelConfigs
+                                    .cfgs[i].tiles[index].iconData),
+                                onClick: BusinessExpandingPanelConfigs
+                                        .cfgs[i].tiles[index].enabled
+                                    ? () {
+                                        Navigator.of(context).pushNamed(
+                                          BusinessExpandingPanelConfigs.cfgs[i]
+                                              .tiles[index].onClickRoute,
+                                        );
+                                      }
+                                    : null,
                               ),
                             ),
                           ),
@@ -186,11 +178,11 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
               leading: ClipRRect(
                 borderRadius: BorderRadius.circular(6),
                 child: FirebaseStorageImage(
-                  storagePathOrURL: businessStore.business.selectedBranch.value
-                              .images.length >
+                  storagePathOrURL: businessStore
+                              .business.selectedBranch.value.images.length >
                           0
-                      ? businessStore
-                          .business.selectedBranch.value.images.keys.elementAt(0)
+                      ? businessStore.business.selectedBranch.value.images.keys
+                          .elementAt(0)
                       : kTemporaryPlaceHolderImage,
                   height: 80,
                   width: 80,

@@ -1,16 +1,16 @@
 import 'dart:convert';
 
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
-import 'package:bapp/helpers/extensions.dart';
 
 class BusinessTimings {
-  final allDayTimings = Observable(ObservableList<DayTiming>());
+  final allDayTimings = ObservableList<DayTiming>();
 
   Map<String, dynamic> toMap() {
-    return allDayTimings.value.fold(
+    return allDayTimings.fold(
       {},
       (previousValue, dt) {
         previousValue.addAll({dt.dayName: dt.toMap()});
@@ -20,7 +20,7 @@ class BusinessTimings {
   }
 
   BusinessTimings.empty() {
-    allDayTimings.value.addAll(kDays.map((e) => DayTiming({}, dayName: e)));
+    allDayTimings.addAll(kDays.map((e) => DayTiming({}, dayName: e)));
     _sort();
   }
 
@@ -28,7 +28,7 @@ class BusinessTimings {
     if (j != null) {
       j.forEach(
         (key, value) {
-          allDayTimings.value.add(
+          allDayTimings.add(
             DayTiming(value, dayName: key),
           );
         },
@@ -38,7 +38,7 @@ class BusinessTimings {
   }
 
   _sort() {
-    allDayTimings.value.sort(
+    allDayTimings.sort(
       (a, b) {
         final aa = kDays.indexOf(a.dayName);
         final bb = kDays.indexOf(b.dayName);
@@ -99,8 +99,8 @@ class FromToTiming {
   }
 
   FromToTiming.fromDates({DateTime from, DateTime to}) {
-    from = from;
-    to = to;
+    this.from = from;
+    this.to = to;
   }
 
   FromToTiming.fromTimeStamps({Timestamp from, Timestamp to}) {
