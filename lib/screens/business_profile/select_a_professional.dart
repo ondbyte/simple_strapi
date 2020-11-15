@@ -1,5 +1,7 @@
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/screens/business_profile/select_time_slot.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/firebase_structures/business_timings.dart';
 import 'package:bapp/widgets/firebase_image.dart';
@@ -72,7 +74,7 @@ class _SelectAProfessionalScreenState extends State<SelectAProfessionalScreen> {
                 act(() {
                   flow.professional.value = s;
                 });
-                //BappNavigator.bappPush(context, routeWidget)
+                BappNavigator.bappPush(context, SelectTimeSlotScreen());
               },
               contentPadding: EdgeInsets.symmetric(vertical: 8),
               title: Text(s.staff.name),

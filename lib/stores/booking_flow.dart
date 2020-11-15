@@ -21,6 +21,7 @@ class BookingFlow {
   final filteredStaffs = ObservableList<FilteredBusinessStaff>();
   final _bookings = ObservableList<BusinessBooking>();
   final timeWindow = Observable<FromToTiming>(null);
+  final holidays = ObservableMap<DateTime, List>();
 
   final List<ReactionDisposer> _disposers = [];
 
@@ -106,13 +107,29 @@ class BookingFlow {
     return branch.staff.firstWhere((s) => s.name == name);
   }
 
+  void _getHolidays() {
+    final hs = branch.businessHolidays.value.all;
+    holidays.clear();
+    hs.forEach((bh) {
+      if (bh.enabled.value) {
+        bh.dates.forEach((date) {
+          holidays.addAll({
+            date: [bh.name]
+          });
+        });
+      }
+    });
+  }
+
   void _setupReactions() {
     _disposers.add(
       reaction(
         (_) => _branch,
         (_) {
           services.clear();
-          if (_branch.value != null) {}
+          if (_branch.value != null) {
+            _getHolidays();
+          }
         },
       ),
     );
