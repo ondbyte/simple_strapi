@@ -38,8 +38,8 @@ extension DateTimeOfDay on TimeOfDay {
   }
 
   int compareTo(TimeOfDay timeOfDay) {
-    final other = timeOfDay.hour + timeOfDay.minute / 60.0;
-    final thiss = this.hour + this.minute / 60.0;
+    final other = timeOfDay.hour * 60 + timeOfDay.minute;
+    final thiss = this.hour * 60 + this.minute;
     if (thiss < other) {
       return -1;
     } else if (thiss == other) {
@@ -84,6 +84,14 @@ extension TimeOfDayDateAndTime on DateTime {
 
   Timestamp toTimeStamp() {
     return Timestamp.fromDate(this);
+  }
+
+  bool isDay(DateTime dt) {
+    return day == dt.day && month == dt.month;
+  }
+
+  DateTime toDay(DateTime dt) {
+    return DateTime(dt.year, dt.month, dt.day, hour, minute);
   }
 }
 

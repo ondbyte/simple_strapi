@@ -4,6 +4,7 @@ import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:mobx/mobx.dart';
 
 class BusinessTimings {
@@ -17,6 +18,13 @@ class BusinessTimings {
         return previousValue;
       },
     );
+  }
+
+  List<FromToTiming> getForDay(DateTime day) {
+    final todayName = DateFormat(DateFormat.WEEKDAY).format(day).toLowerCase();
+    final todayTimings =
+        allDayTimings.firstWhere((dt) => dt.dayName == todayName);
+    return todayTimings.timings.value.toList();
   }
 
   BusinessTimings.empty() {
@@ -116,22 +124,38 @@ class FromToTiming {
   }
 
   FromToTiming.today() {
-    final now = DateTime.now();
-    from = DateTime(now.year, now.month, now.day);
+    _forDay(DateTime.now());
+  }
+
+  FromToTiming.forDay(DateTime day) {
+    _forDay(day);
+  }
+
+  _forDay(DateTime day) {
+    from = DateTime(day.year, day.month, day.day);
     to = from.add(const Duration(days: 1));
   }
 
-  List<FromToTiming> splitInto({int stepMinutes}) {
+  List<FromToTiming> splitInto({
+    int stepMinutes,
+    int durationPadding = 0,
+  }) {
+    final padding = Duration(minutes: durationPadding);
     final step = Duration(minutes: stepMinutes);
     final list = <FromToTiming>[];
-    while (true) {
-      final f = from;
-      final t = from.add(step);
-      if (t.isBefore(to)) {
+    var shouldGoAhead = true;
+    var f = from;
+    var t = from.add(step);
+    while (shouldGoAhead) {
+      final end = t.toTimeOfDay();
+      if ((end.isBefore(to.toTimeOfDay()) || end.isSame(to.toTimeOfDay())) &&
+          !f.add(padding).toTimeOfDay().isAfter(to.toTimeOfDay())) {
         list.add(FromToTiming.fromDates(from: f, to: t));
       } else {
-        break;
+        shouldGoAhead = false;
       }
+      f = f.add(step);
+      t = t.add(step);
     }
     return list;
   }

@@ -35,6 +35,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
             onPressed: flow.services.isEmpty
                 ? null
                 : () async {
+                    flow.getBookings();
                     await BappNavigator.bappPush(
                         context, SelectAProfessionalScreen());
                   },
