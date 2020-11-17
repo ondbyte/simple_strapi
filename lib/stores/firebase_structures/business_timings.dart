@@ -152,13 +152,17 @@ class FromToTiming {
       }
       return [
         FromToTiming.fromDates(
-            from: _otherTo.toDateAndTime(), to: _to.toDateAndTime())
+          from: _otherTo.toDateAndTime(),
+          to: _to.toDateAndTime(),
+        )
       ];
     } else {
       if (_to.isSame(_otherTo)) {
         [
           FromToTiming.fromDates(
-              from: _from.toDateAndTime(), to: _otherFrom.toDateAndTime())
+            from: _from.toDateAndTime(),
+            to: _otherFrom.toDateAndTime(),
+          )
         ];
       }
       return [
