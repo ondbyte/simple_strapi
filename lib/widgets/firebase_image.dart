@@ -29,7 +29,7 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
-      builder: (_,cons) {
+      builder: (_, cons) {
         return widget.storagePathOrURL.endsWith("svg")
             ? widget.circular
                 ? CircleAvatar(
@@ -38,8 +38,8 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
                 : SvgPicture.asset(
                     widget.storagePathOrURL,
                     fit: BoxFit.contain,
-                    width: widget.width??cons.maxWidth,
-                    height: widget.height??cons.maxHeight,
+                    width: widget.width ?? cons.maxWidth,
+                    height: widget.height ?? cons.maxHeight,
                   )
             : FutureBuilder<String>(
                 future: () async {
@@ -55,30 +55,38 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
                 builder: (_, snap) {
                   if (snap.hasData) {
                     if (widget.circular) {
-                      return CircleAvatar(
-                        backgroundImage: CachedNetworkImageProvider(
-                          snap.data,
+                      return SizedBox(
+                        height: widget.height,
+                        width: widget.width,
+                        child: CircleAvatar(
+                          backgroundImage: CachedNetworkImageProvider(
+                            snap.data,
+                          ),
                         ),
                       );
                     } else {
                       return CachedNetworkImage(
                         imageUrl: snap.data,
                         fit: widget.fit,
-                        width: widget.width??cons.maxWidth,
-                        height: widget.height??cons.maxHeight,
+                        width: widget.width ?? cons.maxWidth,
+                        height: widget.height ?? cons.maxHeight,
                       );
                     }
                   }
                   if (widget.circular) {
-                    return CircleAvatar(
-                      backgroundImage: svg.Svg(kTemporaryPlaceHolderImage),
+                    return SizedBox(
+                      height: widget.height,
+                      width: widget.width,
+                      child: CircleAvatar(
+                        backgroundImage: svg.Svg(kTemporaryPlaceHolderImage),
+                      ),
                     );
                   }
                   return SvgPicture.asset(
                     kTemporaryPlaceHolderImage,
                     fit: BoxFit.contain,
-                    width: widget.width??cons.maxWidth,
-                    height: widget.height??cons.maxHeight,
+                    width: widget.width ?? cons.maxWidth,
+                    height: widget.height ?? cons.maxHeight,
                   );
                 },
               );
@@ -89,13 +97,17 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
 
 class ListTileFirebaseImage extends StatelessWidget {
   final String storagePathOrURL;
+  final bool circular;
 
-  const ListTileFirebaseImage({Key key, this.storagePathOrURL}) : super(key: key);
+  const ListTileFirebaseImage(
+      {Key key, this.storagePathOrURL, this.circular = false})
+      : super(key: key);
   @override
   Widget build(BuildContext context) {
     return RRFirebaseStorageImage(
       height: 64,
       width: 64,
+      circular: circular,
       storagePathOrURL: storagePathOrURL,
     );
   }
@@ -103,9 +115,12 @@ class ListTileFirebaseImage extends StatelessWidget {
 
 class RRFirebaseStorageImage extends StatelessWidget {
   final String storagePathOrURL;
-  final double width,height;
+  final double width, height;
+  final bool circular;
 
-  const RRFirebaseStorageImage({Key key, this.storagePathOrURL, this.width, this.height}) : super(key: key);
+  const RRFirebaseStorageImage(
+      {Key key, this.storagePathOrURL, this.width, this.height, this.circular})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -114,10 +129,9 @@ class RRFirebaseStorageImage extends StatelessWidget {
       child: FirebaseStorageImage(
         width: width,
         height: height,
+        circular: circular,
         storagePathOrURL: storagePathOrURL,
       ),
     );
   }
 }
-
-

@@ -76,10 +76,7 @@ class _BookingsTabState extends State<BookingsTab> {
           markersColor: Theme.of(context).accentColor,
           selectedColor: Theme.of(context).primaryColor.withOpacity(0.5),
           markersMaxAmount: 1),
-      onDaySelected: (
-        day,
-        events,__
-      ) {
+      onDaySelected: (day, events, __) {
         _selectedDay = day;
       },
       onVisibleDaysChanged: (_, __, ___) {},

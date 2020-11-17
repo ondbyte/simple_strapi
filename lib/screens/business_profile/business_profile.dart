@@ -1,6 +1,8 @@
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/extensions.dart' show BappNavigator;
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
+import 'package:bapp/screens/business_profile/select_a_professional.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/widgets/firebase_image.dart';
 import 'package:bapp/widgets/tabs/business_profile/services_tab.dart';
@@ -30,7 +32,13 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
             subTitle: flow.selectedSubTitle.value.isNotEmpty
                 ? flow.selectedSubTitle.value
                 : null,
-            onPressed: flow.services.isEmpty ? null : () {},
+            onPressed: flow.services.isEmpty
+                ? null
+                : () async {
+                    flow.getBookings();
+                    await BappNavigator.bappPush(
+                        context, SelectAProfessionalScreen());
+                  },
           );
         },
       ),
