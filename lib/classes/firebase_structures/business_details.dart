@@ -1,17 +1,10 @@
-import 'dart:typed_data';
-
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
-import 'package:bapp/stores/firebase_structures/business_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:mobx/mobx.dart';
-import 'package:multi_image_picker/multi_image_picker.dart';
 
 import 'business_branch.dart';
 import 'business_category.dart';
-import 'business_holidays.dart';
-import 'business_timings.dart';
 
 class BusinessDetails {
   final category = Observable<BusinessCategory>(null);
@@ -89,7 +82,10 @@ class BusinessDetails {
       this.branches.value =
           tmp.map((e) => BusinessBranch(myDoc: e, business: this)).toList();
     }
-    this.selectedBranch.value = this.branches.value.firstWhere((b) => b.myDoc.value==j["selectedBranch"]);
+    this.selectedBranch.value = this
+        .branches
+        .value
+        .firstWhere((b) => b.myDoc.value == j["selectedBranch"]);
     this.email.value = j["email"];
     this.myDoc.value = j["myDoc"];
 

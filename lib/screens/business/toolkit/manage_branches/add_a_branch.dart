@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:bapp/stores/business_store.dart';
-import 'package:bapp/widgets/add_image_sliver.dart';
+import 'package:bapp/widgets/tiles/add_image_sliver.dart';
 import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/shake_widget.dart';
 import 'package:bapp/widgets/store_provider.dart';

@@ -1,9 +1,10 @@
 import 'package:bapp/helpers/helper.dart';
-import 'package:bapp/stores/firebase_structures/business_details.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
+
+import 'business_details.dart';
 
 class BusinessServices {
   final BusinessDetails business;

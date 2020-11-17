@@ -1,10 +1,8 @@
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/stores/business_store.dart';
-import 'package:bapp/stores/firebase_structures/business_services.dart';
-import 'package:bapp/widgets/add_image_sliver.dart';
-import 'package:bapp/widgets/buttons.dart';
 import 'package:bapp/widgets/loading_stack.dart';
+import 'package:bapp/widgets/tiles/add_image_sliver.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -36,9 +34,9 @@ class _BusinessAddServiceCategoryScreenState
             _name = _name.trim();
             _description = _description.trim();
             final business =
-                Provider.of<BusinessStore>(context, listen: false)
-                    .business;
-            if (business.selectedBranch.value.businessServices.value.allCategories
+                Provider.of<BusinessStore>(context, listen: false).business;
+            if (business
+                .selectedBranch.value.businessServices.value.allCategories
                 .any((c) => c.categoryName.value == _name)) {
               Flushbar(
                 message: "That category exists",
@@ -48,16 +46,17 @@ class _BusinessAddServiceCategoryScreenState
               ).show(context);
               return;
             }
-            act((){
+            act(() {
               kLoading.value = true;
             });
-            await business.selectedBranch.value.businessServices.value.addACategory(
+            await business.selectedBranch.value.businessServices.value
+                .addACategory(
               categoryName: _name,
               description: _description,
               images: _image,
             );
             Navigator.of(context).pop();
-            act((){
+            act(() {
               kLoading.value = false;
             });
           },
@@ -75,7 +74,7 @@ class _BusinessAddServiceCategoryScreenState
                         children: [
                           TextFormField(
                             decoration:
-                            InputDecoration(labelText: "Category name"),
+                                InputDecoration(labelText: "Category name"),
                             onChanged: (s) {
                               _name = s;
                             },
@@ -90,7 +89,8 @@ class _BusinessAddServiceCategoryScreenState
                             height: 20,
                           ),
                           TextFormField(
-                            decoration: InputDecoration(labelText: "Description"),
+                            decoration:
+                                InputDecoration(labelText: "Description"),
                             onChanged: (s) {
                               _description = s;
                             },

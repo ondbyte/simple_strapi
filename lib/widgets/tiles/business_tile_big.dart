@@ -1,5 +1,5 @@
+import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/config/constants.dart';
-import 'package:bapp/stores/firebase_structures/business_branch.dart';
 import 'package:flutter/material.dart';
 
 import '../firebase_image.dart';

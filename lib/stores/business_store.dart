@@ -1,3 +1,5 @@
+import 'package:bapp/classes/firebase_structures/business_category.dart';
+import 'package:bapp/classes/firebase_structures/business_details.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:bapp/stores/cloud_store.dart';
@@ -6,9 +8,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
-
-import 'firebase_structures/business_category.dart';
-import 'firebase_structures/business_details.dart';
 
 part 'business_store.g.dart';
 

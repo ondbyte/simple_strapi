@@ -1,16 +1,16 @@
+import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
-import 'package:bapp/stores/firebase_structures/business_branch.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
-import 'search_bar.dart';
-import 'store_provider.dart';
+import '../search_bar.dart';
+import '../store_provider.dart';
 
 class DiscoverTab extends StatefulWidget {
   @override

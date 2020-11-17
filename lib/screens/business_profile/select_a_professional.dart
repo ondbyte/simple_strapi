@@ -1,9 +1,9 @@
+import 'package:bapp/classes/firebase_structures/business_timings.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business_profile/select_time_slot.dart';
 import 'package:bapp/stores/booking_flow.dart';
-import 'package:bapp/stores/firebase_structures/business_timings.dart';
 import 'package:bapp/widgets/firebase_image.dart';
 import 'package:bapp/widgets/tiles/rr_list_tile.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';

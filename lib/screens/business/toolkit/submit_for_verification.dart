@@ -1,15 +1,15 @@
 import 'dart:io';
 
+import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/stores/business_store.dart';
-import 'package:bapp/stores/firebase_structures/business_branch.dart';
-import 'package:bapp/widgets/add_image_sliver.dart';
 import 'package:bapp/widgets/buttons.dart';
 import 'package:bapp/widgets/loading_stack.dart';
 import 'package:bapp/widgets/padded_text.dart';
+import 'package:bapp/widgets/tiles/add_image_sliver.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
