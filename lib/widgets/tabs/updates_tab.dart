@@ -1,11 +1,6 @@
-import 'dart:math';
-
-import 'package:bapp/classes/feedback.dart';
 import 'package:bapp/classes/notification_update.dart';
 import 'package:bapp/config/config.dart' hide Tab;
-import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/updates_store.dart';
-import 'package:bapp/widgets/undo_widget.dart';
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
@@ -13,9 +8,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
-import 'loading.dart';
-import 'login_widget.dart';
-import 'store_provider.dart';
+import '../store_provider.dart';
 
 class UpdatesTab extends StatefulWidget {
   @override
@@ -99,14 +92,14 @@ class _UpdatesTabState extends State<UpdatesTab> {
   Widget _getEmpty() {
     return Center(
       child: OrientationBuilder(
-        builder: (_,o){
+        builder: (_, o) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SvgPicture.asset(
                 "assets/svg/empty-list.svg",
-                width: o==Orientation.landscape?100: 300,
+                width: o == Orientation.landscape ? 100 : 300,
               ),
               SizedBox(
                 height: 10,

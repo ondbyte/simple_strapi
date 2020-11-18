@@ -1,12 +1,13 @@
 import 'package:bapp/config/config_data_types.dart';
-import 'package:bapp/stores/firebase_structures/business_branch.dart';
-import 'package:bapp/stores/firebase_structures/business_details.dart';
-import 'package:bapp/stores/firebase_structures/business_services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mobx/mobx.dart';
 import 'package:thephonenumber/thephonenumber.dart';
+
+import 'business_branch.dart';
+import 'business_details.dart';
+import 'business_services.dart';
 
 class BusinessStaff {
   UserType role;

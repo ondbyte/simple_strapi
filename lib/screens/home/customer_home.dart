@@ -1,11 +1,10 @@
 import 'package:bapp/config/config.dart';
-import 'package:bapp/widgets/bapp_bar.dart';
-import 'package:bapp/widgets/bookings_tab.dart';
-import 'package:bapp/widgets/discover_tab.dart';
-import 'package:bapp/widgets/favorites_tab.dart';
 import 'package:bapp/widgets/location_label.dart';
 import 'package:bapp/widgets/menu.dart';
-import 'package:bapp/widgets/updates_tab.dart';
+import 'package:bapp/widgets/tabs/bookings_tab.dart';
+import 'package:bapp/widgets/tabs/discover_tab.dart';
+import 'package:bapp/widgets/tabs/favorites_tab.dart';
+import 'package:bapp/widgets/tabs/updates_tab.dart';
 import 'package:flutter/material.dart';
 
 class CustomerHome extends StatefulWidget {

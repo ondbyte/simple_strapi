@@ -1,4 +1,4 @@
-import 'package:bapp/stores/firebase_structures/business_category.dart';
+import 'package:bapp/classes/firebase_structures/business_category.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 

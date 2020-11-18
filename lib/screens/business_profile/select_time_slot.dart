@@ -1,8 +1,8 @@
+import 'package:bapp/classes/firebase_structures/business_timings.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/stores/booking_flow.dart';
-import 'package:bapp/stores/firebase_structures/business_timings.dart';
 import 'package:bapp/widgets/bapp_calendar.dart';
 import 'package:bapp/widgets/tiles/rr_list_tile.dart';
 import 'package:flutter/foundation.dart';
@@ -30,7 +30,11 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
       bottomNavigationBar: Observer(builder: (_) {
         return BottomPrimaryButton(
           label: "Confirm booking",
-          onPressed: flow.slot.value == null ? null : () {},
+          onPressed: flow.slot.value == null
+              ? null
+              : () async {
+                  await flow.done();
+                },
         );
       }),
       body: DefaultTabController(

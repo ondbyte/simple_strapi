@@ -1,20 +1,16 @@
-import 'package:bapp/FCM.dart';
+import 'package:bapp/classes/firebase_structures/business_services.dart';
+import 'package:bapp/classes/firebase_structures/business_staff.dart';
 import 'package:bapp/config/config_data_types.dart';
-import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
-import 'package:bapp/stores/firebase_structures/business_services.dart';
-import 'package:bapp/stores/firebase_structures/business_staff.dart';
-import 'package:bapp/widgets/add_image_sliver.dart';
 import 'package:bapp/widgets/buttons.dart';
-import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/loading_stack.dart';
 import 'package:bapp/widgets/multiple_option_chips.dart';
 import 'package:bapp/widgets/shake_widget.dart';
+import 'package:bapp/widgets/tiles/add_image_sliver.dart';
 import 'package:enum_to_string/enum_to_string.dart';
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -57,7 +53,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                   delegate: SliverChildListDelegate(
                     [
                       DropdownButtonFormField<UserType>(
-                        value: _staff.role??null,
+                        value: _staff.role ?? null,
                         items: [
                           DropdownMenuItem(
                             child: Text(
@@ -108,7 +104,9 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                               _theNumber = ThePhoneNumberLib.parseNumber(
                                   internationalNumber: pn.phoneNumber);
                             },
-                            initialValue: PhoneNumber(phoneNumber: _theNumber?.internationalNumber??""),
+                            initialValue: PhoneNumber(
+                                phoneNumber:
+                                    _theNumber?.internationalNumber ?? ""),
                             onInputValidated: (b) async {
                               if (b != _numberValidated) {
                                 setState(() {
@@ -116,8 +114,8 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                                 });
                               }
                             },
-                            validator: (s){
-                              if(_numberValidated){
+                            validator: (s) {
+                              if (_numberValidated) {
                                 return null;
                               }
                               return "Enter a valid number";
@@ -195,7 +193,6 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                         firstDate: DateTime(2000),
                         initialDate: DateTime.now(),
                         lastDate: DateTime.now(),
-
                         onDateSubmitted: (date) {
                           _staff.dateOfJoining = date;
                         },
@@ -215,10 +212,10 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                                 labelText: "Select staff expertise",
                                 placeHolder: "No service categories",
                                 onAddPressed: () async {
-                                  await Navigator.of(context).pushNamed((RouteManager.businessAddAServiceCategoryScreen));
-                                  setState(() {
-
-                                  });
+                                  await Navigator.of(context).pushNamed(
+                                      (RouteManager
+                                          .businessAddAServiceCategoryScreen));
+                                  setState(() {});
                                 },
                                 itemLabel: (_, cat) {
                                   return cat.categoryName.value;
@@ -229,16 +226,15 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                                   }
                                   return null;
                                 },
-                                onSaved: (s) {
-                                },
+                                onSaved: (s) {},
                                 onChanged: (val) {
                                   selected.clear();
                                   selected.addAll(val);
                                   _staff.expertise.clear();
                                   _staff.expertise.addAll(val);
                                 },
-                                items: businessStore.business.selectedBranch.value.businessServices
-                                    .value.allCategories,
+                                items: businessStore.business.selectedBranch
+                                    .value.businessServices.value.allCategories,
                                 selectedItems: selected,
                               );
                             },
@@ -285,18 +281,26 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                               return;
                             }
                             final branch = Provider.of<BusinessStore>(context,
-                                listen: false)
+                                    listen: false)
                                 .business
                                 .selectedBranch
                                 .value;
-                            if(branch.staff.isNotEmpty&&branch.staff.any((s) => s?.name==_staff.name||s.contactNumber?.internationalNumber==_theNumber?.internationalNumber)){
-                              Flushbar(message: "That user details exists",duration: const Duration(seconds: 2),).show(context);
+                            if (branch.staff.isNotEmpty &&
+                                branch.staff.any((s) =>
+                                    s?.name == _staff.name ||
+                                    s.contactNumber?.internationalNumber ==
+                                        _theNumber?.internationalNumber)) {
+                              Flushbar(
+                                message: "That user details exists",
+                                duration: const Duration(seconds: 2),
+                              ).show(context);
                               return;
                             }
                             act(() {
                               kLoading.value = true;
                             });
-                            assert(_theNumber?.internationalNumber!=null,"number missing");
+                            assert(_theNumber?.internationalNumber != null,
+                                "number missing");
                             await branch.addAStaff(
                               userPhoneNumber: _theNumber,
                               name: _staff.name,
@@ -306,7 +310,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                               expertise: _staff.expertise,
                             );
                             Navigator.of(context).pop();
-                            act((){
+                            act(() {
                               kLoading.value = false;
                             });
                           }
@@ -503,7 +507,7 @@ class _BusinessAskUserForStaffingWidgetState
         )
       ],
     );
-  }*//*
+  }*/ /*
 
 
   Widget _onDeny(BusinessStore businessStore, CloudStore cloudStore) {

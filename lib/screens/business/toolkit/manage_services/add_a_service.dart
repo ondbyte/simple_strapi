@@ -1,10 +1,10 @@
+import 'package:bapp/classes/firebase_structures/business_services.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
-import 'package:bapp/stores/firebase_structures/business_services.dart';
-import 'package:bapp/widgets/add_image_sliver.dart';
 import 'package:bapp/widgets/buttons.dart';
 import 'package:bapp/widgets/loading_stack.dart';
+import 'package:bapp/widgets/tiles/add_image_sliver.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';

@@ -1,6 +1,6 @@
+import 'package:bapp/classes/firebase_structures/business_timings.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/business_store.dart';
-import 'package:bapp/stores/firebase_structures/business_timings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';

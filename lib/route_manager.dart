@@ -1,11 +1,11 @@
 import 'package:bapp/screens/business/addbusiness/choose_category.dart';
 import 'package:bapp/screens/business/addbusiness/thank_you_for_your_interest.dart';
 import 'package:bapp/screens/business/branch_chooser.dart';
-import 'package:bapp/screens/business/toolkit/manage_holidays/add_a_holiday.dart';
-import 'package:bapp/screens/business/toolkit/manage_holidays/holidays.dart';
 import 'package:bapp/screens/business/toolkit/manage_branches/add_a_branch.dart';
 import 'package:bapp/screens/business/toolkit/manage_branches/manage_branches.dart';
 import 'package:bapp/screens/business/toolkit/manage_contact.dart';
+import 'package:bapp/screens/business/toolkit/manage_holidays/add_a_holiday.dart';
+import 'package:bapp/screens/business/toolkit/manage_holidays/holidays.dart';
 import 'package:bapp/screens/business/toolkit/manage_media.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_category.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
@@ -21,7 +21,6 @@ import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/screens/onboarding/onboardingscreen.dart';
 import 'package:bapp/screens/search/show_results.dart';
 import 'package:bapp/screens/settings/settings.dart';
-import 'package:bapp/stores/firebase_structures/business_holidays.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -102,6 +101,7 @@ class RouteManager {
     print("route called: ${settings.name}");
 
     switch (settings.name) {
+
       ///business customer end view
       case businessProfileScreen:
         return MaterialPageRoute(
@@ -217,7 +217,6 @@ class RouteManager {
           },
         );
 
-
       case settingsScreen:
         return MaterialPageRoute(
           builder: (_) {
@@ -309,7 +308,9 @@ class RouteManager {
       case pickAPlace:
         return MaterialPageRoute(
           builder: (_) {
-            return PickAPlaceScreen(country: settings.arguments,);
+            return PickAPlaceScreen(
+              country: settings.arguments,
+            );
           },
         );
       default:

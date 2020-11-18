@@ -1,11 +1,8 @@
-import 'package:bapp/config/config.dart';
 import 'package:bapp/config/config_data_types.dart';
-import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/themestore.dart';
-import 'package:bapp/widgets/bapp_bar.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -38,8 +35,8 @@ class _MenuState extends State<Menu> {
           builder: (_, cloudStore, __) {
             return Observer(
               builder: (_) {
-                final items = Helper.filterMenuItems(
-                    cloudStore.userType, cloudStore.alterEgo, cloudStore.status);
+                final items = Helper.filterMenuItems(cloudStore.userType,
+                    cloudStore.alterEgo, cloudStore.status);
                 return ListView(
                   children: [
                     SizedBox(

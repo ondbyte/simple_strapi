@@ -1,9 +1,5 @@
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/helper.dart';
-import 'package:bapp/stores/firebase_structures/business_holidays.dart';
-import 'package:bapp/stores/firebase_structures/business_services.dart';
-import 'package:bapp/stores/firebase_structures/business_staff.dart';
-import 'package:bapp/stores/firebase_structures/business_timings.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -12,6 +8,10 @@ import 'package:mobx/mobx.dart';
 import 'package:thephonenumber/thephonenumber.dart';
 
 import 'business_details.dart';
+import 'business_holidays.dart';
+import 'business_services.dart';
+import 'business_staff.dart';
+import 'business_timings.dart';
 
 class BusinessBranch {
   final myDoc = Observable<DocumentReference>(null);

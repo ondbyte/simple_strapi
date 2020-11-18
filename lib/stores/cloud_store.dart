@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:bapp/classes/firebase_structures/business_branch.dart';
+import 'package:bapp/classes/firebase_structures/business_details.dart';
 import 'package:bapp/classes/location.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
@@ -16,8 +18,6 @@ import 'package:thephonenumber/thephonenumber.dart';
 
 import '../FCM.dart';
 import 'business_store.dart';
-import 'firebase_structures/business_branch.dart';
-import 'firebase_structures/business_details.dart';
 
 part 'cloud_store.g.dart';
 

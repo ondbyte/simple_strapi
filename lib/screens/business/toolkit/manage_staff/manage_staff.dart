@@ -1,7 +1,7 @@
+import 'package:bapp/classes/firebase_structures/business_staff.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/business_store.dart';
-import 'package:bapp/stores/firebase_structures/business_staff.dart';
 import 'package:bapp/widgets/firebase_image.dart';
 import 'package:bapp/widgets/tabs/business_profile/services_tab.dart';
 import 'package:enum_to_string/enum_to_string.dart';
