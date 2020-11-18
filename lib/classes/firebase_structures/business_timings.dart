@@ -20,6 +20,11 @@ class BusinessTimings {
     );
   }
 
+  List<FromToTiming> getTodayTimings(){
+    final today = DateFormat("EEEE").format(DateTime.now());
+    return allDayTimings.firstWhere((element) => element.dayName.toLowerCase()==today.toLowerCase()).timings.value;
+  }
+
   List<FromToTiming> getForDay(DateTime day) {
     final todayName = DateFormat(DateFormat.WEEKDAY).format(day).toLowerCase();
     final todayTimings =

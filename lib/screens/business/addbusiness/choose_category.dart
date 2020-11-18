@@ -102,7 +102,7 @@ class _ChooseYourBusinessCategoryScreenState
     return ContextualMessageScreen(
       message: "You already have a business on Bapp",
       buttonText: "Switch to Business",
-      onButtonPressed: () async {
+      onButtonPressed: (context) async {
         Provider.of<CloudStore>(context, listen: false).switchUserType(context);
       },
     );

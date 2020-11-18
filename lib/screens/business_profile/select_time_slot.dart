@@ -2,6 +2,8 @@ import 'package:bapp/classes/firebase_structures/business_timings.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
+import 'package:bapp/screens/home/bapp.dart';
+import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/widgets/bapp_calendar.dart';
 import 'package:bapp/widgets/tiles/rr_list_tile.dart';
@@ -33,19 +35,33 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
           onPressed: flow.slot.value == null
               ? null
               : () async {
-                  await flow.done();
+                  await BappNavigator.bappPushAndRemoveAll(
+                    context,
+                    ContextualMessageScreen(
+                      message:
+                          "Your booking has been placed, please show up minutes before the booking",
+                      buttonText: "Go to Home",
+                      init: () async {
+                        await flow.done();
+                      },
+                      onButtonPressed: (context) {
+                        BappNavigator.bappPushAndRemoveAll(context, Bapp());
+                      },
+                    ),
+                  );
                 },
         );
       }),
       body: DefaultTabController(
         length: 3,
-        initialIndex: 1,
+        initialIndex: _getInitialIndexForPeriodOfTheDay(),
         child: NestedScrollView(
           headerSliverBuilder: (_, __) {
             return [
               SliverAppBar(
-                collapsedHeight: 180,
-                expandedHeight: 180,
+                elevation: 0,
+                collapsedHeight: 160,
+                expandedHeight: 160,
                 pinned: true,
                 automaticallyImplyLeading: false,
                 flexibleSpace: BappRowCalender(
@@ -70,16 +86,15 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
                   },
                 ),
               ),
-              SliverList(
-                delegate: SliverChildListDelegate(
-                  [
-                    getBappTabBar(context, [
-                      Text("Morning"),
-                      Text("Afternoon"),
-                      Text("Evening"),
-                    ]),
-                  ],
-                ),
+              SliverAppBar(
+                elevation: 0,
+                pinned: true,
+                automaticallyImplyLeading: false,
+                flexibleSpace: getBappTabBar(context, [
+                  const Text("Morning"),
+                  const Text("Afternoon"),
+                  const Text("Evening"),
+                ]),
               )
             ];
           },
@@ -87,6 +102,17 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
         ),
       ),
     );
+  }
+
+  int _getInitialIndexForPeriodOfTheDay() {
+    final now = DateTime.now().toTimeOfDay();
+    if (now.isAM()) {
+      return 0;
+    }
+    if (now.hour < 3 && now.minute <= 59) {
+      return 1;
+    }
+    return 2;
   }
 
   Widget _getTimeSlotTabs() {

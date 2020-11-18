@@ -44,7 +44,7 @@ class _BusinessSubmitBranchForVerificationState
                       init: () {},
                       message:
                           "Your selected branch is disabled or in process of verification",
-                      onButtonPressed: () {
+                      onButtonPressed: (context) {
                         Navigator.pop(context);
                       },
                     )

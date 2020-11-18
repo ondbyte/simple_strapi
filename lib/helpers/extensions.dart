@@ -111,6 +111,14 @@ extension BappNavigator<T> on Navigator {
     return Navigator.push(context, _materialPageRoute(routeWidget));
   }
 
+  static Future<T> bappPushAndRemoveUntill<T>(BuildContext context, Widget routeWidget,bool Function(Route) predicate) {
+    return Navigator.pushAndRemoveUntil(context, _materialPageRoute(routeWidget),predicate);
+  }
+
+  static Future<T> bappPushAndRemoveAll<T>(BuildContext context, Widget routeWidget,) {
+    return Navigator.pushAndRemoveUntil(context, _materialPageRoute(routeWidget),(_)=>false);
+  }
+
   static Route _materialPageRoute(Widget w) {
     return MaterialPageRoute(builder: (_) {
       return w;

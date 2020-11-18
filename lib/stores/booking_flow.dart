@@ -210,8 +210,8 @@ class BookingFlow {
       status: BusinessBookingStatus.pending,
       bookedByNumber: FirebaseAuth.instance.currentUser.phoneNumber,
     );
-    b.myDoc =
-        await FirebaseFirestore.instance.collection("bookings").add(b.toMap());
+    /*b.myDoc =
+        await FirebaseFirestore.instance.collection("bookings").add(b.toMap());*/
     bookings.add(b);
   }
 }

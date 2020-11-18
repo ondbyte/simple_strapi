@@ -8,7 +8,7 @@ class ContextualMessageScreen extends StatefulWidget {
   final Function init;
   final String message;
   final String buttonText;
-  final Function onButtonPressed;
+  final Function(BuildContext) onButtonPressed;
 
   const ContextualMessageScreen(
       {Key key,
@@ -52,7 +52,7 @@ class _ContextualMessageScreenState extends State<ContextualMessageScreen> {
                 SizedBox(
                   height: 20,
                 ),
-                Text("${widget.message}"),
+                Text("${widget.message}",textAlign: TextAlign.center,),
                 SizedBox(
                   height: 20,
                 ),
@@ -61,7 +61,7 @@ class _ContextualMessageScreenState extends State<ContextualMessageScreen> {
                       ? null
                       : () {
                           if (widget.onButtonPressed != null) {
-                            widget.onButtonPressed();
+                            widget.onButtonPressed(context);
                           } else {
                             Navigator.of(context).pushNamedAndRemoveUntil(
                                 RouteManager.home, (route) => false);

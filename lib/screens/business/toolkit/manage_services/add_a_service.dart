@@ -273,7 +273,8 @@ class _BottomPrimaryButtonState extends State<BottomPrimaryButton> {
     assert((widget.title != null && widget.subTitle != null ||
         (widget.title == null && widget.subTitle == null)));
     return Container(
-      padding: widget.padding ?? EdgeInsets.all(16),
+      padding: widget.padding ?? const EdgeInsets.all(16),
+      color: Theme.of(context).backgroundColor,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
