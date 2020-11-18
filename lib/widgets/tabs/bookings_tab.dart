@@ -1,9 +1,13 @@
 import 'package:bapp/config/config.dart';
+import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/widgets/bapp_calendar.dart';
+import 'package:bapp/widgets/booking_timeline.dart';
 import 'package:bapp/widgets/login_widget.dart';
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -13,10 +17,8 @@ class BookingsTab extends StatefulWidget {
 }
 
 class _BookingsTabState extends State<BookingsTab> {
-  Map<DateTime, List<String>> _bookings = {};
-  Map<DateTime, List<String>> _holidays = {};
   CalendarController _calendarController = CalendarController();
-  DateTime _selectedDay = DateTime.now();
+  final _selectedDay = Observable(DateTime.now());
 
   @override
   void dispose() {
@@ -38,11 +40,36 @@ class _BookingsTabState extends State<BookingsTab> {
                   )
                 : CustomScrollView(
                     slivers: <Widget>[
+                      SliverAppBar(
+                        elevation: 0,
+                        collapsedHeight: 160,
+                        expandedHeight: 160,
+                        pinned: true,
+                        automaticallyImplyLeading: false,
+                        actions: [SizedBox()],
+                        flexibleSpace: BappRowCalender(
+                          bookings: flow.myBookingsAsCalendarEvents(),
+                          initialDate: DateTime.now(),
+                          holidays: flow.holidays,
+                          controller: _calendarController,
+                          onDayChanged: (day, _, __) {
+                            act(() {
+                              _selectedDay.value = day;
+                            });
+                          },
+                        ),
+                      ),
                       SliverList(
-                        delegate: SliverChildListDelegate([
-                          _buildTableCalendar(),
-                        ]),
-                      )
+                          delegate: SliverChildListDelegate([
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Observer(builder: (_) {
+                          return BookingTimeLineWidget(
+                            date: _selectedDay.value,
+                          );
+                        })
+                      ]))
                     ],
                   );
           },
@@ -51,38 +78,5 @@ class _BookingsTabState extends State<BookingsTab> {
     );
   }
 
-  Widget _buildTableCalendar() {
-    return TableCalendar(
-      headerStyle: HeaderStyle(
-          leftChevronIcon: Icon(FeatherIcons.chevronLeft,
-              color: Theme.of(context).iconTheme.color),
-          rightChevronIcon: Icon(FeatherIcons.chevronLeft,
-              color: Theme.of(context).iconTheme.color)),
-      initialCalendarFormat: CalendarFormat.week,
-      availableCalendarFormats: {CalendarFormat.week: 'Week'},
-      calendarController: _calendarController,
-      events: _bookings,
-      holidays: _holidays,
-      startingDayOfWeek: StartingDayOfWeek.sunday,
-      calendarStyle: CalendarStyle(
-          todayColor: Colors.transparent,
-          todayStyle: TextStyle(color: Theme.of(context).primaryColor),
-          unavailableStyle: TextStyle(color: Theme.of(context).disabledColor),
-          holidayStyle: TextStyle(color: Theme.of(context).disabledColor),
-          weekendStyle:
-              TextStyle(color: Theme.of(context).textTheme.bodyText1.color),
-          outsideDaysVisible: false,
-          canEventMarkersOverflow: true,
-          markersColor: Theme.of(context).accentColor,
-          selectedColor: Theme.of(context).primaryColor.withOpacity(0.5),
-          markersMaxAmount: 1),
-      onDaySelected: (day, events, __) {
-        _selectedDay = day;
-      },
-      onVisibleDaysChanged: (_, __, ___) {},
-      onCalendarCreated: (_, __, ___) {
-        _calendarController.setSelectedDay(_selectedDay);
-      },
-    );
-  }
+  BookingFlow get flow => Provider.of<BookingFlow>(context, listen: false);
 }

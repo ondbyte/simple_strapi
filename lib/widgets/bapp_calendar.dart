@@ -4,6 +4,7 @@ import 'package:table_calendar/table_calendar.dart';
 
 class BappRowCalender extends StatelessWidget {
   final Map<DateTime, List> holidays;
+  final Map<DateTime, List> bookings;
   final Function(DateTime, List, List) onDayChanged;
   final CalendarController controller;
   final DateTime initialDate;
@@ -13,7 +14,8 @@ class BappRowCalender extends StatelessWidget {
       this.holidays,
       this.onDayChanged,
       this.initialDate,
-      this.controller})
+      this.controller,
+      this.bookings})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -29,6 +31,7 @@ class BappRowCalender extends StatelessWidget {
       calendarController: controller,
       holidays: holidays,
       startingDayOfWeek: StartingDayOfWeek.sunday,
+      events: bookings,
       calendarStyle: CalendarStyle(
         todayColor: Colors.transparent,
         todayStyle: TextStyle(color: Theme.of(context).primaryColor),

@@ -25,6 +25,30 @@ class BookingFlow {
   final timeWindow = Observable<FromToTiming>(null);
   final holidays = ObservableMap<DateTime, List>();
   final slot = Observable<DateTime>(null);
+  final myBookings = ObservableList<BusinessBooking>();
+
+  Map<DateTime, List> myBookingsAsCalendarEvents() {
+    final map = <DateTime, List>{};
+    myBookings.forEach((element) {
+      final day = element.fromToTiming.from;
+      map.addAll({day: getBookingsForDay(day)});
+    });
+    return map;
+  }
+
+  reset() {
+    _branch.value = null;
+    services.clear();
+    totalDurationMinutes.value = 0;
+    totalPrice.value = 0.0;
+    professional.value = null;
+    selectedTitle.value = "";
+    selectedSubTitle.value = "";
+    filteredStaffs.clear();
+    timeWindow.value = null;
+    slot.value = null;
+    bookings.clear();
+  }
 
   final List<ReactionDisposer> _disposers = [];
 
@@ -39,7 +63,57 @@ class BookingFlow {
     _setupReactions();
   }
 
-  Future getBookings() async {
+  List<BusinessBooking> getBookingsForDay(DateTime day) {
+    return bookings
+        .where((element) => element.fromToTiming.from.isDay(day))
+        .toList();
+  }
+
+  List<BusinessBooking> getMyBookingsForDay(DateTime day) {
+    return myBookings
+        .where((element) => element.fromToTiming.from.isDay(day))
+        .toList();
+  }
+
+  Future getMyBookings() async {
+    if (FirebaseAuth.instance.currentUser.phoneNumber == null) {
+      Helper.printLog("no number to get bookings");
+      return;
+    }
+    final bookingSnaps = await FirebaseFirestore.instance
+        .collection("bookings")
+        .where("bookedByNumber",
+            isGreaterThanOrEqualTo:
+                FirebaseAuth.instance.currentUser.phoneNumber)
+        .get();
+
+    myBookings.clear();
+    bookingSnaps.docs.forEach(
+      (booking) {
+        final data = booking.data();
+        bookings.add(
+          BusinessBooking(
+            services: (data["services"] as List).map(
+              (s) {
+                return BusinessService.fromJson(s);
+              },
+            ).toList(),
+            staff: getStaffFor(data["staff"]),
+            branch: branch,
+            fromToTiming: FromToTiming.fromTimeStamps(
+              from: data["from"],
+              to: data["to"],
+            ),
+            status: EnumToString.fromString(
+                BusinessBookingStatus.values, data["status"]),
+            bookedByNumber: data["bookedByNumber"],
+          )..myDoc = booking.reference,
+        );
+      },
+    );
+  }
+
+  Future getBranchBookings() async {
     final bookingSnaps = await FirebaseFirestore.instance
         .collection("bookings")
         .where("branch", isEqualTo: branch.myDoc.value)
@@ -210,8 +284,11 @@ class BookingFlow {
       status: BusinessBookingStatus.pending,
       bookedByNumber: FirebaseAuth.instance.currentUser.phoneNumber,
     );
-    /*b.myDoc =
-        await FirebaseFirestore.instance.collection("bookings").add(b.toMap());*/
+    b.myDoc =
+        await FirebaseFirestore.instance.collection("bookings").add(b.toMap());
     bookings.add(b);
+    act(() {
+      reset();
+    });
   }
 }

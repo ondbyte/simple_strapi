@@ -66,6 +66,7 @@ dependencies:
   chips_choice: ^2.0.1
   flutter_svg_provider: ^0.1.6
   flutter_rating_bar: ^3.2.0
+  flutter_week_view: any
 
 
   # MAPS

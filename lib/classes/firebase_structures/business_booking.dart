@@ -31,8 +31,8 @@ class BusinessBooking {
       "from": fromToTiming.from.toTimeStamp(),
       "to": fromToTiming.to.toTimeStamp(),
       "services": services.map((e) => e.toMap()).toList(),
-      "branch": branch.myDoc,
-      "user": bookedByNumber,
+      "branch": branch.myDoc.value,
+      "bookedByNumber": bookedByNumber,
       "status": EnumToString.convertToString(status),
     };
   }
