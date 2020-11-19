@@ -79,19 +79,12 @@ dev_dependencies:
     sdk: flutter
   mobx_codegen: ^1.1.0+1
   build_runner: ^1.10.0
+  test: ^1.15.5
 
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
-
-# The following section is specific to Flutter.
 flutter:
 
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
   assets:
     - assets/
     - assets/svg/

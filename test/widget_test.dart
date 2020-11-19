@@ -7,13 +7,14 @@
 
 import 'package:bapp/classes/firebase_structures/business_timings.dart';
 import 'package:bapp/stores/booking_flow.dart';
+import 'package:bapp/widgets/tabs/business_profile/about_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bapp/main.dart';
 
 void main() {
-  test("testing time arrange",(){
+  /*test("testing time arrange",(){
     final wh = [
       FromToTiming.fromDates(from: DateTime(2020,11,1,9),to: DateTime(2020,11,1,13)),
       FromToTiming.fromDates(from: DateTime(2020,11,1,14),to: DateTime(2020,11,1,18)),
@@ -22,5 +23,5 @@ void main() {
       FromToTiming.fromDates(from: DateTime(2020,11,1,10),to: DateTime(2020,11,1,11)),
       FromToTiming.fromDates(from: DateTime(2020,11,1,12),to: DateTime(2020,11,1,13)),
     ];
-  });
+  });*/
 }
