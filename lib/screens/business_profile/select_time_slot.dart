@@ -98,7 +98,14 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
               )
             ];
           },
-          body: _getTimeSlotTabs(),
+          body: Observer(
+            builder: (_) {
+              if (_holiday.value) {
+                return const Text("Its holiday");
+              }
+              return _getTimeSlotTabs();
+            },
+          ),
         ),
       ),
     );

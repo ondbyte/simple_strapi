@@ -454,16 +454,24 @@ abstract class _CloudStore with Store {
     final list = <BusinessBranch>[];
     final businesses = <DocumentReference, BusinessDetails>{};
     if (snaps.docs.isNotEmpty) {
-      await Future.forEach(snaps.docs, (doc) async {
+      await Future.forEach<QueryDocumentSnapshot>(snaps.docs, (doc) async {
         final DocumentReference businessRef = doc.data()["business"];
         if (businesses.containsKey(businessRef)) {
-          list.add(BusinessBranch.fromJson(doc.data(),
-              business: businesses[businessRef]));
+          list.add(
+            BusinessBranch.fromJson(
+              doc.data(),
+              business: businesses[businessRef],
+            )..myDoc.value = doc.reference,
+          );
         } else {
           final bSnap = await businessRef.get();
           final businessDetails = BusinessDetails.fromJson(bSnap.data());
           list.add(
-              BusinessBranch.fromJson(doc.data(), business: businessDetails));
+            BusinessBranch.fromJson(
+              doc.data(),
+              business: businessDetails,
+            )..myDoc.value = doc.reference,
+          );
           businesses.addAll({businessRef: businessDetails});
         }
       });

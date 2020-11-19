@@ -1,5 +1,6 @@
 import 'package:bapp/FCM.dart';
 import 'package:bapp/config/config_data_types.dart';
+import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/updates_store.dart';
 import 'package:bapp/widgets/buttons.dart';
@@ -24,6 +25,7 @@ class _BappState extends State<Bapp> {
       store: Provider.of<CloudStore>(context),
       init: (cloudStore) async {
         await Provider.of<UpdatesStore>(context, listen: false).init(context);
+        await Provider.of<BookingFlow>(context, listen: false).getMyBookings();
         //await Provider.of<BusinessStore>(context, listen: false).init(context);
         //Helper.printLog("setting up message layer");
         BappFCM().listenForBappMessages(
