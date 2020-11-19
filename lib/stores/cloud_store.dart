@@ -17,6 +17,7 @@ import 'package:provider/provider.dart';
 import 'package:thephonenumber/thephonenumber.dart';
 
 import '../FCM.dart';
+import 'all_store.dart';
 import 'business_store.dart';
 
 part 'cloud_store.g.dart';
@@ -52,6 +53,37 @@ abstract class _CloudStore with Store {
   String fcmToken = "";
 
   String _previousUID = "";
+
+  AllStore _allStore;
+
+  void setAllStore(AllStore allStore) => _allStore = allStore;
+
+  final branches = <DocumentReference, BusinessBranch>{};
+  final businesses = <DocumentReference, BusinessDetails>{};
+
+  Future<BusinessBranch> getBranch({DocumentReference reference}) async {
+    if (branches.containsKey(reference)) {
+      return branches[reference];
+    }
+    final snap = await reference.get();
+    final data = snap.data();
+    final businessRef = data["business"];
+    final business = await getBusiness(reference: businessRef);
+    final branch = BusinessBranch.fromJson(data, business: business);
+    branches.addAll({reference: branch});
+    return branch;
+  }
+
+  Future<BusinessDetails> getBusiness({DocumentReference reference}) async {
+    if (businesses.containsKey(reference)) {
+      return businesses[reference];
+    }
+    final snap = await reference.get();
+    final data = snap.data();
+    final business = BusinessDetails.fromJson(data);
+    businesses.addAll({reference: business});
+    return business;
+  }
 
   Future init({Function onLogin, Function onNotLogin}) async {
     _onLogin = onLogin;
@@ -451,32 +483,37 @@ abstract class _CloudStore with Store {
           isEqualTo: myAddress.locality.name);
     }
     final snaps = await query.get();
-    final list = <BusinessBranch>[];
-    final businesses = <DocumentReference, BusinessDetails>{};
+    final _branches = <DocumentReference, BusinessBranch>{};
     if (snaps.docs.isNotEmpty) {
       await Future.forEach<QueryDocumentSnapshot>(snaps.docs, (doc) async {
         final DocumentReference businessRef = doc.data()["business"];
         if (businesses.containsKey(businessRef)) {
-          list.add(
-            BusinessBranch.fromJson(
+          if (branches.containsKey(doc.reference)) {
+            final branch = await getBranch(reference: doc.reference);
+            _branches.addAll({doc.reference:branch});
+          } else {
+            final branch = BusinessBranch.fromJson(
               doc.data(),
               business: businesses[businessRef],
-            )..myDoc.value = doc.reference,
-          );
+            )..myDoc.value = doc.reference;
+            _branches.addAll(
+              {
+                doc.reference: branch,
+              },
+            );
+          }
         } else {
-          final bSnap = await businessRef.get();
-          final businessDetails = BusinessDetails.fromJson(bSnap.data());
-          list.add(
-            BusinessBranch.fromJson(
+          final businessDetails = await getBusiness(reference: businessRef);
+          _branches.addAll({
+            doc.reference: BusinessBranch.fromJson(
               doc.data(),
               business: businessDetails,
             )..myDoc.value = doc.reference,
-          );
-          businesses.addAll({businessRef: businessDetails});
+          });
         }
       });
     }
-    return list;
+    return branches.values.toList();
   }
 }
 

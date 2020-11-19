@@ -1,3 +1,4 @@
+/*
 import 'package:bapp/classes/location.dart';
 
 import 'package:mobx/mobx.dart';
@@ -34,3 +35,4 @@ class BusinessShop{
     };
   }
 }
+*/

@@ -5,12 +5,16 @@ import 'package:bapp/classes/firebase_structures/business_services.dart';
 import 'package:bapp/classes/firebase_structures/business_staff.dart';
 import 'package:bapp/classes/firebase_structures/business_timings.dart';
 import 'package:bapp/helpers/extensions.dart';
+import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:mobx/mobx.dart';
+import 'package:provider/provider.dart';
 
 import '../helpers/helper.dart';
+import 'all_store.dart';
 
 class BookingFlow {
   final _branch = Observable<BusinessBranch>(null);
@@ -26,6 +30,10 @@ class BookingFlow {
   final holidays = ObservableMap<DateTime, List>();
   final slot = Observable<DateTime>(null);
   final myBookings = ObservableList<BusinessBooking>();
+
+  AllStore _allStore;
+
+  void setAllStore(AllStore allStore) => _allStore = allStore;
 
   Map<DateTime, List> myBookingsAsCalendarEvents() {
     final map = <DateTime, List>{};
@@ -89,8 +97,10 @@ class BookingFlow {
 
     myBookings.clear();
     bookingSnaps.docs.forEach(
-      (booking) {
+      (booking) async {
         final data = booking.data();
+        final cloudStore = _allStore.get<CloudStore>();
+        final b = await cloudStore.getBranch(reference: booking["branch"]);
         bookings.add(
           BusinessBooking(
             services: (data["services"] as List).map(
@@ -99,13 +109,15 @@ class BookingFlow {
               },
             ).toList(),
             staff: getStaffFor(data["staff"]),
-            branch: branch,
+            branch: b,
             fromToTiming: FromToTiming.fromTimeStamps(
               from: data["from"],
               to: data["to"],
             ),
             status: EnumToString.fromString(
-                BusinessBookingStatus.values, data["status"]),
+              BusinessBookingStatus.values,
+              data["status"],
+            ),
             bookedByNumber: data["bookedByNumber"],
           )..myDoc = booking.reference,
         );
@@ -120,13 +132,15 @@ class BookingFlow {
         .where("from", isGreaterThanOrEqualTo: DateTime.now().toTimeStamp())
         .where("from",
             isLessThanOrEqualTo:
-                DateTime.now().add(Duration(days: 30)).toTimeStamp())
+                DateTime.now().add(const Duration(days: 30)).toTimeStamp())
         .get();
 
     bookings.clear();
     bookingSnaps.docs.forEach(
-      (booking) {
+      (booking) async {
         final data = booking.data();
+        final cloudStore = _allStore.get<CloudStore>();
+        final b = await cloudStore.getBranch(reference: booking["branch"]);
         bookings.add(
           BusinessBooking(
             services: (data["services"] as List).map(
@@ -135,7 +149,7 @@ class BookingFlow {
               },
             ).toList(),
             staff: getStaffFor(data["staff"]),
-            branch: branch,
+            branch: b,
             fromToTiming: FromToTiming.fromTimeStamps(
               from: data["from"],
               to: data["to"],
@@ -287,8 +301,6 @@ class BookingFlow {
     b.myDoc =
         await FirebaseFirestore.instance.collection("bookings").add(b.toMap());
     bookings.add(b);
-    act(() {
-      reset();
-    });
+    act(reset);
   }
 }

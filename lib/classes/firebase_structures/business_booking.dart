@@ -1,3 +1,4 @@
+import 'package:bapp/classes/firebase_structures/business_details.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
@@ -23,9 +24,9 @@ class BusinessBooking {
       this.staff,
       this.branch,
       this.fromToTiming,
-      this.services});
+      this.services, });
 
-  toMap() {
+  Map toMap() {
     return {
       "staff": staff.name,
       "from": fromToTiming.from.toTimeStamp(),

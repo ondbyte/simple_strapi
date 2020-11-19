@@ -1,17 +1,14 @@
-import 'package:bapp/route_manager.dart';
-import 'package:bapp/stores/booking_flow.dart';
-import 'package:bapp/stores/cloud_store.dart';
-import 'package:bapp/stores/storage_store.dart';
-import 'package:bapp/stores/themestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
+import 'route_manager.dart';
+import 'stores/all_store.dart';
+import 'stores/booking_flow.dart';
 import 'stores/business_store.dart';
+import 'stores/cloud_store.dart';
+import 'stores/themestore.dart';
 import 'stores/updates_store.dart';
 
 void main() async {
@@ -24,27 +21,34 @@ class App extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final allStore = AllStore();
     return MultiProvider(
       providers: [
+        Provider<AllStore>(
+          create: (_) => allStore,
+        ),
         Provider<ThemeStore>(
           create: (_) => ThemeStore(),
         ),
         Provider<CloudStore>(
-          create: (_) => CloudStore(),
+          create: (_) => CloudStore()..setAllStore(allStore),
         ),
         Provider<UpdatesStore>(
           create: (_) => UpdatesStore(),
         ),
         Provider<BusinessStore>(
-          create: (_) => BusinessStore(),
+          create: (_) => BusinessStore()..setAllStore(allStore),
         ),
         Provider<BookingFlow>(
-          create: (_) => BookingFlow(),
+          create: (_) => BookingFlow()..setAllStore(allStore),
         ),
       ],
       builder: (context, w) {
-        return Consumer<ThemeStore>(
-          builder: (_, themeStore, __) {
+        return Consumer5<ThemeStore,CloudStore,BusinessStore,AllStore,BookingFlow>(
+          builder: (_, themeStore,cloudStore,businessStore,allStore,flow, __) {
+            allStore.set(cloudStore);
+            allStore.set(businessStore);
+            allStore.set(flow);
             return Observer(
               builder: (_) {
                 return MaterialApp(

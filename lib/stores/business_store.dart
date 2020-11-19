@@ -2,6 +2,7 @@ import 'package:bapp/classes/firebase_structures/business_category.dart';
 import 'package:bapp/classes/firebase_structures/business_details.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
+import 'package:bapp/stores/all_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -28,6 +29,10 @@ abstract class _BusinessStore with Store {
   DocumentReference businessDoc;
 
   CloudStore _cloudStore;
+
+  AllStore _allStore;
+
+  void setAllStore(AllStore allStore)=>_allStore=allStore;
 
   Future init(BuildContext context) async {
     _user = _auth.currentUser;
