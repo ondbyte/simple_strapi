@@ -22,6 +22,12 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final allStore = AllStore();
+    final cloudStore = CloudStore()..setAllStore(allStore);
+    final businessStore = BusinessStore()..setAllStore(allStore);
+    final flow = BookingFlow()..setAllStore(allStore);
+    allStore.set<CloudStore>(cloudStore);
+    allStore.set<BusinessStore>(businessStore);
+    allStore.set<BookingFlow>(flow);
     return MultiProvider(
       providers: [
         Provider<AllStore>(
@@ -31,24 +37,21 @@ class App extends StatelessWidget {
           create: (_) => ThemeStore(),
         ),
         Provider<CloudStore>(
-          create: (_) => CloudStore()..setAllStore(allStore),
+          create: (_) => cloudStore,
         ),
         Provider<UpdatesStore>(
           create: (_) => UpdatesStore(),
         ),
         Provider<BusinessStore>(
-          create: (_) => BusinessStore()..setAllStore(allStore),
+          create: (_) => businessStore,
         ),
         Provider<BookingFlow>(
-          create: (_) => BookingFlow()..setAllStore(allStore),
+          create: (_) => flow,
         ),
       ],
       builder: (context, w) {
-        return Consumer5<ThemeStore,CloudStore,BusinessStore,AllStore,BookingFlow>(
-          builder: (_, themeStore,cloudStore,businessStore,allStore,flow, __) {
-            allStore.set(cloudStore);
-            allStore.set(businessStore);
-            allStore.set(flow);
+        return Consumer<ThemeStore>(
+          builder: (_, themeStore, __) {
             return Observer(
               builder: (_) {
                 return MaterialApp(

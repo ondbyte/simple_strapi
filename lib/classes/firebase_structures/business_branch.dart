@@ -1,4 +1,6 @@
+import 'package:bapp/classes/firebase_structures/business_category.dart';
 import 'package:bapp/config/config_data_types.dart';
+import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
@@ -32,6 +34,7 @@ class BusinessBranch {
   final businessHolidays = Observable<BusinessHolidays>(null);
   final status =
       Observable<BusinessBranchActiveStatus>(BusinessBranchActiveStatus.lead);
+  final businessCategory = Observable<BusinessCategory>(null);
   String iso2 = "";
   String city = "";
   String locality = "";
@@ -42,6 +45,10 @@ class BusinessBranch {
     this.business.value = business;
     this.myDoc.value = myDoc;
     _getBranch(myDoc);
+  }
+
+  BusinessStaff getStaffFor({String name}) {
+    return staff.firstWhere((s) => s.name == name);
   }
 
   var _disposers = <ReactionDisposer>[];
@@ -159,6 +166,7 @@ class BusinessBranch {
         ),
       ),
     );
+    myDoc.value = j["myDoc"];
     name.value = j["name"];
     address.value = j["address"];
     latlong.value = j["latlong"];
@@ -186,6 +194,7 @@ class BusinessBranch {
     //print(j["businessHolidays"]);
     status.value =
         EnumToString.fromString(BusinessBranchActiveStatus.values, j["status"]);
+    businessCategory.value = j["businessCategory"];
     try {
       if (status.value == BusinessBranchActiveStatus.published) {
         iso2 = j["assignedAddress"]["iso2"];
@@ -223,6 +232,7 @@ class BusinessBranch {
           businessTimings.value?.toMap() ?? BusinessTimings.empty().toMap(),
       "businessHolidays": businessHolidays.value?.toList() ?? [],
       "status": EnumToString.convertToString(status.value),
+      "businessCategory": businessCategory.value.toMap()
     };
   }
 
@@ -239,8 +249,8 @@ class BusinessBranch {
 
   Future saveBranch() async {
     if (myDoc.value == null) {
-      final collec = business.value.myDoc.value.parent;
-      final doc = await collec.add(toMap());
+      final doc = business.value.myDoc.value.parent.doc("b_" + kUUIDGen.v1());
+      await doc.set(toMap());
       await act(() {
         this.myDoc.value = doc;
       });

@@ -8,6 +8,7 @@ import 'package:bapp/widgets/firebase_image.dart';
 import 'package:bapp/widgets/tabs/business_profile/about_tab.dart';
 import 'package:bapp/widgets/tabs/business_profile/services_tab.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -51,11 +52,29 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
             return <Widget>[
               SliverAppBar(
                 expandedHeight: 256,
-                flexibleSpace: FirebaseStorageImage(
-                  fit: BoxFit.cover,
-                  storagePathOrURL: flow.branch.images.isNotEmpty
-                      ? flow.branch.images.keys.elementAt(0)
-                      : kTemporaryPlaceHolderImage,
+                actions: [
+                  IconButton(
+                    icon: Icon(
+                      FeatherIcons.heart,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {},
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      FeatherIcons.share2,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {},
+                  ),
+                ],
+                flexibleSpace: FlexibleSpaceBar(
+                  background: FirebaseStorageImage(
+                    fit: BoxFit.cover,
+                    storagePathOrURL: flow.branch.images.isNotEmpty
+                        ? flow.branch.images.keys.elementAt(0)
+                        : kTemporaryPlaceHolderImage,
+                  ),
                 ),
               ),
               SliverList(

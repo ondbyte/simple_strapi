@@ -1,7 +1,8 @@
-import 'package:bapp/classes/firebase_structures/business_details.dart';
+import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
+import 'package:flutter/widgets.dart';
 
 import 'business_branch.dart';
 import 'business_services.dart';
@@ -15,18 +16,21 @@ class BusinessBooking {
   final List<BusinessService> services;
   final String bookedByNumber;
   final BusinessBookingStatus status;
+  final UserType bookingUserType;
 
   DocumentReference myDoc;
 
-  BusinessBooking(
-      {this.status,
-      this.bookedByNumber,
-      this.staff,
-      this.branch,
-      this.fromToTiming,
-      this.services, });
+  BusinessBooking({
+    @required this.bookingUserType,
+    @required this.status,
+    @required this.bookedByNumber,
+    @required this.staff,
+    @required this.branch,
+    @required this.fromToTiming,
+    @required this.services,
+  });
 
-  Map toMap() {
+  Map<String, dynamic> toMap() {
     return {
       "staff": staff.name,
       "from": fromToTiming.from.toTimeStamp(),
@@ -35,6 +39,7 @@ class BusinessBooking {
       "branch": branch.myDoc.value,
       "bookedByNumber": bookedByNumber,
       "status": EnumToString.convertToString(status),
+      "bookingUserType": EnumToString.convertToString(bookingUserType),
     };
   }
 }

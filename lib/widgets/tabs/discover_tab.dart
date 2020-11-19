@@ -1,6 +1,8 @@
 import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/config/config.dart';
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/search/branches_result_screen.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
@@ -279,9 +281,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
   Widget _getCategoriesScroller(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
-      child: StoreProvider<BusinessStore>(
-        store: Provider.of<BusinessStore>(context, listen: false),
-        builder: (_, businessStore) {
+      child: Consumer2<BusinessStore, CloudStore>(
+        builder: (_, businessStore, cloudStore, __) {
           return Observer(
             builder: (_) {
               return Row(
@@ -289,7 +290,22 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   ...List.generate(
                     businessStore.categories.length,
                     (index) => FlatButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        BappNavigator.bappPush(
+                          context,
+                          BranchesResultScreen(
+                            title:
+                                "Top " + businessStore.categories[index].name,
+                            subTitle: "In " +
+                                (cloudStore.myAddress.locality != null
+                                    ? cloudStore.myAddress.locality.name
+                                    : cloudStore.myAddress.city.name),
+                            futureBranchList: cloudStore.getBranchesForCategory(
+                              businessStore.categories[index],
+                            ),
+                          ),
+                        );
+                      },
                       child: Text(
                         businessStore.categories[index].name,
                         style: Theme.of(context).textTheme.subtitle1,

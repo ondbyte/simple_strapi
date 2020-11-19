@@ -4,14 +4,13 @@ import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/classes/firebase_structures/business_services.dart';
 import 'package:bapp/classes/firebase_structures/business_staff.dart';
 import 'package:bapp/classes/firebase_structures/business_timings.dart';
+import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:mobx/mobx.dart';
-import 'package:provider/provider.dart';
 
 import '../helpers/helper.dart';
 import 'all_store.dart';
@@ -25,7 +24,7 @@ class BookingFlow {
   final selectedTitle = Observable("");
   final selectedSubTitle = Observable("");
   final filteredStaffs = ObservableList<FilteredBusinessStaff>();
-  final bookings = ObservableList<BusinessBooking>();
+  final branchBookings = ObservableList<BusinessBooking>();
   final timeWindow = Observable<FromToTiming>(null);
   final holidays = ObservableMap<DateTime, List>();
   final slot = Observable<DateTime>(null);
@@ -39,7 +38,7 @@ class BookingFlow {
     final map = <DateTime, List>{};
     myBookings.forEach((element) {
       final day = element.fromToTiming.from;
-      map.addAll({day: getBookingsForDay(day)});
+      map.addAll({day: getMyBookingsForDay(day)});
     });
     return map;
   }
@@ -55,7 +54,7 @@ class BookingFlow {
     filteredStaffs.clear();
     timeWindow.value = null;
     slot.value = null;
-    bookings.clear();
+    branchBookings.clear();
   }
 
   final List<ReactionDisposer> _disposers = [];
@@ -72,7 +71,7 @@ class BookingFlow {
   }
 
   List<BusinessBooking> getBookingsForDay(DateTime day) {
-    return bookings
+    return branchBookings
         .where((element) => element.fromToTiming.from.isDay(day))
         .toList();
   }
@@ -91,8 +90,7 @@ class BookingFlow {
     final bookingSnaps = await FirebaseFirestore.instance
         .collection("bookings")
         .where("bookedByNumber",
-            isGreaterThanOrEqualTo:
-                FirebaseAuth.instance.currentUser.phoneNumber)
+            isEqualTo: FirebaseAuth.instance.currentUser.phoneNumber)
         .get();
 
     myBookings.clear();
@@ -101,25 +99,27 @@ class BookingFlow {
         final data = booking.data();
         final cloudStore = _allStore.get<CloudStore>();
         final b = await cloudStore.getBranch(reference: booking["branch"]);
-        bookings.add(
+        myBookings.add(
           BusinessBooking(
-            services: (data["services"] as List).map(
-              (s) {
-                return BusinessService.fromJson(s);
-              },
-            ).toList(),
-            staff: getStaffFor(data["staff"]),
-            branch: b,
-            fromToTiming: FromToTiming.fromTimeStamps(
-              from: data["from"],
-              to: data["to"],
-            ),
-            status: EnumToString.fromString(
-              BusinessBookingStatus.values,
-              data["status"],
-            ),
-            bookedByNumber: data["bookedByNumber"],
-          )..myDoc = booking.reference,
+              services: (data["services"] as List).map(
+                (s) {
+                  return BusinessService.fromJson(s);
+                },
+              ).toList(),
+              staff: b.getStaffFor(name: data["staff"]),
+              branch: b,
+              fromToTiming: FromToTiming.fromTimeStamps(
+                from: data["from"],
+                to: data["to"],
+              ),
+              status: EnumToString.fromString(
+                BusinessBookingStatus.values,
+                data["status"],
+              ),
+              bookedByNumber: data["bookedByNumber"],
+              bookingUserType: EnumToString.fromString(
+                  UserType.values, data["bookingUserType"]))
+            ..myDoc = booking.reference,
         );
       },
     );
@@ -135,29 +135,31 @@ class BookingFlow {
                 DateTime.now().add(const Duration(days: 30)).toTimeStamp())
         .get();
 
-    bookings.clear();
+    branchBookings.clear();
     bookingSnaps.docs.forEach(
       (booking) async {
         final data = booking.data();
         final cloudStore = _allStore.get<CloudStore>();
         final b = await cloudStore.getBranch(reference: booking["branch"]);
-        bookings.add(
+        branchBookings.add(
           BusinessBooking(
-            services: (data["services"] as List).map(
-              (s) {
-                return BusinessService.fromJson(s);
-              },
-            ).toList(),
-            staff: getStaffFor(data["staff"]),
-            branch: b,
-            fromToTiming: FromToTiming.fromTimeStamps(
-              from: data["from"],
-              to: data["to"],
-            ),
-            status: EnumToString.fromString(
-                BusinessBookingStatus.values, data["status"]),
-            bookedByNumber: data["bookedByNumber"],
-          )..myDoc = booking.reference,
+              services: (data["services"] as List).map(
+                (s) {
+                  return BusinessService.fromJson(s);
+                },
+              ).toList(),
+              staff: b.getStaffFor(name: data["staff"]),
+              branch: b,
+              fromToTiming: FromToTiming.fromTimeStamps(
+                from: data["from"],
+                to: data["to"],
+              ),
+              status: EnumToString.fromString(
+                  BusinessBookingStatus.values, data["status"]),
+              bookedByNumber: data["bookedByNumber"],
+              bookingUserType: EnumToString.fromString(
+                  UserType.values, data["bookingUserType"]))
+            ..myDoc = booking.reference,
         );
       },
     );
@@ -170,7 +172,7 @@ class BookingFlow {
     branch.staff.forEach((s) {
       staffWithBookings.addAll({s: []});
     });
-    bookings.forEach((b) {
+    branchBookings.forEach((b) {
       if (staffWithBookings.keys.any((bs) => bs.name == b.staff.name)) {
         staffWithBookings[b.staff] = [...staffWithBookings[b.staff], b];
       }
@@ -188,10 +190,6 @@ class BookingFlow {
         );
       },
     );
-  }
-
-  BusinessStaff getStaffFor(String name) {
-    return branch.staff.firstWhere((s) => s.name == name);
   }
 
   void _getHolidays() {
@@ -297,10 +295,11 @@ class BookingFlow {
       services: services,
       status: BusinessBookingStatus.pending,
       bookedByNumber: FirebaseAuth.instance.currentUser.phoneNumber,
+      bookingUserType: _allStore.get<CloudStore>().userType,
     );
     b.myDoc =
         await FirebaseFirestore.instance.collection("bookings").add(b.toMap());
-    bookings.add(b);
+    myBookings.add(b);
     act(reset);
   }
 }

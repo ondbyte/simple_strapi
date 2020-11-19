@@ -1,13 +1,17 @@
 import 'dart:async';
 
 import 'package:bapp/classes/firebase_structures/business_branch.dart';
+import 'package:bapp/classes/firebase_structures/business_category.dart';
 import 'package:bapp/classes/firebase_structures/business_details.dart';
+import 'package:bapp/classes/firebase_structures/business_services.dart';
+import 'package:bapp/classes/firebase_structures/favorite.dart';
 import 'package:bapp/classes/location.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
@@ -49,6 +53,7 @@ abstract class _CloudStore with Store {
   AuthStatus status = AuthStatus.unsure;
   @observable
   bool loadingForOTP = false;
+  final favorites = ObservableList<Favorite>();
 
   String fcmToken = "";
 
@@ -57,33 +62,6 @@ abstract class _CloudStore with Store {
   AllStore _allStore;
 
   void setAllStore(AllStore allStore) => _allStore = allStore;
-
-  final branches = <DocumentReference, BusinessBranch>{};
-  final businesses = <DocumentReference, BusinessDetails>{};
-
-  Future<BusinessBranch> getBranch({DocumentReference reference}) async {
-    if (branches.containsKey(reference)) {
-      return branches[reference];
-    }
-    final snap = await reference.get();
-    final data = snap.data();
-    final businessRef = data["business"];
-    final business = await getBusiness(reference: businessRef);
-    final branch = BusinessBranch.fromJson(data, business: business);
-    branches.addAll({reference: branch});
-    return branch;
-  }
-
-  Future<BusinessDetails> getBusiness({DocumentReference reference}) async {
-    if (businesses.containsKey(reference)) {
-      return businesses[reference];
-    }
-    final snap = await reference.get();
-    final data = snap.data();
-    final business = BusinessDetails.fromJson(data);
-    businesses.addAll({reference: business});
-    return business;
-  }
 
   Future init({Function onLogin, Function onNotLogin}) async {
     _onLogin = onLogin;
@@ -354,6 +332,12 @@ abstract class _CloudStore with Store {
         await setMyFcmToken();
       }, fireImmediately: true),
     );
+
+    _disposers.add(
+      reaction((_) => favorites.length, (_) async {
+        await setMyFavorites();
+      }, fireImmediately: false),
+    );
   }
 
   Future updateProfile(
@@ -472,6 +456,47 @@ abstract class _CloudStore with Store {
     //await FirebaseAuth.instance.signInAnonymously();
   }
 
+  final branches = <DocumentReference, BusinessBranch>{};
+  final businesses = <DocumentReference, BusinessDetails>{};
+
+  Future<BusinessBranch> getBranch(
+      {DocumentReference reference, Map<String, dynamic> forData}) async {
+    if (forData != null) {
+      final businessRef = forData["business"];
+      final business = await getBusiness(reference: businessRef);
+      final branch = BusinessBranch.fromJson(forData, business: business);
+      branches.addAll({reference: branch});
+      return branch;
+    }
+    if (branches.containsKey(reference)) {
+      return branches[reference];
+    }
+    final snap = await reference.get();
+    final data = snap.data();
+    final businessRef = data["business"];
+    final business = await getBusiness(reference: businessRef);
+    final branch = BusinessBranch.fromJson(data, business: business);
+    branches.addAll({reference: branch});
+    return branch;
+  }
+
+  Future<BusinessDetails> getBusiness(
+      {DocumentReference reference, Map<String, dynamic> forData}) async {
+    if (forData != null) {
+      final business = BusinessDetails.fromJson(forData);
+      businesses.addAll({reference: business});
+      return business;
+    }
+    if (businesses.containsKey(reference)) {
+      return businesses[reference];
+    }
+    final snap = await reference.get();
+    final data = snap.data();
+    final business = BusinessDetails.fromJson(data);
+    businesses.addAll({reference: business});
+    return business;
+  }
+
   Future<List<BusinessBranch>> getNearestFeatured() async {
     final query = FirebaseFirestore.instance
         .collection("businesses")
@@ -483,37 +508,82 @@ abstract class _CloudStore with Store {
           isEqualTo: myAddress.locality.name);
     }
     final snaps = await query.get();
-    final _branches = <DocumentReference, BusinessBranch>{};
+    final _branches = <BusinessBranch>[];
     if (snaps.docs.isNotEmpty) {
       await Future.forEach<QueryDocumentSnapshot>(snaps.docs, (doc) async {
-        final DocumentReference businessRef = doc.data()["business"];
-        if (businesses.containsKey(businessRef)) {
-          if (branches.containsKey(doc.reference)) {
-            final branch = await getBranch(reference: doc.reference);
-            _branches.addAll({doc.reference:branch});
-          } else {
-            final branch = BusinessBranch.fromJson(
-              doc.data(),
-              business: businesses[businessRef],
-            )..myDoc.value = doc.reference;
-            _branches.addAll(
-              {
-                doc.reference: branch,
-              },
-            );
-          }
-        } else {
-          final businessDetails = await getBusiness(reference: businessRef);
-          _branches.addAll({
-            doc.reference: BusinessBranch.fromJson(
-              doc.data(),
-              business: businessDetails,
-            )..myDoc.value = doc.reference,
-          });
-        }
+        final branch =
+            await getBranch(reference: doc.reference, forData: doc.data());
+        _branches.add(branch);
       });
     }
-    return branches.values.toList();
+    return _branches;
+  }
+
+  Future<List<BusinessBranch>> getBranchesForCategory(
+      BusinessCategory category) async {
+    final query = await FirebaseFirestore.instance
+        .collection("businesses")
+        .where("status", isEqualTo: "published")
+        .where("category.name", isEqualTo: category.name)
+        .where("assignedAddress.iso2", isEqualTo: myAddress.country.iso2)
+        .where("assignedAddress.city", isEqualTo: myAddress.city.name);
+    if (myAddress.locality != null) {
+      query.where("assignedAddress.locality",
+          isEqualTo: myAddress.locality.name);
+    }
+    final snaps = await query.get();
+    if (snaps.docs.isEmpty) {
+      return [];
+    }
+    final list = <BusinessBranch>[];
+    await Future.forEach(snaps.docs, (snap) async {
+      list.add(
+          await getBranch(reference: snap.reference, forData: snap.data()));
+    });
+    return list;
+  }
+
+  Future getFavorites() async {
+    if (myData.containsKey("favorites")) {
+      final favoritesData = myData["favorites"];
+      if (favoritesData is Map) {
+        favoritesData.forEach((k, v) async {
+          if (v is Map) {
+            final type =
+                EnumToString.fromString(FavoriteType.values, v["type"]);
+            if (type == FavoriteType.business) {
+              final business = await getBusiness(reference: v["business"]);
+              favorites.add(Favorite(business: business, type: type, id: k));
+            } else if (type == FavoriteType.businessBranch) {
+              final branch = await getBranch(reference: v["businessBranch"]);
+              favorites
+                  .add(Favorite(businessBranch: branch, type: type, id: k));
+            } else if (type == FavoriteType.businessService) {
+              favorites.add(Favorite(
+                  businessService:
+                      BusinessService.fromJson(v["businessService"]),
+                  type: type,
+                  id: k));
+            }
+          } else {
+            throw Exception(
+                "This should never be the case @cloudStore getFavorites()");
+          }
+        });
+      } else {
+        throw Exception(
+            "This should never be the case @cloudStore getFavorites()");
+      }
+    }
+  }
+
+  Future setMyFavorites() async {
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(FirebaseAuth.instance.currentUser.uid)
+        .set({
+      "favorites": favorites.map((f) => MapEntry(kUUIDGen.v1(), f.toMap()))
+    }, SetOptions(merge: true));
   }
 }
 

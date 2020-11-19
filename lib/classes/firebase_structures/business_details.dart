@@ -139,7 +139,8 @@ class BusinessDetails {
       ..contactNumber.value = contactNumber.value
       ..email.value = email.value
       ..rating.value = 0.0
-      ..status.value = BusinessBranchActiveStatus.lead;
+      ..status.value = BusinessBranchActiveStatus.lead
+      ..businessCategory.value = this.category.value;
 
     await branch.saveBranch();
 

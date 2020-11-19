@@ -15,7 +15,7 @@ class _BookingTimeLineWidgetState extends State<BookingTimeLineWidget> {
   final _c = DayViewController(zoomCoefficient: 2.0, minZoom: 2.0);
   @override
   Widget build(BuildContext context) {
-    final list = flow.getBookingsForDay(widget.date);
+    final list = flow.getMyBookingsForDay(widget.date);
     return DayView(
       date: widget.date,
       inScrollableWidget: true,
