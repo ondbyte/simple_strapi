@@ -3,6 +3,7 @@ import 'package:bapp/classes/firebase_structures/business_details.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:bapp/stores/all_store.dart';
+import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -32,7 +33,7 @@ abstract class _BusinessStore with Store {
 
   AllStore _allStore;
 
-  void setAllStore(AllStore allStore)=>_allStore=allStore;
+  void setAllStore(AllStore allStore) => _allStore = allStore;
 
   Future init(BuildContext context) async {
     _user = _auth.currentUser;
@@ -99,6 +100,7 @@ abstract class _BusinessStore with Store {
       final data = businessDetails.data();
       //print(data);
       business = BusinessDetails.fromJson(data);
+      _allStore.get<BookingFlow>().branch = business.selectedBranch.value;
     }
   }
 

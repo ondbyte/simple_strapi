@@ -6,11 +6,13 @@ import 'package:bapp/classes/firebase_structures/business_staff.dart';
 import 'package:bapp/classes/firebase_structures/business_timings.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/extensions.dart';
+import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
+import 'package:thephonenumber/thephonenumber.dart';
 
 import '../helpers/helper.dart';
 import 'all_store.dart';
@@ -25,7 +27,7 @@ class BookingFlow {
   final selectedSubTitle = Observable("");
   final filteredStaffs = ObservableList<FilteredBusinessStaff>();
   final branchBookings = ObservableList<BusinessBooking>();
-  final timeWindow = Observable<FromToTiming>(null);
+  final timeWindow = Observable<FromToTiming>(FromToTiming.today());
   final holidays = ObservableMap<DateTime, List>();
   final slot = Observable<DateTime>(null);
   final myBookings = ObservableList<BusinessBooking>();
@@ -52,7 +54,7 @@ class BookingFlow {
     selectedTitle.value = "";
     selectedSubTitle.value = "";
     filteredStaffs.clear();
-    timeWindow.value = null;
+    timeWindow.value = FromToTiming.today();
     slot.value = null;
     branchBookings.clear();
   }
@@ -79,6 +81,15 @@ class BookingFlow {
   List<BusinessBooking> getMyBookingsForDay(DateTime day) {
     return myBookings
         .where((element) => element.fromToTiming.from.isDay(day))
+        .toList();
+  }
+
+  List<BusinessBooking> getStaffBookingsForDay(DateTime day) {
+    assert(professional.value != null);
+    return branchBookings
+        .where((element) =>
+            element.fromToTiming.from.isDay(day) &&
+            element.staff.name == professional.value.staff.name)
         .toList();
   }
 
@@ -207,13 +218,32 @@ class BookingFlow {
   }
 
   void _setupReactions() {
+    _disposers.add(reaction(
+        (_) => _allStore.get<BusinessStore>().business.selectedBranch.value,
+        (b) {
+      branch = b;
+    }));
+    _disposers.add(reaction((_) => professional.value, (p) {
+      services.clear();
+      slot.value = null;
+      timeWindow.value = FromToTiming.today();
+      totalDurationMinutes.value = 0;
+      totalPrice.value = 0.0;
+      selectedSubTitle.value = "";
+      selectedTitle.value = "";
+      holidays.clear();
+      slot.value = null;
+      if (_branch.value != null) {
+        _getHolidays();
+      }
+    }));
     _disposers.add(
       reaction(
         (_) => _branch.value,
         (_) {
           services.clear();
           slot.value = null;
-          timeWindow.value = null;
+          timeWindow.value = FromToTiming.today();
           totalDurationMinutes.value = 0;
           totalPrice.value = 0.0;
           professional.value = null;
@@ -244,7 +274,7 @@ class BookingFlow {
       reaction(
         (_) => timeWindow.value,
         (_) async {
-          if (professional.value != null) {
+          if (professional.value != null && timeWindow.value != null) {
             professional.value.computeForDay(timeWindow.value.from);
           }
         },
@@ -283,7 +313,7 @@ class BookingFlow {
     });
   }
 
-  Future done() async {
+  Future done({ThePhoneNumber number}) async {
     final from = slot.value.toDay(timeWindow.value.from);
     final to = slot.value
         .add(Duration(minutes: totalDurationMinutes.value))
@@ -294,7 +324,9 @@ class BookingFlow {
       staff: professional.value.staff,
       services: services,
       status: BusinessBookingStatus.pending,
-      bookedByNumber: FirebaseAuth.instance.currentUser.phoneNumber,
+      bookedByNumber: number == null
+          ? FirebaseAuth.instance.currentUser.phoneNumber
+          : number.internationalNumber,
       bookingUserType: _allStore.get<CloudStore>().userType,
     );
     b.myDoc =

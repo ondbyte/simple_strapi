@@ -1,3 +1,4 @@
+import 'package:bapp/classes/firebase_structures/business_timings.dart';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/booking_flow.dart';
@@ -7,7 +8,6 @@ import 'package:bapp/widgets/booking_timeline.dart';
 import 'package:bapp/widgets/login_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -18,7 +18,6 @@ class BookingsTab extends StatefulWidget {
 
 class _BookingsTabState extends State<BookingsTab> {
   CalendarController _calendarController = CalendarController();
-  final _selectedDay = Observable(DateTime.now());
 
   @override
   void dispose() {
@@ -46,7 +45,9 @@ class _BookingsTabState extends State<BookingsTab> {
                         expandedHeight: 160,
                         pinned: true,
                         automaticallyImplyLeading: false,
-                        actions: [SizedBox()],
+                        actions: [
+                          SizedBox(),
+                        ],
                         flexibleSpace: BappRowCalender(
                           bookings: flow.myBookingsAsCalendarEvents(),
                           initialDate: DateTime.now(),
@@ -54,22 +55,29 @@ class _BookingsTabState extends State<BookingsTab> {
                           controller: _calendarController,
                           onDayChanged: (day, _, __) {
                             act(() {
-                              _selectedDay.value = day;
+                              flow.timeWindow.value = FromToTiming.forDay(day);
                             });
                           },
                         ),
                       ),
                       SliverList(
-                          delegate: SliverChildListDelegate([
-                        SizedBox(
-                          height: 20,
+                        delegate: SliverChildListDelegate(
+                          [
+                            SizedBox(
+                              height: 20,
+                            ),
+                            Observer(
+                              builder: (_) {
+                                return BookingTimeLineWidget(
+                                  date: flow.timeWindow.value.from,
+                                  list: flow.getBookingsForDay(
+                                      flow.timeWindow.value.from),
+                                );
+                              },
+                            )
+                          ],
                         ),
-                        Observer(builder: (_) {
-                          return BookingTimeLineWidget(
-                            date: _selectedDay.value,
-                          );
-                        })
-                      ]))
+                      )
                     ],
                   );
           },

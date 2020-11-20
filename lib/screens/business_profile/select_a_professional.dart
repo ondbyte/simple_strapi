@@ -1,3 +1,4 @@
+import 'package:bapp/classes/filtered_business_staff.dart';
 import 'package:bapp/classes/firebase_structures/business_timings.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/extensions.dart';
@@ -13,6 +14,9 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
 
 class SelectAProfessionalScreen extends StatefulWidget {
+  final Function(FilteredBusinessStaff) onSelected;
+
+  const SelectAProfessionalScreen({Key key, this.onSelected}) : super(key: key);
   @override
   _SelectAProfessionalScreenState createState() =>
       _SelectAProfessionalScreenState();
@@ -70,12 +74,17 @@ class _SelectAProfessionalScreenState extends State<SelectAProfessionalScreen> {
         (s) {
           list.add(
             ListTile(
-              onTap: () {
-                act(() {
-                  flow.professional.value = s;
-                });
-                BappNavigator.bappPush(context, SelectTimeSlotScreen());
-              },
+              onTap: widget.onSelected != null
+                  ? () {
+                      widget.onSelected(s);
+                      Navigator.of(context).pop();
+                    }
+                  : () {
+                      act(() {
+                        flow.professional.value = s;
+                      });
+                      BappNavigator.bappPush(context, SelectTimeSlotScreen());
+                    },
               contentPadding: EdgeInsets.symmetric(vertical: 8),
               title: Text(s.staff.name),
               trailing: Icon(Icons.arrow_forward_rounded),

@@ -1,3 +1,4 @@
+import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_week_view/flutter_week_view.dart';
@@ -5,8 +6,10 @@ import 'package:provider/provider.dart';
 
 class BookingTimeLineWidget extends StatefulWidget {
   final DateTime date;
+  final List<BusinessBooking> list;
 
-  const BookingTimeLineWidget({Key key, this.date}) : super(key: key);
+  const BookingTimeLineWidget({Key key, this.date, this.list = const []})
+      : super(key: key);
   @override
   _BookingTimeLineWidgetState createState() => _BookingTimeLineWidgetState();
 }
@@ -14,8 +17,14 @@ class BookingTimeLineWidget extends StatefulWidget {
 class _BookingTimeLineWidgetState extends State<BookingTimeLineWidget> {
   final _c = DayViewController(zoomCoefficient: 2.0, minZoom: 2.0);
   @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final list = flow.getMyBookingsForDay(widget.date);
+    final list = widget.list;
     return DayView(
       date: widget.date,
       inScrollableWidget: true,

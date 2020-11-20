@@ -16,6 +16,9 @@ import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class SelectTimeSlotScreen extends StatefulWidget {
+  final Function onSelect;
+
+  const SelectTimeSlotScreen({Key key, this.onSelect}) : super(key: key);
   @override
   _SelectTimeSlotScreenState createState() => _SelectTimeSlotScreenState();
 }
@@ -34,22 +37,24 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
           label: "Confirm booking",
           onPressed: flow.slot.value == null
               ? null
-              : () async {
-                  await BappNavigator.bappPushAndRemoveAll(
-                    context,
-                    ContextualMessageScreen(
-                      message:
-                          "Your booking has been placed, please show up minutes before the booking",
-                      buttonText: "Go to Home",
-                      init: () async {
-                        await flow.done();
-                      },
-                      onButtonPressed: (context) {
-                        BappNavigator.bappPushAndRemoveAll(context, Bapp());
-                      },
-                    ),
-                  );
-                },
+              : widget.onSelect != null
+                  ? widget.onSelect
+                  : () async {
+                      await BappNavigator.bappPushAndRemoveAll(
+                        context,
+                        ContextualMessageScreen(
+                          message:
+                              "Your booking has been placed, please show up minutes before the booking",
+                          buttonText: "Go to Home",
+                          init: () async {
+                            await flow.done();
+                          },
+                          onButtonPressed: (context) {
+                            BappNavigator.bappPushAndRemoveAll(context, Bapp());
+                          },
+                        ),
+                      );
+                    },
         );
       }),
       body: DefaultTabController(
