@@ -1,4 +1,4 @@
-import 'package:bapp/FCM.dart';
+import 'package:bapp/fcm.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/cloud_store.dart';

@@ -175,6 +175,8 @@ class BappFCMMessage {
   }
 
   Map<String, String> toMap() {
+    List diet;
+
     if (type == BappFCMMessageType.reminder) {
       assert(remindTime != null, "reminder message must have a reminding time");
     }

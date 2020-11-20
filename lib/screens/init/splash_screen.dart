@@ -14,7 +14,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:thephonenumber/thephonenumber.dart';
 
-import '../../FCM.dart';
+import '../../fcm.dart';
 import '../../route_manager.dart';
 
 class SplashScreen extends StatefulWidget {
