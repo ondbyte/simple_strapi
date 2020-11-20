@@ -90,7 +90,7 @@ async function createReminder(message: BappFCMMessage) {
     const parent = client.queuePath(project, location, queue);
     const task = {
         httpRequest: {
-            httpMethod: 'POST',
+            httpMethod: ct.protos.google.cloud.tasks.v2.HttpMethod.POST,
             url: "https://us-central1-bapp-f05e2.cloudfunctions.net/sendReminder",
             body: JSON.stringify(message.toMap()),
             headers: {
@@ -101,15 +101,15 @@ async function createReminder(message: BappFCMMessage) {
             seconds: message.remindTime?.getTime() ?? 1000 / 1000,
         },
         firstAttempt: {
-            dispatchTime: message.remindTime,
+            dispatchTime: message.remindTime?.getTime()??1000/1000,
         },
         lastAttempt: {
-            dispatchTime: message.remindTime,
+            dispatchTime: message.remindTime?.getTime()??1000/1000,
         },
         headers: {
             'Content-Type': 'application/string',
         },
-    } as ct.protos.google.cloud.tasks.v2.ITask;
+    } ;
 
     try {
         const [response] = await client.createTask({ parent, task });
