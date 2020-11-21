@@ -50,6 +50,7 @@ enum BusinessBookingStatus {
   cancelledByReceptionist,
   cancelledByManager,
   pending,
+  accepted,
   ongoing,
   finished,
   noShow
