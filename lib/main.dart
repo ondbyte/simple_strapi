@@ -23,10 +23,10 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     final allStore = AllStore();
     final cloudStore = CloudStore()..setAllStore(allStore);
-    final businessStore = BusinessStore()..setAllStore(allStore);
-    final flow = BookingFlow()..setAllStore(allStore);
     allStore.set<CloudStore>(cloudStore);
+    final businessStore = BusinessStore()..setAllStore(allStore);
     allStore.set<BusinessStore>(businessStore);
+    final flow = BookingFlow(allStore);
     allStore.set<BookingFlow>(flow);
     return MultiProvider(
       providers: [

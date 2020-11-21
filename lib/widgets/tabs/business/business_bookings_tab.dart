@@ -27,8 +27,10 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      flow.branch =
-          Provider.of<BusinessStore>(context).business.selectedBranch.value;
+      flow.branch = Provider.of<BusinessStore>(context, listen: false)
+          .business
+          .selectedBranch
+          .value;
     });
     super.initState();
   }

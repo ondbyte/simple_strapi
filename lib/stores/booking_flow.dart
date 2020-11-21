@@ -68,7 +68,7 @@ class BookingFlow {
     });
   }
 
-  BookingFlow() {
+  BookingFlow(this._allStore) {
     _setupReactions();
   }
 
@@ -105,35 +105,33 @@ class BookingFlow {
         .get();
 
     myBookings.clear();
-    bookingSnaps.docs.forEach(
-      (booking) async {
-        final data = booking.data();
-        final cloudStore = _allStore.get<CloudStore>();
-        final b = await cloudStore.getBranch(reference: booking["branch"]);
-        myBookings.add(
-          BusinessBooking(
-              services: (data["services"] as List).map(
-                (s) {
-                  return BusinessService.fromJson(s);
-                },
-              ).toList(),
-              staff: b.getStaffFor(name: data["staff"]),
-              branch: b,
-              fromToTiming: FromToTiming.fromTimeStamps(
-                from: data["from"],
-                to: data["to"],
-              ),
-              status: EnumToString.fromString(
-                BusinessBookingStatus.values,
-                data["status"],
-              ),
-              bookedByNumber: data["bookedByNumber"],
-              bookingUserType: EnumToString.fromString(
-                  UserType.values, data["bookingUserType"]))
-            ..myDoc = booking.reference,
-        );
-      },
-    );
+    await Future.forEach(bookingSnaps.docs, (booking) async {
+      final data = booking.data();
+      final cloudStore = _allStore.get<CloudStore>();
+      final b = await cloudStore.getBranch(reference: booking["branch"]);
+      myBookings.add(
+        BusinessBooking(
+            services: (data["services"] as List).map(
+              (s) {
+                return BusinessService.fromJson(s);
+              },
+            ).toList(),
+            staff: b.getStaffFor(name: data["staff"]),
+            branch: b,
+            fromToTiming: FromToTiming.fromTimeStamps(
+              from: data["from"],
+              to: data["to"],
+            ),
+            status: EnumToString.fromString(
+              BusinessBookingStatus.values,
+              data["status"],
+            ),
+            bookedByNumber: data["bookedByNumber"],
+            bookingUserType: EnumToString.fromString(
+                UserType.values, data["bookingUserType"]))
+          ..myDoc = booking.reference,
+      );
+    });
   }
 
   Future getBranchBookings() async {
@@ -218,21 +216,23 @@ class BookingFlow {
   }
 
   void _setupReactions() {
-    _disposers.add(reaction(
-        (_) => _allStore.get<BusinessStore>().business.selectedBranch.value,
-        (b) {
-      branch = b;
-    }));
+    if (_allStore.get<CloudStore>().userType != UserType.customer) {
+      _disposers.add(reaction(
+          (_) => _allStore.get<BusinessStore>().business.selectedBranch.value,
+          (b) {
+        branch = b;
+      }));
+    }
+
     _disposers.add(reaction((_) => professional.value, (p) {
-      services.clear();
+      //services.clear();
       slot.value = null;
       timeWindow.value = FromToTiming.today();
-      totalDurationMinutes.value = 0;
-      totalPrice.value = 0.0;
-      selectedSubTitle.value = "";
-      selectedTitle.value = "";
+      //totalDurationMinutes.value = 0;
+      //totalPrice.value = 0.0;
+      //selectedSubTitle.value = "";
+      //selectedTitle.value = "";
       holidays.clear();
-      slot.value = null;
       if (_branch.value != null) {
         _getHolidays();
       }

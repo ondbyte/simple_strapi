@@ -42,6 +42,23 @@ class BusinessBooking {
       "bookingUserType": EnumToString.convertToString(bookingUserType),
     };
   }
+
+  double totalCost() {
+    var t = 0.0;
+    services.forEach((element) {
+      t += element.price.value;
+    });
+    return t;
+  }
+
+  String getServicesSeperatedBycomma() {
+    var s = "";
+    services.forEach((element) {
+      s += element.serviceName.value + ", ";
+    });
+    //s = s.trim().replaceFirst(",", "", s.length - 1);
+    return s;
+  }
 }
 
 enum BusinessBookingStatus {

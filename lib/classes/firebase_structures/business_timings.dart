@@ -20,9 +20,13 @@ class BusinessTimings {
     );
   }
 
-  List<FromToTiming> getTodayTimings(){
+  List<FromToTiming> getTodayTimings() {
     final today = DateFormat("EEEE").format(DateTime.now());
-    return allDayTimings.firstWhere((element) => element.dayName.toLowerCase()==today.toLowerCase()).timings.value;
+    return allDayTimings
+        .firstWhere(
+            (element) => element.dayName.toLowerCase() == today.toLowerCase())
+        .timings
+        .value;
   }
 
   List<FromToTiming> getForDay(DateTime day) {
@@ -186,14 +190,14 @@ class FromToTiming {
         )
       ];
     } else {
-      if (_to.isSame(_otherTo)) {
+      /*if (_to.isSame(_otherTo)) {
         [
           FromToTiming.fromDates(
             from: _from.toDateAndTime(),
             to: _otherFrom.toDateAndTime(),
           )
         ];
-      }
+      }*/
       return [
         FromToTiming.fromDates(
           from: _from.toDateAndTime(),
@@ -205,5 +209,14 @@ class FromToTiming {
         )
       ];
     }
+  }
+
+  final _format = DateFormat("hh:mm a");
+  String format() {
+    return _format.format(from) + " to " + _format.format(to);
+  }
+
+  int inMinutes() {
+    return to.difference(from).inMinutes;
   }
 }

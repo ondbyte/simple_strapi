@@ -4,8 +4,8 @@ import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/bapp_calendar.dart';
-import 'package:bapp/widgets/booking_timeline.dart';
 import 'package:bapp/widgets/login_widget.dart';
+import 'package:bapp/widgets/tiles/customer_booking_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -68,10 +68,19 @@ class _BookingsTabState extends State<BookingsTab> {
                             ),
                             Observer(
                               builder: (_) {
-                                return BookingTimeLineWidget(
-                                  date: flow.timeWindow.value.from,
-                                  list: flow.getBookingsForDay(
-                                      flow.timeWindow.value.from),
+                                final list = flow.getMyBookingsForDay(
+                                    flow.timeWindow.value.from);
+                                if (list.isEmpty) {
+                                  return SizedBox();
+                                }
+                                return ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: list.length,
+                                  itemBuilder: (_, i) {
+                                    return CustomerBookingTile(
+                                      booking: list[i],
+                                    );
+                                  },
                                 );
                               },
                             )
