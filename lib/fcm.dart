@@ -59,25 +59,28 @@ class BappFCM {
     }
   }
 
-  Future initForIOS() async {
-    final _fcm = FirebaseMessaging();
-    final enabled = await _fcm.requestNotificationPermissions(
-      const IosNotificationSettings(
-          sound: true, badge: true, alert: true, provisional: false),
-    );
-    if (enabled) {
-      _init(_fcm);
-      _fcm.setAutoInitEnabled(true);
-    } else {
-      if (!isFcmInitialized) {
-        _fcm.onIosSettingsRegistered.listen(
-          (event) {
-            initForIOS();
-          },
-        );
+  Future<bool> initForIOS() async {
+    if (Platform.isIOS) {
+      final _fcm = FirebaseMessaging();
+      final enabled = await _fcm.requestNotificationPermissions(
+        const IosNotificationSettings(
+            sound: true, badge: true, alert: true, provisional: false),
+      );
+      if (enabled) {
+        _init(_fcm);
+        _fcm.setAutoInitEnabled(true);
+      } else {
+        if (!isFcmInitialized) {
+          _fcm.onIosSettingsRegistered.listen(
+            (event) {
+              initForIOS();
+            },
+          );
+        }
       }
+      return enabled;
     }
-    return enabled;
+    return false;
   }
 
   Future onMessage(Map<String, dynamic> message) async {

@@ -29,68 +29,71 @@ class _BookingsTabState extends State<BookingsTab> {
   Widget build(BuildContext context) {
     return Consumer<CloudStore>(
       builder: (_, cloudStore, __) {
-        return Observer(
-          builder: (_) {
-            return cloudStore.status == AuthStatus.anonymousUser
-                ? AskToLoginWidget(
-                    loginReason: LoginConfig.bookingTabLoginReason.primary,
-                    secondaryReason:
-                        LoginConfig.bookingTabLoginReason.secondary,
-                  )
-                : CustomScrollView(
-                    slivers: <Widget>[
-                      SliverAppBar(
-                        elevation: 0,
-                        collapsedHeight: 160,
-                        expandedHeight: 160,
-                        pinned: true,
-                        automaticallyImplyLeading: false,
-                        actions: [
-                          SizedBox(),
-                        ],
-                        flexibleSpace: BappRowCalender(
-                          bookings: flow.myBookingsAsCalendarEvents(),
-                          initialDate: DateTime.now(),
-                          holidays: flow.holidays,
-                          controller: _calendarController,
-                          onDayChanged: (day, _, __) {
-                            act(() {
-                              flow.timeWindow.value = FromToTiming.forDay(day);
-                            });
-                          },
-                        ),
-                      ),
-                      SliverList(
-                        delegate: SliverChildListDelegate(
-                          [
-                            SizedBox(
-                              height: 20,
-                            ),
-                            Observer(
-                              builder: (_) {
-                                final list = flow.getMyBookingsForDay(
-                                    flow.timeWindow.value.from);
-                                if (list.isEmpty) {
-                                  return SizedBox();
-                                }
-                                return ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: list.length,
-                                  itemBuilder: (_, i) {
-                                    return CustomerBookingTile(
-                                      booking: list[i],
-                                    );
-                                  },
-                                );
-                              },
-                            )
+        return OrientationBuilder(builder: (_, o) {
+          return Observer(
+            builder: (_) {
+              return cloudStore.status == AuthStatus.anonymousUser
+                  ? AskToLoginWidget(
+                      loginReason: LoginConfig.bookingTabLoginReason.primary,
+                      secondaryReason:
+                          LoginConfig.bookingTabLoginReason.secondary,
+                    )
+                  : CustomScrollView(
+                      slivers: <Widget>[
+                        SliverAppBar(
+                          elevation: 0,
+                          collapsedHeight: 160,
+                          expandedHeight: 160,
+                          pinned: true,
+                          automaticallyImplyLeading: false,
+                          actions: [
+                            SizedBox(),
                           ],
+                          flexibleSpace: BappRowCalender(
+                            bookings: flow.myBookingsAsCalendarEvents(),
+                            initialDate: DateTime.now(),
+                            holidays: flow.holidays,
+                            controller: _calendarController,
+                            onDayChanged: (day, _, __) {
+                              act(() {
+                                flow.timeWindow.value =
+                                    FromToTiming.forDay(day);
+                              });
+                            },
+                          ),
                         ),
-                      )
-                    ],
-                  );
-          },
-        );
+                        SliverList(
+                          delegate: SliverChildListDelegate(
+                            [
+                              SizedBox(
+                                height: 20,
+                              ),
+                              Observer(
+                                builder: (_) {
+                                  final list = flow.getMyBookingsForDay(
+                                      flow.timeWindow.value.from);
+                                  if (list.isEmpty) {
+                                    return SizedBox();
+                                  }
+                                  return ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: list.length,
+                                    itemBuilder: (_, i) {
+                                      return CustomerBookingTile(
+                                        booking: list[i],
+                                      );
+                                    },
+                                  );
+                                },
+                              )
+                            ],
+                          ),
+                        )
+                      ],
+                    );
+            },
+          );
+        });
       },
     );
   }

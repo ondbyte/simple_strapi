@@ -1,6 +1,5 @@
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
-import 'package:bapp/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -9,13 +8,19 @@ class ContextualMessageScreen extends StatefulWidget {
   final String message;
   final String buttonText;
   final Function(BuildContext) onButtonPressed;
+  final String svgAssetToDisplay;
+  final String secondarybuttonText;
+  final Function(BuildContext) secondaryButtonPressed;
 
   const ContextualMessageScreen(
       {Key key,
       this.init,
       this.message,
       this.buttonText = "Back to Home",
-      this.onButtonPressed})
+      this.onButtonPressed,
+      this.svgAssetToDisplay,
+      this.secondarybuttonText,
+      this.secondaryButtonPressed})
       : super(key: key);
   @override
   _ContextualMessageScreenState createState() =>
@@ -23,7 +28,8 @@ class ContextualMessageScreen extends StatefulWidget {
 }
 
 class _ContextualMessageScreenState extends State<ContextualMessageScreen> {
-  bool loading = true;
+  bool loading = true, _inited = false;
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -31,9 +37,10 @@ class _ContextualMessageScreenState extends State<ContextualMessageScreen> {
         padding: EdgeInsets.all(16),
         child: InitWidget(
           initializer: () async {
-            if (widget.init != null) {
+            if (widget.init != null && !_inited) {
               await widget.init();
             }
+            _inited = true;
           },
           onInitComplete: () {
             setState(() {
@@ -46,13 +53,16 @@ class _ContextualMessageScreenState extends State<ContextualMessageScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 SvgPicture.asset(
-                  "assets/svg/messages.svg",
+                  widget.svgAssetToDisplay ?? "assets/svg/messages.svg",
                   width: 256,
                 ),
                 SizedBox(
                   height: 20,
                 ),
-                Text("${widget.message}",textAlign: TextAlign.center,),
+                Text(
+                  "${widget.message}",
+                  textAlign: TextAlign.center,
+                ),
                 SizedBox(
                   height: 20,
                 ),
@@ -68,7 +78,18 @@ class _ContextualMessageScreenState extends State<ContextualMessageScreen> {
                           }
                         },
                   child: Text(widget.buttonText),
-                )
+                ),
+                if (widget.secondarybuttonText != null)
+                  FlatButton(
+                    onPressed: loading
+                        ? null
+                        : () {
+                            if (widget.secondaryButtonPressed != null) {
+                              widget.secondaryButtonPressed(context);
+                            }
+                          },
+                    child: Text(widget.secondarybuttonText),
+                  ),
               ],
             ),
           ),

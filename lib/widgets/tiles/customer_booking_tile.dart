@@ -1,141 +1,113 @@
 import 'package:bapp/classes/firebase_structures/business_booking.dart';
-import 'package:bapp/config/config.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class CustomerBookingTile extends StatelessWidget {
+import '../size_provider.dart';
+
+class CustomerBookingTile extends StatefulWidget {
   final BorderRadius borderRadius;
   final BusinessBooking booking;
+  final EdgeInsets padding;
+  final EdgeInsets margin;
 
-  const CustomerBookingTile({Key key, this.borderRadius, this.booking})
+  const CustomerBookingTile(
+      {Key key, this.borderRadius, this.booking, this.padding, this.margin})
       : super(key: key);
+
+  @override
+  _CustomerBookingTileState createState() => _CustomerBookingTileState();
+}
+
+class _CustomerBookingTileState extends State<CustomerBookingTile> {
+  final _key = GlobalKey();
   @override
   Widget build(BuildContext context) {
-    final color = _getColor();
+    final color = BusinessBooking.getColor(widget.booking.status);
     final currency =
         Provider.of<CloudStore>(context, listen: false).theNumber.currency;
-    return ListTile(
-      leading: SizedBox(
-        width: 8,
-        height: double.maxFinite,
+    return Padding(
+      key: _key,
+      padding: widget.margin ?? EdgeInsets.all(8),
+      child: OnChildSizedWidget(
         child: Container(
-          color: _getColor(),
-        ),
-      ),
-      trailing: TextButton(
-        child: Text(""),
-        style: ButtonStyle(
-          foregroundColor: MaterialStateProperty.resolveWith<Color>(
-            (states) => _getColor(),
+          decoration: BoxDecoration(
+            color: Theme.of(context).backgroundColor,
+            borderRadius: widget.borderRadius ?? BorderRadius.circular(6),
+          ),
+          child: ListTile(
+            contentPadding: widget.padding ??
+                EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            trailing: SizedBox(
+              width: 8,
+            ),
+            title: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.booking.fromToTiming.format(),
+                  style: Theme.of(context).textTheme.subtitle1,
+                ),
+                Text(
+                  widget.booking.branch.name.value,
+                  style: Theme.of(context).textTheme.headline3,
+                ),
+              ],
+            ),
+            subtitle: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.booking.getServicesSeperatedBycomma(),
+                  style: Theme.of(context).textTheme.subtitle2,
+                ),
+                Text(
+                  widget.booking.fromToTiming.inMinutes().toString() +
+                      " Minutes, " +
+                      currency +
+                      " " +
+                      widget.booking.totalCost().toString(),
+                )
+              ],
+            ),
           ),
         ),
-      ),
-      title: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            booking.fromToTiming.format(),
-            style: Theme.of(context).textTheme.subtitle1,
-          ),
-          Text(
-            booking.branch.name.value,
-            style: Theme.of(context).textTheme.headline3,
-          ),
-        ],
-      ),
-      subtitle: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            booking.getServicesSeperatedBycomma(),
-            style: Theme.of(context).textTheme.subtitle2,
-          ),
-          Text(
-            booking.fromToTiming.inMinutes().toString() +
-                " Minutes, " +
-                currency +
-                " " +
-                booking.totalCost().toString(),
-          )
-        ],
-      ),
-    );
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: borderRadius ?? BorderRadius.zero,
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-      child: Row(
-        children: [
-          Container(
-            width: 8,
-          ),
-          //Column
-        ],
+        onChildSize: (s) {
+          if (s != null) {
+            return SizedBox.fromSize(
+              size: s,
+              child: Padding(
+                padding: widget.padding ?? EdgeInsets.all(8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 8,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: color,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                    ),
+                    Text(
+                      BusinessBooking.getButtonLabel(widget.booking.status),
+                      style: Theme.of(context)
+                          .textTheme
+                          .subtitle1
+                          .apply(color: color),
+                    )
+                  ],
+                ),
+              ),
+            );
+          }
+          return SizedBox();
+        },
       ),
     );
-  }
-
-  Color _getColor() {
-    final status = booking.status;
-    switch (status) {
-      case BusinessBookingStatus.accepted:
-      case BusinessBookingStatus.ongoing:
-        {
-          return CardsColor.colors["teal"];
-        }
-      case BusinessBookingStatus.pending:
-        {
-          return CardsColor.colors["purple"];
-        }
-      case BusinessBookingStatus.cancelledByUser:
-        {
-          return CardsColor.colors["orange"];
-        }
-      case BusinessBookingStatus.cancelledByManager:
-      case BusinessBookingStatus.cancelledByReceptionist:
-      case BusinessBookingStatus.cancelledByStaff:
-      case BusinessBookingStatus.noShow:
-        {
-          return Colors.redAccent;
-        }
-      case BusinessBookingStatus.finished:
-        {
-          return Colors.grey[400];
-        }
-    }
-  }
-
-  Color _getButtonLabel() {
-    final status = booking.status;
-    switch (status) {
-      case BusinessBookingStatus.accepted:
-      case BusinessBookingStatus.ongoing:
-        {
-          return CardsColor.colors["teal"];
-        }
-      case BusinessBookingStatus.pending:
-        {
-          return CardsColor.colors["purple"];
-        }
-      case BusinessBookingStatus.cancelledByUser:
-        {
-          return CardsColor.colors["orange"];
-        }
-      case BusinessBookingStatus.cancelledByManager:
-      case BusinessBookingStatus.cancelledByReceptionist:
-      case BusinessBookingStatus.cancelledByStaff:
-      case BusinessBookingStatus.noShow:
-        {
-          return Colors.redAccent;
-        }
-      case BusinessBookingStatus.finished:
-        {
-          return Colors.grey[400];
-        }
-    }
   }
 }

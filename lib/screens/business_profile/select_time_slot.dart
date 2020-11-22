@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:bapp/classes/firebase_structures/business_timings.dart';
+import 'package:bapp/fcm.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
@@ -32,31 +35,55 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
       appBar: AppBar(
         title: Text("Select Timeslot"),
       ),
-      bottomNavigationBar: Observer(builder: (_) {
-        return BottomPrimaryButton(
-          label: "Confirm booking",
-          onPressed: flow.slot.value == null
-              ? null
-              : widget.onSelect != null
-                  ? widget.onSelect
-                  : () async {
-                      await BappNavigator.bappPushAndRemoveAll(
-                        context,
-                        ContextualMessageScreen(
-                          message:
-                              "Your booking has been placed, please show up minutes before the booking",
-                          buttonText: "Go to Home",
-                          init: () async {
-                            await flow.done();
-                          },
-                          onButtonPressed: (context) {
-                            BappNavigator.bappPushAndRemoveAll(context, Bapp());
-                          },
-                        ),
-                      );
-                    },
-        );
-      }),
+      bottomNavigationBar: Observer(
+        builder: (_) {
+          return BottomPrimaryButton(
+            label: "Confirm booking",
+            onPressed: flow.slot.value == null
+                ? null
+                : widget.onSelect != null
+                    ? widget.onSelect
+                    : () async {
+                        await BappNavigator.bappPushAndRemoveAll(
+                          context,
+                          ContextualMessageScreen(
+                            svgAssetToDisplay: "assets/svg/success.svg",
+                            message:
+                                "Your booking has been placed, please show up minutes before the booking",
+                            buttonText:
+                                Platform.isIOS && !BappFCM().isFcmInitialized
+                                    ? "Enable reminder for this booking"
+                                    : "Back to home",
+                            init: () async {
+                              await flow.done();
+                            },
+                            onButtonPressed: (context) async {
+                              if (Platform.isIOS &&
+                                  !BappFCM().isFcmInitialized) {
+                                await BappFCM().initForIOS();
+                              } else {
+                                BappNavigator.bappPushAndRemoveAll(
+                                  context,
+                                  Bapp(),
+                                );
+                              }
+                            },
+                            secondarybuttonText:
+                                Platform.isIOS && !BappFCM().isFcmInitialized
+                                    ? "Back to home"
+                                    : null,
+                            secondaryButtonPressed: (context) {
+                              BappNavigator.bappPushAndRemoveAll(
+                                context,
+                                Bapp(),
+                              );
+                            },
+                          ),
+                        );
+                      },
+          );
+        },
+      ),
       body: DefaultTabController(
         length: 3,
         initialIndex: _getInitialIndexForPeriodOfTheDay(),

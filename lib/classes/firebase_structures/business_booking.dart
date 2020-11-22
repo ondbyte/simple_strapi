@@ -1,7 +1,9 @@
+import 'package:bapp/config/config.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'business_branch.dart';
@@ -58,6 +60,64 @@ class BusinessBooking {
     });
     //s = s.trim().replaceFirst(",", "", s.length - 1);
     return s;
+  }
+
+  static Color getColor(BusinessBookingStatus status) {
+    switch (status) {
+      case BusinessBookingStatus.accepted:
+      case BusinessBookingStatus.ongoing:
+        {
+          return CardsColor.colors["teal"];
+        }
+      case BusinessBookingStatus.pending:
+        {
+          return CardsColor.colors["purple"];
+        }
+      case BusinessBookingStatus.cancelledByUser:
+        {
+          return CardsColor.colors["orange"];
+        }
+      case BusinessBookingStatus.cancelledByManager:
+      case BusinessBookingStatus.cancelledByReceptionist:
+      case BusinessBookingStatus.cancelledByStaff:
+      case BusinessBookingStatus.noShow:
+        {
+          return Colors.redAccent;
+        }
+      case BusinessBookingStatus.finished:
+        {
+          return Colors.grey[400];
+        }
+    }
+  }
+
+  static String getButtonLabel(BusinessBookingStatus status) {
+    switch (status) {
+      case BusinessBookingStatus.accepted:
+      case BusinessBookingStatus.ongoing:
+        {
+          return "Confirmed";
+        }
+      case BusinessBookingStatus.pending:
+        {
+          return "New";
+        }
+      case BusinessBookingStatus.cancelledByUser:
+        {
+          return "Cancelled";
+        }
+      case BusinessBookingStatus.cancelledByManager:
+      case BusinessBookingStatus.cancelledByReceptionist:
+      case BusinessBookingStatus.cancelledByStaff:
+      case BusinessBookingStatus.noShow:
+        {
+          return "Rejected";
+        }
+      case BusinessBookingStatus.finished:
+        {
+          return "Completed";
+        }
+    }
   }
 }
 
