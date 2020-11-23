@@ -1,4 +1,5 @@
 import 'package:bapp/classes/firebase_structures/business_booking.dart';
+import 'package:bapp/config/config.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_week_view/flutter_week_view.dart';
@@ -34,7 +35,8 @@ class _BookingTimeLineWidgetState extends State<BookingTimeLineWidget> {
         ...List.generate(
           list.length,
           (index) => FlutterWeekViewEvent(
-            title: "At " + list[index].branch.name.toString(),
+            decoration: BoxDecoration(color: CardsColor.next()),
+            title: "By " + list[index].bookedByNumber,
             description: "",
             start: list[index].fromToTiming.from,
             end: list[index].fromToTiming.to,

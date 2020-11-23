@@ -103,6 +103,9 @@ class FilteredBusinessStaff {
         _workList.addAll([_buzyList[i], _buzyList[i + 1]]);
       }
     }
+    _workList.sort((a, b) {
+      return a.compareTo(b);
+    });
     final list = <FromToTiming>[];
     for (var i = 0; i < _workList.length; i += 2) {
       list.add(

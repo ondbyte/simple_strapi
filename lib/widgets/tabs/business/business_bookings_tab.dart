@@ -75,8 +75,7 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
                         staff: flow.professional.value.staff,
                         trailing: IconButton(
                           icon: Icon(FeatherIcons.refreshCcw),
-                          onPressed: () {
-                            flow.getBranchBookings();
+                          onPressed: () async {
                             BappNavigator.bappPush(
                               context,
                               SelectAProfessionalScreen(
@@ -87,23 +86,24 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
                                 },
                               ),
                             );
+                            await flow.getBranchBookings();
                           },
                         ),
                       ),
                     if (flow.professional.value == null)
                       ListTile(
-                        onTap: () {
-                          flow.getBranchBookings();
+                        onTap: () async {
                           BappNavigator.bappPush(
                             context,
                             SelectAProfessionalScreen(
                               onSelected: (proffesional) {
-                                act(() {
+                                act(() async {
                                   flow.professional.value = proffesional;
                                 });
                               },
                             ),
                           );
+                          await flow.getBranchBookings();
                         },
                         title: Text("Staff"),
                         subtitle: Text("Select a staff"),

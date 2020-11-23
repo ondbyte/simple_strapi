@@ -78,4 +78,16 @@ class BusinessStaff {
   BusinessStaff.fromJson({@required this.business, Map<String, dynamic> j}) {
     _fromJson(j);
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is BusinessStaff) {
+      return this.name == other.name &&
+          this.branch.myDoc.value == other.branch.myDoc.value;
+    }
+    return false;
+  }
+
+  @override
+  int get hashCode => (this.name + this.branch.myDoc.value.path).hashCode;
 }

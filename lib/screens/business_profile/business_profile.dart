@@ -45,7 +45,9 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
         },
       ),
       body: DefaultTabController(
-        length: 2+(flow.branch.offers.isEmpty?0:1)+(flow.branch.packages.isEmpty?0:1),
+        length: 2 +
+            (flow.branch.offers.isEmpty ? 0 : 1) +
+            (flow.branch.packages.isEmpty ? 0 : 1),
         initialIndex: 1,
         child: NestedScrollView(
           headerSliverBuilder: (_, __) {
@@ -103,11 +105,9 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
           },
           body: TabBarView(
             children: [
-              if (flow.branch.offers.isNotEmpty)
-              const SizedBox(),
+              if (flow.branch.offers.isNotEmpty) const SizedBox(),
               const BusinessProfileServicesTab(),
-              if (flow.branch.packages.isNotEmpty)
-              const SizedBox(),
+              if (flow.branch.packages.isNotEmpty) const SizedBox(),
               const BusinessProfileAboutTab(),
             ],
           ),

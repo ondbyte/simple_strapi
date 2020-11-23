@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:bapp/classes/filtered_business_staff.dart';
 import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/classes/firebase_structures/business_branch.dart';
@@ -145,7 +147,8 @@ class BookingFlow {
         .get();
 
     branchBookings.clear();
-    bookingSnaps.docs.forEach(
+    await Future.forEach(
+      bookingSnaps.docs,
       (booking) async {
         final data = booking.data();
         final cloudStore = _allStore.get<CloudStore>();
@@ -177,25 +180,31 @@ class BookingFlow {
 
   void _filterStaffAndBookings() {
     filteredStaffs.clear();
-    final staffWithBookings = <BusinessStaff, List<BusinessBooking>>{};
+    final staffWithBookings =
+        LinkedHashMap<BusinessStaff, List<BusinessBooking>>(
+      equals: (a, b) => a == b,
+      hashCode: (k) => k.hashCode,
+    );
     branch.staff.forEach((s) {
-      staffWithBookings.addAll({s: []});
+      staffWithBookings.addAll({s: <BusinessBooking>[]});
     });
     branchBookings.forEach((b) {
       if (staffWithBookings.keys.any((bs) => bs.name == b.staff.name)) {
-        staffWithBookings[b.staff] = [...staffWithBookings[b.staff], b];
+        final tmp = staffWithBookings[b.staff] ?? [];
+        staffWithBookings[b.staff] = tmp.isEmpty ? [b] : [...tmp, b];
       }
     });
     staffWithBookings.forEach(
       (bs, bbs) {
         filteredStaffs.add(
           FilteredBusinessStaff(
-              staff: bs,
-              bookings: bbs,
-              stepMinutes: 15,
-              selectedDurationMinutes: totalDurationMinutes.value,
-              businessTimings: branch.businessTimings.value,
-              selectedDay: timeWindow.value.from),
+            staff: bs,
+            bookings: bbs,
+            stepMinutes: 15,
+            selectedDurationMinutes: totalDurationMinutes.value,
+            businessTimings: branch.businessTimings.value,
+            selectedDay: timeWindow.value.from,
+          ),
         );
       },
     );
@@ -265,7 +274,9 @@ class BookingFlow {
         (_) {
           _setPriceDuration();
           _setTitleSubTitle();
-          _filterStaffAndBookings();
+          if (_allStore.get<CloudStore>().userType == UserType.customer) {
+            filteredStaffs.clear();
+          }
         },
       ),
     );
@@ -323,7 +334,7 @@ class BookingFlow {
       fromToTiming: FromToTiming.fromDates(from: from, to: to),
       staff: professional.value.staff,
       services: services,
-      status: BusinessBookingStatus.pending,
+      status: BusinessBookingStatus.walkin,
       bookedByNumber: number == null
           ? FirebaseAuth.instance.currentUser.phoneNumber
           : number.internationalNumber,
