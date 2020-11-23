@@ -1,7 +1,4 @@
-import 'package:bapp/classes/firebase_structures/business_category.dart';
-import 'package:bapp/config/config_data_types.dart';
-import 'package:bapp/config/constants.dart';
-import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/helpers/exceptions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -9,6 +6,11 @@ import 'package:flutter/foundation.dart';
 import 'package:mobx/mobx.dart';
 import 'package:thephonenumber/thephonenumber.dart';
 
+import '../../config/config_data_types.dart';
+import '../../config/constants.dart';
+import '../../helpers/extensions.dart';
+import '../../helpers/helper.dart';
+import 'business_category.dart';
 import 'business_details.dart';
 import 'business_holidays.dart';
 import 'business_services.dart';
@@ -35,6 +37,11 @@ class BusinessBranch {
   final status =
       Observable<BusinessBranchActiveStatus>(BusinessBranchActiveStatus.lead);
   final businessCategory = Observable<BusinessCategory>(null);
+  final offers = ObservableList();
+  final packages = ObservableList();
+
+  final description = Observable("");
+  final tag = Observable("");
   String iso2 = "";
   String city = "";
   String locality = "";
@@ -195,21 +202,27 @@ class BusinessBranch {
     status.value =
         EnumToString.fromString(BusinessBranchActiveStatus.values, j["status"]);
     businessCategory.value = j["businessCategory"];
+    description.value = j["description"]??"";
+    tag.value = j["tag"]??"";
     try {
       if (status.value == BusinessBranchActiveStatus.published) {
         iso2 = j["assignedAddress"]["iso2"];
         city = j["assignedAddress"]["city"];
         locality = j["assignedAddress"]["locality"];
+        if(isNullOrEmpty(iso2)||isNullOrEmpty(city)){
+          throw BappDataBaseError(msg: "You have not setup business correctly",whatHappened: "could not find the data you need to manually add some data to the branch document of branch "+name.value+" Did add all the details?",);
+        }
         misc = ThePhoneNumberLib.parseNumber(iso2Code: iso2);
       }
-    } catch (e, s) {
+    } on BappDataBaseError catch(e, s) {
       FirebaseCrashlytics.instance.recordError(
-        "Business setup error",
+        e.msg,
         s,
-        reason:
-            "you have setup a business as published but have not setup the data correctly",
+        reason:e.whatHappened,
       );
       FirebaseCrashlytics.instance.sendUnsentReports();
+    } catch (e){
+      rethrow;
     }
   }
 
@@ -232,7 +245,9 @@ class BusinessBranch {
           businessTimings.value?.toMap() ?? BusinessTimings.empty().toMap(),
       "businessHolidays": businessHolidays.value?.toList() ?? [],
       "status": EnumToString.convertToString(status.value),
-      "businessCategory": businessCategory.value.toMap()
+      "businessCategory": businessCategory.value.toMap(),
+      "tag":tag.value,
+      "description":description.value
     };
   }
 
@@ -282,6 +297,16 @@ class BusinessBranch {
 
   Future removeAStaff(BusinessStaff s) async {
     staff.remove(s);
+  }
+
+  String getOpenTodayString(){
+    final timings = businessTimings.value.getTodayTimings();
+    return timings.isNotEmpty
+        ? ("Open Today\n" +
+        timings.first.from.toStringWithAmOrPm() +
+        " to " +
+        timings.last.to.toStringWithAmOrPm())
+        : "Not open today";
   }
 }
 

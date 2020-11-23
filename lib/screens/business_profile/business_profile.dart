@@ -39,13 +39,13 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                 : () async {
                     flow.getBranchBookings();
                     await BappNavigator.bappPush(
-                        context, SelectAProfessionalScreen());
+                        context, const SelectAProfessionalScreen());
                   },
           );
         },
       ),
       body: DefaultTabController(
-        length: 4,
+        length: 2+(flow.branch.offers.isEmpty?0:1)+(flow.branch.packages.isEmpty?0:1),
         initialIndex: 1,
         child: NestedScrollView(
           headerSliverBuilder: (_, __) {
@@ -54,14 +54,14 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                 expandedHeight: 256,
                 actions: [
                   IconButton(
-                    icon: Icon(
+                    icon: const Icon(
                       FeatherIcons.heart,
                       color: Colors.white,
                     ),
                     onPressed: () {},
                   ),
                   IconButton(
-                    icon: Icon(
+                    icon: const Icon(
                       FeatherIcons.share2,
                       color: Colors.white,
                     ),
@@ -78,28 +78,37 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                 ),
               ),
               SliverList(
-                  delegate: SliverChildListDelegate([
-                BusinessTileWidget(
-                  titleStyle: Theme.of(context).textTheme.headline1,
-                  branch: flow.branch,
-                  onTap: null,
-                  padding: const EdgeInsets.all(16),
+                delegate: SliverChildListDelegate(
+                  [
+                    BusinessTileWidget(
+                      titleStyle: Theme.of(context).textTheme.headline1,
+                      branch: flow.branch,
+                      onTap: null,
+                      padding: const EdgeInsets.all(16),
+                    ),
+                    getBappTabBar(
+                      context,
+                      [
+                        if (flow.branch.offers.isNotEmpty) const Text("Offers"),
+                        const Text("Services"),
+                        if (flow.branch.packages.isNotEmpty)
+                          const Text("Packages"),
+                        const Text("About"),
+                      ],
+                    ),
+                  ],
                 ),
-                getBappTabBar(context, [
-                  const Text("Offers"),
-                  const Text("Services"),
-                  const Text("Packages"),
-                  const Text("About"),
-                ])
-              ]))
+              ),
             ];
           },
-          body: const TabBarView(
+          body: TabBarView(
             children: [
-              SizedBox(),
-              BusinessProfileServicesTab(),
-              SizedBox(),
-              BusinessProfileAboutTab(),
+              if (flow.branch.offers.isNotEmpty)
+              const SizedBox(),
+              const BusinessProfileServicesTab(),
+              if (flow.branch.packages.isNotEmpty)
+              const SizedBox(),
+              const BusinessProfileAboutTab(),
             ],
           ),
         ),

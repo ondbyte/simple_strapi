@@ -21,7 +21,7 @@ class ChooseCategoryListTilesWidget extends StatelessWidget {
               decoration: BoxDecoration(
                   color: Theme.of(context).primaryColor.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(6)),
-              margin: EdgeInsets.only(bottom: 20),
+              margin: const EdgeInsets.only(bottom: 20),
               child: ListTile(
                 title: Text(
                   elements[index].name,

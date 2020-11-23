@@ -1,10 +1,15 @@
+import 'package:async/async.dart';
+import 'dart:typed_data';
+
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_svg_provider/flutter_svg_provider.dart' as svg;
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class FirebaseStorageImage extends StatefulWidget {
   final String storagePathOrURL;
@@ -12,6 +17,7 @@ class FirebaseStorageImage extends StatefulWidget {
   final double height;
   final double width;
   final bool circular;
+
   const FirebaseStorageImage({
     Key key,
     @required this.storagePathOrURL,
@@ -26,6 +32,37 @@ class FirebaseStorageImage extends StatefulWidget {
 }
 
 class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
+  final _memoizer = AsyncMemoizer<Uint8List>();
+
+  @override
+  void initState() {
+    if(!widget.storagePathOrURL.endsWith(".svg")){
+      _mem();
+    }
+    super.initState();
+  }
+
+  void _mem(){
+    _memoizer.runOnce(() async {
+      final file =
+      await DefaultCacheManager().getFileFromCache(widget.storagePathOrURL);
+      if (file != null) {
+        return file.file.readAsBytes();
+      } else {
+        final i = FirebaseStorage.instance;
+        final data = await i
+            .ref()
+            .child(
+          widget.storagePathOrURL,
+        )
+            .getData(1024 * 1024 * 8);
+        final newFile =
+        await DefaultCacheManager().putFile(widget.storagePathOrURL, data);
+        return newFile.readAsBytes();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -41,17 +78,8 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
                     width: widget.width ?? cons.maxWidth,
                     height: widget.height ?? cons.maxHeight,
                   )
-            : FutureBuilder<String>(
-                future: () async {
-                  final i = FirebaseStorage.instance;
-                  final s = await i
-                      .ref()
-                      .child(
-                        widget.storagePathOrURL,
-                      )
-                      .getDownloadURL();
-                  return s as String;
-                }(),
+            : FutureBuilder<Uint8List>(
+                future: _memoizer.future,
                 builder: (_, snap) {
                   if (snap.hasData) {
                     if (widget.circular) {
@@ -59,14 +87,12 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
                         height: widget.height,
                         width: widget.width,
                         child: CircleAvatar(
-                          backgroundImage: CachedNetworkImageProvider(
-                            snap.data,
-                          ),
+                          backgroundImage: MemoryImage(snap.data),
                         ),
                       );
                     } else {
-                      return CachedNetworkImage(
-                        imageUrl: snap.data,
+                      return Image.memory(
+                        snap.data,
                         fit: widget.fit,
                         width: widget.width ?? cons.maxWidth,
                         height: widget.height ?? cons.maxHeight,
@@ -119,7 +145,11 @@ class RRFirebaseStorageImage extends StatelessWidget {
   final bool circular;
 
   const RRFirebaseStorageImage(
-      {Key key, this.storagePathOrURL, this.width, this.height, this.circular})
+      {Key key,
+      this.storagePathOrURL,
+      this.width,
+      this.height,
+      this.circular = false})
       : super(key: key);
 
   @override

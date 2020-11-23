@@ -272,27 +272,29 @@ class _BottomPrimaryButtonState extends State<BottomPrimaryButton> {
   Widget build(BuildContext context) {
     assert((widget.title != null && widget.subTitle != null ||
         (widget.title == null && widget.subTitle == null)));
-    return Container(
-      padding: widget.padding ?? const EdgeInsets.all(16),
-      color: Theme.of(context).backgroundColor,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (widget.title != null)
-            ListTile(
-              title: Text(widget.title),
-              subtitle: Text(widget.subTitle),
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 900),
+      curve: Curves.easeOutExpo,
+      child: widget.onPressed == null
+          ? const SizedBox()
+          : Container(
+              padding: widget.padding ?? const EdgeInsets.all(16),
+              color: Theme.of(context).backgroundColor,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (widget.title != null)
+                    ListTile(
+                      title: Text(widget.title),
+                      subtitle: Text(widget.subTitle),
+                    ),
+                  PrimaryButton(
+                    widget.label,
+                    onPressed: widget.onPressed,
+                  ),
+                ],
+              ),
             ),
-          if (widget.title != null)
-            const SizedBox(
-              height: 8,
-            ),
-          PrimaryButton(
-            widget.label,
-            onPressed: widget.onPressed,
-          ),
-        ],
-      ),
     );
   }
 }

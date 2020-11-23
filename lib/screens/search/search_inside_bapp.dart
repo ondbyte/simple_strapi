@@ -1,5 +1,8 @@
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/search/branches_result_screen.dart';
 import 'package:bapp/stores/business_store.dart';
+import 'package:bapp/stores/cloud_store.dart';
 
 import 'package:bapp/widgets/choose_category.dart';
 import 'package:bapp/widgets/store_provider.dart';
@@ -24,12 +27,27 @@ class _SearchInsideBappScreenState extends State<SearchInsideBappScreen> {
         store: Provider.of<BusinessStore>(context),
         builder: (_, businessStore) {
           return Padding(
-            padding: EdgeInsets.all(16),
-            child: ChooseCategoryListTilesWidget(
-              elements: businessStore.categories,
-              onCategorySelected: (c) {
-                Navigator.of(context)
-                    .pushNamed(RouteManager.showResultsScreen, arguments: c);
+            padding: const EdgeInsets.all(16),
+            child: Consumer<CloudStore>(
+              builder: (_, cloudStore, __) {
+                return ChooseCategoryListTilesWidget(
+                  elements: businessStore.categories,
+                  onCategorySelected: (c) {
+                    BappNavigator.bappPush(
+                      context,
+                      BranchesResultScreen(
+                        title: "Top " + c.name,
+                        subTitle: "In " +
+                            (cloudStore.myAddress.locality != null
+                                ? cloudStore.myAddress.locality.name
+                                : cloudStore.myAddress.city.name),
+                        futureBranchList: cloudStore.getBranchesForCategory(
+                          c,
+                        ),
+                      ),
+                    );
+                  },
+                );
               },
             ),
           );

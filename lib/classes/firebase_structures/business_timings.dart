@@ -169,47 +169,6 @@ class FromToTiming {
     return list;
   }
 
-  List<FromToTiming> punchHoles(List<FromToTiming> timings) {
-    final list = <FromToTiming>[];
-  }
-
-  List<FromToTiming> punchHole(FromToTiming timing) {
-    final list = <TimeOfDay>[];
-    var _from = from.toTimeOfDay();
-    var _to = to.toTimeOfDay();
-    var _otherFrom = timing.from.toTimeOfDay();
-    var _otherTo = timing.to.toTimeOfDay();
-    if (_from.isSame(_otherFrom)) {
-      if (_to.isSame(_otherTo)) {
-        return [];
-      }
-      return [
-        FromToTiming.fromDates(
-          from: _otherTo.toDateAndTime(),
-          to: _to.toDateAndTime(),
-        )
-      ];
-    } else {
-      /*if (_to.isSame(_otherTo)) {
-        [
-          FromToTiming.fromDates(
-            from: _from.toDateAndTime(),
-            to: _otherFrom.toDateAndTime(),
-          )
-        ];
-      }*/
-      return [
-        FromToTiming.fromDates(
-          from: _from.toDateAndTime(),
-          to: _otherFrom.toDateAndTime(),
-        ),
-        FromToTiming.fromDates(
-          from: _otherTo.toDateAndTime(),
-          to: _to.toDateAndTime(),
-        )
-      ];
-    }
-  }
 
   final _format = DateFormat("hh:mm a");
   String format() {
@@ -219,4 +178,6 @@ class FromToTiming {
   int inMinutes() {
     return to.difference(from).inMinutes;
   }
+
+
 }

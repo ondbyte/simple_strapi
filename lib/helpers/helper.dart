@@ -161,6 +161,7 @@ Future uploadBusinessBranchApprovalPDF({File fileToUpload}) async {
 PreferredSizeWidget getBappTabBar(BuildContext context, List<Widget> tabs) {
   return TabBar(
     indicator: UnderlineTabIndicator(
+      insets: EdgeInsets.zero,
       borderSide: BorderSide(
         color: Theme.of(context).primaryColor,
         width: 2,
@@ -171,7 +172,7 @@ PreferredSizeWidget getBappTabBar(BuildContext context, List<Widget> tabs) {
     indicatorColor: Theme.of(context).primaryColor,
     indicatorPadding: const EdgeInsets.all(16),
     indicatorWeight: 6,
-    indicatorSize: TabBarIndicatorSize.label,
+    indicatorSize: TabBarIndicatorSize.tab,
     labelPadding: const EdgeInsets.all(8),
     tabs: tabs,
   );

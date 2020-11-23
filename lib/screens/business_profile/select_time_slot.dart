@@ -185,13 +185,13 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
   Widget build(BuildContext context) {
     return Observer(builder: (_) {
       if (widget.fromToTimings.isEmpty) {
-        return Text("No timings");
+        return const Center(child: Text("No timings"),);
       }
       return Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: GridView.builder(
           shrinkWrap: true,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2, childAspectRatio: 16 / 6),
           itemCount: widget.fromToTimings.length,
           itemBuilder: (_, i) {

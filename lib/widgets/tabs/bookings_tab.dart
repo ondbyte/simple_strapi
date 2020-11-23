@@ -1,15 +1,16 @@
-import 'package:bapp/classes/firebase_structures/business_timings.dart';
-import 'package:bapp/config/config.dart';
-import 'package:bapp/helpers/helper.dart';
-import 'package:bapp/stores/booking_flow.dart';
-import 'package:bapp/stores/cloud_store.dart';
-import 'package:bapp/widgets/bapp_calendar.dart';
-import 'package:bapp/widgets/login_widget.dart';
-import 'package:bapp/widgets/tiles/customer_booking_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
+
+import '../../classes/firebase_structures/business_timings.dart';
+import '../../config/config.dart';
+import '../../helpers/helper.dart';
+import '../../stores/booking_flow.dart';
+import '../../stores/cloud_store.dart';
+import '../bapp_calendar.dart';
+import '../login_widget.dart';
+import '../tiles/customer_booking_tile.dart';
 
 class BookingsTab extends StatefulWidget {
   @override
@@ -17,7 +18,7 @@ class BookingsTab extends StatefulWidget {
 }
 
 class _BookingsTabState extends State<BookingsTab> {
-  CalendarController _calendarController = CalendarController();
+  final _calendarController = CalendarController();
 
   @override
   void dispose() {
@@ -38,63 +39,98 @@ class _BookingsTabState extends State<BookingsTab> {
                       secondaryReason:
                           LoginConfig.bookingTabLoginReason.secondary,
                     )
-                  : CustomScrollView(
+                  : o==Orientation.portrait? CustomScrollView(
                       slivers: <Widget>[
-                        SliverAppBar(
-                          elevation: 0,
-                          collapsedHeight: 160,
-                          expandedHeight: 160,
-                          pinned: true,
-                          automaticallyImplyLeading: false,
-                          actions: [
-                            SizedBox(),
-                          ],
-                          flexibleSpace: BappRowCalender(
-                            bookings: flow.myBookingsAsCalendarEvents(),
-                            initialDate: DateTime.now(),
-                            holidays: flow.holidays,
-                            controller: _calendarController,
-                            onDayChanged: (day, _, __) {
-                              act(() {
-                                flow.timeWindow.value =
-                                    FromToTiming.forDay(day);
-                              });
-                            },
-                          ),
-                        ),
-                        SliverList(
-                          delegate: SliverChildListDelegate(
-                            [
-                              SizedBox(
-                                height: 20,
-                              ),
-                              Observer(
-                                builder: (_) {
-                                  final list = flow.getMyBookingsForDay(
-                                      flow.timeWindow.value.from);
-                                  if (list.isEmpty) {
-                                    return SizedBox();
-                                  }
-                                  return ListView.builder(
-                                    shrinkWrap: true,
-                                    itemCount: list.length,
-                                    itemBuilder: (_, i) {
-                                      return CustomerBookingTile(
-                                        booking: list[i],
-                                      );
-                                    },
-                                  );
-                                },
-                              )
-                            ],
-                          ),
-                        )
+                        _getCalender(),
+                        _getBookingsScroll()
                       ],
-                    );
+                    ): _getLandscape();
             },
           );
-        });
+        },);
       },
+    );
+  }
+
+  Widget _getLandscape(){
+    return LayoutBuilder(builder:(_,cons){
+      return Row(
+        children: [
+          SizedBox(
+            height: cons.maxHeight,
+            width: cons.maxWidth/2,
+            child: CustomScrollView(
+              slivers: [
+                _getCalender(),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: cons.maxHeight,
+            width: cons.maxWidth/2,
+            child: CustomScrollView(
+              slivers: [
+                _getBookingsScroll(),
+              ],
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _getBookingsScroll(){
+    return SliverList(
+      delegate: SliverChildListDelegate(
+        [
+          const  SizedBox(
+            height: 20,
+          ),
+          Observer(
+            builder: (_) {
+              final list = flow.getMyBookingsForDay(
+                  flow.timeWindow.value.from);
+              if (list.isEmpty) {
+                return const SizedBox();
+              }
+              return ListView.builder(
+                shrinkWrap: true,
+                itemCount: list.length,
+                itemBuilder: (_, i) {
+                  return CustomerBookingTile(
+                    booking: list[i],
+                  );
+                },
+              );
+            },
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _getCalender(){
+    return SliverAppBar(
+      elevation: 0,
+      collapsedHeight: 160,
+      expandedHeight: 160,
+      pinned: true,
+      automaticallyImplyLeading: false,
+      actions: [
+        SizedBox(),
+      ],
+      flexibleSpace: BappRowCalender(
+        bookings: flow.myBookingsAsCalendarEvents(),
+        initialDate: DateTime.now(),
+        holidays: flow.holidays,
+        controller: _calendarController,
+        onDayChanged: (day, _, __) {
+          act(() {
+            flow.timeWindow.value =
+                FromToTiming.forDay(day);
+          });
+        },
+      ),
     );
   }
 

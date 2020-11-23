@@ -1,8 +1,8 @@
-import 'package:bapp/classes/firebase_structures/business_booking.dart';
-import 'package:bapp/stores/cloud_store.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../classes/firebase_structures/business_booking.dart';
+import '../../stores/cloud_store.dart';
 import '../size_provider.dart';
 
 class CustomerBookingTile extends StatefulWidget {
@@ -37,8 +37,8 @@ class _CustomerBookingTileState extends State<CustomerBookingTile> {
           ),
           child: ListTile(
             contentPadding: widget.padding ??
-                EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            trailing: SizedBox(
+                const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            trailing: const SizedBox(
               width: 8,
             ),
             title: Column(
@@ -105,7 +105,7 @@ class _CustomerBookingTileState extends State<CustomerBookingTile> {
               ),
             );
           }
-          return SizedBox();
+          return const SizedBox();
         },
       ),
     );

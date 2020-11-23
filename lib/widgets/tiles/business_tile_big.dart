@@ -28,7 +28,7 @@ class BusinessTileBigWidget extends StatelessWidget {
                 child: Stack(
                   alignment: Alignment.bottomLeft,
                   children: [
-                    FirebaseStorageImage(
+                    RRFirebaseStorageImage(
                       storagePathOrURL: branch.images.isNotEmpty
                           ? branch.images.keys.elementAt(0)
                           : kTemporaryPlaceHolderImage,

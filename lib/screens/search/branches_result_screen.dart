@@ -40,7 +40,7 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
                             color: Colors.white,
                           ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       height: 20,
                     ),
                     Text(
