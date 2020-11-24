@@ -61,7 +61,6 @@ abstract class _CloudStore with Store {
 
   String _previousUID = "";
 
-
   AllStore _allStore;
 
   void setAllStore(AllStore allStore) => _allStore = allStore;
@@ -78,6 +77,7 @@ abstract class _CloudStore with Store {
     await getMyAddress();
     await getMyUserTypes();
     await getMyFavorites();
+    _setupFavoritesListener();
     _setupAutoRun();
   }
 
@@ -153,10 +153,50 @@ abstract class _CloudStore with Store {
   }
 
   Future getMyFavorites() async {
-    if(myData.containsKey("favorites")){
+    if (myData.containsKey("favorites")) {
       final fs = myData["favorites"];
-
+      if (fs is Map) {
+        fs.forEach(
+          (key, value) {
+            favorites.add(
+              Favorite(
+                id: key,
+                type: EnumToString.fromString(
+                  FavoriteType.values,
+                  value["type"],
+                ),
+                business: value["business"],
+                businessBranch: value["businessBranch"],
+                businessService: value["businessService"] != null
+                    ? BusinessService.fromJson(value["businessService"])
+                    : {},
+              ),
+            );
+          },
+        );
+      }
     }
+  }
+
+  void _setupFavoritesListener() {
+    _allStore.get<EventBus>().on<Favorite>().listen((event) {
+      final existing = favorites.firstWhere((element) => element == event,
+          orElse: () => null);
+      if (existing != null) {
+        favorites.remove(existing);
+      } else {
+        favorites.add(event);
+      }
+    });
+  }
+
+  Future _saveFavorites() async {
+    final data = Map.fromEntries(favorites.map(
+        (element) => MapEntry(element.id ?? kUUIDGen.v1(), element.toMap())));
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(FirebaseAuth.instance.currentUser.uid)
+        .set({"favorites": data}, SetOptions(merge: true));
   }
 
   @action
@@ -165,11 +205,11 @@ abstract class _CloudStore with Store {
       final ut = UserType.values[myData["my_user_type"]];
       if (myData.containsKey("my_alter_ego")) {
         final ae = UserType.values[myData["my_alter_ego"]];
-        if(userType==null){
+        if (userType == null) {
           userType = ut;
           alterEgo = ae;
         } else {
-          if(ut!=UserType.customer){
+          if (ut != UserType.customer) {
             _allStore.get<EventBus>().fire(AppEvents.reboot);
           }
         }
@@ -355,7 +395,7 @@ abstract class _CloudStore with Store {
 
     _disposers.add(
       reaction((_) => favorites.length, (_) async {
-        await setMyFavorites();
+        await _saveFavorites();
       }, fireImmediately: false),
     );
   }
@@ -595,15 +635,6 @@ abstract class _CloudStore with Store {
             "This should never be the case @cloudStore getFavorites()");
       }
     }
-  }
-
-  Future setMyFavorites() async {
-    await FirebaseFirestore.instance
-        .collection("users")
-        .doc(FirebaseAuth.instance.currentUser.uid)
-        .set({
-      "favorites": favorites.map((f) => MapEntry(kUUIDGen.v1(), f.toMap()))
-    }, SetOptions(merge: true));
   }
 }
 

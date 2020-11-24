@@ -23,8 +23,34 @@ class Favorite {
       "type": EnumToString.convertToString(type),
       "business": business?.myDoc?.value,
       "businessBranch": businessBranch?.myDoc?.value,
-      "businessService": businessService?.toMap(),
+      "businessService": businessService?.toMap() ?? {},
     };
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is Favorite) {
+      return hashCode == other.hashCode;
+    }
+    return false;
+  }
+
+  @override
+  int get hashCode {
+    switch (type) {
+      case FavoriteType.business:
+        {
+          return business.hashCode;
+        }
+      case FavoriteType.businessBranch:
+        {
+          return businessBranch.hashCode;
+        }
+      case FavoriteType.businessService:
+        {
+          return businessService.hashCode;
+        }
+    }
   }
 }
 

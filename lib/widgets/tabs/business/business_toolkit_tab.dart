@@ -175,18 +175,13 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
           builder: (_) {
             return ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: FirebaseStorageImage(
-                  storagePathOrURL: businessStore
-                              .business.selectedBranch.value.images.length >
-                          0
-                      ? businessStore.business.selectedBranch.value.images.keys
-                          .elementAt(0)
-                      : kTemporaryPlaceHolderImage,
-                  height: 80,
-                  width: 80,
-                ),
+              leading: ListTileFirebaseImage(
+                storagePathOrURL: businessStore
+                            .business.selectedBranch.value.images.length >
+                        0
+                    ? businessStore.business.selectedBranch.value.images.keys
+                        .elementAt(0)
+                    : kTemporaryPlaceHolderImage,
               ),
               title: Text(
                 businessStore.business.selectedBranch.value.name.value,

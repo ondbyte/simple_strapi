@@ -5,8 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
 
-import 'business_details.dart';
-
 class BusinessServices {
   final BusinessBranch branch;
   final all = ObservableList<BusinessService>();
@@ -15,7 +13,7 @@ class BusinessServices {
   BusinessServices.empty({this.branch});
 
   BusinessServices.fromJsonList(List<dynamic> l, {@required this.branch}) {
-    assert(branch!=null);
+    assert(branch != null);
     l.forEach((i) {
       final item = i as Map<String, dynamic>;
       if (item.keys.contains("serviceName")) {
@@ -135,6 +133,20 @@ class BusinessService {
       "category": category.value?.toMap() ?? {},
       "images": images.keys.toList(),
     };
+  }
+
+  @override
+  int get hashCode => (serviceName.value +
+          price.value.toString() +
+          category.value.categoryName.value)
+      .hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is BusinessService) {
+      return hashCode == other.hashCode;
+    }
+    return false;
   }
 }
 

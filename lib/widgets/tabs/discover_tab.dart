@@ -132,35 +132,42 @@ class _DiscoverTabState extends State<DiscoverTab> {
                       ? Row(
                           children: [
                             ...List.generate(snap.data.length, (i) {
-                              return Container(
-                                width: snap.data.length == 1
-                                    ? cons.maxWidth - 32
-                                    : cons.maxWidth * 0.8,
-                                child: BusinessTileBigWidget(
-                                  branch: snap.data[i],
-                                  onTap: () {
-                                    Provider.of<BookingFlow>(context,
-                                            listen: false)
-                                        .branch = snap.data[i];
-                                    Navigator.of(context).pushNamed(
-                                        RouteManager.businessProfileScreen,
-                                        arguments: [snap.data[i]]);
-                                  },
-                                  tag: Chip(
-                                    backgroundColor:
-                                        CardsColor.colors["lightGreen"],
-                                    label: Text(
-                                      "Featured",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyText1
-                                          .apply(
-                                            color: Theme.of(context)
-                                                .backgroundColor,
-                                          ),
+                              return Row(
+                                children: [
+                                  Container(
+                                    width: snap.data.length == 1
+                                        ? cons.maxWidth - 32
+                                        : cons.maxWidth * 0.8,
+                                    child: BusinessTileBigWidget(
+                                      branch: snap.data[i],
+                                      onTap: () {
+                                        Provider.of<BookingFlow>(context,
+                                                listen: false)
+                                            .branch = snap.data[i];
+                                        Navigator.of(context).pushNamed(
+                                            RouteManager.businessProfileScreen,
+                                            arguments: [snap.data[i]]);
+                                      },
+                                      tag: Chip(
+                                        backgroundColor:
+                                            CardsColor.colors["lightGreen"],
+                                        label: Text(
+                                          "Featured",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyText1
+                                              .apply(
+                                                color: Theme.of(context)
+                                                    .backgroundColor,
+                                              ),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
+                                  SizedBox(
+                                    width: 16,
+                                  ),
+                                ],
                               );
                             })
                           ],

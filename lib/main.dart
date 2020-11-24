@@ -32,7 +32,6 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    final allStore = AllStore();
     final bus = EventBus();
 
     ///listen for reboot
@@ -43,55 +42,61 @@ class _AppState extends State<App> {
         });
       }
     });
-    allStore.set<EventBus>(bus);
-    final cloudStore = CloudStore()..setAllStore(allStore);
-    allStore.set<CloudStore>(cloudStore);
-    final businessStore = BusinessStore()..setAllStore(allStore);
-    allStore.set<BusinessStore>(businessStore);
-    final flow = BookingFlow(allStore);
-    allStore.set<BookingFlow>(flow);
     return KeyedSubtree(
-        key: _key,
-        child: MultiProvider(
-          providers: [
-            Provider<EventBus>(
-              create: (_) => bus,
-            ),
-            Provider<AllStore>(
-              create: (_) => allStore,
-            ),
-            Provider<ThemeStore>(
-              create: (_) => ThemeStore(),
-            ),
-            Provider<CloudStore>(
-              create: (_) => cloudStore,
-            ),
-            Provider<UpdatesStore>(
-              create: (_) => UpdatesStore(),
-            ),
-            Provider<BusinessStore>(
-              create: (_) => businessStore,
-            ),
-            Provider<BookingFlow>(
-              create: (_) => flow,
-            ),
-          ],
-          builder: (context, w) {
-            return Consumer<ThemeStore>(
-              builder: (_, themeStore, __) {
-                return Observer(
-                  builder: (_) {
-                    return MaterialApp(
-                      title: "Bapp",
-                      theme: themeStore.selectedThemeData,
-                      initialRoute: "/",
-                      onGenerateRoute: RouteManager.onGenerate,
-                    );
-                  },
-                );
-              },
-            );
-          },
-        ));
+      key: _key,
+      child: Builder(
+        builder: (_) {
+          final allStore = AllStore();
+          allStore.set<EventBus>(bus);
+          final cloudStore = CloudStore()..setAllStore(allStore);
+          allStore.set<CloudStore>(cloudStore);
+          final businessStore = BusinessStore()..setAllStore(allStore);
+          allStore.set<BusinessStore>(businessStore);
+          final flow = BookingFlow(allStore);
+          allStore.set<BookingFlow>(flow);
+          return MultiProvider(
+            providers: [
+              Provider<EventBus>(
+                create: (_) => bus,
+              ),
+              Provider<AllStore>(
+                create: (_) => allStore,
+              ),
+              Provider<ThemeStore>(
+                create: (_) => ThemeStore(),
+              ),
+              Provider<CloudStore>(
+                create: (_) => cloudStore,
+              ),
+              Provider<UpdatesStore>(
+                create: (_) => UpdatesStore(),
+              ),
+              Provider<BusinessStore>(
+                create: (_) => businessStore,
+              ),
+              Provider<BookingFlow>(
+                create: (_) => flow,
+              ),
+            ],
+            builder: (context, w) {
+              return Consumer<ThemeStore>(
+                builder: (_, themeStore, __) {
+                  return Observer(
+                    builder: (_) {
+                      return MaterialApp(
+                        title: "Bapp",
+                        theme: themeStore.selectedThemeData,
+                        initialRoute: "/",
+                        onGenerateRoute: RouteManager.onGenerate,
+                      );
+                    },
+                  );
+                },
+              );
+            },
+          );
+        },
+      ),
+    );
   }
 }
