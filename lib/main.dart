@@ -1,4 +1,3 @@
-import 'package:bapp/widgets/reboot_widget.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';

@@ -1,9 +1,10 @@
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/main.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/themestore.dart';
-import 'package:bapp/widgets/reboot_widget.dart';
+import 'package:event_bus/event_bus.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -136,7 +137,8 @@ class _MenuState extends State<Menu> {
         {
           () async {
             await Provider.of<CloudStore>(context, listen: false).signOut();
-            _allStore.get<EventBus>().fire(AppEvents.reboot);;
+            Provider.of<EventBus>(context, listen: false)
+                .fire(AppEvents.reboot);
           }();
           break;
         }
