@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:bapp/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:enum_to_string/enum_to_string.dart';
+import 'package:event_bus/event_bus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
@@ -95,6 +97,7 @@ abstract class _CloudStore with Store {
               _onLogin();
               _onLogin = null;
             }
+            _previousUID = user.uid;
           }
         } else {
           status = AuthStatus.userNotPresent;
@@ -138,7 +141,7 @@ abstract class _CloudStore with Store {
       final tmp = userType;
       userType = alterEgo;
       alterEgo = tmp;
-      Navigator.of(context).pushNamedAndRemoveUntil("/", (route) => false);
+      _allStore.get<EventBus>().fire(AppEvents.reboot);
       return true;
     } else {
       Flushbar(
@@ -159,9 +162,17 @@ abstract class _CloudStore with Store {
   @action
   Future getMyUserTypes() async {
     if (myData.containsKey("my_user_type")) {
-      userType = UserType.values[myData["my_user_type"]];
+      final ut = UserType.values[myData["my_user_type"]];
       if (myData.containsKey("my_alter_ego")) {
-        alterEgo = UserType.values[myData["my_alter_ego"]];
+        final ae = UserType.values[myData["my_alter_ego"]];
+        if(userType==null){
+          userType = ut;
+          alterEgo = ae;
+        } else {
+          if(ut!=UserType.customer){
+            _allStore.get<EventBus>().fire(AppEvents.reboot);
+          }
+        }
       } else {
         alterEgo = UserType.customer;
         setMyAlterEgo();

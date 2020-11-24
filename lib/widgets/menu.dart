@@ -3,6 +3,7 @@ import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/themestore.dart';
+import 'package:bapp/widgets/reboot_widget.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -39,7 +40,7 @@ class _MenuState extends State<Menu> {
                     cloudStore.alterEgo, cloudStore.status);
                 return ListView(
                   children: [
-                    SizedBox(
+                    const SizedBox(
                       height: 20,
                     ),
                     ..._getMenuItems(context, items),
@@ -135,8 +136,7 @@ class _MenuState extends State<Menu> {
         {
           () async {
             await Provider.of<CloudStore>(context, listen: false).signOut();
-            Navigator.of(context)
-                .pushNamedAndRemoveUntil("/", (route) => false);
+            _allStore.get<EventBus>().fire(AppEvents.reboot);;
           }();
           break;
         }

@@ -1,3 +1,5 @@
+import 'package:bapp/widgets/reboot_widget.dart';
+import 'package:event_bus/event_bus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -17,54 +19,80 @@ void main() async {
   runApp(App());
 }
 
-class App extends StatelessWidget {
-  // This widget is the root of your application.
+enum AppEvents {
+  reboot,
+}
+
+class App extends StatefulWidget {
+  @override
+  _AppState createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+  var _key = UniqueKey();
+
   @override
   Widget build(BuildContext context) {
     final allStore = AllStore();
+    final bus = EventBus();
+
+    ///listen for reboot
+    bus.on<AppEvents>().listen((event) {
+      if (event == AppEvents.reboot) {
+        setState(() {
+          _key = UniqueKey();
+        });
+      }
+    });
+    allStore.set<EventBus>(bus);
     final cloudStore = CloudStore()..setAllStore(allStore);
     allStore.set<CloudStore>(cloudStore);
     final businessStore = BusinessStore()..setAllStore(allStore);
     allStore.set<BusinessStore>(businessStore);
     final flow = BookingFlow(allStore);
     allStore.set<BookingFlow>(flow);
-    return MultiProvider(
-      providers: [
-        Provider<AllStore>(
-          create: (_) => allStore,
-        ),
-        Provider<ThemeStore>(
-          create: (_) => ThemeStore(),
-        ),
-        Provider<CloudStore>(
-          create: (_) => cloudStore,
-        ),
-        Provider<UpdatesStore>(
-          create: (_) => UpdatesStore(),
-        ),
-        Provider<BusinessStore>(
-          create: (_) => businessStore,
-        ),
-        Provider<BookingFlow>(
-          create: (_) => flow,
-        ),
-      ],
-      builder: (context, w) {
-        return Consumer<ThemeStore>(
-          builder: (_, themeStore, __) {
-            return Observer(
-              builder: (_) {
-                return MaterialApp(
-                  title: "Bapp",
-                  theme: themeStore.selectedThemeData,
-                  initialRoute: "/",
-                  onGenerateRoute: RouteManager.onGenerate,
+    return KeyedSubtree(
+        key: _key,
+        child: MultiProvider(
+          providers: [
+            Provider<EventBus>(
+              create: (_) => bus,
+            ),
+            Provider<AllStore>(
+              create: (_) => allStore,
+            ),
+            Provider<ThemeStore>(
+              create: (_) => ThemeStore(),
+            ),
+            Provider<CloudStore>(
+              create: (_) => cloudStore,
+            ),
+            Provider<UpdatesStore>(
+              create: (_) => UpdatesStore(),
+            ),
+            Provider<BusinessStore>(
+              create: (_) => businessStore,
+            ),
+            Provider<BookingFlow>(
+              create: (_) => flow,
+            ),
+          ],
+          builder: (context, w) {
+            return Consumer<ThemeStore>(
+              builder: (_, themeStore, __) {
+                return Observer(
+                  builder: (_) {
+                    return MaterialApp(
+                      title: "Bapp",
+                      theme: themeStore.selectedThemeData,
+                      initialRoute: "/",
+                      onGenerateRoute: RouteManager.onGenerate,
+                    );
+                  },
                 );
               },
             );
           },
-        );
-      },
-    );
+        ));
   }
 }

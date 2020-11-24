@@ -100,11 +100,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
               ),
               ignoreBlank: true,
-              initialValue: _number == null
-                  ? PhoneNumber(isoCode: cloudStore.myAddress.country.iso2)
-                  : _number,
+              initialValue: _number ?? PhoneNumber(isoCode: cloudStore.myAddress.country.iso2),
             ),
-            SizedBox(
+            const SizedBox(
               height: 20,
             ),
             PrimaryButton(
