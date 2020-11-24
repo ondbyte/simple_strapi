@@ -1,13 +1,19 @@
-import 'package:bapp/config/config.dart';
-import 'package:bapp/stores/cloud_store.dart';
-import 'package:bapp/widgets/buttons.dart';
-import 'package:bapp/widgets/loading.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+
+import '../../config/config.dart';
+import '../../helpers/extensions.dart';
+import '../../helpers/helper.dart';
+import '../../stores/cloud_store.dart';
+import '../../widgets/buttons.dart';
+import '../../widgets/loading.dart';
+import 'package:pedantic/pedantic.dart';
 
 class OnBoardingScreen extends StatefulWidget {
   @override
@@ -30,7 +36,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Spacer(
+                          const Spacer(
                             flex: 4,
                           ),
                           CarouselSlider(
@@ -58,12 +64,12 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                               },
                             ),
                           ),
-                          Spacer(
+                          const Spacer(
                             flex: 2,
                           ),
                           _buildIndicator(
                               context, OnBoardingConfig.slides.length),
-                          Spacer(
+                          const Spacer(
                             flex: 1,
                           ),
                         ],
@@ -86,7 +92,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
           return Container(
             width: 6,
             height: 6,
-            margin: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+            margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: _selected == index
@@ -109,14 +115,14 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
             width: 256,
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Text(
           slide.title,
           style: Theme.of(context).textTheme.headline2,
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         Text(
@@ -125,7 +131,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
           maxLines: 3,
           textAlign: TextAlign.center,
         ),
-        SizedBox(
+        const SizedBox(
           height: 10,
         ),
         PrimaryButton(
@@ -133,11 +139,29 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
           hide: index != OnBoardingConfig.slides.length - 1,
           onPressed: () async {
             ///first time so sign in anonymously
-            await context.read<CloudStore>().signInAnonymous();
-            //Navigator.of(context).pop();
-
-            ///setup user data
-            //await await context.read<CloudStore>().init(context.read<AuthStore>());
+            try {
+              await context.read<CloudStore>().signInAnonymous();
+            } on FirebaseAuthException catch (e) {
+              Helper.printLog(e.toString());
+              if (e.code == "network-request-failed") {
+                unawaited(
+                  Flushbar(
+                    message: "No network",
+                    mainButton: FlatButton(
+                      onPressed: () {
+                        Provider.of<CloudStore>(context,listen: false).status = AuthStatus.userNotPresent;
+                        BappNavigator.bappPushAndRemoveAll(context, OnBoardingScreen());
+                      },
+                      child: Text(
+                        "Try again",
+                        style: Theme.of(context).textTheme.button.apply(
+                            color: Theme.of(context).scaffoldBackgroundColor),
+                      ),
+                    ),
+                  ).show(context),
+                );
+              }
+            }
           },
         )
       ],

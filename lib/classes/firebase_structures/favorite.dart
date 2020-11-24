@@ -1,7 +1,8 @@
-import 'package:bapp/classes/firebase_structures/business_branch.dart';
-import 'package:bapp/classes/firebase_structures/business_details.dart';
-import 'package:bapp/classes/firebase_structures/business_services.dart';
 import 'package:enum_to_string/enum_to_string.dart';
+
+import 'business_branch.dart';
+import 'business_details.dart';
+import 'business_services.dart';
 
 class Favorite {
   final FavoriteType type;

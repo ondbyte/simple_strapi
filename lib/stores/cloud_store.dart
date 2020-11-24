@@ -1,14 +1,5 @@
 import 'dart:async';
 
-import 'package:bapp/classes/firebase_structures/business_branch.dart';
-import 'package:bapp/classes/firebase_structures/business_category.dart';
-import 'package:bapp/classes/firebase_structures/business_details.dart';
-import 'package:bapp/classes/firebase_structures/business_services.dart';
-import 'package:bapp/classes/firebase_structures/favorite.dart';
-import 'package:bapp/classes/location.dart';
-import 'package:bapp/config/config_data_types.dart';
-import 'package:bapp/config/constants.dart';
-import 'package:bapp/helpers/helper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:enum_to_string/enum_to_string.dart';
@@ -20,7 +11,16 @@ import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:thephonenumber/thephonenumber.dart';
 
+import '../classes/firebase_structures/business_branch.dart';
+import '../classes/firebase_structures/business_category.dart';
+import '../classes/firebase_structures/business_details.dart';
+import '../classes/firebase_structures/business_services.dart';
+import '../classes/firebase_structures/favorite.dart';
+import '../classes/location.dart';
+import '../config/config_data_types.dart';
+import '../config/constants.dart';
 import '../fcm.dart';
+import '../helpers/helper.dart';
 import 'all_store.dart';
 import 'business_store.dart';
 
@@ -33,7 +33,7 @@ abstract class _CloudStore with Store {
   final _fireStore = FirebaseFirestore.instance;
 
   Map<String, dynamic> myData;
-  List<ReactionDisposer> _disposers = [];
+  final List<ReactionDisposer> _disposers = [];
 
   @observable
   MyAddress myAddress;
@@ -59,6 +59,7 @@ abstract class _CloudStore with Store {
 
   String _previousUID = "";
 
+
   AllStore _allStore;
 
   void setAllStore(AllStore allStore) => _allStore = allStore;
@@ -69,15 +70,16 @@ abstract class _CloudStore with Store {
     _listenForUserChange();
   }
 
-  _init() async {
+  void _init() async {
     await getUserData();
     await getActiveCountries();
     await getMyAddress();
     await getMyUserTypes();
+    await getMyFavorites();
     _setupAutoRun();
   }
 
-  _listenForUserChange() {
+  void _listenForUserChange() {
     _auth.userChanges().listen(
       (u) async {
         user = u;
@@ -144,6 +146,13 @@ abstract class _CloudStore with Store {
         duration: Duration(seconds: 2),
       ).show(context);
       return false;
+    }
+  }
+
+  Future getMyFavorites() async {
+    if(myData.containsKey("favorites")){
+      final fs = myData["favorites"];
+
     }
   }
 

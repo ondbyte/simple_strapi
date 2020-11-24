@@ -1,3 +1,7 @@
+import 'package:bapp/classes/firebase_structures/business_holidays.dart';
+import 'package:bapp/classes/firebase_structures/business_services.dart';
+import 'package:bapp/classes/firebase_structures/business_timings.dart';
+import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -71,30 +75,27 @@ class BusinessDetails {
   } */
 
   BusinessDetails.fromJson(Map<String, dynamic> j) {
-    this.category.value = BusinessCategory.fromJson(j["category"]);
-    this.businessName.value = j["businessName"] as String;
-    this.contactNumber.value = j["contactNumber"] as String;
-    this.address.value = j["address"] as String;
-    this.latlong.value = j["latlong"] as GeoPoint;
-    this.uid.value = j["uid"] as String;
+    category.value = BusinessCategory.fromJson(j["businessCategory"]);
+    businessName.value = j["businessName"] as String;
+    contactNumber.value = j["contactNumber"] as String;
+    address.value = j["address"] as String;
+    latlong.value = j["latlong"] as GeoPoint;
+    uid.value = j["uid"] as String;
     final tmp = j["branches"] as List;
-    if (tmp != null) {
-      this.branches.value =
-          tmp.map((e) => BusinessBranch(myDoc: e, business: this)).toList();
-    }
-    this.selectedBranch.value = this
-        .branches
+    branches.value =
+        tmp.map((e) => BusinessBranch(myDoc: e, business: this)).toList();
+    selectedBranch.value = branches
         .value
         .firstWhere((b) => b.myDoc.value == j["selectedBranch"]);
-    this.email.value = j["email"];
-    this.myDoc.value = j["myDoc"];
+    email.value = j["email"];
+    myDoc.value = j["myDoc"];
 
     setupReactions();
   }
 
   Map<String, dynamic> toMap() {
     return {
-      "category": category.value.toMap(),
+      "businessCategory": category.value.toMap(),
       "businessName": businessName.value,
       "contactNumber": contactNumber.value,
       "address": address.value,
@@ -140,7 +141,11 @@ class BusinessDetails {
       ..email.value = email.value
       ..rating.value = 0.0
       ..status.value = BusinessBranchActiveStatus.lead
-      ..businessCategory.value = this.category.value;
+      ..businessCategory.value = this.category.value
+    ..myDoc.value = myDoc.value.parent.doc("b_" + kUUIDGen.v1())
+    ..businessHolidays.value = BusinessHolidays.empty(business: this)
+    ..businessTimings.value = BusinessTimings.empty()
+    ..businessServices.value = BusinessServices.empty();
 
     await branch.saveBranch();
 

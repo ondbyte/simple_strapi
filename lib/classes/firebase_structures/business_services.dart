@@ -1,3 +1,4 @@
+import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -7,13 +8,14 @@ import 'package:mobx/mobx.dart';
 import 'business_details.dart';
 
 class BusinessServices {
-  final BusinessDetails business;
+  final BusinessBranch branch;
   final all = ObservableList<BusinessService>();
   final allCategories = ObservableList<BusinessServiceCategory>();
 
-  BusinessServices.empty({this.business});
+  BusinessServices.empty({this.branch});
 
-  BusinessServices.fromJsonList(List<dynamic> l, {@required this.business}) {
+  BusinessServices.fromJsonList(List<dynamic> l, {@required this.branch}) {
+    assert(branch!=null);
     l.forEach((i) {
       final item = i as Map<String, dynamic>;
       if (item.keys.contains("serviceName")) {
@@ -48,20 +50,20 @@ class BusinessServices {
       ..images.addAll(imgs);
 
     all.add(service);
-    await business.myDoc.value.update({
+    await branch.myDoc.value.update({
       "businessServices": FieldValue.arrayUnion([service.toMap()])
     });
-    await business.selectedBranch.value.myDoc.value.update({
+    await branch.myDoc.value.update({
       "businessServices": FieldValue.arrayUnion([service.toMap()])
     });
   }
 
   Future removeService(BusinessService service) async {
     all.remove(service);
-    await business.myDoc.value.update({
+    await branch.myDoc.value.update({
       "businessServices": FieldValue.arrayRemove([service.toMap()])
     });
-    await business.selectedBranch.value.myDoc.value.update({
+    await branch.myDoc.value.update({
       "businessServices": FieldValue.arrayRemove([service.toMap()])
     });
   }
@@ -79,14 +81,14 @@ class BusinessServices {
       ..images.addAll(imgs);
 
     allCategories.add(category);
-    await business.selectedBranch.value.myDoc.value.update({
+    await branch.myDoc.value.update({
       "businessServices": FieldValue.arrayUnion([category.toMap()])
     });
   }
 
   Future removeCategory(BusinessServiceCategory category) async {
     allCategories.remove(category);
-    business.selectedBranch.value.myDoc.value.update({
+    await branch.myDoc.value.update({
       "businessServices": FieldValue.arrayRemove([category.toMap()])
     });
   }

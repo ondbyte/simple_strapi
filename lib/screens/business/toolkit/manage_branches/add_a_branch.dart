@@ -22,7 +22,7 @@ class BusinessAddABranchScreen extends StatefulWidget {
 
 class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
   PickedLocation _pickedLocation;
-  Map<String, bool> _filteredExistingImages;
+  Map<String, bool> _filteredExistingImages = {};
   bool _doShakePlace = false;
   bool _doShakePhotos = false;
   final _pickedImages = <Asset>[];

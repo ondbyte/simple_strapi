@@ -59,7 +59,7 @@ class BusinessBranch {
   }
 
   var _disposers = <ReactionDisposer>[];
-  _setupReactions() {
+  void _setupReactions() {
     _disposers.add(
       reaction(
         (_) => myDoc.value,
@@ -191,17 +191,15 @@ class BusinessBranch {
     rating.value = j["rating"];
     businessServices.value = BusinessServices.fromJsonList(
         j["businessServices"],
-        business: business.value);
+        branch: this);
     businessTimings.value = BusinessTimings.fromJson(j["businessTimings"]);
     businessHolidays.value = BusinessHolidays.fromJsonList(
       j["businessHolidays"],
       business: business.value,
     );
-    //Helper.printLog("bHolidays");
-    //print(j["businessHolidays"]);
     status.value =
         EnumToString.fromString(BusinessBranchActiveStatus.values, j["status"]);
-    businessCategory.value = j["businessCategory"];
+    businessCategory.value = BusinessCategory.fromJson(j["businessCategory"]);
     description.value = j["description"]??"";
     tag.value = j["tag"]??"";
     try {
@@ -263,15 +261,7 @@ class BusinessBranch {
   }
 
   Future saveBranch() async {
-    if (myDoc.value == null) {
-      final doc = business.value.myDoc.value.parent.doc("b_" + kUUIDGen.v1());
-      await doc.set(toMap());
-      await act(() {
-        this.myDoc.value = doc;
-      });
-    } else {
-      await myDoc.value.set(toMap());
-    }
+    await myDoc.value.set(toMap());
   }
 
   Future addAStaff(
