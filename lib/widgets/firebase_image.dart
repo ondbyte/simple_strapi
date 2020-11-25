@@ -131,8 +131,8 @@ class ListTileFirebaseImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RRFirebaseStorageImage(
-      height: 64,
-      width: 64,
+      height: 48,
+      width: 48,
       circular: circular,
       storagePathOrURL: storagePathOrURL,
     );

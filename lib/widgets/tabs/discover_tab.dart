@@ -59,7 +59,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                       const SizedBox(
                         height: 20,
                       ),
-                      const Text("Or Browse Categories"),
+                      const Text("Or explore categories"),
                     ],
                   ),
                 ),
@@ -67,7 +67,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
               SliverList(
                 delegate: SliverChildListDelegate([
                   const SizedBox(
-                    height: 10,
+                    height: 0,
                   ),
                   _getCategoriesScroller(context),
                   const SizedBox(
@@ -138,8 +138,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
                         BappNavigator.bappPush(
                           context,
                           BranchesResultScreen(
-                            title: "Featured on Bapp",
-                            subTitle: "at " + cloudStore.getAddressLabel(),
+                            title: "Featured Service",
+                            subTitle: "in " + cloudStore.getAddressLabel(),
                             categoryName: "featured",
                             futureBranchList: Future.value(snap.data),
                             placeName: cloudStore.getAddressLabel(),
@@ -147,9 +147,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
                         );
                       },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: SingleChildScrollView(
+                    SingleChildScrollView(
+                        padding: const EdgeInsets.only(left: 16),
                         scrollDirection: Axis.horizontal,
                         child: snap.hasData
                             ? Row(
@@ -197,7 +196,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                                 ],
                               )
                             : const SizedBox(),
-                      ),
+                      
                     ),
                   ],
                 );
@@ -315,6 +314,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
 
   Widget _getCategoriesScroller(BuildContext context) {
     return SingleChildScrollView(
+      padding: EdgeInsets.only(left:10),
       scrollDirection: Axis.horizontal,
       child: Consumer2<BusinessStore, CloudStore>(
         builder: (_, businessStore, cloudStore, __) {
@@ -324,7 +324,9 @@ class _DiscoverTabState extends State<DiscoverTab> {
                 children: [
                   ...List.generate(
                     businessStore.categories.length,
-                    (index) => FlatButton(
+                    (index) => TextButton(
+                    
+                    
                       onPressed: () {
                         BappNavigator.bappPush(
                           context,

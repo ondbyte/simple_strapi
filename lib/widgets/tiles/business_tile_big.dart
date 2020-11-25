@@ -71,7 +71,9 @@ class BusinessTileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      
       onTap: onTap,
+      dense: true,
       contentPadding: padding ?? EdgeInsets.zero,
       title: Text(
         branch.name.value,
@@ -90,7 +92,7 @@ class BusinessTileWidget extends StatelessWidget {
         children: [
           Icon(
             Icons.star,
-            color: Colors.yellow[500],
+            color: Colors.amber
           ),
           const SizedBox(
             height: 2,

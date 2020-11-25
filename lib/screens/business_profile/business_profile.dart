@@ -122,7 +122,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                       titleStyle: Theme.of(context).textTheme.headline1,
                       branch: flow.branch,
                       onTap: null,
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.symmetric(horizontal:16, vertical: 10),
                     ),
                     getBappTabBar(
                       context,

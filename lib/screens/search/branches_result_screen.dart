@@ -31,30 +31,31 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
         slivers: [
           SliverAppBar(
             backgroundColor: Colors.black,
-            expandedHeight: 256,
+            expandedHeight: 120,
             flexibleSpace: FlexibleSpaceBar(
               background: SizedBox(
-                height: 256,
+                height:100,
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      widget.title,
+                      "${widget.title}s",
                       style: Theme.of(context).textTheme.headline1.apply(
                             color: Colors.white,
                           ),
                     ),
-                    const SizedBox(
-                      height: 20,
-                    ),
+                    
                     Text(
                       widget.subTitle,
                       style: Theme.of(context)
                           .textTheme
                           .bodyText1
                           .apply(color: Colors.white),
+                    ),
+                    const SizedBox(
+                      height: 30,
                     ),
                   ],
                 ),
@@ -72,14 +73,17 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
                     }
                     return snap.data.isNotEmpty
                         ? ListView.builder(
+                          padding: EdgeInsets.fromLTRB(0,16,0,0),
                             shrinkWrap: true,
                             itemCount: snap.data.length,
                             itemBuilder: (_, i) {
                               return BusinessTileWidget(
+                                titleStyle: Theme.of(context).textTheme.subtitle1,
                                 withImage: true,
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 6),
+                                    horizontal: 16, vertical: 0),
                                 branch: snap.data[i],
+                              
                                 onTap: () async {
                                   flow.branch = snap.data[i];
                                   BappNavigator.bappPush(
