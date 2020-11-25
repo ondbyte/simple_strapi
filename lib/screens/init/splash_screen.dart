@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/extensions.dart';
+import 'package:bapp/screens/home/bapp.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
 
 import 'package:bapp/stores/business_store.dart';
@@ -45,7 +48,9 @@ class _SplashScreenState extends State<SplashScreen> with AutomaticKeepAliveClie
 
             if (cloudStore.myAddress != null) {
               ///customer is not a first timer
-              Navigator.of(context).pushNamedAndRemoveUntil(RouteManager.home,(route) => false);
+              if(mounted){
+                BappNavigator.bappPush(context, Bapp());
+              }
               killState = !killState;
               return;
             } else {
@@ -77,16 +82,16 @@ class _SplashScreenState extends State<SplashScreen> with AutomaticKeepAliveClie
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             Container(
-              margin: EdgeInsets.only(top: 30, bottom: 30),
+              margin: const EdgeInsets.only(top: 30, bottom: 30),
               height: 80,
-              child: new SvgPicture.asset(
+              child: SvgPicture.asset(
                 'assets/svg/logo.svg',
                 semanticsLabel: 'Ice Cream',
               ),
             ),
             Column(
               children: <Widget>[
-                new Text(
+                Text(
                   '$kAppName',
                   style: Theme.of(context).textTheme.headline1,
                 ),

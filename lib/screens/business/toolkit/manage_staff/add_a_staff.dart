@@ -1,15 +1,3 @@
-import 'package:bapp/classes/firebase_structures/business_services.dart';
-import 'package:bapp/classes/firebase_structures/business_staff.dart';
-import 'package:bapp/config/config_data_types.dart';
-import 'package:bapp/helpers/helper.dart';
-import 'package:bapp/route_manager.dart';
-import 'package:bapp/stores/business_store.dart';
-import 'package:bapp/stores/cloud_store.dart';
-import 'package:bapp/widgets/buttons.dart';
-import 'package:bapp/widgets/loading_stack.dart';
-import 'package:bapp/widgets/multiple_option_chips.dart';
-import 'package:bapp/widgets/shake_widget.dart';
-import 'package:bapp/widgets/tiles/add_image_sliver.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +6,19 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:thephonenumber/thephonenumber.dart';
+
+import '../../../../classes/firebase_structures/business_services.dart';
+import '../../../../classes/firebase_structures/business_staff.dart';
+import '../../../../config/config_data_types.dart';
+import '../../../../helpers/helper.dart';
+import '../../../../route_manager.dart';
+import '../../../../stores/business_store.dart';
+import '../../../../stores/cloud_store.dart';
+import '../../../../widgets/buttons.dart';
+import '../../../../widgets/loading_stack.dart';
+import '../../../../widgets/multiple_option_chips.dart';
+import '../../../../widgets/shake_widget.dart';
+import '../../../../widgets/tiles/add_image_sliver.dart';
 
 class BusinessAddAStaffScreen extends StatefulWidget {
   BusinessAddAStaffScreen({Key key}) : super(key: key);
@@ -35,6 +36,13 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
   String authorizedUid = "";
   bool _numberValidated = false;
   ThePhoneNumber _theNumber;
+  final _pnController = TextEditingController();
+
+  @override
+  void dispose() {
+    _pnController.dispose();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return LoadingStackWidget(
@@ -48,12 +56,12 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
             Form(
               key: _key,
               child: SliverPadding(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate(
                     [
                       DropdownButtonFormField<UserType>(
-                        value: _staff.role ?? null,
+                        value: _staff.role,
                         items: [
                           DropdownMenuItem(
                             child: Text(
@@ -97,13 +105,12 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                       Consumer<CloudStore>(
                         builder: (_, cloudStore, __) {
                           return InternationalPhoneNumberInput(
+                            onInputChanged: (PhoneNumber value) {
+                              _pnController.text = value.phoneNumber;
+                            },
                             inputDecoration:
                                 const InputDecoration(labelText: "Bapp user"),
                             countries: [cloudStore.theNumber.iso2Code],
-                            onInputChanged: (pn) {
-                              _theNumber = ThePhoneNumberLib.parseNumber(
-                                  internationalNumber: pn.phoneNumber);
-                            },
                             initialValue: PhoneNumber(
                                 phoneNumber:
                                     _theNumber?.internationalNumber ?? ""),
@@ -111,6 +118,8 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                               if (b != _numberValidated) {
                                 setState(() {
                                   _numberValidated = b;
+                                  _theNumber = ThePhoneNumberLib.parseNumber(
+                                      internationalNumber: _pnController.text);
                                 });
                               }
                             },
@@ -123,58 +132,15 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                           );
                         },
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 20,
                       ),
-                      /*FlatButton.icon(
-                        onPressed: authorizedUid.isNotEmpty
-                            ? _numberValidated
-                                ? () {
-                                    Flushbar(
-                                      message:
-                                          "User acknowledged the staffing request",
-                                      duration: const Duration(seconds: 2),
-                                    ).show(context);
-                                  }
-                                : null
-                            : _numberValidated
-                                ? () async {
-                                    if (_theNumber.internationalNumber ==
-                                        Provider.of<CloudStore>(context,
-                                                listen: false)
-                                            .theNumber
-                                            .internationalNumber) {
-                                      ///cannot use own number
-                                      Flushbar(
-                                        message: "Cannot be your number",
-                                        duration: const Duration(seconds: 2),
-                                      ).show(context);
-                                      return;
-                                    }
-                                    authorizedUid =
-                                        (await _getStaffAuthorization()) ?? "";
-                                    setState(() {
-
-                                    });
-                                  }
-                                : null,
-                        icon: Icon(FeatherIcons.user),
-                        textTheme: ButtonTextTheme.primary,
-                        label: Text(
-                          authorizedUid.isNotEmpty
-                              ? "Authorized"
-                              : "Ask Authorization",
-                        ),
-                        color: authorizedUid.isNotEmpty
-                            ? Colors.green
-                            : Theme.of(context).errorColor,
-                      ),*/
-                      SizedBox(
+                      const SizedBox(
                         height: 20,
                       ),
                       TextFormField(
                         decoration:
-                            InputDecoration(labelText: "Name of the staff"),
+                            const InputDecoration(labelText: "Name of the staff"),
                         onChanged: (s) {
                           _staff.name = s;
                         },
@@ -185,7 +151,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                           return null;
                         },
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 20,
                       ),
                       InputDatePickerFormField(
@@ -198,7 +164,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                         },
                         errorFormatText: "Select a date",
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 20,
                       ),
                       Consumer<BusinessStore>(
@@ -213,8 +179,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                                 placeHolder: "No service categories",
                                 onAddPressed: () async {
                                   await Navigator.of(context).pushNamed(
-                                      (RouteManager
-                                          .businessAddAServiceCategoryScreen));
+                                      (RouteManager.businessAddAServiceCategoryScreen));
                                   setState(() {});
                                 },
                                 itemLabel: (_, cat) {
@@ -241,7 +206,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                           );
                         },
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 20,
                       ),
                       Observer(
@@ -299,6 +264,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                             act(() {
                               kLoading.value = true;
                             });
+                            _theNumber = ThePhoneNumberLib.parseNumber(internationalNumber: _pnController.text);
                             assert(_theNumber?.internationalNumber != null,
                                 "number missing");
                             await branch.addAStaff(
@@ -326,234 +292,5 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
       ),
     );
   }
-/*
-  Future<String> _getStaffAuthorization() async {
-    return await showDialog<String>(
-      context: context,
-      builder: (_) {
-        return AlertDialog(
-          //title: Text(_theNumber.internationalNumber),
-          content: BusinessAskUserForStaffingWidget(
-            thePhoneNumber: _theNumber,
-          ),
-        );
-      },
-    );
-  }*/
+
 }
-/*
-
-class BusinessAskUserForStaffingWidget extends StatefulWidget {
-  final ThePhoneNumber thePhoneNumber;
-  BusinessAskUserForStaffingWidget({Key key, @required this.thePhoneNumber})
-      : super(key: key);
-
-  @override
-  _BusinessAskUserForStaffingWidgetState createState() =>
-      _BusinessAskUserForStaffingWidgetState();
-}
-
-class _BusinessAskUserForStaffingWidgetState
-    extends State<BusinessAskUserForStaffingWidget> {
-  bool _loading = false, _waiting = false;
-  Widget _finallyWidget;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        return !_waiting;
-      },
-      child: Consumer2<CloudStore, BusinessStore>(
-        builder: (_, cloudStore, businessStore, __) {
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _finallyWidget == null
-                  ? Text(
-                      "Press ask now to ask the Bapp user with the number ${widget.thePhoneNumber.internationalNumber} to join your business on Bapp",
-                    )
-                  : SizedBox(),
-              SizedBox(
-                height: _finallyWidget == null ? 20 : 0,
-              ),
-              _loading
-                  ? LoadingWidget()
-                  : _finallyWidget == null
-                      ? PrimaryButton(
-                          "Ask now",
-                          onPressed: (){
-                            _onPressed(businessStore, cloudStore);
-                          },
-                        )
-                      : _finallyWidget,
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  _onPressed(BusinessStore businessStore, CloudStore cloudStore) async {
-    setState(() {
-      _loading = true;
-    });
-    final response = await _askNow(businessStore, cloudStore);
-    if (response == BappFunctionsResponse.multiUser ||
-        response == BappFunctionsResponse.noUser) {
-      _finallyWidget = Column(
-        children: [
-          Text("User is not on Bapp, please ask the user to sign up."),
-          SizedBox(
-            height: 20,
-          ),
-          PrimaryButton(
-            "Go back",
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      );
-    } else if (response == BappFunctionsResponse.success) {
-      _finallyWidget = Column(
-        children: [
-          Text("User is on Bapp, we are reaching them out, please wait"),
-          SizedBox(
-            height: 20,
-          ),
-          LoadingWidget(),
-        ],
-      );
-    } else if (response.contains(BappFunctionsResponse.invalidRecipient)) {
-      _finallyWidget = Column(
-        children: [
-          Text(
-              "Ask the user enable the notification in settings and press ask again"),
-          SizedBox(
-            height: 20,
-          ),
-          PrimaryButton(
-            "Ask again",
-            onPressed: (){
-              _onPressed(businessStore, cloudStore);
-            },
-          ),
-          FlatButton(
-            onPressed: (){
-              Navigator.of(context).pop();
-            },
-            child: Text("Go back"),
-          )
-        ],
-      );
-    }
-    setState(() {
-      _loading = false;
-    });
-  }
-
-  Future<String> _askNow(
-      BusinessStore businessStore, CloudStore cloudStore) async {
-    _waiting = true;
-    final response = await cloudStore.getAuthorizationForStaffing(
-      phoneNumber: widget.thePhoneNumber,
-      business: businessStore.business,
-      onReplyRecieved: (bappMessage) {
-        if (bappMessage == null) {
-          _finallyWidget = _onNull(businessStore, cloudStore);
-        } else {
-          if (bappMessage.type ==
-              BappFCMMessageType.staffAuthorizationAskDeny) {
-            _finallyWidget = _onDeny(businessStore, cloudStore);
-          } else if (bappMessage.type ==
-              BappFCMMessageType.staffAuthorizationAskAcknowledge) {
-            //_finallyWidget = _onAcknowledge(businessStore, cloudStore);
-            Helper.printLog("UID");
-            print(bappMessage.data["uid"]);
-            Navigator.of(context).pop(bappMessage.data["uid"]);
-          }
-        }
-        setState(() {
-          _loading = false;
-        });
-      },
-    );
-    return response;
-  }
-*/
-/*
-  Widget _onAcknowledge(BusinessStore businessStore, CloudStore cloudStore) {
-    return Column(
-      children: [
-        Text(
-          "User acknowledged",
-          style:
-              Theme.of(context).textTheme.headline1.apply(color: Colors.green),
-        ),
-        SizedBox(
-          height: 20,
-        ),
-        PrimaryButton(
-          "Go back",
-          onPressed: () {
-            Navigator.of(context).pop("");
-          },
-        )
-      ],
-    );
-  }*/ /*
-
-
-  Widget _onDeny(BusinessStore businessStore, CloudStore cloudStore) {
-    return Column(
-      children: [
-        Text(
-          "User denied your offer",
-          style: Theme.of(context).textTheme.headline1.apply(color: Colors.red),
-        ),
-        SizedBox(
-          height: 20,
-        ),
-        PrimaryButton(
-          "Go back",
-          onPressed: () {
-            Navigator.of(context).pop("");
-          },
-        )
-      ],
-    );
-  }
-
-  Widget _onNull(BusinessStore businessStore, CloudStore cloudStore) {
-    return Column(
-      children: [
-        Text(
-          "Times up,",
-          style: Theme.of(context).textTheme.headline1,
-        ),
-        SizedBox(
-          height: 20,
-        ),
-        PrimaryButton(
-          "Ask again",
-          onPressed: (){
-            _onPressed(businessStore, cloudStore);
-          },
-        ),
-        FlatButton(
-          onPressed: () {
-            Navigator.of(context).pop("");
-          },
-          child: Text("Go back"),
-        )
-      ],
-    );
-  }
-}
-*/
