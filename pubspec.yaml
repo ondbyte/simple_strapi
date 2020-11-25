@@ -2,7 +2,7 @@ name: bapp
 description: A new Flutter project.
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-version: 0.0.1+1
+version: 0.2.0+11
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -76,12 +76,22 @@ dependencies:
   geocoder: ^0.2.1
   geolocator: ^6.0.0+4
 
+  
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   mobx_codegen: ^1.1.0+1
   build_runner: ^1.10.0
   test: ^1.15.5
+  flutter_launcher_icons: ^0.8.1
+  
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path_ios: "assets/appIcons/ios.jpg"
+  image_path_android: "assets/appIcons/android.png"
 
 flutter:
 
