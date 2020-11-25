@@ -50,7 +50,9 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
               data: Theme.of(context).copyWith(
                   cardColor: Theme.of(context).scaffoldBackgroundColor),
               child: ExpansionPanelList(
+                expandedHeaderPadding: EdgeInsets.all(0),
                 elevation: 0,
+                
                 dividerColor: Colors.transparent,
                 children: List.generate(
                     BusinessExpandingPanelConfigs.cfgs.length, (i) {
