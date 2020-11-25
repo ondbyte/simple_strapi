@@ -1,10 +1,11 @@
+import 'package:bapp/helpers/helper.dart';
 import 'package:flutter/cupertino.dart';
 
 ///this widget provides the size of the already rendered child so we can render another above it using the size
 
 class OnChildSizedWidget extends StatefulWidget {
   final Widget child;
-  final Widget Function(Size) onChildSize;
+  final Function(Size) onChildSize;
 
   const OnChildSizedWidget({Key key, this.onChildSize, this.child})
       : super(key: key);
@@ -13,13 +14,12 @@ class OnChildSizedWidget extends StatefulWidget {
 }
 
 class _OnChildSizedWidgetState extends State<OnChildSizedWidget> {
-  Widget _upperChild = SizedBox();
 
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       setState(() {
-        _upperChild = widget.onChildSize(context.size);
+        widget.onChildSize(context.size);
       });
     });
     super.initState();
@@ -27,8 +27,37 @@ class _OnChildSizedWidgetState extends State<OnChildSizedWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [widget.child, _upperChild],
+    return widget.child;
+  }
+}
+
+class RenderAfterChildWidget extends StatefulWidget {
+  final Widget Function(Size) onChildRendered;
+  final Widget child;
+
+  const RenderAfterChildWidget({Key key, this.onChildRendered, this.child}) : super(key: key);
+  @override
+  _RenderAfterChildWidgetState createState() => _RenderAfterChildWidgetState();
+}
+
+class _RenderAfterChildWidgetState extends State<RenderAfterChildWidget> {
+  Widget _upperChild = const SizedBox();
+  @override
+  Widget build(BuildContext context) {
+    return OnChildSizedWidget(
+      child: Stack(
+        children: [
+          widget.child,
+          _upperChild,
+        ],
+      ),
+      onChildSize: (s){
+        setState(() {
+          Helper.printLog("setting upper child");
+          _upperChild = widget.onChildRendered(s);
+        });
+      },
     );
   }
 }
+

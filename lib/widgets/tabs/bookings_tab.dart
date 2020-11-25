@@ -1,3 +1,4 @@
+import 'package:bapp/widgets/size_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -108,18 +109,23 @@ class _BookingsTabState extends State<BookingsTab> {
       ),
     );
   }
-
+  double _calenderHeight;
   Widget _getCalender(){
     return SliverAppBar(
       elevation: 0,
-      collapsedHeight: 160,
-      expandedHeight: 160,
+      collapsedHeight: _calenderHeight?? 160,
+      expandedHeight: _calenderHeight?? 160,
       pinned: true,
       automaticallyImplyLeading: false,
       actions: [
-        SizedBox(),
+        const SizedBox(),
       ],
       flexibleSpace: BappRowCalender(
+        onChildRendered: (s){
+          setState(() {
+            _calenderHeight = s.height+6;
+          });
+        },
         bookings: flow.myBookingsAsCalendarEvents(),
         initialDate: DateTime.now(),
         holidays: flow.holidays,

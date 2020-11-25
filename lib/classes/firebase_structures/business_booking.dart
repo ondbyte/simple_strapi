@@ -69,6 +69,7 @@ class BusinessBooking {
         {
           return CardsColor.colors["teal"];
         }
+      case BusinessBookingStatus.walkin:
       case BusinessBookingStatus.pending:
         {
           return CardsColor.colors["purple"];
@@ -97,6 +98,10 @@ class BusinessBooking {
       case BusinessBookingStatus.ongoing:
         {
           return "Confirmed";
+        }
+      case BusinessBookingStatus.walkin:
+        {
+          return "Walkin";
         }
       case BusinessBookingStatus.pending:
         {

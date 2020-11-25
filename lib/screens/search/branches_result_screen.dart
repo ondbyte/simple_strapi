@@ -76,6 +76,7 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
                             itemCount: snap.data.length,
                             itemBuilder: (_, i) {
                               return BusinessTileWidget(
+                                withImage: true,
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 16, vertical: 6),
                                 branch: snap.data[i],

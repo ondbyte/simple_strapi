@@ -1,3 +1,4 @@
+import 'package:bapp/helpers/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -29,7 +30,7 @@ class _CustomerBookingTileState extends State<CustomerBookingTile> {
     return Padding(
       key: _key,
       padding: widget.margin ?? EdgeInsets.all(8),
-      child: OnChildSizedWidget(
+      child: RenderAfterChildWidget(
         child: Container(
           decoration: BoxDecoration(
             color: Theme.of(context).backgroundColor,
@@ -74,7 +75,7 @@ class _CustomerBookingTileState extends State<CustomerBookingTile> {
             ),
           ),
         ),
-        onChildSize: (s) {
+        onChildRendered: (s) {
           if (s != null) {
             return SizedBox.fromSize(
               size: s,

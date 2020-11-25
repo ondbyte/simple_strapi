@@ -334,7 +334,7 @@ class BookingFlow {
       fromToTiming: FromToTiming.fromDates(from: from, to: to),
       staff: professional.value.staff,
       services: services,
-      status: BusinessBookingStatus.walkin,
+      status: number==null?BusinessBookingStatus.pending:BusinessBookingStatus.walkin,
       bookedByNumber: number == null
           ? FirebaseAuth.instance.currentUser.phoneNumber
           : number.internationalNumber,

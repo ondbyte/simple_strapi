@@ -82,8 +82,8 @@ class BusinessTileWidget extends StatelessWidget {
         branch.address.value,
         maxLines: 1,
       ),
-      leading: withImage?ListTileFirebaseImage(
-        storagePathOrURL: branch.images.isNotEmpty?branch.images[0]:kTemporaryPlaceHolderImage,
+      leading: withImage? ListTileFirebaseImage(
+        storagePathOrURL: branch.images.isNotEmpty?branch.images.keys.elementAt(0):kTemporaryPlaceHolderImage,
       ):null,
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
