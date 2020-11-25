@@ -22,18 +22,14 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
       child: CustomScrollView(
         slivers: [
           SliverPadding(
-            padding: EdgeInsets.only(top: 20, left: 16, right: 16),
+            padding: EdgeInsets.only(top: 0, left: 16, right: 16),
             sliver: SliverList(
               delegate: SliverChildListDelegate(
                 [
                   _getBranchTile(context),
-                  SizedBox(
-                    height: 20,
-                  ),
+                  
                   _getSubmitForVerificationButton(context),
-                  SizedBox(
-                    height: 20,
-                  ),
+                 
                 ],
               ),
             ),
@@ -46,7 +42,7 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
 
   Widget _getExpansionTiles(BuildContext context) {
     return SliverPadding(
-      padding: EdgeInsets.all(16),
+      padding: EdgeInsets.symmetric(horizontal:16, vertical:0),
       sliver: SliverList(
         delegate: SliverChildListDelegate(
           [
@@ -225,33 +221,37 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
                 businessStore.business.selectedBranch.value.status.value ==
                     BusinessBranchActiveStatus.documentVerification;
             return draft || docuVerification
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: ListTile(
-                      tileColor:
-                          docuVerification ? Colors.green : Colors.redAccent,
-                      title: Text(
-                        docuVerification
-                            ? "Branch is in verification"
-                            : "Submit for verification",
-                        style:
-                            TextStyle(color: Theme.of(context).indicatorColor),
+                ? Container(
+                   margin: EdgeInsets.only(bottom:10, top: 10),
+                  child: ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: ListTile(
+                          tileColor:
+                              docuVerification ? Colors.green : Colors.redAccent,
+                          title: Text(
+                            docuVerification
+                                ? "Branch is in verification"
+                                : "Submit for verification",
+                            style:
+                                TextStyle(color: Theme.of(context).primaryColorLight),
+                          ),
+                          trailing: draft
+                              ? Icon(
+                                  FeatherIcons.arrowRightCircle,
+                                  color: Theme.of(context).primaryColorLight,
+                                )
+                              : null,
+                          onTap: docuVerification
+                              ? null
+                              : () {
+                                  Navigator.of(context).pushNamed(
+                                      RouteManager.businessVerificationScreen);
+                                },
+                        
                       ),
-                      trailing: draft
-                          ? Icon(
-                              FeatherIcons.arrowRightCircle,
-                              color: Theme.of(context).indicatorColor,
-                            )
-                          : null,
-                      onTap: docuVerification
-                          ? null
-                          : () {
-                              Navigator.of(context).pushNamed(
-                                  RouteManager.businessVerificationScreen);
-                            },
                     ),
-                  )
-                : SizedBox();
+                )
+                : SizedBox( height: 0,);
           },
         );
       },
