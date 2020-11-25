@@ -1,6 +1,7 @@
 import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/screens/business_profile/business_profile.dart';
+import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:flutter/material.dart';
@@ -8,10 +9,15 @@ import 'package:provider/provider.dart';
 
 class BranchesResultScreen extends StatefulWidget {
   final Future<List<BusinessBranch>> futureBranchList;
-  final String title, subTitle;
+  final String title, subTitle, placeName, categoryName;
 
   const BranchesResultScreen(
-      {Key key, this.futureBranchList, this.title, this.subTitle})
+      {Key key,
+      this.futureBranchList,
+      this.title,
+      this.subTitle,
+      this.placeName,
+      this.categoryName})
       : super(key: key);
   @override
   _BranchesResultScreenState createState() => _BranchesResultScreenState();
@@ -64,22 +70,32 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
                     if (!snap.hasData) {
                       return LinearProgressIndicator();
                     }
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: snap.hasData ? snap.data.length : 0,
-                      itemBuilder: (_, i) {
-                        return BusinessTileWidget(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                          branch: snap.data[i],
-                          onTap: () async {
-                            flow.branch = snap.data[i];
-                            BappNavigator.bappPush(
-                                context, BusinessProfileScreen());
-                          },
-                        );
-                      },
-                    );
+                    return snap.data.isNotEmpty
+                        ? ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: snap.data.length,
+                            itemBuilder: (_, i) {
+                              return BusinessTileWidget(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 6),
+                                branch: snap.data[i],
+                                onTap: () async {
+                                  flow.branch = snap.data[i];
+                                  BappNavigator.bappPush(
+                                      context, BusinessProfileScreen());
+                                },
+                              );
+                            },
+                          )
+                        : ContextualMessageScreen(
+                            interactive: false,
+                            svgAssetToDisplay: "assets/svg/empty-list.svg",
+                            message: "There are no " +
+                                widget.categoryName +
+                                " in " +
+                                widget.placeName +
+                                ", We are adding more local businesses to serve you better",
+                          );
                   },
                 ),
               ],

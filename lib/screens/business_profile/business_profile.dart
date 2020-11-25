@@ -11,7 +11,6 @@ import 'package:bapp/widgets/firebase_image.dart';
 import 'package:bapp/widgets/tabs/business_profile/about_tab.dart';
 import 'package:bapp/widgets/tabs/business_profile/services_tab.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
-import 'package:event_bus/event_bus.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -92,8 +91,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                               color: Colors.white,
                             ),
                             onPressed: () {
-                              Provider.of<EventBus>(context, listen: false)
-                                  .fire(fav);
+                              cloudStore.addOrRemoveFavorite(fav);
                             },
                           );
                         },

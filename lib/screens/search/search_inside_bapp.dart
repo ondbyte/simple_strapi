@@ -1,9 +1,7 @@
 import 'package:bapp/helpers/extensions.dart';
-import 'package:bapp/route_manager.dart';
 import 'package:bapp/screens/search/branches_result_screen.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
-
 import 'package:bapp/widgets/choose_category.dart';
 import 'package:bapp/widgets/store_provider.dart';
 import 'package:flutter/material.dart';
@@ -36,11 +34,10 @@ class _SearchInsideBappScreenState extends State<SearchInsideBappScreen> {
                     BappNavigator.bappPush(
                       context,
                       BranchesResultScreen(
+                        categoryName: c.name,
+                        placeName: cloudStore.getAddressLabel(),
                         title: "Top " + c.name,
-                        subTitle: "In " +
-                            (cloudStore.myAddress.locality != null
-                                ? cloudStore.myAddress.locality.name
-                                : cloudStore.myAddress.city.name),
+                        subTitle: "In " + cloudStore.getAddressLabel(),
                         futureBranchList: cloudStore.getBranchesForCategory(
                           c,
                         ),

@@ -77,8 +77,13 @@ abstract class _CloudStore with Store {
     await getMyAddress();
     await getMyUserTypes();
     await getMyFavorites();
-    _setupFavoritesListener();
     _setupAutoRun();
+  }
+
+  String getAddressLabel() {
+    return (myAddress.locality != null
+        ? myAddress.locality.name
+        : myAddress.city.name);
   }
 
   void _listenForUserChange() {
@@ -178,16 +183,18 @@ abstract class _CloudStore with Store {
     }
   }
 
-  void _setupFavoritesListener() {
-    _allStore.get<EventBus>().on<Favorite>().listen((event) {
-      final existing = favorites.firstWhere((element) => element == event,
-          orElse: () => null);
-      if (existing != null) {
-        favorites.remove(existing);
-      } else {
-        favorites.add(event);
-      }
-    });
+  void addOrRemoveFavorite(Favorite f) {
+    final existing =
+        favorites.firstWhere((element) => element == f, orElse: () => null);
+    if (existing != null) {
+      favorites.remove(existing);
+    } else {
+      favorites.add(f);
+    }
+  }
+
+  bool isFavorite(Favorite f) {
+    return favorites.any((element) => element == f);
   }
 
   Future _saveFavorites() async {

@@ -301,12 +301,11 @@ class _DiscoverTabState extends State<DiscoverTab> {
                         BappNavigator.bappPush(
                           context,
                           BranchesResultScreen(
+                            placeName: cloudStore.getAddressLabel(),
+                            categoryName: businessStore.categories[index].name,
                             title:
                                 "Top " + businessStore.categories[index].name,
-                            subTitle: "In " +
-                                (cloudStore.myAddress.locality != null
-                                    ? cloudStore.myAddress.locality.name
-                                    : cloudStore.myAddress.city.name),
+                            subTitle: "In " + cloudStore.getAddressLabel(),
                             futureBranchList: cloudStore.getBranchesForCategory(
                               businessStore.categories[index],
                             ),

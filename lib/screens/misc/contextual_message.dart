@@ -11,6 +11,7 @@ class ContextualMessageScreen extends StatefulWidget {
   final String svgAssetToDisplay;
   final String secondarybuttonText;
   final Function(BuildContext) secondaryButtonPressed;
+  final bool interactive;
 
   const ContextualMessageScreen(
       {Key key,
@@ -20,7 +21,8 @@ class ContextualMessageScreen extends StatefulWidget {
       this.onButtonPressed,
       this.svgAssetToDisplay,
       this.secondarybuttonText,
-      this.secondaryButtonPressed})
+      this.secondaryButtonPressed,
+      this.interactive = true})
       : super(key: key);
   @override
   _ContextualMessageScreenState createState() =>
@@ -66,20 +68,21 @@ class _ContextualMessageScreenState extends State<ContextualMessageScreen> {
                 SizedBox(
                   height: 20,
                 ),
-                FlatButton(
-                  onPressed: loading
-                      ? null
-                      : () {
-                          if (widget.onButtonPressed != null) {
-                            widget.onButtonPressed(context);
-                          } else {
-                            Navigator.of(context).pushNamedAndRemoveUntil(
-                                RouteManager.home, (route) => false);
-                          }
-                        },
-                  child: Text(widget.buttonText),
-                ),
-                if (widget.secondarybuttonText != null)
+                if (widget.interactive)
+                  FlatButton(
+                    onPressed: loading
+                        ? null
+                        : () {
+                            if (widget.onButtonPressed != null) {
+                              widget.onButtonPressed(context);
+                            } else {
+                              Navigator.of(context).pushNamedAndRemoveUntil(
+                                  RouteManager.home, (route) => false);
+                            }
+                          },
+                    child: Text(widget.buttonText),
+                  ),
+                if (widget.secondarybuttonText != null && widget.interactive)
                   FlatButton(
                     onPressed: loading
                         ? null
