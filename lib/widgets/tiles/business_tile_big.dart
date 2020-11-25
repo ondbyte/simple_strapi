@@ -71,7 +71,9 @@ class BusinessTileWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      
       onTap: onTap,
+      dense: true,
       contentPadding: padding ?? EdgeInsets.zero,
       title: Text(
         branch.name.value,

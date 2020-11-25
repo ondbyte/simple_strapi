@@ -78,10 +78,12 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
                             itemCount: snap.data.length,
                             itemBuilder: (_, i) {
                               return BusinessTileWidget(
+                                titleStyle: Theme.of(context).textTheme.subtitle1,
                                 withImage: true,
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 6),
+                                    horizontal: 16, vertical: 0),
                                 branch: snap.data[i],
+                              
                                 onTap: () async {
                                   flow.branch = snap.data[i];
                                   BappNavigator.bappPush(
