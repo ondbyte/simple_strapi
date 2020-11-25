@@ -28,14 +28,15 @@ class BusinessProfileAboutTab extends StatelessWidget {
           ),
           PaddedText(
             "Important information",
-            style: Theme.of(context).textTheme.headline1,
+            style: Theme.of(context).textTheme.headline3,
           ),
           const SizedBox(
             height: 20,
           ),
           ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16,),
             leading: const Icon(FeatherIcons.clock),
+            dense: true,
             title: Text(
               timingsString,
               style: Theme.of(context).textTheme.subtitle1,
@@ -43,7 +44,8 @@ class BusinessProfileAboutTab extends StatelessWidget {
           ),
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            leading: const Icon(FeatherIcons.clock),
+            leading: const Icon(FeatherIcons.info),
+            dense: true,
             title: Text(
               tagString,
               style: Theme.of(context).textTheme.subtitle1,
@@ -52,6 +54,7 @@ class BusinessProfileAboutTab extends StatelessWidget {
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             leading: const Icon(FeatherIcons.mapPin),
+            dense: true,
             title: Text(
               "Get Directions",
               style: Theme.of(context).textTheme.subtitle1.apply(
@@ -67,7 +70,7 @@ class BusinessProfileAboutTab extends StatelessWidget {
           ),
           PaddedText(
             "About "+flow.branch.name.value,
-            style: Theme.of(context).textTheme.headline1,
+            style: Theme.of(context).textTheme.headline3,
           ),
           const SizedBox(
             height: 20,

@@ -90,7 +90,7 @@ class BusinessTileWidget extends StatelessWidget {
         children: [
           Icon(
             Icons.star,
-            color: Colors.yellow[500],
+            color: Colors.amber
           ),
           const SizedBox(
             height: 2,

@@ -278,20 +278,25 @@ class _BottomPrimaryButtonState extends State<BottomPrimaryButton> {
       child: widget.onPressed == null
           ? const SizedBox()
           : Container(
-              padding: widget.padding ?? const EdgeInsets.all(16),
+              padding: widget.padding ?? const EdgeInsets.symmetric(vertical:0, horizontal: 16),
               color: Theme.of(context).backgroundColor,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (widget.title != null)
                     ListTile(
-                      title: Text(widget.title),
-                      subtitle: Text(widget.subTitle),
+                      dense: true,
+                      contentPadding: EdgeInsets.all(0),
+                      title: Text(widget.title, style: Theme.of(context).textTheme.subtitle1,),
+                      subtitle: Text(widget.subTitle, style: Theme.of(context).textTheme.bodyText2,),
                     ),
                   PrimaryButton(
                     widget.label,
                     onPressed: widget.onPressed,
                   ),
+                  SizedBox(
+                    height:30
+                  )
                 ],
               ),
             ),

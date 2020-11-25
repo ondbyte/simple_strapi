@@ -92,8 +92,8 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
             return [
               SliverAppBar(
                 elevation: 0,
-                collapsedHeight: 160,
-                expandedHeight: 160,
+                collapsedHeight: 140,
+                expandedHeight: 140,
                 pinned: true,
                 automaticallyImplyLeading: false,
                 flexibleSpace: BappRowCalender(
@@ -187,9 +187,8 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
       if (widget.fromToTimings.isEmpty) {
         return const Center(child: Text("No timings"),);
       }
-      return Padding(
-        padding: const EdgeInsets.all(16),
-        child: GridView.builder(
+      return GridView.builder(
+         padding: const EdgeInsets.symmetric(vertical:0, horizontal: 16),
           shrinkWrap: true,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2, childAspectRatio: 16 / 6),
@@ -204,7 +203,7 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
               },
             );
           },
-        ),
+        
       );
     });
   }
@@ -247,6 +246,13 @@ class _TimeSlotState extends State<TimeSlot> {
             },
             child: Container(
               alignment: Alignment.center,
+              decoration: BoxDecoration(
+                 color: _selected
+                  ? Theme.of(context).primaryColor
+                  : Theme.of(context).backgroundColor,
+                  borderRadius: BorderRadius.all(Radius.circular(4))
+              
+              ),
               margin: EdgeInsets.all(8),
               child: DefaultTextStyle(
                 style: Theme.of(context)
@@ -255,9 +261,7 @@ class _TimeSlotState extends State<TimeSlot> {
                     .apply(color: _selected ? Colors.white : Colors.black),
                 child: Text(format.format(widget.label.toDateAndTime())),
               ),
-              color: _selected
-                  ? Theme.of(context).primaryColor
-                  : Theme.of(context).backgroundColor,
+             
             ),
           );
         },
