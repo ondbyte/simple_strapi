@@ -12,7 +12,7 @@
     <application
         android:name=".Application"
         android:label="bapp"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
 
         <!-- photo picker flutter. -->
         android:requestLegacyExternalStorage="true"
