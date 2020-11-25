@@ -125,7 +125,7 @@ class _BookingsTabState extends State<BookingsTab> {
       flexibleSpace: BappRowCalender(
         onChildRendered: (s){
           setState(() {
-            _calenderHeight = s.height+6;
+            _calenderHeight = s.height;
           });
         },
         bookings: flow.myBookingsAsCalendarEvents(),
