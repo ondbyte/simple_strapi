@@ -122,8 +122,11 @@ class _AddImageTileWidgetState extends State<AddImageTileWidget> {
                                         setState(() {
                                           if (filtered[index]
                                               .startsWith("local")) {
-                                            _existingImages
-                                                .remove(filtered[index]);
+                                            filtered.removeAt(index);
+                                            _existingImages.clear();
+                                            _existingImages.addAll(
+                                                Map.fromEntries(filtered.map(
+                                                    (e) => MapEntry(e, true))));
                                           } else {
                                             _existingImages[filtered[index]] =
                                                 false;

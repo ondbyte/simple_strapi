@@ -161,24 +161,32 @@ abstract class _CloudStore with Store {
     if (myData.containsKey("favorites")) {
       final fs = myData["favorites"];
       if (fs is Map) {
-        fs.forEach(
-          (key, value) {
-            favorites.add(
-              Favorite(
-                id: key,
-                type: EnumToString.fromString(
-                  FavoriteType.values,
-                  value["type"],
-                ),
-                business: value["business"],
-                businessBranch: value["businessBranch"],
-                businessService: value["businessService"] != null
-                    ? BusinessService.fromJson(value["businessService"])
-                    : {},
-              ),
-            );
-          },
-        );
+        await Future.forEach<MapEntry>(fs.entries, (entry) async {
+          final key = entry.key;
+          final type = EnumToString.fromString(
+            FavoriteType.values,
+            entry.value["type"],
+          );
+          var business;
+          var branch;
+          var service;
+          if (type == FavoriteType.business) {
+            business = await getBusiness(reference: entry.value["business"]);
+          } else if (type == FavoriteType.businessBranch) {
+            branch = await getBranch(reference: entry.value["businessBranch"]);
+          } else if (type == FavoriteType.businessService) {
+            service = BusinessService.fromJson(entry.value["businessService"]);
+          }
+          favorites.add(
+            Favorite(
+              id: key,
+              type: type,
+              business: business,
+              businessBranch: branch,
+              businessService: service,
+            ),
+          );
+        });
       }
     }
   }
@@ -203,7 +211,7 @@ abstract class _CloudStore with Store {
     await FirebaseFirestore.instance
         .collection("users")
         .doc(FirebaseAuth.instance.currentUser.uid)
-        .set({"favorites": data}, SetOptions(merge: true));
+        .update({"favorites": data});
   }
 
   @action

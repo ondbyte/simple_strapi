@@ -1,15 +1,13 @@
-import 'package:async/async.dart';
 import 'dart:typed_data';
 
+import 'package:async/async.dart';
 import 'package:bapp/config/constants.dart';
-import 'package:bapp/helpers/helper.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:flutter_svg_provider/flutter_svg_provider.dart' as svg;
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 class FirebaseStorageImage extends StatefulWidget {
   final String storagePathOrURL;
@@ -36,16 +34,16 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
 
   @override
   void initState() {
-    if(!widget.storagePathOrURL.endsWith(".svg")){
+    if (!widget.storagePathOrURL.endsWith(".svg")) {
       _mem();
     }
     super.initState();
   }
 
-  void _mem(){
+  void _mem() {
     _memoizer.runOnce(() async {
       final file =
-      await DefaultCacheManager().getFileFromCache(widget.storagePathOrURL);
+          await DefaultCacheManager().getFileFromCache(widget.storagePathOrURL);
       if (file != null) {
         return file.file.readAsBytes();
       } else {
@@ -53,11 +51,11 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
         final data = await i
             .ref()
             .child(
-          widget.storagePathOrURL,
-        )
+              widget.storagePathOrURL,
+            )
             .getData(1024 * 1024 * 8);
         final newFile =
-        await DefaultCacheManager().putFile(widget.storagePathOrURL, data);
+            await DefaultCacheManager().putFile(widget.storagePathOrURL, data);
         return newFile.readAsBytes();
       }
     });
@@ -99,24 +97,21 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
                       );
                     }
                   }
-                  if (widget.circular) {
-                    return SizedBox(
-                      height: widget.height,
-                      width: widget.width,
-                      child: CircleAvatar(
-                        backgroundImage: svg.Svg(kTemporaryPlaceHolderImage),
-                      ),
-                    );
-                  }
-                  return SvgPicture.asset(
-                    kTemporaryPlaceHolderImage,
-                    fit: BoxFit.contain,
-                    width: widget.width ?? cons.maxWidth,
-                    height: widget.height ?? cons.maxHeight,
+                  return SizedBox(
+                    height: widget.height,
+                    width: widget.width,
+                    child: _getLoader(),
                   );
                 },
               );
       },
+    );
+  }
+
+  Widget _getLoader() {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: LinearProgressIndicator(),
     );
   }
 }

@@ -84,9 +84,8 @@ class BusinessDetails {
     final tmp = j["branches"] as List;
     branches.value =
         tmp.map((e) => BusinessBranch(myDoc: e, business: this)).toList();
-    selectedBranch.value = branches
-        .value
-        .firstWhere((b) => b.myDoc.value == j["selectedBranch"]);
+    selectedBranch.value =
+        branches.value.firstWhere((b) => b.myDoc.value == j["selectedBranch"]);
     email.value = j["email"];
     myDoc.value = j["myDoc"];
 
@@ -142,10 +141,10 @@ class BusinessDetails {
       ..rating.value = 0.0
       ..status.value = BusinessBranchActiveStatus.lead
       ..businessCategory.value = this.category.value
-    ..myDoc.value = myDoc.value.parent.doc("b_" + kUUIDGen.v1())
-    ..businessHolidays.value = BusinessHolidays.empty(business: this)
-    ..businessTimings.value = BusinessTimings.empty()
-    ..businessServices.value = BusinessServices.empty();
+      ..myDoc.value = myDoc.value.parent.doc("b_" + kUUIDGen.v1())
+      ..businessHolidays.value = BusinessHolidays.empty(business: this)
+      ..businessTimings.value = BusinessTimings.empty()
+      ..businessServices.value = BusinessServices.empty();
 
     await branch.saveBranch();
 
@@ -173,5 +172,16 @@ class BusinessDetails {
   bool anyBranchInUnPublished() {
     return branches.value.any((element) =>
         element.status.value == BusinessBranchActiveStatus.unPublished);
+  }
+
+  @override
+  int get hashCode => myDoc.value.path.hashCode;
+
+  @override
+  bool operator ==(Object other) {
+    if (other is BusinessDetails) {
+      return other.hashCode == hashCode;
+    }
+    return false;
   }
 }
