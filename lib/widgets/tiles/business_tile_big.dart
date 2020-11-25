@@ -54,6 +54,7 @@ class BusinessTileBigWidget extends StatelessWidget {
 }
 
 class BusinessTileWidget extends StatelessWidget {
+  final bool withImage;
   final BusinessBranch branch;
   final Function onTap;
   final EdgeInsets padding;
@@ -64,7 +65,7 @@ class BusinessTileWidget extends StatelessWidget {
       @required this.branch,
       @required this.onTap,
       this.padding,
-      this.titleStyle})
+      this.titleStyle, this.withImage=false})
       : super(key: key);
 
   @override
@@ -81,6 +82,9 @@ class BusinessTileWidget extends StatelessWidget {
         branch.address.value,
         maxLines: 1,
       ),
+      leading: withImage?ListTileFirebaseImage(
+        storagePathOrURL: branch.images.isNotEmpty?branch.images[0]:kTemporaryPlaceHolderImage,
+      ):null,
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

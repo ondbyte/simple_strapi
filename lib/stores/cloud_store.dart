@@ -591,12 +591,14 @@ abstract class _CloudStore with Store {
     final query = await FirebaseFirestore.instance
         .collection("businesses")
         .where("status", isEqualTo: "published")
-        .where("category.name", isEqualTo: category.name)
+        .where("businessCategory.name", isEqualTo: category.name)
         .where("assignedAddress.iso2", isEqualTo: myAddress.country.iso2)
         .where("assignedAddress.city", isEqualTo: myAddress.city.name);
     if (myAddress.locality != null) {
-      query.where("assignedAddress.locality",
-          isEqualTo: myAddress.locality.name);
+      query.where(
+        "assignedAddress.locality",
+        isEqualTo: myAddress.locality.name,
+      );
     }
     final snaps = await query.get();
     if (snaps.docs.isEmpty) {

@@ -68,7 +68,7 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
                   future: widget.futureBranchList,
                   builder: (_, snap) {
                     if (!snap.hasData) {
-                      return LinearProgressIndicator();
+                      return const LinearProgressIndicator();
                     }
                     return snap.data.isNotEmpty
                         ? ListView.builder(
@@ -76,13 +76,15 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
                             itemCount: snap.data.length,
                             itemBuilder: (_, i) {
                               return BusinessTileWidget(
-                                padding: EdgeInsets.symmetric(
+                                padding: const EdgeInsets.symmetric(
                                     horizontal: 16, vertical: 6),
                                 branch: snap.data[i],
                                 onTap: () async {
                                   flow.branch = snap.data[i];
                                   BappNavigator.bappPush(
-                                      context, BusinessProfileScreen());
+                                    context,
+                                    BusinessProfileScreen(),
+                                  );
                                 },
                               );
                             },
