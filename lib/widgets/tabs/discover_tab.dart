@@ -2,15 +2,18 @@ import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/business/branch_chooser.dart';
 import 'package:bapp/screens/search/branches_result_screen.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
+import 'package:bapp/widgets/tiles/see_all.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
+import '../padded_text.dart';
 import '../search_bar.dart';
 import '../store_provider.dart';
 
@@ -36,8 +39,9 @@ class _DiscoverTabState extends State<DiscoverTab> {
                       Consumer<CloudStore>(builder: (_, authStore, __) {
                         return Observer(
                           builder: (_) {
-                            final name = authStore.user?.displayName ?? "user";
-                            return Text("Hey " + name);
+                            return authStore.user?.displayName == null
+                                ? const SizedBox()
+                                : Text("Hey, " + authStore.user.displayName);
                           },
                         );
                       }),
@@ -124,57 +128,81 @@ class _DiscoverTabState extends State<DiscoverTab> {
           future: cloudStore.getNearestFeatured(),
           builder: (_, snap) {
             return LayoutBuilder(builder: (_, cons) {
-              return Padding(
-                padding: const EdgeInsets.all(16),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: snap.hasData
-                      ? Row(
-                          children: [
-                            ...List.generate(snap.data.length, (i) {
-                              return Row(
+              if (snap.hasData && snap.data.isNotEmpty) {
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SeeAllListTile(
+                      title: "Featured on Bapp",
+                      onSeeAll: () {
+                        BappNavigator.bappPush(
+                          context,
+                          BranchesResultScreen(
+                            title: "Featured on Bapp",
+                            subTitle: "at " + cloudStore.getAddressLabel(),
+                            categoryName: "featured",
+                            futureBranchList: Future.value(snap.data),
+                            placeName: cloudStore.getAddressLabel(),
+                          ),
+                        );
+                      },
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: snap.hasData
+                            ? Row(
                                 children: [
-                                  Container(
-                                    width: snap.data.length == 1
-                                        ? cons.maxWidth - 32
-                                        : cons.maxWidth * 0.8,
-                                    child: BusinessTileBigWidget(
-                                      branch: snap.data[i],
-                                      onTap: () {
-                                        Provider.of<BookingFlow>(context,
-                                                listen: false)
-                                            .branch = snap.data[i];
-                                        Navigator.of(context).pushNamed(
-                                            RouteManager.businessProfileScreen,
-                                            arguments: [snap.data[i]]);
-                                      },
-                                      tag: Chip(
-                                        backgroundColor:
-                                            CardsColor.colors["lightGreen"],
-                                        label: Text(
-                                          "Featured",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyText1
-                                              .apply(
-                                                color: Theme.of(context)
-                                                    .backgroundColor,
+                                  ...List.generate(snap.data.length, (i) {
+                                    return Row(
+                                      children: [
+                                        Container(
+                                          width: snap.data.length == 1
+                                              ? cons.maxWidth - 32
+                                              : cons.maxWidth * 0.8,
+                                          child: BusinessTileBigWidget(
+                                            branch: snap.data[i],
+                                            onTap: () {
+                                              Provider.of<BookingFlow>(context,
+                                                      listen: false)
+                                                  .branch = snap.data[i];
+                                              Navigator.of(context).pushNamed(
+                                                  RouteManager
+                                                      .businessProfileScreen,
+                                                  arguments: [snap.data[i]]);
+                                            },
+                                            tag: Chip(
+                                              backgroundColor: CardsColor
+                                                  .colors["lightGreen"],
+                                              label: Text(
+                                                "Featured",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyText1
+                                                    .apply(
+                                                      color: Theme.of(context)
+                                                          .backgroundColor,
+                                                    ),
                                               ),
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 16,
-                                  ),
+                                        SizedBox(
+                                          width: 16,
+                                        ),
+                                      ],
+                                    );
+                                  })
                                 ],
-                              );
-                            })
-                          ],
-                        )
-                      : const SizedBox(),
-                ),
-              );
+                              )
+                            : const SizedBox(),
+                      ),
+                    ),
+                  ],
+                );
+              }
+              return SizedBox();
             });
           },
         );
