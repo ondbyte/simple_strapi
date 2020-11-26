@@ -7,14 +7,13 @@ import 'package:thephonenumber/thecountrynumber.dart';
 
 import 'business_branch.dart';
 import 'business_details.dart';
-import 'business_services.dart';
 
 class BusinessStaff {
   UserType role;
   String name;
   DateTime dateOfJoining;
   Map<String, bool> images = {};
-  final expertise = ObservableList<BusinessServiceCategory>();
+  final expertise = ObservableList<String>();
 
   BusinessBranch branch;
   BusinessDetails business;
@@ -31,7 +30,7 @@ class BusinessStaff {
     this.name,
     this.dateOfJoining,
     this.images = const {},
-    List<BusinessServiceCategory> expertise,
+    List<String> expertise,
     this.rating = 0,
   }) {
     if (expertise != null) {
@@ -44,10 +43,7 @@ class BusinessStaff {
       "role": EnumToString.convertToString(role),
       "name": name,
       "dateOfJoining": dateOfJoining,
-      "expertise": expertise.fold<List>([], (previousValue, e) {
-        previousValue.add(e.toMap());
-        return previousValue;
-      }),
+      "expertise": expertise.toList(),
       "branch": branch.myDoc.value,
       "business": business.myDoc.value,
       "contactNumber": contactNumber.internationalNumber,
@@ -60,12 +56,7 @@ class BusinessStaff {
     role = EnumToString.fromString(UserType.values, j["role"]);
     name = j["name"];
     dateOfJoining = (j["dateOfJoining"] as Timestamp).toDate();
-    expertise.addAll([
-      ...(j["expertise"] as List).fold<List>([], (previousValue, e) {
-        previousValue.add(BusinessServiceCategory.fromJson(e));
-        return previousValue;
-      })
-    ]);
+    expertise.addAll((j["expertise"] as List).map((e) => e as String).toList());
     branch =
         business.branches.value.firstWhere((b) => b.myDoc.value == j["branch"]);
     contactNumber = TheNumber(internationalNumber: j["contactNumber"]);

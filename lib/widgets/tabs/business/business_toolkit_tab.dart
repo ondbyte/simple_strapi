@@ -177,8 +177,7 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
               contentPadding: EdgeInsets.zero,
               leading: ListTileFirebaseImage(
                 storagePathOrURL: businessStore
-                            .business.selectedBranch.value.images.length >
-                        0
+                        .business.selectedBranch.value.images.isNotEmpty
                     ? businessStore.business.selectedBranch.value.images.keys
                         .elementAt(0)
                     : kTemporaryPlaceHolderImage,

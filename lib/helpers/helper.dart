@@ -11,6 +11,7 @@ import 'package:flutter/cupertino.dart' hide Action;
 import 'package:flutter/material.dart' hide Action;
 import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image/image.dart';
 import 'package:mobx/mobx.dart' show Action;
 import 'package:provider/provider.dart';
 
@@ -121,10 +122,18 @@ Future<Map<String, bool>> uploadImagesToStorageAndReturnStringList(
       (entry) async {
     if (!entry.value) {
       await f.ref().child(entry.key).delete();
+      imagesWithFiltered.removeWhere((key, value) => key == entry.key);
     } else {
       if (entry.key.startsWith("local")) {
-        final file = File(removeLocalFromPath(entry.key));
-        final task = folder.child(nameFromPath(entry.key)).putFile(file);
+        final uints = await File(removeLocalFromPath(entry.key)).readAsBytes();
+        var thumbedData = decodeImage(uints);
+        if (thumbedData.width > 849) {
+          thumbedData = copyResize(thumbedData, width: 800);
+        }
+        final bytes = encodePng(thumbedData);
+        final task = folder
+            .child(nameFromPath(entry.key, extension: ".png"))
+            .putData(bytes);
         final done = await task.onComplete;
         storagePaths.addAll({done.ref.path: true});
       } else {
@@ -139,8 +148,8 @@ String removeLocalFromPath(String path) {
   return path.replaceFirst("local", "");
 }
 
-String nameFromPath(String path) {
-  return path.split("/").last;
+String nameFromPath(String path, {String extension = ""}) {
+  return path.split("/").last + "";
 }
 
 Future uploadBusinessBranchApprovalPDF({File fileToUpload}) async {

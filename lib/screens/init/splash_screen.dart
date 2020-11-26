@@ -1,11 +1,9 @@
-import 'dart:io';
 import 'dart:isolate';
 
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/screens/home/bapp.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
-
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/themestore.dart';
@@ -27,7 +25,8 @@ class SplashScreen extends StatefulWidget {
   _SplashScreenState createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with AutomaticKeepAliveClientMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with AutomaticKeepAliveClientMixin {
   bool killState = false;
   @override
   Widget build(BuildContext context) {
@@ -39,7 +38,8 @@ class _SplashScreenState extends State<SplashScreen> with AutomaticKeepAliveClie
         await Provider.of<ThemeStore>(context, listen: false).init();
         await _initCrashlytics();
         await Provider.of<CloudStore>(context, listen: false).init(
-          onLogin: () async {
+            onLogin: () async {
+          if (mounted) {
             //await FirebaseAuth.instance.signOut();
             final cloudStore = Provider.of<CloudStore>(context, listen: false);
             await Provider.of<BusinessStore>(context, listen: false)
@@ -47,23 +47,20 @@ class _SplashScreenState extends State<SplashScreen> with AutomaticKeepAliveClie
 
             if (cloudStore.myAddress != null) {
               ///customer is not a first timer
-              if(mounted){
-                BappNavigator.bappPush(context, Bapp());
-              }
+              BappNavigator.bappPushAndRemoveAll(context, Bapp());
               killState = !killState;
               return;
             } else {
-              Navigator.of(context).pushNamedAndRemoveUntil(RouteManager.pickAPlace, (route) => false);
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                  RouteManager.pickAPlace, (route) => false);
               killState = !killState;
               return;
             }
-          },
-          onNotLogin: () async {
-            Navigator.of(context)
-                .pushNamed(RouteManager.onBoardingScreen);
-            return;
           }
-        );
+        }, onNotLogin: () async {
+          Navigator.of(context).pushNamed(RouteManager.onBoardingScreen);
+          return;
+        });
         //await context.read<FeedbackStore>().init();
       },
 
@@ -122,7 +119,7 @@ class _SplashScreenState extends State<SplashScreen> with AutomaticKeepAliveClie
         if (errorAndStacktrace.first
             .toString()
             .contains("The service is currently unavailable")) {
-          Provider.of<EventBus>(context,listen: false).fire(AppEvents.reboot);
+          Provider.of<EventBus>(context, listen: false).fire(AppEvents.reboot);
         }
         await FirebaseCrashlytics.instance.recordError(
           errorAndStacktrace.first,

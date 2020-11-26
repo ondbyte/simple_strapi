@@ -1,22 +1,22 @@
 import 'package:enum_to_string/enum_to_string.dart';
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
-import 'package:thephonenumber/thecountrynumber.dart';
+import 'package:textfield_tags/textfield_tags.dart';
+import 'package:thephonenumber/thephonenumber.dart';
 
 import '../../../../classes/firebase_structures/business_services.dart';
 import '../../../../classes/firebase_structures/business_staff.dart';
 import '../../../../config/config_data_types.dart';
 import '../../../../helpers/helper.dart';
-import '../../../../route_manager.dart';
 import '../../../../stores/business_store.dart';
 import '../../../../stores/cloud_store.dart';
 import '../../../../widgets/buttons.dart';
 import '../../../../widgets/loading_stack.dart';
-import '../../../../widgets/multiple_option_chips.dart';
 import '../../../../widgets/shake_widget.dart';
 import '../../../../widgets/tiles/add_image_sliver.dart';
 
@@ -35,7 +35,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
   final _doShakeImage = Observable(false);
   String authorizedUid = "";
   bool _numberValidated = false;
-  TheNumber _theNumber;
+  ThePhoneNumber _theNumber;
   final _pnController = TextEditingController();
 
   @override
@@ -43,6 +43,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
     _pnController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return LoadingStackWidget(
@@ -110,7 +111,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                             },
                             inputDecoration:
                                 const InputDecoration(labelText: "Bapp user"),
-                            countries: [cloudStore.theNumber.country.iso2],
+                            countries: [cloudStore.theNumber.iso2Code],
                             initialValue: PhoneNumber(
                                 phoneNumber:
                                     _theNumber?.internationalNumber ?? ""),
@@ -118,7 +119,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                               if (b != _numberValidated) {
                                 setState(() {
                                   _numberValidated = b;
-                                  _theNumber = TheCountryNumber().parseNumber(
+                                  _theNumber = ThePhoneNumberLib.parseNumber(
                                       internationalNumber: _pnController.text);
                                 });
                               }
@@ -139,8 +140,8 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                         height: 20,
                       ),
                       TextFormField(
-                        decoration:
-                            const InputDecoration(labelText: "Name of the staff"),
+                        decoration: const InputDecoration(
+                            labelText: "Name of the staff"),
                         onChanged: (s) {
                           _staff.name = s;
                         },
@@ -173,34 +174,25 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                               ObservableList<BusinessServiceCategory>();
                           return Observer(
                             builder: (_) {
-                              return MultipleChipOptionsFormField<
-                                  BusinessServiceCategory>(
-                                labelText: "Select staff expertise",
-                                placeHolder: "No service categories",
-                                onAddPressed: () async {
-                                  await Navigator.of(context).pushNamed(
-                                      (RouteManager.businessAddAServiceCategoryScreen));
-                                  setState(() {});
+                              return TextFieldTags(
+                                onTag: (s) {
+                                  _staff.expertise.add(s);
                                 },
-                                itemLabel: (_, cat) {
-                                  return cat.categoryName.value;
+                                onDelete: (s) {
+                                  _staff.expertise.remove(s);
                                 },
-                                validator: (s) {
-                                  if (s.isEmpty) {
-                                    return "Select at-least a expertise";
-                                  }
-                                  return null;
-                                },
-                                onSaved: (s) {},
-                                onChanged: (val) {
-                                  selected.clear();
-                                  selected.addAll(val);
-                                  _staff.expertise.clear();
-                                  _staff.expertise.addAll(val);
-                                },
-                                items: businessStore.business.selectedBranch
-                                    .value.businessServices.value.allCategories,
-                                selectedItems: selected,
+                                tagsStyler: TagsStyler(
+                                  tagCancelIcon: Icon(
+                                    FeatherIcons.x,
+                                    color: Theme.of(context).indicatorColor,
+                                  ),
+                                  tagTextStyle: TextStyle(
+                                      color: Theme.of(context).indicatorColor),
+                                  tagDecoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                ),
                               );
                             },
                           );
@@ -264,7 +256,8 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                             act(() {
                               kLoading.value = true;
                             });
-                            _theNumber = TheCountryNumber().parseNumber(internationalNumber: _pnController.text);
+                            _theNumber = ThePhoneNumberLib.parseNumber(
+                                internationalNumber: _pnController.text);
                             assert(_theNumber?.internationalNumber != null,
                                 "number missing");
                             await branch.addAStaff(
@@ -292,5 +285,4 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
       ),
     );
   }
-
 }

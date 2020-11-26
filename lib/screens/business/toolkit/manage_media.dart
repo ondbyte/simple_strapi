@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
+import 'manage_services/add_a_service.dart';
+
 class BusinessManageMediaScreen extends StatefulWidget {
   BusinessManageMediaScreen({Key key}) : super(key: key);
 
@@ -23,29 +25,30 @@ class _BusinessManageMediaScreenState extends State<BusinessManageMediaScreen> {
       appBar: AppBar(
         automaticallyImplyLeading: true,
         title: Text("Add Branch images"),
-        leading: BackButton(
-          onPressed: !_loading
-              ? () async {
-                  if (_images.isEmpty) {
-                    Navigator.of(context).pop();
-                    return;
-                  }
-                  setState(() {
-                    _loading = true;
-                  });
-                  Flushbar(
-                    message: "Uploading images..",
-                    duration: const Duration(seconds: 2),
-                  ).show(context);
-                  await Provider.of<BusinessStore>(context, listen: false)
-                      .business
-                      .selectedBranch
-                      .value
-                      .updateImages(imgs: _images);
+      ),
+      bottomNavigationBar: BottomPrimaryButton(
+        label: "Update",
+        onPressed: !_loading
+            ? () async {
+                if (_images.isEmpty) {
                   Navigator.of(context).pop();
+                  return;
                 }
-              : null,
-        ),
+                setState(() {
+                  _loading = true;
+                });
+                Flushbar(
+                  message: "Uploading images..",
+                  duration: const Duration(seconds: 2),
+                ).show(context);
+                await Provider.of<BusinessStore>(context, listen: false)
+                    .business
+                    .selectedBranch
+                    .value
+                    .updateImages(imgs: _images);
+                Navigator.of(context).pop();
+              }
+            : null,
       ),
       body: _loading
           ? LoadingWidget()
@@ -60,8 +63,7 @@ class _BusinessManageMediaScreenState extends State<BusinessManageMediaScreen> {
                       //Helper.printLog("FSTORAGE");
                       //print(images);
                       return AddImageTileWidget(
-                        existingImages: Map.fromIterable(images.keys,
-                            key: (k) => k, value: (k) => true),
+                        existingImages: images,
                         maxImage: 6,
                         title: "Add Images",
                         subTitle:

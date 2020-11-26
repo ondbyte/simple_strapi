@@ -48,6 +48,7 @@ dependencies:
   intl: ^0.16.1
   uuid: ^2.2.2
   pdf: ^1.11.2
+  image: ^2.1.19
 
   #UI
   animated_text_kit: ^2.2.0
@@ -68,6 +69,10 @@ dependencies:
   flutter_svg_provider: ^0.1.6
   flutter_rating_bar: ^3.2.0
   flutter_week_view: any
+  #forked update/should be changed to pub.dev when released
+  textfield_tags:
+    git:
+      url: https://github.com/ondbyte/textfield_tags.git
 
 
   # MAPS
