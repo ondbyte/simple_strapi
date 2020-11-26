@@ -7,6 +7,7 @@ import 'package:mobx/mobx.dart';
 import 'package:thephonenumber/thephonenumber.dart';
 
 import '../../config/config_data_types.dart';
+import '../../config/constants.dart';
 import '../../helpers/extensions.dart';
 import '../../helpers/helper.dart';
 import 'business_category.dart';
@@ -177,10 +178,8 @@ class BusinessBranch {
     address.value = j["address"];
     latlong.value = j["latlong"];
     staff.clear();
-    if ((j["staff"] as List).isNotEmpty) {
-      staff.addAll(List.castFrom(j["staff"])
-          .map((e) => BusinessStaff.fromJson(business: business.value, j: e)));
-    }
+    staff.addAll(List.castFrom(j["staff"])
+        .map((e) => BusinessStaff.fromJson(business: business.value, j: e)));
     manager.value = j["manager"] != null
         ? BusinessStaff.fromJson(business: business.value, j: j["manager"])
         : null;
@@ -190,8 +189,9 @@ class BusinessBranch {
     contactNumber.value = j["contactNumber"];
     email.value = j["email"];
     rating.value = j["rating"];
-    businessServices.value =
-        BusinessServices.fromJsonList(j["businessServices"], branch: this);
+    businessServices.value = BusinessServices.fromJsonList(
+        j["businessServices"],
+        branch: this);
     businessTimings.value = BusinessTimings.fromJson(j["businessTimings"]);
     businessHolidays.value = BusinessHolidays.fromJsonList(
       j["businessHolidays"],
@@ -200,32 +200,26 @@ class BusinessBranch {
     status.value =
         EnumToString.fromString(BusinessBranchActiveStatus.values, j["status"]);
     businessCategory.value = BusinessCategory.fromJson(j["businessCategory"]);
-    description.value = j["description"] ?? "";
-    tag.value = j["tag"] ?? "";
+    description.value = j["description"]??"";
+    tag.value = j["tag"]??"";
     try {
       if (status.value == BusinessBranchActiveStatus.published) {
         iso2 = j["assignedAddress"]["iso2"];
         city = j["assignedAddress"]["city"];
         locality = j["assignedAddress"]["locality"];
-        if (isNullOrEmpty(iso2) || isNullOrEmpty(city)) {
-          throw BappDataBaseError(
-            msg: "You have not setup business correctly",
-            whatHappened:
-                "could not find the data you need to manually add some data to the branch document of branch " +
-                    name.value +
-                    " Did add all the details?",
-          );
+        if(isNullOrEmpty(iso2)||isNullOrEmpty(city)){
+          throw BappDataBaseError(msg: "You have not setup business correctly",whatHappened: "could not find the data you need to manually add some data to the branch document of branch "+name.value+" Did add all the details?",);
         }
         misc = ThePhoneNumberLib.parseNumber(iso2Code: iso2);
       }
-    } on BappDataBaseError catch (e, s) {
+    } on BappDataBaseError catch(e, s) {
       FirebaseCrashlytics.instance.recordError(
         e.msg,
         s,
-        reason: e.whatHappened,
+        reason:e.whatHappened,
       );
       FirebaseCrashlytics.instance.sendUnsentReports();
-    } catch (e) {
+    } catch (e){
       rethrow;
     }
   }
@@ -250,13 +244,8 @@ class BusinessBranch {
       "businessHolidays": businessHolidays.value?.toList() ?? [],
       "status": EnumToString.convertToString(status.value),
       "businessCategory": businessCategory.value.toMap(),
-      "tag": tag.value,
-      "description": description.value,
-      "assignedAddress": {
-        "iso2": iso2,
-        "city": city,
-        "locality": locality,
-      }
+      "tag":tag.value,
+      "description":description.value
     };
   }
 
@@ -264,7 +253,6 @@ class BusinessBranch {
     final list = await uploadImagesToStorageAndReturnStringList(imgs);
 
     act(() {
-      images.clear();
       images.addAll(list);
     });
 
@@ -282,7 +270,7 @@ class BusinessBranch {
       String name,
       DateTime dateOfJoining,
       Map<String, bool> images,
-      List<String> expertise}) async {
+      List<BusinessServiceCategory> expertise}) async {
     final imgs = await uploadImagesToStorageAndReturnStringList(images);
     final s = BusinessStaff(
       business: this.business.value,
@@ -301,25 +289,14 @@ class BusinessBranch {
     staff.remove(s);
   }
 
-  String getOpenTodayString() {
+  String getOpenTodayString(){
     final timings = businessTimings.value.getTodayTimings();
     return timings.isNotEmpty
-        ? ("Open Today\n" +
-            timings.first.from.toStringWithAmOrPm() +
-            " to " +
-            timings.last.to.toStringWithAmOrPm())
+        ? ("Open Today\nFrom " +
+        timings.first.from.toStringWithAmOrPm() +
+        " to " +
+        timings.last.to.toStringWithAmOrPm())
         : "Not open today";
-  }
-
-  @override
-  int get hashCode => myDoc.value.path.hashCode;
-
-  @override
-  bool operator ==(Object other) {
-    if (other is BusinessBranch) {
-      return other.hashCode == hashCode;
-    }
-    return false;
   }
 }
 

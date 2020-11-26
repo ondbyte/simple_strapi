@@ -12,8 +12,8 @@ var kRandom = Random();
 List<List<MenuItem>> kFilteredMenuItems = [];
 
 ///change your terms and privacy policy link here
-final kTerms = "https://example.com";
-final kPrivacy = "https://example.com";
+final kTerms = "https://www.thebapp.app/terms-of-use.html";
+final kPrivacy = "https://www.thebapp.app/privacy-policy.html";
 
 ///maps key
 ///currently uses the one from bapp not bapp-dev
@@ -35,9 +35,9 @@ const kDays = [
 ];
 
 const kHolidayTypes = [
-  "type A",
-  "type B",
-  "change the options in constants",
+  "Public Holiday",
+  "Company Holiday",
+  "Others",
 ];
 
 ///global setting to track whether ios notification is enabled

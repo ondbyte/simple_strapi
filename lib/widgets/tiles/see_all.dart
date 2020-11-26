@@ -9,8 +9,8 @@ class SeeAllListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      contentPadding: padding?? const EdgeInsets.only(left: 16,right: 16,),
-      title: Text(title,style: Theme.of(context).textTheme.subtitle1),
+      contentPadding: padding?? const EdgeInsets.only(left: 16,right: 16, top: 10, bottom: 5),
+      title: Text(title,style: Theme.of(context).textTheme.headline6),
       trailing: GestureDetector(
         child: Text(seeAllLabel??"See all",style: TextStyle(color: Theme.of(context).primaryColor),),
         onTap: onSeeAll,

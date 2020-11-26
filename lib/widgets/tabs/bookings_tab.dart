@@ -82,10 +82,11 @@ class _BookingsTabState extends State<BookingsTab> {
 
   Widget _getBookingsScroll(){
     return SliverList(
+      
       delegate: SliverChildListDelegate(
         [
           const  SizedBox(
-            height: 20,
+            height: 10,
           ),
           Observer(
             builder: (_) {
@@ -95,6 +96,7 @@ class _BookingsTabState extends State<BookingsTab> {
                 return const SizedBox();
               }
               return ListView.builder(
+                padding: EdgeInsets.all(0),
                 shrinkWrap: true,
                 itemCount: list.length,
                 itemBuilder: (_, i) {
@@ -113,8 +115,8 @@ class _BookingsTabState extends State<BookingsTab> {
   Widget _getCalender(){
     return SliverAppBar(
       elevation: 0,
-      collapsedHeight: _calenderHeight?? 160,
-      expandedHeight: _calenderHeight?? 160,
+      collapsedHeight: _calenderHeight?? 132,
+      expandedHeight: _calenderHeight?? 132,
       pinned: true,
       automaticallyImplyLeading: false,
       actions: [
@@ -123,7 +125,7 @@ class _BookingsTabState extends State<BookingsTab> {
       flexibleSpace: BappRowCalender(
         onChildRendered: (s){
           setState(() {
-            _calenderHeight = s.height+6;
+            _calenderHeight = s.height;
           });
         },
         bookings: flow.myBookingsAsCalendarEvents(),

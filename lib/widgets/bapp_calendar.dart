@@ -22,11 +22,13 @@ class _BappRowCalenderState extends State<BappRowCalender> {
   @override
   Widget build(BuildContext context) {
     return TableCalendar(
+      
       key: _key,
       headerStyle: HeaderStyle(
-          leftChevronIcon: Icon(FeatherIcons.chevronLeft,
+        headerPadding: EdgeInsets.all(0),
+          leftChevronIcon: Icon(FeatherIcons.arrowLeftCircle,
               color: Theme.of(context).iconTheme.color),
-          rightChevronIcon: Icon(FeatherIcons.chevronRight,
+          rightChevronIcon: Icon(FeatherIcons.arrowRightCircle,
               color: Theme.of(context).iconTheme.color)),
       initialCalendarFormat: CalendarFormat.week,
       availableCalendarFormats: {CalendarFormat.week: 'Week'},

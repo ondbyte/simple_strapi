@@ -102,17 +102,17 @@ class HomeScreenFeaturedConfig {
         ref: "",
         cardColor: CardsColor.next()),
     Featured(
-        title: "New On Bapp",
+        title: "Best in \nSavings",
         icon: FeatherIcons.package,
         ref: "",
         cardColor: CardsColor.next()),
     Featured(
-        title: "New On Bapp",
+        title: "Top \n Rated",
         icon: FeatherIcons.package,
         ref: "",
         cardColor: CardsColor.next()),
     Featured(
-        title: "New On Bapp",
+        title: "Only On Bapp",
         icon: FeatherIcons.package,
         ref: "",
         cardColor: CardsColor.next()),

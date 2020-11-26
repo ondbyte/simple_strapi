@@ -32,6 +32,7 @@ class _BusinessProfileServicesTabState
       }
     });
     return ListView.builder(
+      padding: EdgeInsets.only(top:15),
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       itemCount: sorted.length,
@@ -66,6 +67,9 @@ class _BusinessCategoryContainerWidgetState
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const SizedBox(
+            height: 10,
+          ),
           Text(
             widget.category.categoryName.value,
             style: Theme.of(context).textTheme.headline1,
@@ -108,12 +112,14 @@ class _BusinessCategoryContainerWidgetState
       onPressed: () {
         flow.services.add(s);
       },
+      textColor: Theme.of(context).primaryColor,
       child: const Text("Book"),
     );
   }
 
   Widget cancelBookingButton(BusinessService s) {
     return FlatButton(
+      textColor: Theme.of(context).errorColor,
       onPressed: () {
         flow.services
             .removeWhere((element) => element.serviceName == s.serviceName);

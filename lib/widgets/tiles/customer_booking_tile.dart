@@ -40,7 +40,7 @@ class _CustomerBookingTileState extends State<CustomerBookingTile> {
             contentPadding: widget.padding ??
                 const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
             trailing: const SizedBox(
-              width: 8,
+              width: 4,
             ),
             title: Column(
               mainAxisSize: MainAxisSize.min,
@@ -48,11 +48,11 @@ class _CustomerBookingTileState extends State<CustomerBookingTile> {
               children: [
                 Text(
                   widget.booking.fromToTiming.format(),
-                  style: Theme.of(context).textTheme.subtitle1,
+                  style: Theme.of(context).textTheme.bodyText1,
                 ),
                 Text(
                   widget.booking.branch.name.value,
-                  style: Theme.of(context).textTheme.headline3,
+                  style: Theme.of(context).textTheme.subtitle1,
                 ),
               ],
             ),
@@ -62,7 +62,7 @@ class _CustomerBookingTileState extends State<CustomerBookingTile> {
               children: [
                 Text(
                   widget.booking.getServicesSeperatedBycomma(),
-                  style: Theme.of(context).textTheme.subtitle2,
+                  style: Theme.of(context).textTheme.bodyText1,
                 ),
                 Text(
                   widget.booking.fromToTiming.inMinutes().toString() +
@@ -70,6 +70,7 @@ class _CustomerBookingTileState extends State<CustomerBookingTile> {
                       currency +
                       " " +
                       widget.booking.totalCost().toString(),
+                      style: Theme.of(context).textTheme.overline,
                 )
               ],
             ),
