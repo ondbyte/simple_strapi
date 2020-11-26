@@ -2,11 +2,11 @@ import 'package:bapp/classes/location.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mobx/mobx.dart';
-import 'package:thephonenumber/thephonenumber.dart';
+import 'package:thephonenumber/thecountrynumber.dart';
 
 class BappUser {
   final DocumentReference myDoc;
-  final contactNumber = Observable<ThePhoneNumber>(null);
+  final contactNumber = Observable<TheNumber>(null);
   final fcmToken = Observable<String>("");
   final my_alter_ego = Observable<UserType>(null);
   final my_user_type = Observable<UserType>(null);
@@ -29,8 +29,7 @@ class BappUser {
   }
 
   _fromJson(Map<String, dynamic> j) {
-    contactNumber.value =
-        ThePhoneNumberLib.parseNumber(internationalNumber: j["contactNumber"]);
+    contactNumber.value =TheCountryNumber().parseNumber(internationalNumber: j["contactNumber"]);
     fcmToken.value = j["fcmToken"];
     my_alter_ego.value = UserType.values[j["my_alter_ego"]];
     my_user_type.value = UserType.values[j["my_user_type"]];

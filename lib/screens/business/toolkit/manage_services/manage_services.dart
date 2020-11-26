@@ -117,7 +117,7 @@ class _BusinessServicesTabState extends State<BusinessServicesTab>
                       return ListTile(
                         title: Text(service.serviceName.value),
                         subtitle: Text(
-                          cloudStore.theNumber.currency +
+                          cloudStore.theNumber.country.currency +
                               " " +
                               service.price.value.ceil().toInt().toString() +
                               ", " +

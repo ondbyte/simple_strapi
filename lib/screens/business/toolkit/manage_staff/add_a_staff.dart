@@ -7,7 +7,7 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:textfield_tags/textfield_tags.dart';
-import 'package:thephonenumber/thephonenumber.dart';
+import 'package:thephonenumber/thecountrynumber.dart';
 
 import '../../../../classes/firebase_structures/business_services.dart';
 import '../../../../classes/firebase_structures/business_staff.dart';
@@ -35,7 +35,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
   final _doShakeImage = Observable(false);
   String authorizedUid = "";
   bool _numberValidated = false;
-  ThePhoneNumber _theNumber;
+  TheNumber _theNumber;
   final _pnController = TextEditingController();
 
   @override
@@ -111,7 +111,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                             },
                             inputDecoration:
                                 const InputDecoration(labelText: "Bapp user"),
-                            countries: [cloudStore.theNumber.iso2Code],
+                            countries: [cloudStore.theNumber.country.iso2],
                             initialValue: PhoneNumber(
                                 phoneNumber:
                                     _theNumber?.internationalNumber ?? ""),
@@ -119,7 +119,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                               if (b != _numberValidated) {
                                 setState(() {
                                   _numberValidated = b;
-                                  _theNumber = ThePhoneNumberLib.parseNumber(
+                                  _theNumber = TheCountryNumber().parseNumber(
                                       internationalNumber: _pnController.text);
                                 });
                               }
@@ -256,7 +256,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                             act(() {
                               kLoading.value = true;
                             });
-                            _theNumber = ThePhoneNumberLib.parseNumber(
+                            _theNumber = TheCountryNumber().parseNumber(
                                 internationalNumber: _pnController.text);
                             assert(_theNumber?.internationalNumber != null,
                                 "number missing");

@@ -154,7 +154,7 @@ class BusinessServiceChildWidget extends StatelessWidget {
     final flow = Provider.of<BookingFlow>(context, listen: false);
     final s = service.price.value.toString() +
         " " +
-        flow.branch.misc.currency +
+        flow.branch.misc.country.currency +
         ", " +
         service.duration.value.inMinutes.toString() +
         " Minutes" +

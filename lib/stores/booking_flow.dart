@@ -14,7 +14,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
-import 'package:thephonenumber/thephonenumber.dart';
+import 'package:thephonenumber/thecountrynumber.dart';
 
 import '../helpers/helper.dart';
 import 'all_store.dart';
@@ -311,7 +311,7 @@ class BookingFlow {
           " Minutes, " +
           totalPrice.value.toString() +
           " " +
-          branch.misc.currency;
+          branch.misc.country.currency;
     } else {
       selectedTitle.value = "";
       selectedSubTitle.value = "";
@@ -324,7 +324,7 @@ class BookingFlow {
     });
   }
 
-  Future done({ThePhoneNumber number}) async {
+  Future done({TheNumber number}) async {
     final from = slot.value.toDay(timeWindow.value.from);
     final to = slot.value
         .add(Duration(minutes: totalDurationMinutes.value))

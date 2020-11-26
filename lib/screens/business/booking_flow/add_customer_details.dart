@@ -9,10 +9,10 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
-import 'package:thephonenumber/thephonenumber.dart';
+import 'package:thephonenumber/thecountrynumber.dart';
 
 class AddCustomerDetails extends StatelessWidget {
-  final _theNumber = Observable<ThePhoneNumber>(null);
+  final _theNumber = Observable<TheNumber>(null);
   var _num = "";
   @override
   Widget build(BuildContext context) {
@@ -56,7 +56,7 @@ class AddCustomerDetails extends StatelessWidget {
               act(() {
                 if (b) {
                   _theNumber.value =
-                      ThePhoneNumberLib.parseNumber(internationalNumber: _num);
+                      TheCountryNumber().parseNumber(internationalNumber: _num);
                   FocusScope.of(context).unfocus();
                 } else {
                   _theNumber.value = null;

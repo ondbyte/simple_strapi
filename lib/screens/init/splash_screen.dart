@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-import 'package:thephonenumber/thephonenumber.dart';
+import 'package:thephonenumber/thecountrynumber.dart';
 
 import '../../fcm.dart';
 import '../../main.dart';
@@ -34,7 +34,6 @@ class _SplashScreenState extends State<SplashScreen>
     return InitWidget(
       initializer: () async {
         ///init authentication store / load user
-        await ThePhoneNumberLib.init();
         BappFCM().initForAndroid();
         await Provider.of<ThemeStore>(context, listen: false).init();
         await _initCrashlytics();

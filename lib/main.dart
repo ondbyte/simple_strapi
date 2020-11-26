@@ -1,3 +1,4 @@
+import 'package:bapp/helpers/tmp.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -86,7 +87,7 @@ class _AppState extends State<App> {
                       return MaterialApp(
                         title: "Bapp",
                         theme: themeStore.selectedThemeData,
-                        initialRoute: "/",
+                        home: Tmp(),
                         onGenerateRoute: RouteManager.onGenerate,
                       );
                     },

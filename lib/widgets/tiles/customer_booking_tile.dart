@@ -26,7 +26,7 @@ class _CustomerBookingTileState extends State<CustomerBookingTile> {
   Widget build(BuildContext context) {
     final color = BusinessBooking.getColor(widget.booking.status);
     final currency =
-        Provider.of<CloudStore>(context, listen: false).theNumber.currency;
+        Provider.of<CloudStore>(context, listen: false).theNumber.country.currency;
     return Padding(
       key: _key,
       padding: widget.margin ?? EdgeInsets.all(8),

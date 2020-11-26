@@ -11,8 +11,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
-import 'package:thephonenumber/thephonenumber.dart';
-
+import 'package:thephonenumber/thecountrynumber.dart';
 import '../classes/firebase_structures/business_branch.dart';
 import '../classes/firebase_structures/business_category.dart';
 import '../classes/firebase_structures/business_details.dart';
@@ -123,11 +122,11 @@ abstract class _CloudStore with Store {
   }
 
   @computed
-  ThePhoneNumber get theNumber {
+  TheNumber get theNumber {
     final tmp =
-        ThePhoneNumberLib.parseNumber(internationalNumber: user.phoneNumber);
+        TheCountryNumber().parseNumber(internationalNumber: user.phoneNumber);
     if (tmp == null) {
-      return ThePhoneNumber(iso2Code: myAddress.country.iso2);
+      return TheCountryNumber().parseNumber(iso2Code: myAddress.country.iso2);
     }
     return tmp;
   }
@@ -319,7 +318,7 @@ abstract class _CloudStore with Store {
   }
 
   Future<String> getAuthorizationForStaffing(
-      {ThePhoneNumber phoneNumber,
+      {TheNumber phoneNumber,
       BusinessDetails business,
       Function(BappFCMMessage) onReplyRecieved}) async {
     final functions = FirebaseFunctions.instance;
