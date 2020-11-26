@@ -14,7 +14,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:provider/provider.dart';
-import 'package:thephonenumber/thephonenumber.dart';
+import 'package:thephonenumber/thecountrynumber.dart';
+
 
 class ThankYouForYourInterestScreen extends StatefulWidget {
   final BusinessCategory category;
@@ -28,7 +29,7 @@ class ThankYouForYourInterestScreen extends StatefulWidget {
 
 class _ThankYouForYourInterestScreenState
     extends State<ThankYouForYourInterestScreen> {
-  ThePhoneNumber _validNumber;
+  TheNumber _validNumber;
   bool _canVerify = false;
   PickedLocation _pickedLocation;
   bool _shake = false;
@@ -76,7 +77,7 @@ class _ThankYouForYourInterestScreenState
                     ),
                     InternationalPhoneNumberInput(
                       onInputChanged: (PhoneNumber number) {
-                        _validNumber = ThePhoneNumberLib.parseNumber(
+                        _validNumber = TheCountryNumber().parseNumber(
                           internationalNumber: number.phoneNumber,
                         );
                       },
@@ -95,7 +96,7 @@ class _ThankYouForYourInterestScreenState
                       ignoreBlank: true,
                       initialValue: PhoneNumber(
                         phoneNumber: cloudStore.theNumber.number,
-                        isoCode: cloudStore.theNumber.iso2Code,
+                        isoCode: cloudStore.theNumber.country.iso2,
                       ),
                     ),
                     const SizedBox(

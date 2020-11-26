@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:country_pickers/utils/utils.dart';
 import 'package:mobx/mobx.dart';
-import 'package:thephonenumber/thephonenumber.dart';
+import 'package:thephonenumber/thecountrynumber.dart';
 import 'package:bapp/helpers/extensions.dart';
 
 class Locality {
@@ -66,10 +66,10 @@ class Country {
   final bool enabled;
   final ObservableList<City> cities;
 
-  ThePhoneNumber thePhoneNumber;
+  TheNumber thePhoneNumber;
 
   Country({this.iso2, this.enabled, this.cities}){
-    thePhoneNumber = ThePhoneNumberLib.parseNumber(iso2Code: iso2);
+    thePhoneNumber = TheCountryNumber().parseNumber(iso2Code: iso2);
   }
 
   static Country fromJson(Map<String,dynamic> j){

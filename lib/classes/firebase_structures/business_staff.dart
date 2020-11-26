@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mobx/mobx.dart';
-import 'package:thephonenumber/thephonenumber.dart';
+import 'package:thephonenumber/thecountrynumber.dart';
 
 import 'business_branch.dart';
 import 'business_details.dart';
@@ -20,7 +20,7 @@ class BusinessStaff {
   BusinessDetails business;
   BusinessStaff manager;
   BusinessStaff receptionist;
-  ThePhoneNumber contactNumber;
+  TheNumber contactNumber;
   double rating = 0;
 
   BusinessStaff({
@@ -68,7 +68,7 @@ class BusinessStaff {
     ]);
     branch =
         business.branches.value.firstWhere((b) => b.myDoc.value == j["branch"]);
-    contactNumber = ThePhoneNumber(internationalNumber: j["contactNumber"]);
+    contactNumber = TheNumber(internationalNumber: j["contactNumber"]);
     images = Map.fromIterable(j["images"],
             key: (v) => v as String, value: (_) => true) ??
         {};

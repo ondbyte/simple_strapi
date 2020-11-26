@@ -139,7 +139,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                                 child: TextFormField(
                                   decoration: InputDecoration(
                                     labelText: "Price",
-                                    suffix: Text(cloudStore.theNumber.currency),
+                                    suffix: Text(cloudStore.theNumber.country.currency),
                                   ),
                                   keyboardType: TextInputType.number,
                                   validator: (s) {

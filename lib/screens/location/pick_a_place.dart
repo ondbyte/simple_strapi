@@ -47,7 +47,7 @@ class PickAPlaceScreen extends StatelessWidget {
                       children: <Widget>[
                         ...cloudStore.countries.map(
                           (e) => ListTile(
-                            title: Text(e.thePhoneNumber.englishName),
+                            title: Text(e.thePhoneNumber.country.englishName),
                             trailing: Icon(Icons.arrow_forward_ios),
                             onTap: () async {
                               //cloudStore.getLocationsInCountry(e);

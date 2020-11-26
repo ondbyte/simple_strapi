@@ -4,7 +4,7 @@ import 'package:bapp/stores/business_store.dart';
 import 'package:flutter/material.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:provider/provider.dart';
-import 'package:thephonenumber/thephonenumber.dart';
+import 'package:thephonenumber/thecountrynumber.dart';
 
 class BusinessManageContactDetailsScreen extends StatefulWidget {
   @override
@@ -12,7 +12,7 @@ class BusinessManageContactDetailsScreen extends StatefulWidget {
 }
 
 class _BusinessManageContactDetailsScreenState extends State<BusinessManageContactDetailsScreen> {
-  ThePhoneNumber _enteredNumber,_previousNumber;
+  TheNumber _enteredNumber,_previousNumber;
   bool _correct = false;
   String _email = "", _previousEmail = "";
 
@@ -62,7 +62,7 @@ class _BusinessManageContactDetailsScreenState extends State<BusinessManageConta
               },),
               const SizedBox(height: 20,),
               Consumer<BusinessStore>(builder: (_,businessStore,__){
-                _previousNumber = ThePhoneNumberLib.parseNumber(internationalNumber: businessStore.business.selectedBranch.value.contactNumber.value);
+                _previousNumber = TheCountryNumber().parseNumber(internationalNumber: businessStore.business.selectedBranch.value.contactNumber.value);
                 //print(_enteredNumber);
                 return InternationalPhoneNumberInput(
 
@@ -70,9 +70,9 @@ class _BusinessManageContactDetailsScreenState extends State<BusinessManageConta
                     labelText: "phone number",
                   ),
                   onInputChanged: (pn){
-                    _enteredNumber = ThePhoneNumberLib.parseNumber(internationalNumber: pn.phoneNumber);
+                    _enteredNumber = TheCountryNumber().parseNumber(internationalNumber: pn.phoneNumber);
                   },
-                  initialValue: PhoneNumber(phoneNumber: _previousNumber.number,isoCode: _previousNumber.iso2Code),
+                  initialValue: PhoneNumber(phoneNumber: _previousNumber.number,isoCode: _previousNumber.country.iso2),
                   autoValidateMode: AutovalidateMode.onUserInteraction,
                   onInputValidated: (b){
                     _correct = b;
