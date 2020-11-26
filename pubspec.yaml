@@ -35,8 +35,10 @@ dependencies:
   screen: ^0.0.5
 
   thephonenumber:
-    git:
-      url: https://github.com/ondbyte/thephonenumber_dart.git
+    path: libraries/thephonenumber
+
+  the_country_number_widgets:
+    path: libraries/the_country_number_widgets
 
   #ICONS
   feather_icons_flutter: ^4.7.4

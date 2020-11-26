@@ -4,7 +4,7 @@ import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mobx/mobx.dart';
-import 'package:thephonenumber/thephonenumber.dart';
+import 'package:thephonenumber/thecountrynumber.dart';
 
 import '../../config/config_data_types.dart';
 import '../../helpers/extensions.dart';
@@ -44,7 +44,7 @@ class BusinessBranch {
   String iso2 = "";
   String city = "";
   String locality = "";
-  ThePhoneNumber misc;
+  TheNumber misc;
 
   BusinessBranch(
       {DocumentReference myDoc, @required BusinessDetails business}) {
@@ -216,7 +216,7 @@ class BusinessBranch {
                     " Did add all the details?",
           );
         }
-        misc = ThePhoneNumberLib.parseNumber(iso2Code: iso2);
+        misc = TheCountryNumber().parseNumber(iso2Code: iso2);
       }
     } on BappDataBaseError catch (e, s) {
       FirebaseCrashlytics.instance.recordError(
@@ -278,7 +278,7 @@ class BusinessBranch {
 
   Future addAStaff(
       {UserType role,
-      ThePhoneNumber userPhoneNumber,
+      TheNumber userPhoneNumber,
       String name,
       DateTime dateOfJoining,
       Map<String, bool> images,
