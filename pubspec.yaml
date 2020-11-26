@@ -34,9 +34,9 @@ dependencies:
   flutter_absolute_path: ^1.0.6
   screen: ^0.0.5
 
+  #LOCAL
   thephonenumber:
     path: libraries/thephonenumber
-
   the_country_number_widgets:
     path: libraries/the_country_number_widgets
 
