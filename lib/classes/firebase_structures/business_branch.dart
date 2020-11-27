@@ -132,6 +132,14 @@ class BusinessBranch {
     );
   }
 
+  bool anyStaffHasNumber(TheNumber tn) {
+    return staff.any((s) => s.contactNumber == tn);
+  }
+
+  bool anyStaffHasName(String n) {
+    return staff.any((s) => s.name == n);
+  }
+
   ///get current data from firestore
   Future pull() async {
     await _getBranch(myDoc.value);

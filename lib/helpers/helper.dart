@@ -121,8 +121,13 @@ Future<Map<String, bool>> uploadImagesToStorageAndReturnStringList(
   await Future.forEach<MapEntry<String, bool>>(imagesWithFiltered.entries,
       (entry) async {
     if (!entry.value) {
-      await f.ref().child(entry.key).delete();
-      imagesWithFiltered.removeWhere((key, value) => key == entry.key);
+      try {
+        await f.ref().child(entry.key).delete();
+      } catch (e, s) {
+        Helper.printLog("Unable to delete file on storage");
+        print(e);
+        print(s);
+      }
     } else {
       if (entry.key.startsWith("local")) {
         final uints = await File(removeLocalFromPath(entry.key)).readAsBytes();

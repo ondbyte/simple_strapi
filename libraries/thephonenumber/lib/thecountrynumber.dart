@@ -1,9 +1,7 @@
 library thecountrynumber;
 
 ///A library to
-
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:thephonenumber/data.dart';
@@ -12,7 +10,8 @@ import 'package:thephonenumber/data.dart';
 class TheCountryNumber {
   static List<_TheCountry> _countries = [];
 
-  List<TheCountry> get countries => _countries.map((e) => TheCountry(e)).toList();
+  List<TheCountry> get countries =>
+      _countries.map((e) => TheCountry(e)).toList();
 
   TheCountryNumber._init() {
     final dataJ = json.decode(data) as List;
@@ -29,7 +28,7 @@ class TheCountryNumber {
 
   String toString2() {
     return _countries.fold("\n",
-            (previousValue, element) => previousValue + element.toString() + "\n");
+        (previousValue, element) => previousValue + element.toString() + "\n");
   }
 
   TheNumber parseNumber({
@@ -139,7 +138,7 @@ class TheCountryNumber {
 
     if (!isNullOrEmpty(englishName)) {
       final tmp = _countries.firstWhere(
-            (element) {
+        (element) {
           if (isNullOrEmpty(element.englishName)) {
             return false;
           } else {
@@ -174,16 +173,16 @@ class TheCountryNumber {
         ? internationalNumber.replaceFirst(country.dialCode, "")
         : "";
     return TheNumber(
-      dialCode: country.dialCode,
-      number: _number,
-      internationalNumber: internationalNumber??"",
-      country: TheCountry(country),
-      hasNumber: internationalNumber!=null,
-      validLength: country.dialLengths.any((element) => element==_number.length,)
-    );
+        dialCode: country.dialCode,
+        number: _number,
+        internationalNumber: internationalNumber ?? "",
+        country: TheCountry(country),
+        hasNumber: internationalNumber != null,
+        validLength: country.dialLengths.any(
+          (element) => element == _number.length,
+        ));
   }
 }
-
 
 class TheNumber {
   final String dialCode;
@@ -194,40 +193,59 @@ class TheNumber {
   final validLength;
 
   TheNumber(
-      {this.hasNumber=false,this.validLength=false,this.dialCode="", this.number="", this.internationalNumber="",@required this.country}){
-    assert(country!=null);
+      {this.hasNumber = false,
+      this.validLength = false,
+      this.dialCode = "",
+      this.number = "",
+      this.internationalNumber = "",
+      @required this.country}) {
+    assert(country != null);
   }
 
-  TheNumber addNumber(String s){
-    return TheCountryNumber().parseNumber(internationalNumber: dialCode+s);
+  TheNumber addNumber(String s) {
+    return TheCountryNumber().parseNumber(internationalNumber: dialCode + s);
+  }
+
+  TheNumber removeNumber() {
+    return TheCountryNumber().parseNumber(iso2Code: this.country.iso2);
   }
 
   @override
   String toString() {
     return '''hasNumber: $hasNumber\nvalidLength: $validLength\ndialCode: $dialCode\n dialCode: $dialCode\n number: $number\n internationalNumber: $internationalNumber\n$country''';
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is TheNumber) {
+      return hashCode == other.hashCode;
+    }
+    return false;
+  }
+
+  @override
+  int get hashCode => internationalNumber.hashCode;
 }
 
 class TheCountry {
   final _TheCountry _country;
   TheCountry(this._country);
 
-  String get iso2=> _country.iso2Code;
+  String get iso2 => _country.iso2Code;
 
-  String get iso3=> _country.iso3Code;
+  String get iso3 => _country.iso3Code;
 
-  String get currency=> _country.currency;
+  String get currency => _country.currency;
 
-  String get capital=> _country.capital;
+  String get capital => _country.capital;
 
-  String get englishName=> _country.englishName;
+  String get englishName => _country.englishName;
 
-  String get localName=> _country.name;
+  String get localName => _country.name;
 
   @override
   String toString() {
-    return
-      '''
+    return '''
       Country:
       $iso2
       $iso3

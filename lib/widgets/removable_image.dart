@@ -1,4 +1,3 @@
-import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/widgets/firebase_image.dart';
 import 'package:flutter/material.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
@@ -19,7 +18,6 @@ class RemovableImageWidget extends StatelessWidget {
       : super(key: key);
   @override
   Widget build(BuildContext context) {
-    Helper.printLog(storageUrlOrPath);
     return Stack(
       alignment: Alignment.topRight,
       children: [

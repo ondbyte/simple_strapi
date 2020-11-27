@@ -25,7 +25,7 @@ class _LoadingStackWidgetState extends State<LoadingStackWidget> {
             return kLoading.value
                 ? SizedBox(
                     child: Container(
-                      color: Theme.of(context).backgroundColor,
+                      color: Theme.of(context).scaffoldBackgroundColor,
                       child: LoadingWidget(),
                     ),
                   )

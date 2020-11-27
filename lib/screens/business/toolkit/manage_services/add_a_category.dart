@@ -61,68 +61,73 @@ class _BusinessAddServiceCategoryScreenState
             });
           },
         ),
-        body: CustomScrollView(
-          slivers: [
-            SliverPadding(
-              padding: EdgeInsets.all(16),
-              sliver: SliverList(
+        body: GestureDetector(
+          onTap: (){
+            FocusScope.of(context).unfocus();
+          },
+          child: CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: EdgeInsets.all(16),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate(
+                    [
+                      Form(
+                        key: _key,
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              decoration:
+                              InputDecoration(labelText: "Category name"),
+                              onChanged: (s) {
+                                _name = s;
+                              },
+                              validator: (s) {
+                                if (s.isEmpty) {
+                                  return "Enter a valid name";
+                                }
+                                return null;
+                              },
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            TextFormField(
+                              decoration:
+                              InputDecoration(labelText: "Description"),
+                              onChanged: (s) {
+                                _description = s;
+                              },
+                              validator: (s) {
+                                if (s.isEmpty) {
+                                  return "Enter a valid description";
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SliverList(
                 delegate: SliverChildListDelegate(
                   [
-                    Form(
-                      key: _key,
-                      child: Column(
-                        children: [
-                          TextFormField(
-                            decoration:
-                                InputDecoration(labelText: "Category name"),
-                            onChanged: (s) {
-                              _name = s;
-                            },
-                            validator: (s) {
-                              if (s.isEmpty) {
-                                return "Enter a valid name";
-                              }
-                              return null;
-                            },
-                          ),
-                          SizedBox(
-                            height: 20,
-                          ),
-                          TextFormField(
-                            decoration:
-                                InputDecoration(labelText: "Description"),
-                            onChanged: (s) {
-                              _description = s;
-                            },
-                            validator: (s) {
-                              if (s.isEmpty) {
-                                return "Enter a valid description";
-                              }
-                              return null;
-                            },
-                          ),
-                        ],
-                      ),
+                    AddImageTileWidget(
+                      maxImage: 1,
+                      title: "Add an image",
+                      subTitle: "(optional)",
+                      onImagesSelected: (imgs) {
+                        _image = imgs;
+                      },
                     ),
                   ],
                 ),
               ),
-            ),
-            SliverList(
-              delegate: SliverChildListDelegate(
-                [
-                  AddImageTileWidget(
-                    maxImage: 1,
-                    title: "Add an image",
-                    subTitle: "(optional)",
-                    onImagesSelected: (imgs) {
-                      _image = imgs;
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

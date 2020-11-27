@@ -2,7 +2,6 @@ import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/route_manager.dart';
-import 'package:bapp/screens/business/branch_chooser.dart';
 import 'package:bapp/screens/search/branches_result_screen.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/business_store.dart';
@@ -13,7 +12,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
-import '../padded_text.dart';
 import '../search_bar.dart';
 import '../store_provider.dart';
 
@@ -93,12 +91,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                           final businessStore = Provider.of<BusinessStore>(
                               context,
                               listen: false);
-                          return (businessStore.business != null &&
-                                  (businessStore.business.anyBranchInDraft() ||
-                                      businessStore.business
-                                          .anyBranchInPublished() ||
-                                      businessStore.business
-                                          .anyBranchInUnPublished()))
+                          return (businessStore.business != null)
                               ? const SizedBox()
                               : _getOwnABusiness(context);
                         },
@@ -148,55 +141,54 @@ class _DiscoverTabState extends State<DiscoverTab> {
                       },
                     ),
                     SingleChildScrollView(
-                        padding: const EdgeInsets.only(left: 16),
-                        scrollDirection: Axis.horizontal,
-                        child: snap.hasData
-                            ? Row(
-                                children: [
-                                  ...List.generate(snap.data.length, (i) {
-                                    return Row(
-                                      children: [
-                                        Container(
-                                          width: snap.data.length == 1
-                                              ? cons.maxWidth - 32
-                                              : cons.maxWidth * 0.8,
-                                          child: BusinessTileBigWidget(
-                                            branch: snap.data[i],
-                                            onTap: () {
-                                              Provider.of<BookingFlow>(context,
-                                                      listen: false)
-                                                  .branch = snap.data[i];
-                                              Navigator.of(context).pushNamed(
-                                                  RouteManager
-                                                      .businessProfileScreen,
-                                                  arguments: [snap.data[i]]);
-                                            },
-                                            tag: Chip(
-                                              backgroundColor: CardsColor
-                                                  .colors["lightGreen"],
-                                              label: Text(
-                                                "Featured",
-                                                style: Theme.of(context)
-                                                    .textTheme
-                                                    .bodyText1
-                                                    .apply(
-                                                      color: Theme.of(context)
-                                                          .backgroundColor,
-                                                    ),
-                                              ),
+                      padding: const EdgeInsets.only(left: 16),
+                      scrollDirection: Axis.horizontal,
+                      child: snap.hasData
+                          ? Row(
+                              children: [
+                                ...List.generate(snap.data.length, (i) {
+                                  return Row(
+                                    children: [
+                                      Container(
+                                        width: snap.data.length == 1
+                                            ? cons.maxWidth - 32
+                                            : cons.maxWidth * 0.8,
+                                        child: BusinessTileBigWidget(
+                                          branch: snap.data[i],
+                                          onTap: () {
+                                            Provider.of<BookingFlow>(context,
+                                                    listen: false)
+                                                .branch = snap.data[i];
+                                            Navigator.of(context).pushNamed(
+                                                RouteManager
+                                                    .businessProfileScreen,
+                                                arguments: [snap.data[i]]);
+                                          },
+                                          tag: Chip(
+                                            backgroundColor:
+                                                CardsColor.colors["lightGreen"],
+                                            label: Text(
+                                              "Featured",
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodyText1
+                                                  .apply(
+                                                    color: Theme.of(context)
+                                                        .backgroundColor,
+                                                  ),
                                             ),
                                           ),
                                         ),
-                                        SizedBox(
-                                          width: 16,
-                                        ),
-                                      ],
-                                    );
-                                  })
-                                ],
-                              )
-                            : const SizedBox(),
-                      
+                                      ),
+                                      SizedBox(
+                                        width: 16,
+                                      ),
+                                    ],
+                                  );
+                                })
+                              ],
+                            )
+                          : const SizedBox(),
                     ),
                   ],
                 );
@@ -314,7 +306,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
 
   Widget _getCategoriesScroller(BuildContext context) {
     return SingleChildScrollView(
-      padding: EdgeInsets.only(left:10),
+      padding: EdgeInsets.only(left: 10),
       scrollDirection: Axis.horizontal,
       child: Consumer2<BusinessStore, CloudStore>(
         builder: (_, businessStore, cloudStore, __) {
@@ -325,8 +317,6 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   ...List.generate(
                     businessStore.categories.length,
                     (index) => TextButton(
-                    
-                    
                       onPressed: () {
                         BappNavigator.bappPush(
                           context,

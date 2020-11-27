@@ -1,11 +1,10 @@
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/stores/business_store.dart';
-import 'package:bapp/widgets/buttons.dart';
+import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
 import 'package:provider/provider.dart';
 
 class BusinessAddAHolidayScreen extends StatefulWidget {
@@ -55,14 +54,12 @@ class _BusinessAddAHolidayScreenState extends State<BusinessAddAHolidayScreen> {
         onPressed: () async {
           if (_key.currentState.validate()) {
             final businessStore =
-            Provider.of<BusinessStore>(context,
-                listen: false);
+                Provider.of<BusinessStore>(context, listen: false);
             if (businessStore
                 .business.selectedBranch.value.businessHolidays.value.all
                 .contains(_name)) {
               Flushbar(
-                message:
-                "The holiday with that name exists",
+                message: "The holiday with that name exists",
                 duration: const Duration(seconds: 2),
               ).show(context);
               return;
@@ -71,7 +68,7 @@ class _BusinessAddAHolidayScreenState extends State<BusinessAddAHolidayScreen> {
             businessStore
                 .business.selectedBranch.value.businessHolidays.value.all
                 .forEach(
-                  (businessHoliday) {
+              (businessHoliday) {
                 if (businessHoliday.dates == _pickedDates) {
                   b = true;
                 }
@@ -96,9 +93,9 @@ class _BusinessAddAHolidayScreenState extends State<BusinessAddAHolidayScreen> {
           }
         },
       ),
-      body: WillPopScope(
-        onWillPop: () async {
-          return true;
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
         },
         child: CustomScrollView(
           slivers: [

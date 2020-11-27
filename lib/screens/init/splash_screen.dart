@@ -14,7 +14,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-import 'package:thephonenumber/thecountrynumber.dart';
 
 import '../../fcm.dart';
 import '../../main.dart';
@@ -58,7 +57,9 @@ class _SplashScreenState extends State<SplashScreen>
             }
           }
         }, onNotLogin: () async {
-          Navigator.of(context).pushNamed(RouteManager.onBoardingScreen);
+          if (mounted) {
+            Navigator.of(context).pushNamed(RouteManager.onBoardingScreen);
+          }
           return;
         });
         //await context.read<FeedbackStore>().init();
@@ -71,7 +72,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   Widget _getSplashScreen() {
     return Material(
-      color: Theme.of(context).backgroundColor,
+      color: Theme.of(context).scaffoldBackgroundColor,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

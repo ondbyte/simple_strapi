@@ -59,7 +59,8 @@ class BusinessStaff {
     expertise.addAll((j["expertise"] as List).map((e) => e as String).toList());
     branch =
         business.branches.value.firstWhere((b) => b.myDoc.value == j["branch"]);
-    contactNumber = TheNumber(internationalNumber: j["contactNumber"]);
+    contactNumber =
+        TheCountryNumber().parseNumber(internationalNumber: j["contactNumber"]);
     images = Map.fromIterable(j["images"],
             key: (v) => v as String, value: (_) => true) ??
         {};

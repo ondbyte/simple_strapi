@@ -16,7 +16,7 @@ class AddImageTileWidget extends StatefulWidget {
   AddImageTileWidget(
       {Key key,
       this.onImagesSelected,
-      this.existingImages,
+      this.existingImages = const {},
       this.title,
       this.subTitle,
       this.maxImage,
@@ -29,18 +29,12 @@ class AddImageTileWidget extends StatefulWidget {
 
 class _AddImageTileWidgetState extends State<AddImageTileWidget> {
   final List<Asset> _pickedImages = [];
-  final Map<String, bool> _existingImages = {};
+  final Removables _existingImages = Removables([], []);
 
   @override
   void initState() {
+    _existingImages.nonRemovables.addAll(widget.existingImages.keys);
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      setState(() {
-        if (widget.existingImages != null) {
-          _existingImages.addAll(widget.existingImages);
-        }
-      });
-    });
   }
 
   @override
@@ -62,8 +56,7 @@ class _AddImageTileWidgetState extends State<AddImageTileWidget> {
           ),
           onTap: () async {
             final picked = <Asset>[];
-            final filtered = getFiltered();
-            if (filtered.length == widget.maxImage) {
+            if (_existingImages.nonRemovables.length == widget.maxImage) {
               Flushbar(
                 message: "Max ${widget.maxImage} images",
                 duration: const Duration(seconds: 2),
@@ -72,7 +65,8 @@ class _AddImageTileWidgetState extends State<AddImageTileWidget> {
             }
             try {
               picked.addAll(await MultiImagePicker.pickImages(
-                  maxImages: widget.maxImage - filtered.length));
+                  maxImages:
+                      widget.maxImage - _existingImages.nonRemovables.length));
             } catch (e) {
               Flushbar(
                 message: "No images selected",
@@ -84,10 +78,10 @@ class _AddImageTileWidgetState extends State<AddImageTileWidget> {
               final absPath =
                   await FlutterAbsolutePath.getAbsolutePath(element.identifier);
               //print(absPath);
-              _existingImages["local" + absPath] = true;
+              _existingImages.nonRemovables.add("local" + absPath);
             });
             setState(() {});
-            widget.onImagesSelected(_existingImages);
+            widget.onImagesSelected(_getFinal());
           },
         ),
         SizedBox(
@@ -98,10 +92,9 @@ class _AddImageTileWidgetState extends State<AddImageTileWidget> {
             final cCount = o == Orientation.landscape ? 6 : 3;
             return LayoutBuilder(
               builder: (_, c) {
-                final filtered = getFiltered();
                 return AnimatedContainer(
                   duration: const Duration(milliseconds: 500),
-                  child: filtered.length == 0
+                  child: _existingImages.nonRemovables.length == 0
                       ? SizedBox(
                           height: 0,
                         )
@@ -112,24 +105,38 @@ class _AddImageTileWidgetState extends State<AddImageTileWidget> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                ...List.generate(filtered.length, (index) {
+                                ...List.generate(
+                                    _existingImages.nonRemovables.length,
+                                    (index) {
+                                  final empty = _existingImages.removables
+                                      .contains(
+                                          _existingImages.nonRemovables[index]);
+                                  if (empty) {
+                                    return SizedBox();
+                                  }
                                   return SizedBox(
                                     height: c.maxWidth / cCount,
                                     width: c.maxWidth / cCount,
                                     child: RemovableImageWidget(
-                                      storageUrlOrPath: filtered[index],
+                                      key: Key(
+                                        _existingImages.nonRemovables[index],
+                                      ),
+                                      storageUrlOrPath:
+                                          _existingImages.nonRemovables[index],
                                       onRemove: () {
                                         setState(() {
-                                          if (filtered[index]
+                                          if (_existingImages
+                                              .nonRemovables[index]
                                               .startsWith("local")) {
-                                            _existingImages
-                                                .remove(filtered[index]);
+                                            _existingImages.nonRemovables
+                                                .remove(_existingImages
+                                                    .nonRemovables[index]);
                                           } else {
-                                            _existingImages
-                                                .remove(filtered[index]);
-                                            _existingImages[filtered[index]] =
-                                                false;
+                                            _existingImages.removables.add(
+                                                _existingImages
+                                                    .nonRemovables[index]);
                                           }
+                                          widget.onImagesSelected(_getFinal());
                                         });
                                       },
                                     ),
@@ -148,13 +155,22 @@ class _AddImageTileWidgetState extends State<AddImageTileWidget> {
     );
   }
 
-  List<String> getFiltered() {
-    final List<String> list = [];
-    _existingImages.forEach((key, value) {
-      if (value) {
-        list.add(key);
-      }
+  Map<String, bool> _getFinal() {
+    final m = <String, bool>{};
+    _existingImages.removables.forEach((element) {
+      _existingImages.nonRemovables.remove(element);
+      m.addAll({element: false});
     });
-    return list;
+    _existingImages.nonRemovables.forEach((element) {
+      m.addAll({element: true});
+    });
+    return m;
   }
+}
+
+class Removables {
+  final List<String> nonRemovables;
+  final List<String> removables;
+
+  Removables(this.nonRemovables, this.removables);
 }

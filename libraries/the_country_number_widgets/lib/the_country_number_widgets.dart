@@ -8,7 +8,7 @@ class TheCountryNumberInput extends StatefulWidget {
   final Function(TheNumber) customValidator;
   final TheInputDecor decoration;
   final bool showDialCode;
-  final Function(TheNumber) onValidNumberEntered;
+  final Function(TheNumber) onChanged;
 
   const TheCountryNumberInput(
     this.existingCountryNumber, {
@@ -16,7 +16,7 @@ class TheCountryNumberInput extends StatefulWidget {
     this.customValidator,
     this.decoration = const TheInputDecor(),
     this.showDialCode = true,
-    this.onValidNumberEntered,
+    this.onChanged,
   }) : super(key: key);
   @override
   _TheCountryNumberInputState createState() => _TheCountryNumberInputState();
@@ -27,6 +27,8 @@ class _TheCountryNumberInputState extends State<TheCountryNumberInput> {
   final _controller = TextEditingController();
   @override
   void initState() {
+    assert(widget.existingCountryNumber != null,
+        "Initializing number cannot be null");
     _selectedNumber = widget.existingCountryNumber;
     _controller.text = _selectedNumber.number;
     super.initState();
@@ -39,11 +41,13 @@ class _TheCountryNumberInputState extends State<TheCountryNumberInput> {
         ThePrefix(
           existingCountryNumber: _selectedNumber,
           onNewCountrySelected: (tn) {
-            setState(() {
-              _selectedNumber = TheCountryNumber()
-                  .parseNumber(iso2Code: tn.iso2)
-                  .addNumber(_controller.text);
-            });
+            if (tn != null) {
+              setState(() {
+                _selectedNumber = TheCountryNumber()
+                    .parseNumber(iso2Code: tn.iso2)
+                    .addNumber(_controller.text);
+              });
+            }
           },
         ),
         Expanded(
@@ -60,15 +64,13 @@ class _TheCountryNumberInputState extends State<TheCountryNumberInput> {
             ),
             validator: (s) {
               return widget.customValidator(
-                TheCountryNumber().parseNumber(internationalNumber: s),
+                _selectedNumber,
               );
             },
             onChanged: (s) {
               _selectedNumber = TheCountryNumber().parseNumber(
                   internationalNumber: _selectedNumber.dialCode + s);
-              if (_selectedNumber.validLength) {
-                widget.onValidNumberEntered(_selectedNumber);
-              }
+              widget.onChanged(_selectedNumber);
             },
           ),
         )

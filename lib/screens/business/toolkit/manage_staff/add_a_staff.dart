@@ -3,13 +3,12 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:textfield_tags/textfield_tags.dart';
+import 'package:the_country_number_widgets/the_country_number_widgets.dart';
 import 'package:thephonenumber/thecountrynumber.dart';
 
-import '../../../../classes/firebase_structures/business_services.dart';
 import '../../../../classes/firebase_structures/business_staff.dart';
 import '../../../../config/config_data_types.dart';
 import '../../../../helpers/helper.dart';
@@ -36,13 +35,6 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
   String authorizedUid = "";
   bool _numberValidated = false;
   TheNumber _theNumber;
-  final _pnController = TextEditingController();
-
-  @override
-  void dispose() {
-    _pnController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,235 +44,240 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
           automaticallyImplyLeading: true,
           title: Text("Add a Staff"),
         ),
-        body: CustomScrollView(
-          slivers: [
-            Form(
-              key: _key,
-              child: SliverPadding(
-                padding: const EdgeInsets.all(16),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate(
-                    [
-                      DropdownButtonFormField<UserType>(
-                        value: _staff.role,
-                        items: [
-                          DropdownMenuItem(
-                            child: Text(
-                              EnumToString.convertToString(
-                                UserType.businessManager,
-                              ),
-                            ),
-                            value: UserType.businessManager,
-                          ),
-                          DropdownMenuItem(
-                            child: Text(
-                              EnumToString.convertToString(
-                                UserType.businessReceptionist,
-                              ),
-                            ),
-                            value: UserType.businessReceptionist,
-                          ),
-                          DropdownMenuItem(
-                            child: Text(
-                              EnumToString.convertToString(
-                                UserType.businessStaff,
-                              ),
-                            ),
-                            value: UserType.businessStaff,
-                          ),
-                        ],
-                        decoration: InputDecoration(labelText: "Role"),
-                        validator: (s) {
-                          if (s == null) {
-                            return "Select a role type";
-                          }
-                          return null;
-                        },
-                        onChanged: (s) {
-                          _staff.role = s;
-                        },
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      Consumer<CloudStore>(
-                        builder: (_, cloudStore, __) {
-                          return InternationalPhoneNumberInput(
-                            onInputChanged: (PhoneNumber value) {
-                              _pnController.text = value.phoneNumber;
-                            },
-                            inputDecoration:
-                                const InputDecoration(labelText: "Bapp user"),
-                            countries: [cloudStore.theNumber.country.iso2],
-                            initialValue: PhoneNumber(
-                                phoneNumber:
-                                    _theNumber?.internationalNumber ?? ""),
-                            onInputValidated: (b) async {
-                              if (b != _numberValidated) {
-                                setState(() {
-                                  _numberValidated = b;
-                                  _theNumber = TheCountryNumber().parseNumber(
-                                      internationalNumber: _pnController.text);
-                                });
-                              }
-                            },
-                            validator: (s) {
-                              if (_numberValidated) {
-                                return null;
-                              }
-                              return "Enter a valid number";
-                            },
-                          );
-                        },
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                            labelText: "Name of the staff"),
-                        onChanged: (s) {
-                          _staff.name = s;
-                        },
-                        validator: (s) {
-                          if (s.isEmpty) {
-                            return "Enter a name";
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      InputDatePickerFormField(
-                        fieldLabelText: "Date of joining",
-                        firstDate: DateTime(2000),
-                        initialDate: DateTime.now(),
-                        lastDate: DateTime.now(),
-                        onDateSubmitted: (date) {
-                          _staff.dateOfJoining = date;
-                        },
-                        errorFormatText: "Select a date",
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      Consumer<BusinessStore>(
-                        builder: (_, businessStore, __) {
-                          final selected =
-                              ObservableList<BusinessServiceCategory>();
-                          return Observer(
-                            builder: (_) {
-                              return TextFieldTags(
-                                onTag: (s) {
-                                  _staff.expertise.add(s);
-                                },
-                                onDelete: (s) {
-                                  _staff.expertise.remove(s);
-                                },
-                                tagsStyler: TagsStyler(
-                                  tagCancelIcon: Icon(
-                                    FeatherIcons.x,
-                                    color: Theme.of(context).indicatorColor,
+        body: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).unfocus();
+          },
+          child: CustomScrollView(
+            slivers: [
+              Consumer2<CloudStore, BusinessStore>(
+                builder: (_, cloudStore, businessStore, __) {
+                  return Form(
+                    key: _key,
+                    child: SliverPadding(
+                      padding: const EdgeInsets.all(16),
+                      sliver: SliverList(
+                        delegate: SliverChildListDelegate(
+                          [
+                            DropdownButtonFormField<UserType>(
+                              value: _staff.role,
+                              items: [
+                                DropdownMenuItem(
+                                  child: Text(
+                                    EnumToString.convertToString(
+                                      UserType.businessManager,
+                                    ),
                                   ),
-                                  tagTextStyle: TextStyle(
-                                      color: Theme.of(context).indicatorColor),
-                                  tagDecoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(16),
-                                    color: Theme.of(context).primaryColor,
-                                  ),
+                                  value: UserType.businessManager,
                                 ),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      Observer(
-                        builder: (_) {
-                          return ShakeWidget(
-                            doShake: _doShakeImage.value,
-                            onShakeDone: () {
-                              act(() {
-                                _doShakeImage.value = false;
-                              });
-                            },
-                            child: AddImageTileWidget(
-                              title: "Add an image",
-                              subTitle: "maximum of 1 image",
-                              padding: EdgeInsets.zero,
-                              maxImage: 1,
-                              existingImages: _staff.images,
-                              onImagesSelected: (imgs) {
-                                _staff.images = imgs;
+                                DropdownMenuItem(
+                                  child: Text(
+                                    EnumToString.convertToString(
+                                      UserType.businessReceptionist,
+                                    ),
+                                  ),
+                                  value: UserType.businessReceptionist,
+                                ),
+                                DropdownMenuItem(
+                                  child: Text(
+                                    EnumToString.convertToString(
+                                      UserType.businessStaff,
+                                    ),
+                                  ),
+                                  value: UserType.businessStaff,
+                                ),
+                              ],
+                              decoration: InputDecoration(labelText: "Role"),
+                              validator: (s) {
+                                if (s == null) {
+                                  return "Select a role type";
+                                }
+                                return null;
+                              },
+                              onChanged: (s) {
+                                _staff.role = s;
                               },
                             ),
-                          );
-                        },
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            TheCountryNumberInput(
+                              cloudStore.theNumber.removeNumber(),
+                              decoration: TheInputDecor(labelText: "Bapp user"),
+                              customValidator: (tn) {
+                                if (tn != null) {
+                                  if (businessStore
+                                      .business.selectedBranch.value
+                                      .anyStaffHasNumber(tn)) {
+                                    return "Existing staff";
+                                  }
+                                  if (tn.validLength) {
+                                    return null;
+                                  }
+                                }
+                                return "Enter a valid number";
+                              },
+                              onChanged: (tn) {
+                                setState(
+                                  () {
+                                    _theNumber = tn;
+                                    _numberValidated = tn.validLength;
+                                  },
+                                );
+                              },
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            TextFormField(
+                              decoration: const InputDecoration(
+                                  labelText: "Name of the staff"),
+                              onChanged: (s) {
+                                _staff.name = s;
+                              },
+                              validator: (s) {
+                                if (s.isEmpty) {
+                                  return "Enter a name";
+                                }
+                                if (businessStore.business.selectedBranch.value
+                                    .anyStaffHasName(s)) {
+                                  return "Staff exists";
+                                }
+                                return null;
+                              },
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            InputDatePickerFormField(
+                              fieldLabelText: "Date of joining",
+                              firstDate: DateTime(2000),
+                              initialDate: DateTime.now(),
+                              lastDate: DateTime.now(),
+                              onDateSubmitted: (date) {
+                                _staff.dateOfJoining = date;
+                              },
+                              errorFormatText: "Select a date",
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            Consumer<BusinessStore>(
+                              builder: (_, businessStore, __) {
+                                return TextFieldTags(
+                                  onTag: (s) {
+                                    _staff.expertise.add(s);
+                                  },
+                                  onDelete: (s) {
+                                    _staff.expertise.remove(s);
+                                  },
+                                  tagsStyler: TagsStyler(
+                                    tagCancelIcon: Icon(
+                                      FeatherIcons.x,
+                                      color: Theme.of(context).indicatorColor,
+                                    ),
+                                    tagTextStyle: TextStyle(
+                                        color:
+                                            Theme.of(context).indicatorColor),
+                                    tagDecoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16),
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            Observer(
+                              builder: (_) {
+                                return ShakeWidget(
+                                  doShake: _doShakeImage.value,
+                                  onShakeDone: () {
+                                    act(() {
+                                      _doShakeImage.value = false;
+                                    });
+                                  },
+                                  child: AddImageTileWidget(
+                                    title: "Add an image",
+                                    subTitle: "maximum of 1 image",
+                                    padding: EdgeInsets.zero,
+                                    maxImage: 1,
+                                    existingImages: _staff.images,
+                                    onImagesSelected: (imgs) {
+                                      _staff.images = imgs;
+                                    },
+                                  ),
+                                );
+                              },
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            PrimaryButton(
+                              "Add",
+                              onPressed: () async {
+                                FocusScope.of(context).unfocus();
+                                if (_key.currentState.validate()) {
+                                  if (_staff.images.isEmpty) {
+                                    act(() {
+                                      _doShakeImage.value = true;
+                                    });
+                                    return;
+                                  }
+                                  final branch = Provider.of<BusinessStore>(
+                                          context,
+                                          listen: false)
+                                      .business
+                                      .selectedBranch
+                                      .value;
+                                  if (branch.staff.isNotEmpty &&
+                                      branch.staff.any((s) =>
+                                          s?.name == _staff.name ||
+                                          s.contactNumber
+                                                  ?.internationalNumber ==
+                                              _theNumber
+                                                  ?.internationalNumber)) {
+                                    Flushbar(
+                                      message: "That user details exists",
+                                      duration: const Duration(seconds: 2),
+                                    ).show(context);
+                                    return;
+                                  }
+                                  act(() {
+                                    kLoading.value = true;
+                                  });
+                                  assert(
+                                      _theNumber?.internationalNumber != null,
+                                      "number missing");
+                                  await branch.addAStaff(
+                                    userPhoneNumber: _theNumber,
+                                    name: _staff.name,
+                                    role: _staff.role,
+                                    dateOfJoining: _staff.dateOfJoining,
+                                    images: _staff.images,
+                                    expertise: _staff.expertise,
+                                  );
+                                  Navigator.of(context).pop();
+                                  act(() {
+                                    kLoading.value = false;
+                                  });
+                                }
+                              },
+                            )
+                          ],
+                        ),
                       ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      PrimaryButton(
-                        "Add",
-                        onPressed: () async {
-                          FocusScope.of(context).unfocus();
-                          if (_key.currentState.validate()) {
-                            if (_staff.images.isEmpty) {
-                              act(() {
-                                _doShakeImage.value = true;
-                              });
-                              return;
-                            }
-                            final branch = Provider.of<BusinessStore>(context,
-                                    listen: false)
-                                .business
-                                .selectedBranch
-                                .value;
-                            if (branch.staff.isNotEmpty &&
-                                branch.staff.any((s) =>
-                                    s?.name == _staff.name ||
-                                    s.contactNumber?.internationalNumber ==
-                                        _theNumber?.internationalNumber)) {
-                              Flushbar(
-                                message: "That user details exists",
-                                duration: const Duration(seconds: 2),
-                              ).show(context);
-                              return;
-                            }
-                            act(() {
-                              kLoading.value = true;
-                            });
-                            _theNumber = TheCountryNumber().parseNumber(
-                                internationalNumber: _pnController.text);
-                            assert(_theNumber?.internationalNumber != null,
-                                "number missing");
-                            await branch.addAStaff(
-                              userPhoneNumber: _theNumber,
-                              name: _staff.name,
-                              role: _staff.role,
-                              dateOfJoining: _staff.dateOfJoining,
-                              images: _staff.images,
-                              expertise: _staff.expertise,
-                            );
-                            Navigator.of(context).pop();
-                            act(() {
-                              kLoading.value = false;
-                            });
-                          }
-                        },
-                      )
-                    ],
-                  ),
-                ),
-              ),
-            )
-          ],
+                    ),
+                  );
+                },
+              )
+            ],
+          ),
         ),
       ),
     );

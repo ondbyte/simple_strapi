@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:mobx/mobx.dart';
 import 'package:hive/hive.dart';
+import 'package:mobx/mobx.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'themestore.g.dart';
@@ -21,7 +21,8 @@ abstract class _ThemeStore with Store {
     final dir = await getApplicationSupportDirectory();
     Hive.init(dir.path);
     final box = await Hive.openLazyBox("brigtness.box");
-    final dark = await box.get("dark", defaultValue: false);
+    final dark =
+        await box.get("dark", defaultValue: brightness == Brightness.dark);
     if (dark) {
       if (brightness != Brightness.dark) {
         brightness = Brightness.dark;
@@ -57,7 +58,6 @@ abstract class _ThemeStore with Store {
       ),
 
       //////////////////////////////
-
 
       brightness: Brightness.light,
       indicatorColor: Colors.black,
@@ -369,7 +369,8 @@ abstract class _ThemeStore with Store {
           fontFamily: 'Gilmer',
         ),
       ),
-      bottomAppBarTheme: const BottomAppBarTheme(elevation: 10, color: Colors.black),
+      bottomAppBarTheme:
+          const BottomAppBarTheme(elevation: 10, color: Colors.black),
       dialogTheme: DialogTheme(
         backgroundColor: Colors.grey[900],
       ),
@@ -378,7 +379,7 @@ abstract class _ThemeStore with Store {
         color: Colors.black,
         // color: Colors.white,
         elevation: 0,
-        textTheme:  TextTheme(
+        textTheme: TextTheme(
           headline6: TextStyle(
             fontSize: 22,
             letterSpacing: 0,

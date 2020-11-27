@@ -56,194 +56,201 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
           label: "Add",
           padding: const EdgeInsets.all(16),
         ),
-        body: Consumer2<BusinessStore, CloudStore>(
-          builder: (_, businessStore, cloudStore, __) {
-            return Form(
-              key: _key,
-              child: CustomScrollView(
-                shrinkWrap: true,
-                slivers: [
-                  SliverPadding(
-                    padding: EdgeInsets.all(16),
-                    sliver: SliverList(
-                      delegate: SliverChildListDelegate(
-                        [
-                          Observer(
-                            builder: (_) {
-                              final categories = businessStore
-                                  .business
-                                  .selectedBranch
-                                  .value
-                                  .businessServices
-                                  .value
-                                  .allCategories
-                                  .toList();
-                              return DropdownButtonFormField<
-                                  BusinessServiceCategory>(
-                                decoration: const InputDecoration(
-                                    labelText: "Category"),
-                                items: <
-                                    DropdownMenuItem<BusinessServiceCategory>>[
-                                  ...List.generate(
-                                    categories.length,
-                                    (index) => DropdownMenuItem(
-                                      child: Text(
-                                        categories[index].categoryName.value,
-                                      ),
-                                      value: categories[index],
-                                    ),
-                                  )
-                                ],
-                                validator: (s) {
-                                  if (s == null) {
-                                    return "Please select a category";
-                                  }
-                                  return null;
-                                },
-                                onChanged: (c) {
-                                  act(() {
-                                    _category = c;
-                                  });
-                                  FocusScope.of(context).nextFocus();
-                                },
-                              );
-                            },
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          TextFormField(
-                            decoration: const InputDecoration(
-                                labelText: "Name of the product"),
-                            validator: (s) {
-                              if (s.isEmpty) {
-                                return "Please enter the name of the product";
-                              }
-                              return null;
-                            },
-                            onChanged: (s) {
-                              act(() {
-                                _service.serviceName.value = s;
-                              });
-                            },
-                            onFieldSubmitted: (_) {
-                              FocusScope.of(context).nextFocus();
-                            },
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextFormField(
-                                  decoration: InputDecoration(
-                                    labelText: "Price",
-                                    suffix: Text(cloudStore.theNumber.country.currency),
-                                  ),
-                                  keyboardType: TextInputType.number,
-                                  validator: (s) {
-                                    final number = double.tryParse(s);
-                                    if (number == null) {
-                                      return "Please enter the correct price of the product";
-                                    }
-                                    return null;
-                                  },
-                                  onChanged: (s) {
-                                    final number = double.tryParse(s);
-                                    act(() {
-                                      _service.price.value = number;
-                                    });
-                                  },
-                                  onFieldSubmitted: (_) {
-                                    FocusScope.of(context).nextFocus();
-                                  },
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 20,
-                              ),
-                              Expanded(
-                                child: TextFormField(
-                                  decoration: const InputDecoration(
-                                    labelText: "Duration",
-                                    suffix: Text("Minutes"),
-                                  ),
-                                  keyboardType: TextInputType.number,
-                                  validator: (s) {
-                                    if (s.contains(".")) {
-                                      return "Please enter valid duration";
-                                    }
-                                    final number = int.tryParse(s);
-                                    if (number == null) {
-                                      return "Please enter valid duration";
-                                    }
-                                    return null;
-                                  },
-                                  onChanged: (s) {
-                                    final number = int.tryParse(s) ?? 0;
-                                    act(
-                                      () {
-                                        _service.duration.value =
-                                            Duration(minutes: number);
-                                      },
-                                    );
-                                  },
-                                  onFieldSubmitted: (_) {
-                                    FocusScope.of(context).nextFocus();
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          TextFormField(
-                            decoration: const InputDecoration(
-                              labelText: "Description",
-                            ),
-                            keyboardType: TextInputType.text,
-                            validator: (s) {
-                              if (s.length < 10) {
-                                return "Please enter valid description";
-                              }
-                              return null;
-                            },
-                            onChanged: (s) {
-                              act(
-                                () {
-                                  _service.description.value = s;
-                                },
-                              );
-                            },
-                            onFieldSubmitted: (_) {
-                              FocusScope.of(context).unfocus();
-                              _key.currentState.validate();
-                            },
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          AddImageTileWidget(
-                            title: "Add a Image",
-                            subTitle: "(optional)",
-                            maxImage: 1,
-                            padding: EdgeInsets.zero,
-                            existingImages: _service.images,
-                            onImagesSelected: (imgs) {
-                              _service.images.clear();
-                              _service.images.addAll(imgs);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                ],
-              ),
-            );
+        body: GestureDetector(
+          onTap: () {
+            FocusScope.of(context).unfocus();
           },
+          child: Consumer2<BusinessStore, CloudStore>(
+            builder: (_, businessStore, cloudStore, __) {
+              return Form(
+                key: _key,
+                child: CustomScrollView(
+                  shrinkWrap: true,
+                  slivers: [
+                    SliverPadding(
+                      padding: EdgeInsets.all(16),
+                      sliver: SliverList(
+                        delegate: SliverChildListDelegate(
+                          [
+                            Observer(
+                              builder: (_) {
+                                final categories = businessStore
+                                    .business
+                                    .selectedBranch
+                                    .value
+                                    .businessServices
+                                    .value
+                                    .allCategories
+                                    .toList();
+                                return DropdownButtonFormField<
+                                    BusinessServiceCategory>(
+                                  decoration: const InputDecoration(
+                                      labelText: "Category"),
+                                  items: <
+                                      DropdownMenuItem<
+                                          BusinessServiceCategory>>[
+                                    ...List.generate(
+                                      categories.length,
+                                      (index) => DropdownMenuItem(
+                                        child: Text(
+                                          categories[index].categoryName.value,
+                                        ),
+                                        value: categories[index],
+                                      ),
+                                    )
+                                  ],
+                                  validator: (s) {
+                                    if (s == null) {
+                                      return "Please select a category";
+                                    }
+                                    return null;
+                                  },
+                                  onChanged: (c) {
+                                    act(() {
+                                      _category = c;
+                                    });
+                                    FocusScope.of(context).nextFocus();
+                                  },
+                                );
+                              },
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            TextFormField(
+                              decoration: const InputDecoration(
+                                  labelText: "Name of the product"),
+                              validator: (s) {
+                                if (s.isEmpty) {
+                                  return "Please enter the name of the product";
+                                }
+                                return null;
+                              },
+                              onChanged: (s) {
+                                act(() {
+                                  _service.serviceName.value = s;
+                                });
+                              },
+                              onFieldSubmitted: (_) {
+                                FocusScope.of(context).nextFocus();
+                              },
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    decoration: InputDecoration(
+                                      labelText: "Price",
+                                      suffix: Text(cloudStore
+                                          .theNumber.country.currency),
+                                    ),
+                                    keyboardType: TextInputType.number,
+                                    validator: (s) {
+                                      final number = double.tryParse(s);
+                                      if (number == null) {
+                                        return "Please enter the correct price of the product";
+                                      }
+                                      return null;
+                                    },
+                                    onChanged: (s) {
+                                      final number = double.tryParse(s);
+                                      act(() {
+                                        _service.price.value = number;
+                                      });
+                                    },
+                                    onFieldSubmitted: (_) {
+                                      FocusScope.of(context).nextFocus();
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 20,
+                                ),
+                                Expanded(
+                                  child: TextFormField(
+                                    decoration: const InputDecoration(
+                                      labelText: "Duration",
+                                      suffix: Text("Minutes"),
+                                    ),
+                                    keyboardType: TextInputType.number,
+                                    validator: (s) {
+                                      if (s.contains(".")) {
+                                        return "Please enter valid duration";
+                                      }
+                                      final number = int.tryParse(s);
+                                      if (number == null) {
+                                        return "Please enter valid duration";
+                                      }
+                                      return null;
+                                    },
+                                    onChanged: (s) {
+                                      final number = int.tryParse(s) ?? 0;
+                                      act(
+                                        () {
+                                          _service.duration.value =
+                                              Duration(minutes: number);
+                                        },
+                                      );
+                                    },
+                                    onFieldSubmitted: (_) {
+                                      FocusScope.of(context).nextFocus();
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            TextFormField(
+                              decoration: const InputDecoration(
+                                labelText: "Description",
+                              ),
+                              keyboardType: TextInputType.text,
+                              validator: (s) {
+                                if (s.length < 10) {
+                                  return "Please enter valid description";
+                                }
+                                return null;
+                              },
+                              onChanged: (s) {
+                                act(
+                                  () {
+                                    _service.description.value = s;
+                                  },
+                                );
+                              },
+                              onFieldSubmitted: (_) {
+                                FocusScope.of(context).unfocus();
+                                _key.currentState.validate();
+                              },
+                            ),
+                            const SizedBox(
+                              height: 20,
+                            ),
+                            AddImageTileWidget(
+                              title: "Add a Image",
+                              subTitle: "(optional)",
+                              maxImage: 1,
+                              padding: EdgeInsets.zero,
+                              existingImages: _service.images,
+                              onImagesSelected: (imgs) {
+                                _service.images.clear();
+                                _service.images.addAll(imgs);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -278,7 +285,8 @@ class _BottomPrimaryButtonState extends State<BottomPrimaryButton> {
       child: widget.onPressed == null
           ? const SizedBox()
           : Container(
-              padding: widget.padding ?? const EdgeInsets.symmetric(vertical:0, horizontal: 16),
+              padding: widget.padding ??
+                  const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
               color: Theme.of(context).backgroundColor,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -287,16 +295,20 @@ class _BottomPrimaryButtonState extends State<BottomPrimaryButton> {
                     ListTile(
                       dense: true,
                       contentPadding: EdgeInsets.all(0),
-                      title: Text(widget.title, style: Theme.of(context).textTheme.subtitle1,),
-                      subtitle: Text(widget.subTitle, style: Theme.of(context).textTheme.bodyText2,),
+                      title: Text(
+                        widget.title,
+                        style: Theme.of(context).textTheme.subtitle1,
+                      ),
+                      subtitle: Text(
+                        widget.subTitle,
+                        style: Theme.of(context).textTheme.bodyText2,
+                      ),
                     ),
                   PrimaryButton(
                     widget.label,
                     onPressed: widget.onPressed,
                   ),
-                  SizedBox(
-                    height:30
-                  )
+                  SizedBox(height: 30)
                 ],
               ),
             ),

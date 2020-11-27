@@ -1,9 +1,8 @@
 import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/config/config.dart';
-import 'package:bapp/config/constants.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/business_store.dart';
-import 'package:bapp/widgets/firebase_image.dart';
+import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -27,9 +26,7 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
               delegate: SliverChildListDelegate(
                 [
                   _getBranchTile(context),
-                  
                   _getSubmitForVerificationButton(context),
-                 
                 ],
               ),
             ),
@@ -42,7 +39,7 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
 
   Widget _getExpansionTiles(BuildContext context) {
     return SliverPadding(
-      padding: EdgeInsets.symmetric(horizontal:16, vertical:0),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
       sliver: SliverList(
         delegate: SliverChildListDelegate(
           [
@@ -52,7 +49,6 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
               child: ExpansionPanelList(
                 expandedHeaderPadding: EdgeInsets.all(0),
                 elevation: 0,
-                
                 dividerColor: Colors.transparent,
                 children: List.generate(
                     BusinessExpandingPanelConfigs.cfgs.length, (i) {
@@ -171,38 +167,10 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
       builder: (_, businessStore, __) {
         return Observer(
           builder: (_) {
-            return ListTile(
-              contentPadding: EdgeInsets.zero,
-              leading: ListTileFirebaseImage(
-                storagePathOrURL: businessStore
-                        .business.selectedBranch.value.images.isNotEmpty
-                    ? businessStore.business.selectedBranch.value.images.keys
-                        .elementAt(0)
-                    : kTemporaryPlaceHolderImage,
-              ),
-              title: Text(
-                businessStore.business.selectedBranch.value.name.value,
-                maxLines: 1,
-              ),
-              subtitle: Text(
-                businessStore.business.selectedBranch.value.address.value
-                    .split("\n")
-                    .join(", "),
-                maxLines: 1,
-              ),
-              trailing: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.star_border_outlined,
-                    color: Colors.yellow[600],
-                  ),
-                  Text(
-                    "4.5",
-                    style: Theme.of(context).textTheme.caption,
-                  )
-                ],
-              ),
+            return BusinessTileWidget(
+              withImage: true,
+              branch: businessStore.business.selectedBranch.value,
+              onTap: () {},
             );
           },
         );
@@ -223,36 +191,37 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
                     BusinessBranchActiveStatus.documentVerification;
             return draft || docuVerification
                 ? Container(
-                   margin: EdgeInsets.only(bottom:10, top: 10),
-                  child: ClipRRect(
+                    margin: EdgeInsets.only(bottom: 10, top: 10),
+                    child: ClipRRect(
                       borderRadius: BorderRadius.circular(6),
                       child: ListTile(
-                          tileColor:
-                              docuVerification ? Colors.green : Colors.redAccent,
-                          title: Text(
-                            docuVerification
-                                ? "Branch is in verification"
-                                : "Submit for verification",
-                            style:
-                                TextStyle(color: Theme.of(context).primaryColorLight),
-                          ),
-                          trailing: draft
-                              ? Icon(
-                                  FeatherIcons.arrowRightCircle,
-                                  color: Theme.of(context).primaryColorLight,
-                                )
-                              : null,
-                          onTap: docuVerification
-                              ? null
-                              : () {
-                                  Navigator.of(context).pushNamed(
-                                      RouteManager.businessVerificationScreen);
-                                },
-                        
+                        tileColor:
+                            docuVerification ? Colors.green : Colors.redAccent,
+                        title: Text(
+                          docuVerification
+                              ? "Branch is in verification"
+                              : "Submit for verification",
+                          style: TextStyle(
+                              color: Theme.of(context).primaryColorLight),
+                        ),
+                        trailing: draft
+                            ? Icon(
+                                FeatherIcons.arrowRightCircle,
+                                color: Theme.of(context).primaryColorLight,
+                              )
+                            : null,
+                        onTap: docuVerification
+                            ? null
+                            : () {
+                                Navigator.of(context).pushNamed(
+                                    RouteManager.businessVerificationScreen);
+                              },
                       ),
                     ),
-                )
-                : SizedBox( height: 0,);
+                  )
+                : SizedBox(
+                    height: 0,
+                  );
           },
         );
       },
