@@ -1,9 +1,8 @@
-import 'package:bapp/fcm.dart';
 import 'package:bapp/config/config_data_types.dart';
+import 'package:bapp/fcm.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/updates_store.dart';
-import 'package:bapp/widgets/buttons.dart';
 import 'package:bapp/widgets/store_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -109,39 +108,9 @@ class _BappFCMMesssageLayerWidgetState
           Text(_latestMessage.body),
           SizedBox(
             height: 20,
-          ),
-          _buttonize(_latestMessage),
-          _cancelButtonize(_latestMessage),
+          )
         ],
       ),
     );
-  }
-
-  _buttonize(BappFCMMessage message) {
-    if (message.type == BappFCMMessageType.staffAuthorizationAsk) {
-      return PrimaryButton(
-        "Acknowledge",
-        onPressed: () {
-          Provider.of<CloudStore>(context, listen: false)
-              .giveAuthorizationForStaffing(message, authorized: true);
-          _latestMessage = null;
-          Navigator.pop(context, true);
-        },
-      );
-    }
-  }
-
-  _cancelButtonize(BappFCMMessage message) {
-    if (message.type == BappFCMMessageType.staffAuthorizationAsk) {
-      return FlatButton(
-        child: Text("Not interested"),
-        onPressed: () {
-          Provider.of<CloudStore>(context, listen: false)
-              .giveAuthorizationForStaffing(message);
-          _latestMessage = null;
-          Navigator.pop(context, false);
-        },
-      );
-    }
   }
 }

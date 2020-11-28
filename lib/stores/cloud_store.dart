@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:bapp/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -316,66 +315,6 @@ abstract class _CloudStore with Store {
       },
     );
     //activeCountries = map((e) => e.id);
-  }
-
-  Future<String> getAuthorizationForStaffing(
-      {TheNumber phoneNumber,
-      BusinessDetails business,
-      Function(BappFCMMessage) onReplyRecieved}) async {
-    final functions = FirebaseFunctions.instance;
-    final callable = functions.httpsCallable(BappFunctions.sendBappMessage);
-    final called = await callable
-        .call(
-      BappFCMMessage(
-        type: BappFCMMessageType.staffAuthorizationAsk,
-        title: "You are being added as a Staff",
-        body: business.businessName.value +
-            " is adding you as their staff, acknowledge this to authorize adding",
-        to: phoneNumber.internationalNumber,
-        frm: theNumber.internationalNumber,
-      ).toMap(),
-    )
-        .catchError((e, s) {
-      Helper.printLog("error from fun");
-      print(e);
-      print(s);
-    });
-    //Helper.printLog("resopnse from fun");
-    //print(called.data);
-    final resultString = called.data["result"];
-    print(resultString);
-    if (resultString == BappFunctionsResponse.multiUser) {
-      Helper.printLog("multi user found at firestore/users");
-    }
-
-    if (resultString == BappFunctionsResponse.success) {
-      BappFCM().listenForStaffingAuthorizationOnce((bappMessage) {
-        onReplyRecieved(bappMessage);
-      });
-    }
-    if (resultString.runtimeType == String) {
-      return resultString;
-    }
-    return resultString["errorInfo"]["code"];
-  }
-
-  Future<void> giveAuthorizationForStaffing(BappFCMMessage message,
-      {bool authorized = false}) async {
-    final bappmessage = BappFCMMessage(
-      to: message.frm,
-      frm: theNumber.internationalNumber,
-      title: "Acknowledged",
-      data: {},
-      body: "Acknowledged",
-      click_action: "",
-      type: authorized
-          ? BappFCMMessageType.staffAuthorizationAskAcknowledge
-          : BappFCMMessageType.staffAuthorizationAskDeny,
-    );
-    final functions = FirebaseFunctions.instance;
-    final callable = functions.httpsCallable(BappFunctions.sendBappMessage);
-    final called = await callable.call(bappmessage.toMap());
-    print(called.data);
   }
 
   void _setupAutoRun() {

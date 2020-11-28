@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:mobx/mobx.dart';
 
 import 'business_branch.dart';
 import 'business_services.dart';
@@ -18,7 +19,7 @@ class BusinessBooking {
   final FromToTiming fromToTiming;
   final List<BusinessService> services;
   final String bookedByNumber;
-  final BusinessBookingStatus status;
+  final status = Observable<BusinessBookingStatus>(null);
   final UserType bookingUserType;
   final DateTime remindTime;
 
@@ -27,17 +28,23 @@ class BusinessBooking {
   BusinessBooking({
     @required this.myDoc,
     @required this.bookingUserType,
-    @required this.status,
+    @required BusinessBookingStatus status,
     @required this.bookedByNumber,
     @required this.staff,
     @required this.branch,
     @required this.fromToTiming,
     @required this.services,
     @required this.remindTime,
-  });
+  }) {
+    this.status.value = status;
+  }
 
   static DocumentReference newDoc() {
     return FirebaseFirestore.instance.collection("bookings").doc(kUUIDGen.v1());
+  }
+
+  Future<bool> save() async {
+    await myDoc.set(toMap());
   }
 
   Map<String, dynamic> toMap() {
@@ -49,7 +56,7 @@ class BusinessBooking {
       "services": services.map((e) => e.toMap()).toList(),
       "branch": branch.myDoc.value,
       "bookedByNumber": bookedByNumber,
-      "status": EnumToString.convertToString(status),
+      "status": EnumToString.convertToString(status.value),
       "bookingUserType": EnumToString.convertToString(bookingUserType),
     };
   }

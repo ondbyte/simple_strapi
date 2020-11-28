@@ -39,10 +39,16 @@ class BookingFlow {
 
   Map<DateTime, List> myBookingsAsCalendarEvents() {
     final map = <DateTime, List>{};
-    myBookings.forEach((element) {
-      final day = element.fromToTiming.from;
-      map.addAll({day: getMyBookingsForDay(day)});
-    });
+    myBookings.forEach(
+      (element) {
+        final day = element.fromToTiming.from;
+        map.update(
+          day,
+          (value) => value..add(element),
+          ifAbsent: () => [element],
+        );
+      },
+    );
     return map;
   }
 
@@ -60,6 +66,16 @@ class BookingFlow {
     branchBookings.clear();
   }
 
+  resetForBranch() {
+    services.clear();
+    totalDurationMinutes.value = 0;
+    totalPrice.value = 0.0;
+    selectedTitle.value = "";
+    selectedSubTitle.value = "";
+    timeWindow.value = FromToTiming.today();
+    slot.value = null;
+  }
+
   final List<ReactionDisposer> _disposers = [];
 
   BusinessBranch get branch => _branch.value;
@@ -73,15 +89,11 @@ class BookingFlow {
     _setupReactions();
   }
 
-  List<BusinessBooking> getBookingsForDay(DateTime day) {
-    return branchBookings
-        .where((element) => element.fromToTiming.from.isDay(day))
-        .toList();
-  }
-
-  List<BusinessBooking> getMyBookingsForDay(DateTime day) {
-    return myBookings
-        .where((element) => element.fromToTiming.from.isDay(day))
+  List<BusinessBooking> getBookingsForSelectedDay(
+      ObservableList<BusinessBooking> list) {
+    return list
+        .where(
+            (element) => element.fromToTiming.from.isDay(timeWindow.value.from))
         .toList();
   }
 
@@ -99,44 +111,50 @@ class BookingFlow {
       Helper.printLog("no number to get bookings");
       return;
     }
-    final bookingSnaps = await FirebaseFirestore.instance
+    FirebaseFirestore.instance
         .collection("bookings")
         .where("bookedByNumber",
             isEqualTo: FirebaseAuth.instance.currentUser.phoneNumber)
-        .get();
-
-    myBookings.clear();
-    await Future.forEach<DocumentSnapshot>(bookingSnaps.docs, (booking) async {
-      final cloudStore = _allStore.get<CloudStore>();
-      final b = await cloudStore.getBranch(reference: booking["branch"]);
-      myBookings.add(
-        BusinessBooking.fromSnapShot(snap: booking, branch: b),
-      );
+        .snapshots()
+        .listen((bookingSnaps) async {
+      myBookings.clear();
+      await Future.forEach<DocumentSnapshot>(bookingSnaps.docs,
+          (booking) async {
+        final cloudStore = _allStore.get<CloudStore>();
+        final b = await cloudStore.getBranch(reference: booking["branch"]);
+        final bkin = BusinessBooking.fromSnapShot(snap: booking, branch: b);
+        myBookings.add(bkin);
+      });
+    }, onDone: () {
+      Helper.printLog("Listening for my bookings stopped");
+    }, onError: (e, s) {
+      Helper.printLog("error while Listening for my bookings");
     });
   }
 
   Future getBranchBookings() async {
-    final bookingSnaps = await FirebaseFirestore.instance
+    await FirebaseFirestore.instance
         .collection("bookings")
         .where("branch", isEqualTo: branch.myDoc.value)
         .where("from", isGreaterThanOrEqualTo: DateTime.now().toTimeStamp())
         .where("from",
             isLessThanOrEqualTo:
                 DateTime.now().add(const Duration(days: 30)).toTimeStamp())
-        .get();
-
-    branchBookings.clear();
-    await Future.forEach<DocumentSnapshot>(
-      bookingSnaps.docs,
-      (booking) async {
-        final cloudStore = _allStore.get<CloudStore>();
-        final b = await cloudStore.getBranch(reference: booking["branch"]);
-        branchBookings.add(
-          BusinessBooking.fromSnapShot(snap: booking, branch: b),
-        );
-      },
-    );
-    _filterStaffAndBookings();
+        .snapshots()
+        .listen((bookingSnaps) async {
+      branchBookings.clear();
+      await Future.forEach<DocumentSnapshot>(
+        bookingSnaps.docs,
+        (booking) async {
+          final cloudStore = _allStore.get<CloudStore>();
+          final b = await cloudStore.getBranch(reference: booking["branch"]);
+          branchBookings.add(
+            BusinessBooking.fromSnapShot(snap: booking, branch: b),
+          );
+        },
+      );
+      _filterStaffAndBookings();
+    });
   }
 
   void _filterStaffAndBookings() {
@@ -306,8 +324,16 @@ class BookingFlow {
       remindTime: from.subtract(const Duration(hours: 2)),
       myDoc: doc,
     );
-    await b.myDoc.set(b.toMap());
-    myBookings.add(b);
-    act(reset);
+    await b.save();
+    if (number == null) {
+      myBookings.add(b);
+    } else {
+      branchBookings.add(b);
+    }
+    if (number == null) {
+      act(reset);
+    } else {
+      act(resetForBranch);
+    }
   }
 }

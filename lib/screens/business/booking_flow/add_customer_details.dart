@@ -1,4 +1,5 @@
 import 'package:bapp/helpers/extensions.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/screens/home/bapp.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';
@@ -26,9 +27,8 @@ class AddCustomerDetails extends StatelessWidget {
         bottomNavigationBar: Observer(builder: (_) {
           return BottomPrimaryButton(
             label: "Confirm booking",
-            onPressed: _theNumber.value == null
-                ? null
-                : () async {
+            onPressed: _theNumber.value != null && _theNumber.value.validLength
+                ? () async {
                     await BappNavigator.bappPushAndRemoveAll(
                       context,
                       ContextualMessageScreen(
@@ -42,7 +42,8 @@ class AddCustomerDetails extends StatelessWidget {
                         },
                       ),
                     );
-                  },
+                  }
+                : null,
           );
         }),
         body: Form(
@@ -56,7 +57,9 @@ class AddCustomerDetails extends StatelessWidget {
                     internationalNumber:
                         businessStore.business.contactNumber.value),
                 onChanged: (tn) {
-                  _theNumber.value = tn;
+                  act(() {
+                    _theNumber.value = tn;
+                  });
                 },
                 customValidator: (tn) {
                   if (tn != null) {

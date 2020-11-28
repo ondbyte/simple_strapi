@@ -1,4 +1,3 @@
-import 'package:bapp/helpers/helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -24,9 +23,11 @@ class _CustomerBookingTileState extends State<CustomerBookingTile> {
   final _key = GlobalKey();
   @override
   Widget build(BuildContext context) {
-    final color = BusinessBooking.getColor(widget.booking.status);
-    final currency =
-        Provider.of<CloudStore>(context, listen: false).theNumber.country.currency;
+    final color = BusinessBooking.getColor(widget.booking.status.value);
+    final currency = Provider.of<CloudStore>(context, listen: false)
+        .theNumber
+        .country
+        .currency;
     return Padding(
       key: _key,
       padding: widget.margin ?? EdgeInsets.all(8),
@@ -70,7 +71,7 @@ class _CustomerBookingTileState extends State<CustomerBookingTile> {
                       currency +
                       " " +
                       widget.booking.totalCost().toString(),
-                      style: Theme.of(context).textTheme.overline,
+                  style: Theme.of(context).textTheme.overline,
                 )
               ],
             ),
@@ -96,7 +97,8 @@ class _CustomerBookingTileState extends State<CustomerBookingTile> {
                       ),
                     ),
                     Text(
-                      BusinessBooking.getButtonLabel(widget.booking.status),
+                      BusinessBooking.getButtonLabel(
+                          widget.booking.status.value),
                       style: Theme.of(context)
                           .textTheme
                           .subtitle1

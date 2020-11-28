@@ -37,37 +37,37 @@ class FilteredBusinessStaff {
 
   final morningTimings = ObservableList<FromToTiming>();
   void _morningFreeTimings() {
+    morningTimings.clear();
     final maxMorning = TimeOfDay(hour: 12, minute: 1);
     final minMorning = TimeOfDay(hour: 0, minute: 0);
     final list = freeTimings.where((e) {
       return e.to.toTimeOfDay().isBefore(maxMorning) &&
           e.from.toTimeOfDay().isAfter(minMorning);
     });
-    morningTimings.clear();
     morningTimings.addAll(list.toList() ?? []);
   }
 
   final afterNoonTimings = ObservableList<FromToTiming>();
   void _afterNoonFreeTimings() {
+    afterNoonTimings.clear();
     final maxAfternoon = TimeOfDay(hour: 15, minute: 1);
     final minAfternoon = TimeOfDay(hour: 11, minute: 59);
     final list = freeTimings.where((e) {
       return e.to.toTimeOfDay().isBefore(maxAfternoon) &&
           e.from.toTimeOfDay().isAfter(minAfternoon);
     });
-    afterNoonTimings.clear();
     afterNoonTimings.addAll(list.toList() ?? []);
   }
 
   final eveTimings = ObservableList<FromToTiming>();
   void _eveningFreeTimings() {
+    eveTimings.clear();
     final maxEve = TimeOfDay(hour: 23, minute: 59);
     final minEve = TimeOfDay(hour: 14, minute: 59);
     final list = freeTimings.where((e) {
       return e.to.toTimeOfDay().isBefore(maxEve) &&
           e.from.toTimeOfDay().isAfter(minEve);
     });
-    eveTimings.clear();
     eveTimings.addAll(list.toList() ?? []);
   }
 

@@ -1,4 +1,3 @@
-import 'package:bapp/widgets/size_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -31,35 +30,39 @@ class _BookingsTabState extends State<BookingsTab> {
   Widget build(BuildContext context) {
     return Consumer<CloudStore>(
       builder: (_, cloudStore, __) {
-        return OrientationBuilder(builder: (_, o) {
-          return Observer(
-            builder: (_) {
-              return cloudStore.status == AuthStatus.anonymousUser
-                  ? AskToLoginWidget(
-                      loginReason: LoginConfig.bookingTabLoginReason.primary,
-                      secondaryReason:
-                          LoginConfig.bookingTabLoginReason.secondary,
-                    )
-                  : o==Orientation.portrait? CustomScrollView(
-                      slivers: <Widget>[
-                        _getCalender(),
-                        _getBookingsScroll()
-                      ],
-                    ): _getLandscape();
-            },
-          );
-        },);
+        return OrientationBuilder(
+          builder: (_, o) {
+            return Observer(
+              builder: (_) {
+                return cloudStore.status == AuthStatus.anonymousUser
+                    ? AskToLoginWidget(
+                        loginReason: LoginConfig.bookingTabLoginReason.primary,
+                        secondaryReason:
+                            LoginConfig.bookingTabLoginReason.secondary,
+                      )
+                    : o == Orientation.portrait
+                        ? CustomScrollView(
+                            slivers: <Widget>[
+                              _getCalender(),
+                              _getBookingsScroll()
+                            ],
+                          )
+                        : _getLandscape();
+              },
+            );
+          },
+        );
       },
     );
   }
 
-  Widget _getLandscape(){
-    return LayoutBuilder(builder:(_,cons){
+  Widget _getLandscape() {
+    return LayoutBuilder(builder: (_, cons) {
       return Row(
         children: [
           SizedBox(
             height: cons.maxHeight,
-            width: cons.maxWidth/2,
+            width: cons.maxWidth / 2,
             child: CustomScrollView(
               slivers: [
                 _getCalender(),
@@ -68,7 +71,7 @@ class _BookingsTabState extends State<BookingsTab> {
           ),
           SizedBox(
             height: cons.maxHeight,
-            width: cons.maxWidth/2,
+            width: cons.maxWidth / 2,
             child: CustomScrollView(
               slivers: [
                 _getBookingsScroll(),
@@ -80,18 +83,16 @@ class _BookingsTabState extends State<BookingsTab> {
     });
   }
 
-  Widget _getBookingsScroll(){
+  Widget _getBookingsScroll() {
     return SliverList(
-      
       delegate: SliverChildListDelegate(
         [
-          const  SizedBox(
+          const SizedBox(
             height: 10,
           ),
           Observer(
             builder: (_) {
-              final list = flow.getMyBookingsForDay(
-                  flow.timeWindow.value.from);
+              final list = flow.getBookingsForSelectedDay(flow.myBookings);
               if (list.isEmpty) {
                 return const SizedBox();
               }
@@ -111,19 +112,20 @@ class _BookingsTabState extends State<BookingsTab> {
       ),
     );
   }
+
   double _calenderHeight;
-  Widget _getCalender(){
+  Widget _getCalender() {
     return SliverAppBar(
       elevation: 0,
-      collapsedHeight: _calenderHeight?? 132,
-      expandedHeight: _calenderHeight?? 132,
+      collapsedHeight: _calenderHeight ?? 132,
+      expandedHeight: _calenderHeight ?? 132,
       pinned: true,
       automaticallyImplyLeading: false,
       actions: [
         const SizedBox(),
       ],
       flexibleSpace: BappRowCalender(
-        onChildRendered: (s){
+        onChildRendered: (s) {
           setState(() {
             _calenderHeight = s.height;
           });
@@ -134,8 +136,7 @@ class _BookingsTabState extends State<BookingsTab> {
         controller: _calendarController,
         onDayChanged: (day, _, __) {
           act(() {
-            flow.timeWindow.value =
-                FromToTiming.forDay(day);
+            flow.timeWindow.value = FromToTiming.forDay(day);
           });
         },
       ),

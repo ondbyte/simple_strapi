@@ -92,17 +92,6 @@ class BappFCM {
       } catch (e) {
         Helper.printLog(e.toString());
       }
-      if (bappMessage.type ==
-              BappFCMMessageType.staffAuthorizationAskAcknowledge ||
-          bappMessage.type == BappFCMMessageType.staffAuthorizationAskDeny) {
-        //Helper.printLog("authorization message");
-        if (_staffingAuthorizationListener != null) {
-          _staffingAuthorizationListener(bappMessage);
-          _staffingAuthorizationListener = null;
-        }
-      } else if (_bappMessagesListener != null) {
-        _bappMessagesListener(bappMessage);
-      }
     } else {
       Helper.printLog("no data on message");
     }
@@ -201,10 +190,8 @@ class BappFCMMessage {
 }
 
 enum BappFCMMessageType {
-  staffAuthorizationAsk,
-  staffAuthorizationAskAcknowledge,
-  staffAuthorizationAskDeny,
   reminder,
+  bookingUpdate,
 }
 
 enum BappFCMMessagePriority { high }

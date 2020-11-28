@@ -155,17 +155,24 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
   }
 
   Widget _getTimeSlotTabs() {
-    return TabBarView(children: [
-      TimeSlotsWidget(
-        fromToTimings: flow.professional.value.morningTimings,
-      ),
-      TimeSlotsWidget(
-        fromToTimings: flow.professional.value.afterNoonTimings,
-      ),
-      TimeSlotsWidget(
-        fromToTimings: flow.professional.value.eveTimings,
-      ),
-    ]);
+    return Observer(
+      builder: (_) {
+        return TabBarView(children: [
+          TimeSlotsWidget(
+            key: UniqueKey(),
+            fromToTimings: flow.professional.value.morningTimings,
+          ),
+          TimeSlotsWidget(
+            key: UniqueKey(),
+            fromToTimings: flow.professional.value.afterNoonTimings,
+          ),
+          TimeSlotsWidget(
+            key: UniqueKey(),
+            fromToTimings: flow.professional.value.eveTimings,
+          ),
+        ]);
+      },
+    );
   }
 
   BookingFlow get flow => Provider.of<BookingFlow>(context, listen: false);
@@ -185,25 +192,26 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
   Widget build(BuildContext context) {
     return Observer(builder: (_) {
       if (widget.fromToTimings.isEmpty) {
-        return const Center(child: Text("No timings"),);
+        return const Center(
+          child: Text("No timings"),
+        );
       }
       return GridView.builder(
-         padding: const EdgeInsets.symmetric(vertical:0, horizontal: 16),
-          shrinkWrap: true,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2, childAspectRatio: 16 / 6),
-          itemCount: widget.fromToTimings.length,
-          itemBuilder: (_, i) {
-            return TimeSlot(
-              label: widget.fromToTimings[i].from.toTimeOfDay(),
-              onClicked: (b) {
-                act(() {
-                  flow.slot.value = b ? widget.fromToTimings[i].from : null;
-                });
-              },
-            );
-          },
-        
+        padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+        shrinkWrap: true,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2, childAspectRatio: 16 / 6),
+        itemCount: widget.fromToTimings.length,
+        itemBuilder: (_, i) {
+          return TimeSlot(
+            label: widget.fromToTimings[i].from.toTimeOfDay(),
+            onClicked: (b) {
+              act(() {
+                flow.slot.value = b ? widget.fromToTimings[i].from : null;
+              });
+            },
+          );
+        },
       );
     });
   }
@@ -247,12 +255,10 @@ class _TimeSlotState extends State<TimeSlot> {
             child: Container(
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                 color: _selected
-                  ? Theme.of(context).primaryColor
-                  : Theme.of(context).backgroundColor,
-                  borderRadius: BorderRadius.all(Radius.circular(4))
-              
-              ),
+                  color: _selected
+                      ? Theme.of(context).primaryColor
+                      : Theme.of(context).backgroundColor,
+                  borderRadius: BorderRadius.all(Radius.circular(4))),
               margin: EdgeInsets.all(8),
               child: DefaultTextStyle(
                 style: Theme.of(context)
@@ -261,7 +267,6 @@ class _TimeSlotState extends State<TimeSlot> {
                     .apply(color: _selected ? Colors.white : Colors.black),
                 child: Text(format.format(widget.label.toDateAndTime())),
               ),
-             
             ),
           );
         },
