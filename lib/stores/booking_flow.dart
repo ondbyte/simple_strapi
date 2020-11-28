@@ -11,7 +11,6 @@ import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
 import 'package:thephonenumber/thecountrynumber.dart';
@@ -107,31 +106,11 @@ class BookingFlow {
         .get();
 
     myBookings.clear();
-    await Future.forEach(bookingSnaps.docs, (booking) async {
-      final data = booking.data();
+    await Future.forEach<DocumentSnapshot>(bookingSnaps.docs, (booking) async {
       final cloudStore = _allStore.get<CloudStore>();
       final b = await cloudStore.getBranch(reference: booking["branch"]);
       myBookings.add(
-        BusinessBooking(
-            services: (data["services"] as List).map(
-              (s) {
-                return BusinessService.fromJson(s);
-              },
-            ).toList(),
-            staff: b.getStaffFor(name: data["staff"]),
-            branch: b,
-            fromToTiming: FromToTiming.fromTimeStamps(
-              from: data["from"],
-              to: data["to"],
-            ),
-            status: EnumToString.fromString(
-              BusinessBookingStatus.values,
-              data["status"],
-            ),
-            bookedByNumber: data["bookedByNumber"],
-            bookingUserType: EnumToString.fromString(
-                UserType.values, data["bookingUserType"]))
-          ..myDoc = booking.reference,
+        BusinessBooking.fromSnapShot(snap: booking, branch: b),
       );
     });
   }
@@ -147,31 +126,13 @@ class BookingFlow {
         .get();
 
     branchBookings.clear();
-    await Future.forEach(
+    await Future.forEach<DocumentSnapshot>(
       bookingSnaps.docs,
       (booking) async {
-        final data = booking.data();
         final cloudStore = _allStore.get<CloudStore>();
         final b = await cloudStore.getBranch(reference: booking["branch"]);
         branchBookings.add(
-          BusinessBooking(
-              services: (data["services"] as List).map(
-                (s) {
-                  return BusinessService.fromJson(s);
-                },
-              ).toList(),
-              staff: b.getStaffFor(name: data["staff"]),
-              branch: b,
-              fromToTiming: FromToTiming.fromTimeStamps(
-                from: data["from"],
-                to: data["to"],
-              ),
-              status: EnumToString.fromString(
-                  BusinessBookingStatus.values, data["status"]),
-              bookedByNumber: data["bookedByNumber"],
-              bookingUserType: EnumToString.fromString(
-                  UserType.values, data["bookingUserType"]))
-            ..myDoc = booking.reference,
+          BusinessBooking.fromSnapShot(snap: booking, branch: b),
         );
       },
     );
@@ -329,19 +290,23 @@ class BookingFlow {
     final to = slot.value
         .add(Duration(minutes: totalDurationMinutes.value))
         .toDay(timeWindow.value.from);
+    final doc = BusinessBooking.newDoc();
     final b = BusinessBooking(
       branch: branch,
       fromToTiming: FromToTiming.fromDates(from: from, to: to),
       staff: professional.value.staff,
       services: services,
-      status: number==null?BusinessBookingStatus.pending:BusinessBookingStatus.walkin,
+      status: number == null
+          ? BusinessBookingStatus.pending
+          : BusinessBookingStatus.walkin,
       bookedByNumber: number == null
           ? FirebaseAuth.instance.currentUser.phoneNumber
           : number.internationalNumber,
       bookingUserType: _allStore.get<CloudStore>().userType,
+      remindTime: from.subtract(const Duration(hours: 2)),
+      myDoc: doc,
     );
-    b.myDoc =
-        await FirebaseFirestore.instance.collection("bookings").add(b.toMap());
+    await b.myDoc.set(b.toMap());
     myBookings.add(b);
     act(reset);
   }

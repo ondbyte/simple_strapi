@@ -23,6 +23,7 @@ class BusinessDetails {
   final myDoc = Observable<DocumentReference>(null);
 
   final List<ReactionDisposer> _disposers = [];
+
   setupReactions() {
     _disposers.add(
       reaction(
@@ -36,6 +37,21 @@ class BusinessDetails {
             } catch (e) {
               print("Expected ERROR ; ${e.toString()}");
             }
+          }
+        },
+      ),
+    );
+    _disposers.add(
+      reaction(
+        (_) => branches.value.length,
+        (_) {
+          try {
+            myDoc.value.set(
+              {"branches": branches.value.map((e) => e.myDoc).toList()},
+              SetOptions(merge: true),
+            );
+          } catch (e) {
+            print("Expected ERROR ; ${e.toString()}");
           }
         },
       ),

@@ -1,5 +1,6 @@
 import 'package:bapp/config/config.dart';
 import 'package:bapp/config/config_data_types.dart';
+import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
@@ -19,10 +20,12 @@ class BusinessBooking {
   final String bookedByNumber;
   final BusinessBookingStatus status;
   final UserType bookingUserType;
+  final DateTime remindTime;
 
-  DocumentReference myDoc;
+  final DocumentReference myDoc;
 
   BusinessBooking({
+    @required this.myDoc,
     @required this.bookingUserType,
     @required this.status,
     @required this.bookedByNumber,
@@ -30,19 +33,52 @@ class BusinessBooking {
     @required this.branch,
     @required this.fromToTiming,
     @required this.services,
+    @required this.remindTime,
   });
+
+  static DocumentReference newDoc() {
+    return FirebaseFirestore.instance.collection("bookings").doc(kUUIDGen.v1());
+  }
 
   Map<String, dynamic> toMap() {
     return {
       "staff": staff.name,
       "from": fromToTiming.from.toTimeStamp(),
       "to": fromToTiming.to.toTimeStamp(),
+      "remindTime": remindTime.toTimeStamp(),
       "services": services.map((e) => e.toMap()).toList(),
       "branch": branch.myDoc.value,
       "bookedByNumber": bookedByNumber,
       "status": EnumToString.convertToString(status),
       "bookingUserType": EnumToString.convertToString(bookingUserType),
     };
+  }
+
+  static BusinessBooking fromSnapShot(
+      {@required DocumentSnapshot snap, @required BusinessBranch branch}) {
+    final j = snap.data();
+    return BusinessBooking(
+      myDoc: snap.reference,
+      services: (j["services"] as List).map(
+        (s) {
+          return BusinessService.fromJson(s);
+        },
+      ).toList(),
+      staff: branch.getStaffFor(name: j["staff"]),
+      branch: branch,
+      fromToTiming: FromToTiming.fromTimeStamps(
+        from: j["from"],
+        to: j["to"],
+      ),
+      status:
+          EnumToString.fromString(BusinessBookingStatus.values, j["status"]),
+      bookedByNumber: j["bookedByNumber"],
+      bookingUserType: EnumToString.fromString(
+        UserType.values,
+        j["bookingUserType"],
+      ),
+      remindTime: (j["remindTime"] as Timestamp).toDate(),
+    );
   }
 
   double totalCost() {
@@ -89,6 +125,8 @@ class BusinessBooking {
         {
           return Colors.grey[400];
         }
+      default:
+        return Colors.grey[300];
     }
   }
 
@@ -122,6 +160,8 @@ class BusinessBooking {
         {
           return "Completed";
         }
+      default:
+        return "Unknown";
     }
   }
 }

@@ -12,6 +12,7 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:thephonenumber/thecountrynumber.dart';
+
 import '../classes/firebase_structures/business_branch.dart';
 import '../classes/firebase_structures/business_category.dart';
 import '../classes/firebase_structures/business_details.dart';
@@ -534,24 +535,27 @@ abstract class _CloudStore with Store {
   final businesses = <DocumentReference, BusinessDetails>{};
 
   Future<BusinessBranch> getBranch(
-      {DocumentReference reference, Map<String, dynamic> forData}) async {
-    if (forData != null) {
-      final businessRef = forData["business"];
+      {DocumentReference reference, DocumentSnapshot forSnapShot}) async {
+    if (forSnapShot != null) {
+      final businessRef = forSnapShot["business"];
       final business = await getBusiness(reference: businessRef);
-      final branch = BusinessBranch.fromJson(forData, business: business);
-      branches.addAll({reference: branch});
+      final branch =
+          BusinessBranch.fromSnapShot(forSnapShot, business: business);
+      branches.addAll({forSnapShot.reference: branch});
       return branch;
     }
     if (branches.containsKey(reference)) {
       return branches[reference];
     }
     final snap = await reference.get();
-    final data = snap.data();
-    final businessRef = data["business"];
-    final business = await getBusiness(reference: businessRef);
-    final branch = BusinessBranch.fromJson(data, business: business);
-    branches.addAll({reference: branch});
-    return branch;
+    if (snap.exists) {
+      final businessRef = snap.data()["business"];
+      final business = await getBusiness(reference: businessRef);
+      final branch = BusinessBranch.fromSnapShot(snap, business: business);
+      branches.addAll({reference: branch});
+      return branch;
+    }
+    return null;
   }
 
   Future<BusinessDetails> getBusiness(
@@ -585,8 +589,7 @@ abstract class _CloudStore with Store {
     final _branches = <BusinessBranch>[];
     if (snaps.docs.isNotEmpty) {
       await Future.forEach<QueryDocumentSnapshot>(snaps.docs, (doc) async {
-        final branch =
-            await getBranch(reference: doc.reference, forData: doc.data());
+        final branch = await getBranch(forSnapShot: doc);
         _branches.add(branch);
       });
     }
@@ -612,14 +615,14 @@ abstract class _CloudStore with Store {
       return [];
     }
     final list = <BusinessBranch>[];
-    await Future.forEach(snaps.docs, (snap) async {
-      list.add(
-          await getBranch(reference: snap.reference, forData: snap.data()));
+    await Future.forEach<DocumentSnapshot>(snaps.docs, (snap) async {
+      list.add(await getBranch(forSnapShot: snap));
     });
     return list;
   }
 
   Future getFavorites() async {
+    favorites.clear();
     if (myData.containsKey("favorites")) {
       final favoritesData = myData["favorites"];
       if (favoritesData is Map) {

@@ -160,16 +160,16 @@ class BusinessBranch {
     }
     final snap = await myDoc.get();
     if (snap.exists) {
-      final j = snap.data();
-      _fromJson(j);
+      _fromJson(snap.data());
     }
     _setupReactions();
   }
 
-  BusinessBranch.fromJson(Map<String, dynamic> j,
+  BusinessBranch.fromSnapShot(DocumentSnapshot snap,
       {@required BusinessDetails business}) {
     this.business.value = business;
-    _fromJson(j);
+    myDoc.value = snap.reference;
+    _fromJson(snap.data());
   }
 
   void _fromJson(Map<String, dynamic> j) {
