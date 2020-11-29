@@ -1,3 +1,8 @@
+import 'package:bapp/helpers/extensions.dart';
+import 'package:bapp/screens/business_profile/booking_details.dart';
+import 'package:bapp/widgets/bapp_calendar.dart';
+import 'package:bapp/widgets/login_widget.dart';
+import 'package:bapp/widgets/tiles/customer_booking_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -8,9 +13,6 @@ import '../../config/config.dart';
 import '../../helpers/helper.dart';
 import '../../stores/booking_flow.dart';
 import '../../stores/cloud_store.dart';
-import '../bapp_calendar.dart';
-import '../login_widget.dart';
-import '../tiles/customer_booking_tile.dart';
 
 class BookingsTab extends StatefulWidget {
   @override
@@ -102,6 +104,14 @@ class _BookingsTabState extends State<BookingsTab> {
                 itemCount: list.length,
                 itemBuilder: (_, i) {
                   return CustomerBookingTile(
+                    onTap: () {
+                      BappNavigator.bappPush(
+                        context,
+                        BookingDetailsScreen(
+                          booking: list[i],
+                        ),
+                      );
+                    },
                     booking: list[i],
                   );
                 },

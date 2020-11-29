@@ -5,16 +5,17 @@ import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/authentication/login_screen.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/screens/business_profile/select_a_professional.dart';
+import 'package:bapp/screens/business_profile/tabs/about_tab.dart';
+import 'package:bapp/screens/business_profile/tabs/services_tab.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/firebase_image.dart';
-import 'package:bapp/widgets/tabs/business_profile/about_tab.dart';
-import 'package:bapp/widgets/tabs/business_profile/services_tab.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
+
 
 class BusinessProfileScreen extends StatefulWidget {
   BusinessProfileScreen();

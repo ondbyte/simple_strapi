@@ -1,9 +1,9 @@
 import 'package:bapp/config/config.dart';
+import 'package:bapp/screens/business/tabs/business_bookings_tab.dart';
+import 'package:bapp/screens/business/tabs/business_dashboard_tab.dart';
+import 'package:bapp/screens/business/tabs/business_toolkit_tab.dart';
 import 'package:bapp/widgets/business/business_branch_switch.dart';
 import 'package:bapp/widgets/menu.dart';
-import 'package:bapp/widgets/tabs/business/business_bookings_tab.dart';
-import 'package:bapp/widgets/tabs/business/business_dashboard_tab.dart';
-import 'package:bapp/widgets/tabs/business/business_toolkit_tab.dart';
 import 'package:flutter/material.dart';
 
 class BusinessHome extends StatefulWidget {

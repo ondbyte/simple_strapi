@@ -1,14 +1,13 @@
 import 'package:bapp/classes/notification_update.dart';
 import 'package:bapp/config/config.dart' hide Tab;
 import 'package:bapp/stores/updates_store.dart';
+import 'package:bapp/widgets/store_provider.dart';
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
-
-import '../store_provider.dart';
 
 class UpdatesTab extends StatefulWidget {
   @override

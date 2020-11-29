@@ -1,38 +1,83 @@
-import 'package:bapp/classes/location.dart';
-import 'package:bapp/config/config_data_types.dart';
+import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:mobx/mobx.dart';
 import 'package:thephonenumber/thecountrynumber.dart';
 
 class BappUser {
   final DocumentReference myDoc;
-  final contactNumber = Observable<TheNumber>(null);
-  final fcmToken = Observable<String>("");
-  final my_alter_ego = Observable<UserType>(null);
-  final my_user_type = Observable<UserType>(null);
-  final my_location = Observable<Locality>(null);
+  final String name, email, website, facebook, instagram, image;
+  final TheNumber theNumber;
 
-  BappUser({this.myDoc});
+  BappUser({
+    this.myDoc,
+    this.theNumber,
+    this.name,
+    this.email,
+    this.website,
+    this.facebook,
+    this.instagram,
+    this.image,
+  });
 
-  BappUser.fromDoc({this.myDoc, bool fetch = true}) {
-    if (fetch) {
-      myDoc.get().then((value) {
-        if (value.exists) {
-          _fromJson(value.data());
-        }
-      });
-    }
+  static DocumentReference newReference() {
+    return FirebaseFirestore.instance.collection("users").doc(kUUIDGen.v1());
   }
 
-  BappUser.fromJson({this.myDoc, Map<String, dynamic> j}) {
-    _fromJson(j);
+  Future save() async {
+    await myDoc.set(toMap(), SetOptions(merge: true));
   }
 
-  _fromJson(Map<String, dynamic> j) {
-    contactNumber.value =TheCountryNumber().parseNumber(internationalNumber: j["contactNumber"]);
-    fcmToken.value = j["fcmToken"];
-    my_alter_ego.value = UserType.values[j["my_alter_ego"]];
-    my_user_type.value = UserType.values[j["my_user_type"]];
-    my_location.value = Locality.fromJson(j["my_location"]);
+  BappUser updateWith({
+    String name,
+    TheNumber theNumber,
+    String email,
+    String image,
+    String facebook,
+    String instagram,
+    String website,
+    bool forceChange = false,
+  }) {
+    return BappUser(
+      myDoc: this.myDoc,
+      name: name ?? this.name,
+      theNumber: theNumber ?? this.theNumber,
+      email: email ?? this.email,
+      image: image ?? this.image,
+      website:
+          isNullOrEmpty(this.website) || forceChange ? website : this.website,
+      facebook: isNullOrEmpty(this.facebook) || forceChange
+          ? facebook
+          : this.facebook,
+      instagram: isNullOrEmpty(this.instagram) || forceChange
+          ? instagram
+          : this.instagram,
+    );
+  }
+
+  toMap() {
+    return {
+      "contactNumber": theNumber.internationalNumber,
+      "email": email,
+      "facebook": facebook,
+      "instagram": instagram,
+      "name": name,
+      "image": image,
+      "website": website,
+    };
+  }
+
+  static BappUser fromSnapShot({DocumentSnapshot snap}) {
+    final j = snap.data();
+    return BappUser(
+        myDoc: snap.reference,
+        theNumber: TheCountryNumber().parseNumber(
+          internationalNumber: j["contactNumber"],
+        ),
+        name: j["name"],
+        email: j["email"],
+        website: j["website"],
+        facebook: j["facebook"],
+        instagram: j["instagram"],
+        image: j['image']);
   }
 }

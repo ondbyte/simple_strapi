@@ -5,14 +5,6 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'package:bapp/classes/firebase_structures/business_timings.dart';
-import 'package:bapp/stores/booking_flow.dart';
-import 'package:bapp/widgets/tabs/business_profile/about_tab.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
-
-import 'package:bapp/main.dart';
-
 void main() {
   /*test("testing time arrange",(){
     final wh = [

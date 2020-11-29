@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:mobx/mobx.dart';
 
@@ -169,15 +168,21 @@ class FromToTiming {
     return list;
   }
 
-
-  final _format = DateFormat("hh:mm a");
   String format() {
+    final _format = DateFormat("hh:mm a");
     return _format.format(from) + " to " + _format.format(to);
+  }
+
+  String formatFromWithDate() {
+    final _format = DateFormat("dd MMM, hh:mm a");
+    return _format.format(from);
+  }
+
+  String formatMinutes() {
+    return inMinutes().toString() + " Minutes";
   }
 
   int inMinutes() {
     return to.difference(from).inMinutes;
   }
-
-
 }

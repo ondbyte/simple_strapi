@@ -5,15 +5,14 @@ import 'package:bapp/screens/business/toolkit/manage_staff/manage_staff.dart';
 import 'package:bapp/screens/business_profile/select_a_professional.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/business_store.dart';
+import 'package:bapp/widgets/bapp_calendar.dart';
+import 'package:bapp/widgets/booking_timeline.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
-
-import '../../bapp_calendar.dart';
-import '../../booking_timeline.dart';
 
 class BusinessBookingsTab extends StatefulWidget {
   @override

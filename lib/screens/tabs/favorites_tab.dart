@@ -4,12 +4,11 @@ import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/screens/business_profile/business_profile.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/widgets/login_widget.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
-
-import '../login_widget.dart';
 
 class FavoritesTab extends StatefulWidget {
   @override

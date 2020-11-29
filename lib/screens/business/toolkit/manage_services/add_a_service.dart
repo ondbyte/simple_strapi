@@ -262,14 +262,14 @@ class BottomPrimaryButton extends StatefulWidget {
   final String label, title, subTitle;
   final EdgeInsets padding;
 
-  const BottomPrimaryButton(
-      {Key key,
-      this.onPressed,
-      this.label,
-      this.title,
-      this.subTitle,
-      this.padding})
-      : super(key: key);
+  const BottomPrimaryButton({
+    Key key,
+    this.onPressed,
+    this.label,
+    this.title,
+    this.subTitle,
+    this.padding,
+  }) : super(key: key);
   @override
   _BottomPrimaryButtonState createState() => _BottomPrimaryButtonState();
 }

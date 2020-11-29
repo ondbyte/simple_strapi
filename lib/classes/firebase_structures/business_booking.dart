@@ -2,6 +2,7 @@ import 'package:bapp/config/config.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/extensions.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +48,24 @@ class BusinessBooking {
     await myDoc.set(toMap());
   }
 
+  Future<bool> cancel({@required BusinessBookingStatus withStatus}) {
+    var done = Future.value(false);
+    act(() {
+      status.value = withStatus;
+      done = save();
+    });
+    return done;
+  }
+
+  Future<bool> accept() async {
+    var done = Future.value(false);
+    act(() {
+      status.value = BusinessBookingStatus.accepted;
+      done = save();
+    });
+    return done;
+  }
+
   Map<String, dynamic> toMap() {
     return {
       "staff": staff.name,
@@ -84,7 +103,7 @@ class BusinessBooking {
         UserType.values,
         j["bookingUserType"],
       ),
-      remindTime: (j["remindTime"] as Timestamp).toDate(),
+      remindTime: (j["remindTime"] as Timestamp)?.toDate(),
     );
   }
 
@@ -103,6 +122,17 @@ class BusinessBooking {
     });
     //s = s.trim().replaceFirst(",", "", s.length - 1);
     return s;
+  }
+
+  Map<String, String> getServiceNamesWithDuration() {
+    final map = <String, String>{};
+    services.forEach((element) {
+      map.addAll({
+        element.serviceName.value:
+            element.duration.value.inMinutes.toString() + ", " + "Minutes"
+      });
+    });
+    return map;
   }
 
   static Color getColor(BusinessBookingStatus status) {
@@ -170,6 +200,14 @@ class BusinessBooking {
       default:
         return "Unknown";
     }
+  }
+
+  bool isActive() {
+    if (status == null) {
+      return false;
+    }
+    return status.value == BusinessBookingStatus.pending ||
+        status.value == BusinessBookingStatus.accepted;
   }
 }
 

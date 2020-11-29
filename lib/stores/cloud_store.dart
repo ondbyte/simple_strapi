@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:bapp/classes/firebase_structures/bapp_user.dart';
+import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
@@ -48,6 +50,8 @@ abstract class _CloudStore with Store {
   @observable
   User user;
 
+  BappUser bappUser;
+
   Function _onLogin, _onNotLogin;
 
   @observable
@@ -70,13 +74,35 @@ abstract class _CloudStore with Store {
     _listenForUserChange();
   }
 
-  void _init() async {
+  Future _init() async {
     await getUserData();
     await getActiveCountries();
     await getMyAddress();
     await getMyUserTypes();
     await getMyFavorites();
     _setupAutoRun();
+  }
+
+  BusinessBookingStatus getCancelTypeForUserType() {
+    switch (userType) {
+      case UserType.customer:
+        {
+          return BusinessBookingStatus.cancelledByUser;
+        }
+      case UserType.businessStaff:
+        {
+          return BusinessBookingStatus.cancelledByStaff;
+        }
+      case UserType.businessReceptionist:
+        {
+          return BusinessBookingStatus.cancelledByReceptionist;
+        }
+      case UserType.manager:
+      default:
+        {
+          return BusinessBookingStatus.cancelledByManager;
+        }
+    }
   }
 
   String getAddressLabel() {
@@ -118,6 +144,11 @@ abstract class _CloudStore with Store {
 
   Future getUserData() async {
     var snap = await _fireStore.doc("users/${user.uid}").get();
+    snap.reference.snapshots().listen((snap) {
+      if (snap.exists) {
+        bappUser = BappUser.fromSnapShot(snap: snap);
+      }
+    });
     myData = snap.data() ?? {};
   }
 
@@ -290,9 +321,6 @@ abstract class _CloudStore with Store {
           );
         },
       );
-      //final myCountry = countries.firstWhere((element) => element.cities.firstWhere((el) => el.localities.firstWhere((e) => e.name==locationData["locality"]))));
-
-      //Helper.printLog(myLocation.toString());
     }
   }
 
@@ -366,7 +394,7 @@ abstract class _CloudStore with Store {
     if (user.email == null || user.email != email) {
       try {
         await user.updateEmail(email);
-        onSuccess();
+        await onSuccess();
       } on FirebaseAuthException catch (e) {
         onFail(e);
       }
@@ -593,6 +621,17 @@ abstract class _CloudStore with Store {
             "This should never be the case @cloudStore getFavorites()");
       }
     }
+  }
+
+  Future<BappUser> getUserForNumber({String number}) async {
+    final snaps = await FirebaseFirestore.instance
+        .collection("users")
+        .where("contactNumber", isEqualTo: "$number")
+        .get();
+    if (snaps.size == 1) {
+      return BappUser.fromSnapShot(snap: snaps.docs.first);
+    }
+    return null;
   }
 }
 

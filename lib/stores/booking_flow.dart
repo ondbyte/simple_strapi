@@ -117,6 +117,8 @@ class BookingFlow {
             isEqualTo: FirebaseAuth.instance.currentUser.phoneNumber)
         .snapshots()
         .listen((bookingSnaps) async {
+      ///clear old bookings;
+      markRemoved(oldBookings: myBookings);
       myBookings.clear();
       await Future.forEach<DocumentSnapshot>(bookingSnaps.docs,
           (booking) async {
@@ -132,8 +134,16 @@ class BookingFlow {
     });
   }
 
+  void markRemoved({ObservableList<BusinessBooking> oldBookings}) {
+    act(() {
+      oldBookings.forEach((element) {
+        element.status.value = null;
+      });
+    });
+  }
+
   Future getBranchBookings() async {
-    await FirebaseFirestore.instance
+    FirebaseFirestore.instance
         .collection("bookings")
         .where("branch", isEqualTo: branch.myDoc.value)
         .where("from", isGreaterThanOrEqualTo: DateTime.now().toTimeStamp())
@@ -141,20 +151,28 @@ class BookingFlow {
             isLessThanOrEqualTo:
                 DateTime.now().add(const Duration(days: 30)).toTimeStamp())
         .snapshots()
-        .listen((bookingSnaps) async {
-      branchBookings.clear();
-      await Future.forEach<DocumentSnapshot>(
-        bookingSnaps.docs,
-        (booking) async {
-          final cloudStore = _allStore.get<CloudStore>();
-          final b = await cloudStore.getBranch(reference: booking["branch"]);
-          branchBookings.add(
-            BusinessBooking.fromSnapShot(snap: booking, branch: b),
+        .listen(
+      (bookingSnaps) async {
+        if (branch != null) {
+          markRemoved(oldBookings: branchBookings);
+          branchBookings.clear();
+          await Future.forEach<DocumentSnapshot>(
+            bookingSnaps.docs,
+            (booking) async {
+              final cloudStore = _allStore.get<CloudStore>();
+              final b =
+                  await cloudStore.getBranch(reference: booking["branch"]);
+              branchBookings.add(
+                BusinessBooking.fromSnapShot(snap: booking, branch: b),
+              );
+            },
           );
-        },
-      );
-      _filterStaffAndBookings();
-    });
+          if (branch != null) {
+            _filterStaffAndBookings();
+          }
+        }
+      },
+    );
   }
 
   void _filterStaffAndBookings() {
@@ -255,6 +273,8 @@ class BookingFlow {
           _setTitleSubTitle();
           if (_allStore.get<CloudStore>().userType == UserType.customer) {
             filteredStaffs.clear();
+          } else {
+            _filterStaffAndBookings();
           }
         },
       ),
@@ -303,7 +323,9 @@ class BookingFlow {
     });
   }
 
-  Future done({TheNumber number}) async {
+  Future done({
+    TheNumber number,
+  }) async {
     final from = slot.value.toDay(timeWindow.value.from);
     final to = slot.value
         .add(Duration(minutes: totalDurationMinutes.value))
@@ -325,11 +347,6 @@ class BookingFlow {
       myDoc: doc,
     );
     await b.save();
-    if (number == null) {
-      myBookings.add(b);
-    } else {
-      branchBookings.add(b);
-    }
     if (number == null) {
       act(reset);
     } else {

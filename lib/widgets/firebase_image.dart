@@ -46,6 +46,11 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
           await DefaultCacheManager().getFileFromCache(widget.storagePathOrURL);
       if (file != null) {
         return file.file.readAsBytes();
+      } else if (widget.storagePathOrURL.startsWith("http")) {
+        return (await DefaultCacheManager()
+                .downloadFile(widget.storagePathOrURL))
+            .file
+            .readAsBytes();
       } else {
         final i = FirebaseStorage.instance;
         final data = await i
@@ -53,7 +58,7 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
             .child(
               widget.storagePathOrURL,
             )
-            .getData(1024 * 1024 * 8);
+            .getData(1024 * 1024 * 2);
         final newFile =
             await DefaultCacheManager().putFile(widget.storagePathOrURL, data);
         return newFile.readAsBytes();
