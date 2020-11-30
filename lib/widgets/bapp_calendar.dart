@@ -22,34 +22,37 @@ class _BappRowCalenderState extends State<BappRowCalender> {
   @override
   Widget build(BuildContext context) {
     return TableCalendar(
-      
+    
       key: _key,
+
+
       headerStyle: HeaderStyle(
-        headerPadding: EdgeInsets.all(0),
-          leftChevronIcon: Icon(FeatherIcons.arrowLeftCircle,
-              color: Theme.of(context).iconTheme.color),
-          rightChevronIcon: Icon(FeatherIcons.arrowRightCircle,
-              color: Theme.of(context).iconTheme.color)),
-      initialCalendarFormat: CalendarFormat.week,
-      availableCalendarFormats: {CalendarFormat.week: 'Week'},
-      startDay: DateTime.now(),
-      calendarController: widget.controller,
-      holidays: widget.holidays,
-      startingDayOfWeek: StartingDayOfWeek.sunday,
-      events: widget.bookings,
-      calendarStyle: CalendarStyle(
-        todayColor: Colors.transparent,
-        todayStyle: TextStyle(color: Theme.of(context).primaryColor),
-        unavailableStyle: TextStyle(color: Theme.of(context).disabledColor),
-        holidayStyle: TextStyle(color: Theme.of(context).disabledColor),
-        weekendStyle:
-        TextStyle(color: Theme.of(context).textTheme.bodyText1.color),
-        outsideDaysVisible: false,
-        canEventMarkersOverflow: true,
-        markersColor: Theme.of(context).accentColor,
-        selectedColor: Theme.of(context).primaryColor.withOpacity(0.5),
-        markersMaxAmount: 1,
-      ),
+        
+            leftChevronIcon: Icon(FeatherIcons.chevronLeft,
+                color: Theme.of(context).iconTheme.color),
+            rightChevronIcon: Icon(FeatherIcons.chevronRight,
+                color: Theme.of(context).iconTheme.color)),
+        initialCalendarFormat: CalendarFormat.week,
+        availableCalendarFormats: {CalendarFormat.week: 'Week'},
+        calendarController: widget.controller,
+        events: widget.bookings,
+        holidays: widget.holidays,
+        startingDayOfWeek: StartingDayOfWeek.sunday,
+        calendarStyle: CalendarStyle(
+          
+            unavailableStyle: TextStyle(color: Theme.of(context).disabledColor),
+            holidayStyle: TextStyle(color: Theme.of(context).disabledColor),
+            weekendStyle:
+                TextStyle(color: Theme.of(context).textTheme.bodyText1.color),
+            outsideDaysVisible: false,
+            canEventMarkersOverflow: true,
+            markersColor: Theme.of(context).accentColor,
+            selectedColor: Theme.of(context).primaryColor.withOpacity(0.5),
+            markersMaxAmount: 1),
+
+
+
+     
       onDaySelected: (day, events, __) {
         widget.controller.setSelectedDay(day);
         widget.onDayChanged(day, events, __);

@@ -127,8 +127,8 @@ class _BookingsTabState extends State<BookingsTab> {
   Widget _getCalender() {
     return SliverAppBar(
       elevation: 0,
-      collapsedHeight: _calenderHeight ?? 132,
-      expandedHeight: _calenderHeight ?? 132,
+      collapsedHeight: _calenderHeight+6 ?? 132,
+      expandedHeight: _calenderHeight+6 ?? 132,
       pinned: true,
       automaticallyImplyLeading: false,
       actions: [

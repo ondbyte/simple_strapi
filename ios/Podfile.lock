@@ -223,12 +223,12 @@ PODS:
     - BSGridCollectionViewLayout (= 1.2.5)
     - BSImageView (= 1.0.3)
   - BSImageView (1.0.3)
-  - cloud_firestore (0.14.3):
+  - cloud_firestore (0.14.3-1):
     - Firebase/CoreOnly (~> 6.33.0)
     - Firebase/Firestore (~> 6.33.0)
     - firebase_core
     - Flutter
-  - cloud_functions (0.7.0-1):
+  - cloud_functions (0.7.1):
     - Firebase/CoreOnly (~> 6.33.0)
     - Firebase/Functions (~> 6.33.0)
     - firebase_core
@@ -255,15 +255,15 @@ PODS:
   - Firebase/Storage (6.33.0):
     - Firebase/CoreOnly
     - FirebaseStorage (~> 3.9.0)
-  - firebase_auth (0.18.3):
+  - firebase_auth (0.18.3-1):
     - Firebase/Auth (~> 6.33.0)
     - Firebase/CoreOnly (~> 6.33.0)
     - firebase_core
     - Flutter
-  - firebase_core (0.5.2):
+  - firebase_core (0.5.2-1):
     - Firebase/CoreOnly (~> 6.33.0)
     - Flutter
-  - firebase_crashlytics (0.2.3):
+  - firebase_crashlytics (0.2.3-1):
     - Firebase/CoreOnly (~> 6.33.0)
     - Firebase/Crashlytics (~> 6.33.0)
     - firebase_core
@@ -523,13 +523,13 @@ SPEC CHECKSUMS:
   BSGridCollectionViewLayout: 333dcb457a5a3bdd9212607ab5756553dcfe06cb
   BSImagePicker: 07404254f2fcdaf5a2eb403c0f8c337267ce8738
   BSImageView: a149459433a2687157d034c78e059d30ac7f2544
-  cloud_firestore: 19c6f947dd14be9d71695ea23eefde67cd8829c8
-  cloud_functions: 47282d6bdfd334facdb72e644ff4627a5d6317b3
+  cloud_firestore: ff21f96f114720fae096d385b9273087191bd184
+  cloud_functions: c6286570d13cf0111ef76b0f708b369e06ae3741
   device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
   Firebase: 8db6f2d1b2c5e2984efba4949a145875a8f65fe5
-  firebase_auth: 240419f6b00dea39c60a2a9c4379c16c4a4b02fb
-  firebase_core: 350ba329d1641211bc6183a3236893cafdacfea7
-  firebase_crashlytics: ebe0a8b60ac43115a4c80db5c63a00bbdeaf1770
+  firebase_auth: cb33b01b51904969161403bbcb20036519f0c578
+  firebase_core: 7423d688a1c6f2f2d859d64ae26991be39989781
+  firebase_crashlytics: edf8c4deccde049e318abf388023e49dd6adbbc2
   firebase_messaging: 0aea2cd5885b65e19ede58ee3507f485c992cc75
   firebase_storage: 7ab602a75a80cab746f4f31c98a4927f9f376e92
   FirebaseAuth: c92d49ada7948d1a23466e3db17bc4c2039dddc3
