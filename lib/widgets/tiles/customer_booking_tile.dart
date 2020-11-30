@@ -5,27 +5,29 @@ import '../../classes/firebase_structures/business_booking.dart';
 import '../../stores/cloud_store.dart';
 import '../size_provider.dart';
 
-class CustomerBookingTile extends StatefulWidget {
+class BookingTile extends StatefulWidget {
   final BorderRadius borderRadius;
   final BusinessBooking booking;
   final EdgeInsets padding;
   final EdgeInsets margin;
   final Function onTap;
+  final bool isCustomerView;
 
-  const CustomerBookingTile(
+  const BookingTile(
       {Key key,
       this.borderRadius,
       this.booking,
       this.padding,
       this.margin,
-      this.onTap})
+      this.onTap,
+      this.isCustomerView = true})
       : super(key: key);
 
   @override
-  _CustomerBookingTileState createState() => _CustomerBookingTileState();
+  _BookingTileState createState() => _BookingTileState();
 }
 
-class _CustomerBookingTileState extends State<CustomerBookingTile> {
+class _BookingTileState extends State<BookingTile> {
   final _key = GlobalKey();
   @override
   Widget build(BuildContext context) {
@@ -60,7 +62,9 @@ class _CustomerBookingTileState extends State<CustomerBookingTile> {
                     style: Theme.of(context).textTheme.bodyText1,
                   ),
                   Text(
-                    widget.booking.branch.name.value,
+                    widget.isCustomerView
+                        ? widget.booking.branch.name.value
+                        : widget.booking.bookedByName,
                     style: Theme.of(context).textTheme.subtitle1,
                   ),
                 ],
