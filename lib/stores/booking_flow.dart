@@ -193,6 +193,7 @@ class BookingFlow {
     });
     staffWithBookings.forEach(
       (bs, bbs) {
+        Helper.printLog(totalDurationMinutes.value);
         filteredStaffs.add(
           FilteredBusinessStaff(
             staff: bs,
@@ -205,44 +206,70 @@ class BookingFlow {
         );
       },
     );
+    act((){professional.value ??= filteredStaffs.isNotEmpty?filteredStaffs.first:null;});
   }
 
   void _getHolidays() {
     final hs = branch.businessHolidays.value.all;
     holidays.clear();
-    hs.forEach((bh) {
-      if (bh.enabled.value) {
-        bh.dates.forEach((date) {
-          holidays.addAll({
-            date: [bh.name]
-          });
-        });
-      }
-    });
+    hs.forEach(
+      (bh) {
+        if (bh.enabled.value) {
+          bh.dates.forEach(
+            (date) {
+              holidays.addAll(
+                {
+                  date: [bh.name]
+                },
+              );
+            },
+          );
+        }
+      },
+    );
   }
 
   void _setupReactions() {
     if (_allStore.get<CloudStore>().userType != UserType.customer) {
-      _disposers.add(reaction(
+      _disposers.add(
+        reaction(
           (_) => _allStore.get<BusinessStore>().business.selectedBranch.value,
           (b) {
-        branch = b;
-      }));
+            branch = b;
+            if (branch.staff.isNotEmpty) {
+              professional.value = filteredStaffs.first;
+            }
+          },
+        ),
+      );
+      _disposers.add(
+        reaction(
+          (_) => _allStore
+              .get<BusinessStore>()
+              .business
+              .selectedBranch
+              .value
+              .staff,
+          (v) async {
+            await getBranchBookings();
+          },
+        ),
+      );
     }
 
-    _disposers.add(reaction((_) => professional.value, (p) {
-      //services.clear();
-      slot.value = null;
-      timeWindow.value = FromToTiming.today();
-      //totalDurationMinutes.value = 0;
-      //totalPrice.value = 0.0;
-      //selectedSubTitle.value = "";
-      //selectedTitle.value = "";
-      holidays.clear();
-      if (_branch.value != null) {
-        _getHolidays();
-      }
-    }));
+    _disposers.add(
+      reaction(
+        (_) => professional.value,
+        (p) {
+          slot.value = null;
+          timeWindow.value = FromToTiming.today();
+          holidays.clear();
+          if (_branch.value != null) {
+            _getHolidays();
+          }
+        },
+      ),
+    );
     _disposers.add(
       reaction(
         (_) => _branch.value,
@@ -252,7 +279,9 @@ class BookingFlow {
           timeWindow.value = FromToTiming.today();
           totalDurationMinutes.value = 0;
           totalPrice.value = 0.0;
-          professional.value = null;
+          if (_allStore.get<CloudStore>().userType == UserType.customer) {
+            professional.value = null;
+          }
           selectedSubTitle.value = "";
           selectedTitle.value = "";
           filteredStaffs.clear();

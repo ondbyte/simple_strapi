@@ -121,78 +121,52 @@ class _DiscoverTabState extends State<DiscoverTab> {
           builder: (_, snap) {
             return LayoutBuilder(builder: (_, cons) {
               if (snap.hasData && snap.data.isNotEmpty) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SeeAllListTile(
-                      title: "Featured on Bapp",
-                      onSeeAll: () {
-                        BappNavigator.bappPush(
-                          context,
-                          BranchesResultScreen(
-                            title: "Featured Service",
-                            subTitle: "in " + cloudStore.getAddressLabel(),
-                            categoryName: "featured",
-                            futureBranchList: Future.value(snap.data),
-                            placeName: cloudStore.getAddressLabel(),
-                          ),
-                        );
+                return SeeAllListTile(
+                  title: "Featured on Bapp",
+                  onSeeAll: () {
+                    BappNavigator.bappPush(
+                      context,
+                      BranchesResultScreen(
+                        title: "Featured Service",
+                        subTitle: "in " + cloudStore.getAddressLabel(),
+                        categoryName: "featured",
+                        futureBranchList: Future.value(snap.data),
+                        placeName: cloudStore.getAddressLabel(),
+                      ),
+                    );
+                  },
+                  itemCount:snap.data.length ,
+                  itemBuilder: (context,i){
+                    return BusinessTileBigWidget(
+                      branch: snap.data[i],
+                      onTap: () {
+                        Provider.of<BookingFlow>(context,
+                            listen: false)
+                            .branch = snap.data[i];
+                        Navigator.of(context).pushNamed(
+                            RouteManager
+                                .businessProfileScreen,
+                            arguments: [snap.data[i]]);
                       },
-                    ),
-                    SingleChildScrollView(
-                      padding: const EdgeInsets.only(left: 16),
-                      scrollDirection: Axis.horizontal,
-                      child: snap.hasData
-                          ? Row(
-                              children: [
-                                ...List.generate(snap.data.length, (i) {
-                                  return Row(
-                                    children: [
-                                      Container(
-                                        width: snap.data.length == 1
-                                            ? cons.maxWidth - 32
-                                            : cons.maxWidth * 0.8,
-                                        child: BusinessTileBigWidget(
-                                          branch: snap.data[i],
-                                          onTap: () {
-                                            Provider.of<BookingFlow>(context,
-                                                    listen: false)
-                                                .branch = snap.data[i];
-                                            Navigator.of(context).pushNamed(
-                                                RouteManager
-                                                    .businessProfileScreen,
-                                                arguments: [snap.data[i]]);
-                                          },
-                                          tag: Chip(
-                                            backgroundColor:
-                                                CardsColor.colors["lightGreen"],
-                                            label: Text(
-                                              "Featured",
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodyText1
-                                                  .apply(
-                                                    color: Theme.of(context)
-                                                        .backgroundColor,
-                                                  ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        width: 16,
-                                      ),
-                                    ],
-                                  );
-                                })
-                              ],
-                            )
-                          : const SizedBox(),
-                    ),
-                  ],
+                      tag: Chip(
+                        backgroundColor:
+                        CardsColor.colors["lightGreen"],
+                        label: Text(
+                          "Featured",
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyText1
+                              .apply(
+                            color: Theme.of(context)
+                                .backgroundColor,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 );
               }
-              return SizedBox();
+              return const SizedBox();
             });
           },
         );

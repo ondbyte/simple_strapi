@@ -39,7 +39,7 @@ class _CreateYourProfileScreenState extends State<CreateYourProfileScreen> {
             return true;
           },
           child: Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Center(
               child: !_loading
                   ? SingleChildScrollView(
@@ -53,7 +53,7 @@ class _CreateYourProfileScreenState extends State<CreateYourProfileScreen> {
                         "Create your profile",
                         style: Theme.of(context).textTheme.headline1,
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 20,
                       ),
                       Consumer<CloudStore>(
@@ -63,7 +63,7 @@ class _CreateYourProfileScreenState extends State<CreateYourProfileScreen> {
                               _name = cloudStore.user.displayName;
                               return TextFormField(
                                 initialValue: _name,
-                                decoration: InputDecoration(
+                                decoration: const InputDecoration(
                                     labelText: "What is your name?"),
                                 onChanged: (s) {
                                   _name = s;
@@ -79,14 +79,14 @@ class _CreateYourProfileScreenState extends State<CreateYourProfileScreen> {
                           );
                         },
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 20,
                       ),
                       Text(
                         "Your real name is required for service providers to identify you.",
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 20,
                       ),
                       Consumer<CloudStore>(
@@ -96,7 +96,7 @@ class _CreateYourProfileScreenState extends State<CreateYourProfileScreen> {
                               _email = cloudStore.user.email;
                               return TextFormField(
                                 initialValue: _email,
-                                decoration: InputDecoration(
+                                decoration: const InputDecoration(
                                     labelText: "Email address"),
                                 onChanged: (s) {
                                   _email = s;
@@ -112,14 +112,14 @@ class _CreateYourProfileScreenState extends State<CreateYourProfileScreen> {
                           );
                         },
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 20,
                       ),
                       Text(
                         "Your email address will help you to recover your account and recieve updates on your bookings.",
                         style: Theme.of(context).textTheme.bodyText1,
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 10,
                       ),
                       PrimaryButton(

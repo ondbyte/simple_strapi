@@ -1,5 +1,6 @@
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/widgets/tiles/see_all.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
@@ -27,7 +28,7 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SizedBox(
+                            const SizedBox(
                               height: 16,
                             ),
                             Consumer<CloudStore>(
@@ -88,8 +89,33 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
               ),
             ),
           ),
+          SliverPadding(padding: EdgeInsets.symmetric(horizontal: 16),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    NewBookingsScroller()
+                  ]
+                ),
+              ),)
         ],
       ),
     );
   }
 }
+
+class NewBookingsScroller extends StatefulWidget {
+  @override
+  _NewBookingsScrollerState createState() => _NewBookingsScrollerState();
+}
+
+class _NewBookingsScrollerState extends State<NewBookingsScroller> {
+  @override
+  Widget build(BuildContext context) {
+    return SeeAllListTile(
+      title: "New Bookings",
+      onSeeAll: (){},
+
+    );
+  }
+}
+

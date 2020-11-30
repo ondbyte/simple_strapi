@@ -42,21 +42,13 @@ class AddCustomerDetails extends StatelessWidget {
                         number: _theNumber.value.internationalNumber);
                     if (user == null) {
                       user = BappUser(
-                        myDoc: BappUser.newReference(),
+                        myDoc: BappUser.newReference(docName:_theNumber.value.internationalNumber),
                         email: _email,
-                        facebook: _facebook,
-                        instagram: _instagram,
                         name: _name,
                         theNumber: _theNumber.value,
-                        website: _website,
                       );
-                    } else {
-                      user = user.updateWith(
-                          instagram: _instagram,
-                          facebook: _facebook,
-                          website: _website);
+                      await user.save();
                     }
-                    user.save();
                     await BappNavigator.bappPushAndRemoveAll(
                       context,
                       ContextualMessageScreen(
@@ -100,51 +92,6 @@ class AddCustomerDetails extends StatelessWidget {
                         }
                       }
                       return "Enter a valid number";
-                    },
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  TextField(
-                    decoration: InputDecoration(labelText: "Email"),
-                    onChanged: (s) {
-                      _email = s;
-                    },
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  TextField(
-                    decoration: InputDecoration(labelText: "Name"),
-                    onChanged: (s) {
-                      _name = s;
-                    },
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  TextField(
-                    decoration: InputDecoration(labelText: "Website"),
-                    onChanged: (s) {
-                      _website = s;
-                    },
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  TextField(
-                    decoration: InputDecoration(labelText: "Facebook"),
-                    onChanged: (s) {
-                      _facebook = s;
-                    },
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  TextField(
-                    decoration: InputDecoration(labelText: "Instagram"),
-                    onChanged: (s) {
-                      _instagram = s;
                     },
                   ),
                 ],

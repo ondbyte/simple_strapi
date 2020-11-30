@@ -35,7 +35,7 @@ class Helper {
   }
 
   static void printLog(d) {
-    print("[BAPP]" + d);
+    print("[BAPP]" + d.toString());
   }
 
   static dynamic alternateLatLong(dynamic ll) {
@@ -47,12 +47,12 @@ class Helper {
     }
   }
 
-  static filterMenuItems(
+  static List<List<MenuItem>> filterMenuItems(
       UserType userType, UserType alterEgo, AuthStatus authStatus) {
-    final List<List<MenuItem>> ls = [];
+    final ls = <List<MenuItem>>[];
     MenuConfig.menuItems.forEach(
       (element) {
-        final List<MenuItem> l = [];
+        final l = <MenuItem>[];
         element.forEach((el) {
           if (el.showWhenUserTypeIs.contains(userType)) {
             if (el.showWhenAlterEgoIs.contains(alterEgo)) {

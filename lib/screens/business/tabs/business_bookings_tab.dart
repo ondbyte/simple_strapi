@@ -85,7 +85,6 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
                                 },
                               ),
                             );
-                            await flow.getBranchBookings();
                           },
                         ),
                       ),
@@ -102,7 +101,6 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
                               },
                             ),
                           );
-                          await flow.getBranchBookings();
                         },
                         title: Text("Staff"),
                         subtitle: Text("Select a staff"),
