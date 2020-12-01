@@ -32,7 +32,7 @@ class SeeAllListTile extends StatelessWidget {
           i--;
           list.add(
             SizedBox(
-              width: cons.maxWidth - (itemCount > 1 ? 32 : 0),
+              width: cons.maxWidth - (itemCount > 1 ? 48 : 0),
               child: Padding(
                 padding: (childPadding ?? EdgeInsets.zero),
                 child: itemBuilder(context, i),
@@ -46,7 +46,7 @@ class SeeAllListTile extends StatelessWidget {
             ListTile(
               contentPadding: titlePadding ??
                   const EdgeInsets.only(
-                      left: 16, right: 16, top: 10, bottom: 5),
+                      left: 16, right: 16, top: 0, bottom: 0),
               title: Text(title, style: Theme.of(context).textTheme.headline6),
               trailing: GestureDetector(
                 child: Text(
@@ -57,6 +57,7 @@ class SeeAllListTile extends StatelessWidget {
               ),
             ),
             SingleChildScrollView(
+              padding: EdgeInsets.all(0),
               scrollDirection: Axis.horizontal,
               child: Row(
                 mainAxisSize: MainAxisSize.min,

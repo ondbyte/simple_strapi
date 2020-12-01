@@ -44,7 +44,7 @@ class BusinessTileBigWidget extends StatelessWidget {
             BusinessTileWidget(
               branch: branch,
               onTap: () {},
-              padding: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
             ),
           ],
         ),

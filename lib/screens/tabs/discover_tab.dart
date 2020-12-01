@@ -73,12 +73,12 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   ),
                   _getFeaturedScroller(context),
                   const SizedBox(
-                    height: 20,
+                    height: 0,
                   ),
                 ]),
               ),
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.fromLTRB(16,24,16,8),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate(
                     [
@@ -87,7 +87,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                       if (authStore.status == AuthStatus.userPresent)
                         _getHowWasYourExperience(context),
                       const SizedBox(
-                        height: 20,
+                        
                       ),
                       Consumer<CloudStore>(
                         builder: (_, cloudStore, __) {
@@ -127,7 +127,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
               if (snap.hasData && snap.data.isNotEmpty) {
                 return SeeAllListTile(
                   title: "Featured on Bapp",
-                  childPadding: EdgeInsets.all(16),
+                  childPadding: EdgeInsets.symmetric(horizontal:16),
                   onSeeAll: () {
                     BappNavigator.bappPush(
                       context,
