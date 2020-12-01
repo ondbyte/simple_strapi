@@ -2,6 +2,7 @@ import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/business/booking_flow/review.dart';
 import 'package:bapp/screens/search/branches_result_screen.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/business_store.dart';
@@ -71,6 +72,9 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     height: 20,
                   ),
                   _getFeaturedScroller(context),
+                  const SizedBox(
+                    height: 20,
+                  ),
                 ]),
               ),
               SliverPadding(
@@ -222,8 +226,23 @@ class _DiscoverTabState extends State<DiscoverTab> {
   }
 
   Widget _getHowWasYourExperience(BuildContext context) {
-    return SizedBox();
+    return Observer(
+      builder: (_) {
+        if (flow.myBookings.isEmpty) {
+          return SizedBox();
+        }
+        final bs = flow.getUnratedBookings();
+        if (bs.isEmpty) {
+          return SizedBox();
+        }
+        return HowWasYourExperienceTile(
+          booking: bs.first,
+        );
+      },
+    );
   }
+
+  BookingFlow get flow => Provider.of<BookingFlow>(context, listen: false);
 
   Widget _getCompleteOrder(BuildContext context) {
     return SizedBox();

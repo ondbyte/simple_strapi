@@ -6,6 +6,7 @@ import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/classes/firebase_structures/business_services.dart';
 import 'package:bapp/classes/firebase_structures/business_staff.dart';
 import 'package:bapp/classes/firebase_structures/business_timings.dart';
+import 'package:bapp/classes/firebase_structures/rating.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/stores/business_store.dart';
@@ -364,22 +365,23 @@ class BookingFlow {
         .toDay(timeWindow.value.from);
     final doc = BusinessBooking.newDoc();
     final b = BusinessBooking(
-        branch: branch,
-        fromToTiming: FromToTiming.fromDates(from: from, to: to),
-        staff: professional.value.staff,
-        services: services,
-        status: number == null
-            ? BusinessBookingStatus.pending
-            : BusinessBookingStatus.walkin,
-        bookedByNumber: number == null
-            ? FirebaseAuth.instance.currentUser.phoneNumber
-            : number.internationalNumber,
-        bookingUserType: _allStore.get<CloudStore>().userType,
-        remindTime: from.subtract(const Duration(hours: 2)),
-        myDoc: doc,
-        bookedByName: number == null
-            ? FirebaseAuth.instance.currentUser.displayName
-            : "");
+      branch: branch,
+      fromToTiming: FromToTiming.fromDates(from: from, to: to),
+      staff: professional.value.staff,
+      services: services,
+      status: number == null
+          ? BusinessBookingStatus.pending
+          : BusinessBookingStatus.walkin,
+      bookedByNumber: number == null
+          ? FirebaseAuth.instance.currentUser.phoneNumber
+          : number.internationalNumber,
+      bookingUserType: _allStore.get<CloudStore>().userType,
+      remindTime: from.subtract(const Duration(hours: 2)),
+      myDoc: doc,
+      bookedByName:
+          number == null ? FirebaseAuth.instance.currentUser.displayName : "",
+      rating: CompleteBookingRating(),
+    );
     await b.save();
     if (number == null) {
       act(reset);
@@ -410,5 +412,13 @@ class BookingFlow {
           ..sort((a, b) {
             return a.fromToTiming.from.compareTo(b.fromToTiming.from);
           });
+  }
+
+  List<BusinessBooking> getUnratedBookings() {
+    return branchBookings
+        .where((element) =>
+            element.status.value == BusinessBookingStatus.finished &&
+            !element.rating.isRated)
+        .toList();
   }
 }

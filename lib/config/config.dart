@@ -1,3 +1,5 @@
+import 'package:bapp/classes/firebase_structures/business_booking.dart';
+import 'package:bapp/classes/firebase_structures/rating.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
@@ -437,4 +439,41 @@ class BusinessExpandingPanelConfigs {
       ],
     ),
   ];
+}
+
+class RatingConfig {
+  static const reviewLabel = "Would you like share a short review?";
+  static const reviewHint = "Write your review here.";
+
+  static String getFirstSentenceForRating(BookingRating rating) {
+    switch (rating.type) {
+      case BookingRatingType.overAll:
+        {
+          return "How was your overall experience at";
+        }
+      case BookingRatingType.staff:
+        {
+          return "How was the service provided by";
+        }
+      case BookingRatingType.fecilities:
+        {
+          return "How was the facilities at";
+        }
+    }
+  }
+
+  static String getSecondSentenceForRatingWithBooking(
+      BookingRating rating, BusinessBooking booking) {
+    switch (rating.type) {
+      case BookingRatingType.overAll:
+      case BookingRatingType.fecilities:
+        {
+          return booking.branch.name.value;
+        }
+      case BookingRatingType.staff:
+        {
+          return booking.staff.name;
+        }
+    }
+  }
 }

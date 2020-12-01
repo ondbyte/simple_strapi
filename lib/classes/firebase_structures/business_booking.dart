@@ -1,3 +1,4 @@
+import 'package:bapp/classes/firebase_structures/rating.dart';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
@@ -24,24 +25,24 @@ class BusinessBooking {
   final UserType bookingUserType;
   final DateTime remindTime;
   final String bookedByName;
+  final CompleteBookingRating rating;
 
   final DocumentReference myDoc;
 
-  BusinessBooking({@required this.bookedByName,
-    @required this.myDoc,
-    @required this.bookingUserType,
-    @required BusinessBookingStatus status,
-    @required this.bookedByNumber,
-    @required this.staff,
-    @required this.branch,
-    @required this.fromToTiming,
-    @required this.services,
-    @required this.remindTime,
-  }) {
+  BusinessBooking(
+      {@required this.myDoc,
+      @required this.bookingUserType,
+      @required BusinessBookingStatus status,
+      @required this.bookedByNumber,
+      @required this.staff,
+      @required this.branch,
+      @required this.fromToTiming,
+      @required this.services,
+      @required this.remindTime,
+      @required this.bookedByName,
+      @required this.rating}) {
     this.status.value = status;
   }
-
-
 
   static DocumentReference newDoc() {
     return FirebaseFirestore.instance.collection("bookings").doc(kUUIDGen.v1());
@@ -49,6 +50,12 @@ class BusinessBooking {
 
   Future<bool> save() async {
     await myDoc.set(toMap());
+  }
+
+  Future saveRating() async {
+    final tmp = rating.toMap();
+    tmp["isRated"] = true;
+    await myDoc.update({"rating": tmp});
   }
 
   Future<bool> cancel({@required BusinessBookingStatus withStatus}) {
@@ -80,7 +87,8 @@ class BusinessBooking {
       "bookedByNumber": bookedByNumber,
       "status": EnumToString.convertToString(status.value),
       "bookingUserType": EnumToString.convertToString(bookingUserType),
-      "bookedByName":bookedByName
+      "bookedByName": bookedByName,
+      "rating": rating.toMap(),
     };
   }
 
@@ -108,7 +116,8 @@ class BusinessBooking {
         j["bookingUserType"],
       ),
       remindTime: (j["remindTime"] as Timestamp)?.toDate(),
-      bookedByName: j["bookedByName"]??"",
+      bookedByName: j["bookedByName"] ?? "",
+      rating: CompleteBookingRating.fromJson(j["rating"] ?? {}),
     );
   }
 
