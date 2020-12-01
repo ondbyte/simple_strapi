@@ -61,8 +61,8 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
             elevation: 0,
             pinned: true,
             automaticallyImplyLeading: false,
-            expandedHeight: 240,
-            collapsedHeight: 240,
+            expandedHeight: 210,
+            collapsedHeight: 210,
             actions: [SizedBox()],
             flexibleSpace: Observer(
               builder: (_) {
@@ -123,10 +123,11 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
             ),
           ),
           SliverList(
+            
             delegate: SliverChildListDelegate(
               [
                 SizedBox(
-                  height: 20,
+                  height: 0,
                 ),
                 Observer(
                   builder: (_) {

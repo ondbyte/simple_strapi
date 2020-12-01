@@ -30,6 +30,7 @@ class _BookingTimeLineWidgetState extends State<BookingTimeLineWidget> {
   Widget build(BuildContext context) {
     final list = widget.list;
     return DayView(
+      style: DayViewStyle(headerSize:0),
       date: widget.date,
       inScrollableWidget: true,
       userZoomable: false,
@@ -38,6 +39,7 @@ class _BookingTimeLineWidgetState extends State<BookingTimeLineWidget> {
         ...List.generate(
           list.length,
           (index) => FlutterWeekViewEvent(
+            
             onTap: () {
               BappNavigator.bappPush(
                 context,

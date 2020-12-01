@@ -211,7 +211,7 @@ class TitledListTile extends StatelessWidget {
       padding: contentPadding ?? EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
         borderRadius: borderRadius ?? BorderRadius.circular(6),
-        color: Theme.of(context).primaryColor.withOpacity(0.1),
+        color: Theme.of(context).cardColor,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
