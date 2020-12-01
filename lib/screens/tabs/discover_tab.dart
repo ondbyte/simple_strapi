@@ -123,6 +123,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
               if (snap.hasData && snap.data.isNotEmpty) {
                 return SeeAllListTile(
                   title: "Featured on Bapp",
+                  childPadding: EdgeInsets.all(16),
                   onSeeAll: () {
                     BappNavigator.bappPush(
                       context,
@@ -135,31 +136,24 @@ class _DiscoverTabState extends State<DiscoverTab> {
                       ),
                     );
                   },
-                  itemCount:snap.data.length ,
-                  itemBuilder: (context,i){
+                  itemCount: snap.data.length,
+                  itemBuilder: (context, i) {
                     return BusinessTileBigWidget(
                       branch: snap.data[i],
                       onTap: () {
-                        Provider.of<BookingFlow>(context,
-                            listen: false)
+                        Provider.of<BookingFlow>(context, listen: false)
                             .branch = snap.data[i];
                         Navigator.of(context).pushNamed(
-                            RouteManager
-                                .businessProfileScreen,
+                            RouteManager.businessProfileScreen,
                             arguments: [snap.data[i]]);
                       },
                       tag: Chip(
-                        backgroundColor:
-                        CardsColor.colors["lightGreen"],
+                        backgroundColor: CardsColor.colors["lightGreen"],
                         label: Text(
                           "Featured",
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyText1
-                              .apply(
-                            color: Theme.of(context)
-                                .backgroundColor,
-                          ),
+                          style: Theme.of(context).textTheme.bodyText1.apply(
+                                color: Theme.of(context).backgroundColor,
+                              ),
                         ),
                       ),
                     );

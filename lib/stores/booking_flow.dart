@@ -206,7 +206,10 @@ class BookingFlow {
         );
       },
     );
-    act((){professional.value ??= filteredStaffs.isNotEmpty?filteredStaffs.first:null;});
+    act(() {
+      professional.value ??=
+          filteredStaffs.isNotEmpty ? filteredStaffs.first : null;
+    });
   }
 
   void _getHolidays() {
@@ -361,25 +364,51 @@ class BookingFlow {
         .toDay(timeWindow.value.from);
     final doc = BusinessBooking.newDoc();
     final b = BusinessBooking(
-      branch: branch,
-      fromToTiming: FromToTiming.fromDates(from: from, to: to),
-      staff: professional.value.staff,
-      services: services,
-      status: number == null
-          ? BusinessBookingStatus.pending
-          : BusinessBookingStatus.walkin,
-      bookedByNumber: number == null
-          ? FirebaseAuth.instance.currentUser.phoneNumber
-          : number.internationalNumber,
-      bookingUserType: _allStore.get<CloudStore>().userType,
-      remindTime: from.subtract(const Duration(hours: 2)),
-      myDoc: doc,
-    );
+        branch: branch,
+        fromToTiming: FromToTiming.fromDates(from: from, to: to),
+        staff: professional.value.staff,
+        services: services,
+        status: number == null
+            ? BusinessBookingStatus.pending
+            : BusinessBookingStatus.walkin,
+        bookedByNumber: number == null
+            ? FirebaseAuth.instance.currentUser.phoneNumber
+            : number.internationalNumber,
+        bookingUserType: _allStore.get<CloudStore>().userType,
+        remindTime: from.subtract(const Duration(hours: 2)),
+        myDoc: doc,
+        bookedByName: number == null
+            ? FirebaseAuth.instance.currentUser.displayName
+            : "");
     await b.save();
     if (number == null) {
       act(reset);
     } else {
       act(resetForBranch);
     }
+  }
+
+  List<BusinessBooking> getNewBookings() {
+    final now = DateTime.now();
+    return branchBookings
+        .where((element) =>
+            element.status.value == BusinessBookingStatus.pending &&
+            element.fromToTiming.from.isAfter(now))
+        .toList()
+          ..sort((a, b) {
+            return a.fromToTiming.from.compareTo(b.fromToTiming.from);
+          });
+  }
+
+  List<BusinessBooking> getUpcomingBookings() {
+    final now = DateTime.now();
+    return branchBookings
+        .where((element) =>
+            element.status.value == BusinessBookingStatus.accepted &&
+            element.fromToTiming.from.isAfter(now))
+        .toList()
+          ..sort((a, b) {
+            return a.fromToTiming.from.compareTo(b.fromToTiming.from);
+          });
   }
 }

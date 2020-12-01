@@ -104,7 +104,7 @@ class _BookingsTabState extends State<BookingsTab> {
                 shrinkWrap: true,
                 itemCount: list.length,
                 itemBuilder: (_, i) {
-                  return CustomerBookingTile(
+                  return BookingTile(
                     onTap: () {
                       BappNavigator.bappPush(
                         context,

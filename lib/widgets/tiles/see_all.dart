@@ -5,22 +5,22 @@ import 'package:flutter/material.dart';
 class SeeAllListTile extends StatelessWidget {
   final String title, subTitle, seeAllLabel;
   final Function onSeeAll;
-  final EdgeInsets padding;
+  final EdgeInsets padding, titlePadding, childPadding;
   final int itemCount;
   final Widget Function(BuildContext, int) itemBuilder;
-  final EdgeInsets childPadding;
 
-  const SeeAllListTile(
-      {Key key,
-      this.title = '',
-      this.subTitle = '',
-      this.seeAllLabel,
-      this.onSeeAll,
-      this.padding,
-      this.itemBuilder,
-      this.itemCount,
-      this.childPadding})
-      : super(key: key);
+  const SeeAllListTile({
+    Key key,
+    this.title = '',
+    this.subTitle = '',
+    this.seeAllLabel,
+    this.onSeeAll,
+    this.padding,
+    this.itemBuilder,
+    this.itemCount,
+    this.titlePadding,
+    this.childPadding,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -32,9 +32,9 @@ class SeeAllListTile extends StatelessWidget {
           i--;
           list.add(
             SizedBox(
-              width: cons.maxWidth,
+              width: cons.maxWidth - (itemCount > 1 ? 32 : 0),
               child: Padding(
-                padding: padding ?? EdgeInsets.zero,
+                padding: (childPadding ?? EdgeInsets.zero),
                 child: itemBuilder(context, i),
               ),
             ),
@@ -44,7 +44,7 @@ class SeeAllListTile extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              contentPadding: padding ??
+              contentPadding: titlePadding ??
                   const EdgeInsets.only(
                       left: 16, right: 16, top: 10, bottom: 5),
               title: Text(title, style: Theme.of(context).textTheme.headline6),

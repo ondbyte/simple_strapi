@@ -23,10 +23,11 @@ class BusinessBooking {
   final status = Observable<BusinessBookingStatus>(null);
   final UserType bookingUserType;
   final DateTime remindTime;
+  final String bookedByName;
 
   final DocumentReference myDoc;
 
-  BusinessBooking({
+  BusinessBooking({@required this.bookedByName,
     @required this.myDoc,
     @required this.bookingUserType,
     @required BusinessBookingStatus status,
@@ -39,6 +40,8 @@ class BusinessBooking {
   }) {
     this.status.value = status;
   }
+
+
 
   static DocumentReference newDoc() {
     return FirebaseFirestore.instance.collection("bookings").doc(kUUIDGen.v1());
@@ -77,6 +80,7 @@ class BusinessBooking {
       "bookedByNumber": bookedByNumber,
       "status": EnumToString.convertToString(status.value),
       "bookingUserType": EnumToString.convertToString(bookingUserType),
+      "bookedByName":bookedByName
     };
   }
 
@@ -104,6 +108,7 @@ class BusinessBooking {
         j["bookingUserType"],
       ),
       remindTime: (j["remindTime"] as Timestamp)?.toDate(),
+      bookedByName: j["bookedByName"]??"",
     );
   }
 
