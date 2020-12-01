@@ -1,6 +1,6 @@
 import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/helpers/extensions.dart';
-import 'package:bapp/screens/business_profile/booking_details.dart';
+import 'package:bapp/screens/business/booking_flow/booking_details.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
