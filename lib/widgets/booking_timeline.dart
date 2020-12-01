@@ -1,7 +1,8 @@
 import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/helpers/extensions.dart';
-import 'package:bapp/screens/business_profile/booking_details.dart';
+import 'package:bapp/screens/business/booking_flow/booking_details.dart';
+import 'package:bapp/screens/business/booking_flow/booking_details.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_week_view/flutter_week_view.dart';

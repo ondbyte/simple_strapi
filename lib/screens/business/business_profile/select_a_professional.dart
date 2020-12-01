@@ -3,7 +3,7 @@ import 'package:bapp/classes/firebase_structures/business_timings.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
-import 'package:bapp/screens/business_profile/select_time_slot.dart';
+import 'package:bapp/screens/business/business_profile/select_time_slot.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/widgets/firebase_image.dart';
 import 'package:bapp/widgets/tiles/rr_list_tile.dart';
@@ -43,7 +43,7 @@ class _SelectAProfessionalScreenState extends State<SelectAProfessionalScreen> {
       body: CustomScrollView(
         slivers: [
           SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 if (flow.services.isNotEmpty)
@@ -54,7 +54,7 @@ class _SelectAProfessionalScreenState extends State<SelectAProfessionalScreen> {
                       subtitle: Text(flow.selectedSubTitle.value),
                     ),
                   ),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
                 _getProffessionalsTiles()

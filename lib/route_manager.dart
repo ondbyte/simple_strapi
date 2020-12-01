@@ -1,6 +1,7 @@
 import 'package:bapp/screens/business/addbusiness/choose_category.dart';
 import 'package:bapp/screens/business/addbusiness/thank_you_for_your_interest.dart';
 import 'package:bapp/screens/business/branch_chooser.dart';
+import 'package:bapp/screens/business/business_profile/business_profile.dart';
 import 'package:bapp/screens/business/toolkit/manage_branches/add_a_branch.dart';
 import 'package:bapp/screens/business/toolkit/manage_branches/manage_branches.dart';
 import 'package:bapp/screens/business/toolkit/manage_contact.dart';
@@ -14,7 +15,6 @@ import 'package:bapp/screens/business/toolkit/manage_staff/add_a_staff.dart';
 import 'package:bapp/screens/business/toolkit/manage_staff/manage_staff.dart';
 import 'package:bapp/screens/business/toolkit/store_name_address.dart';
 import 'package:bapp/screens/business/toolkit/timings.dart';
-import 'package:bapp/screens/business_profile/business_profile.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:bapp/screens/location/pick_a_place.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';

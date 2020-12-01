@@ -1,6 +1,6 @@
 import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/helpers/extensions.dart';
-import 'package:bapp/screens/business_profile/business_profile.dart';
+import 'package:bapp/screens/business/business_profile/business_profile.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 class SeeAllListTile extends StatelessWidget {
@@ -60,7 +62,7 @@ class SeeAllListTile extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: list,
               ),
-            )
+            ),
           ],
         );
       },

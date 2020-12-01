@@ -1,5 +1,6 @@
 import 'package:bapp/helpers/extensions.dart';
-import 'package:bapp/screens/business_profile/booking_details.dart';
+import 'package:bapp/screens/business/booking_flow/booking_details.dart';
+import 'package:bapp/screens/business/booking_flow/booking_details.dart';
 import 'package:bapp/widgets/bapp_calendar.dart';
 import 'package:bapp/widgets/login_widget.dart';
 import 'package:bapp/widgets/tiles/customer_booking_tile.dart';

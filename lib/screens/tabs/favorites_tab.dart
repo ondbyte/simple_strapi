@@ -1,7 +1,7 @@
 import 'package:bapp/classes/firebase_structures/favorite.dart';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/helpers/extensions.dart';
-import 'package:bapp/screens/business_profile/business_profile.dart';
+import 'package:bapp/screens/business/business_profile/business_profile.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/login_widget.dart';
