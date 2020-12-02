@@ -115,7 +115,7 @@ class _UpdatesTabState extends State<UpdatesTab> {
   }
 
   ///updates tab
-  Widget _getUpdates(Map<String, NotificationUpdate> updates) {
+  Widget _getUpdates(List<NotificationUpdate> updates) {
     return updates.isNotEmpty
         ? CustomScrollView(
             slivers: <Widget>[
@@ -130,7 +130,7 @@ class _UpdatesTabState extends State<UpdatesTab> {
   }
 
   ///news tab
-  Widget _getNews(Map<String, NotificationUpdate> updates) {
+  Widget _getNews(List<NotificationUpdate> updates) {
     return updates.isNotEmpty
         ? CustomScrollView(
             slivers: <Widget>[
@@ -144,18 +144,14 @@ class _UpdatesTabState extends State<UpdatesTab> {
         : _getEmpty();
   }
 
-  List<Widget> _getTiles(Map<String, NotificationUpdate> updates) {
+  List<Widget> _getTiles(List<NotificationUpdate> updates) {
     final ws = <Widget>[];
     updates.forEach(
-      (id, element) {
+      (element) {
         ws.add(
           Dismissible(
-            key: Key(id),
-            onDismissed: (d) {
-              Provider.of<UpdatesStore>(context, listen: false).remove(element);
-              Provider.of<UpdatesStore>(context, listen: false)
-                  .setViewedForUpdate(element);
-            },
+            key: Key(element.myDoc.path),
+            onDismissed: (d) {},
             child: NotificationUpdateTileWidget(
               update: element,
             ),

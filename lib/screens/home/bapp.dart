@@ -2,7 +2,6 @@ import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/fcm.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/cloud_store.dart';
-import 'package:bapp/stores/updates_store.dart';
 import 'package:bapp/widgets/store_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -23,7 +22,7 @@ class _BappState extends State<Bapp> {
     return StoreProvider<CloudStore>(
       store: Provider.of<CloudStore>(context),
       init: (cloudStore) async {
-        await Provider.of<UpdatesStore>(context, listen: false).init(context);
+        //await Provider.of<UpdatesStore>(context, listen: false).init(context);
         await Provider.of<BookingFlow>(context, listen: false).getMyBookings();
       },
       builder: (_, cloudStore) {

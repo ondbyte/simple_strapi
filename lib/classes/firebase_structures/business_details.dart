@@ -21,6 +21,7 @@ class BusinessDetails {
   final selectedBranch = Observable<BusinessBranch>(null);
   final email = Observable<String>("");
   final myDoc = Observable<DocumentReference>(null);
+  final type = Observable("");
 
   final List<ReactionDisposer> _disposers = [];
 
@@ -47,7 +48,7 @@ class BusinessDetails {
         (_) {
           try {
             myDoc.value.set(
-              {"branches": branches.value.map((e) => e.myDoc).toList()},
+              {"branches": branches.value.map((e) => e.myDoc.value).toList()},
               SetOptions(merge: true),
             );
           } catch (e) {
@@ -70,6 +71,7 @@ class BusinessDetails {
     BusinessBranch selectedBranch,
     String email = "",
     DocumentReference myDoc,
+    String type,
   }) {
     this.category.value = category;
     this.businessName.value = businessName;
@@ -81,6 +83,7 @@ class BusinessDetails {
     this.selectedBranch.value = selectedBranch;
     this.email.value = email;
     this.myDoc.value = myDoc;
+    this.type.value = type;
 
     setupReactions();
   }
@@ -104,6 +107,7 @@ class BusinessDetails {
         branches.value.firstWhere((b) => b.myDoc.value == j["selectedBranch"]);
     email.value = j["email"];
     myDoc.value = j["myDoc"];
+    type.value = j["type"];
 
     setupReactions();
   }
@@ -120,6 +124,7 @@ class BusinessDetails {
       "selectedBranch": selectedBranch.value.myDoc.value,
       "email": email.value,
       "myDoc": myDoc.value,
+      "type": type.value,
     };
   }
 
@@ -160,7 +165,8 @@ class BusinessDetails {
       ..myDoc.value = myDoc.value.parent.doc("b_" + kUUIDGen.v1())
       ..businessHolidays.value = BusinessHolidays.empty(business: this)
       ..businessTimings.value = BusinessTimings.empty()
-      ..businessServices.value = BusinessServices.empty();
+      ..businessServices.value = BusinessServices.empty()
+      ..type.value = type.value;
 
     await branch.saveBranch();
 

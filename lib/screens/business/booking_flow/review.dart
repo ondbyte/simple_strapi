@@ -2,7 +2,7 @@ import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/classes/firebase_structures/rating.dart';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/helpers/extensions.dart';
-
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/screens/home/bapp.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';
@@ -19,28 +19,50 @@ class RateTheBookingScreen extends StatefulWidget {
 }
 
 class _RateTheBookingScreenState extends State<RateTheBookingScreen> {
+  BusinessBooking booking;
+  @override
+  void initState() {
+    act(() {
+      kLoading.value = true;
+    });
+    widget.booking.saveRating();
+    widget.booking.myDoc.snapshots().listen((snap) async {
+      setState(() {
+        booking = BusinessBooking.fromSnapShot(
+            snap: snap, branch: widget.booking.branch);
+        act(() {
+          kLoading.value = false;
+        });
+      });
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (booking == null) {
+      return SizedBox();
+    }
     return LoadingStackWidget(
       child: Scaffold(
         bottomNavigationBar: BottomPrimaryButton(
           label: "Send feedback",
-          onPressed: widget.booking.rating.isEdited()
+          onPressed: booking.rating.isEdited()
               ? () async {
                   BappNavigator.bappPushAndRemoveAll(
                     context,
                     ContextualMessageScreen(
-                      message: RatingConfig.getThankYouForTheReviewForBooking(widget.booking),
+                      message: RatingConfig.getThankYouForTheReviewForBooking(
+                          booking),
                       buttonText: "Go to Home",
-                      onButtonPressed: (context){
+                      onButtonPressed: (context) {
                         BappNavigator.bappPushAndRemoveAll(context, Bapp());
                       },
                       init: () async {
-                        await widget.booking.saveRating();
+                        await booking.saveRating();
                       },
                     ),
                   );
-                  Navigator.pop(context);
                 }
               : null,
         ),
@@ -52,9 +74,9 @@ class _RateTheBookingScreenState extends State<RateTheBookingScreen> {
               shrinkWrap: true,
               children: [
                 ...List.generate(
-                  widget.booking.rating.all.length,
+                  booking.rating.all.length,
                   (i) {
-                    final r = widget.booking.rating.all.values.elementAt(i);
+                    final r = booking.rating.all.values.elementAt(i);
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 20),
                       child: RatingTile(
@@ -62,11 +84,11 @@ class _RateTheBookingScreenState extends State<RateTheBookingScreen> {
                             RatingConfig.getFirstSentenceForRating(r),
                         secondSentence:
                             RatingConfig.getSecondSentenceForRatingWithBooking(
-                                    r, widget.booking) +
+                                    r, booking) +
                                 "?",
                         rating: r,
                         onRatingUpdated: (newR) {
-                          widget.booking.rating.update(newR);
+                          booking.rating.update(newR);
                           setState(() {});
                         },
                       ),
@@ -74,9 +96,9 @@ class _RateTheBookingScreenState extends State<RateTheBookingScreen> {
                   },
                 ),
                 TextFormField(
-                  initialValue: widget.booking.rating.review,
+                  initialValue: booking.rating.review,
                   onChanged: (s) {
-                    widget.booking.rating.review = s;
+                    booking.rating.review = s;
                   },
                   decoration: const InputDecoration(
                     labelText: RatingConfig.reviewLabel,
@@ -154,6 +176,7 @@ class BappRatingBar extends StatelessWidget {
     return RatingBar(
       initialRating: initialRating,
       unratedColor: unratedColor ?? Colors.white,
+      updateOnDrag: false,
       ratingWidget: RatingWidget(
         empty: Icon(
           Icons.star_border_outlined,
@@ -170,7 +193,6 @@ class BappRatingBar extends StatelessWidget {
       ),
       onRatingUpdate: onRatingUpdated,
     );
-
   }
 }
 
@@ -187,14 +209,6 @@ class HowWasYourExperienceTile extends StatelessWidget {
     return ClipRRect(
       borderRadius: borderRadius ?? BorderRadius.circular(6),
       child: ListTile(
-        onTap: () {
-          BappNavigator.bappPush(
-            context,
-            RateTheBookingScreen(
-              booking: booking,
-            ),
-          );
-        },
         tileColor: CardsColor.colors["lightGreen"],
         contentPadding: padding ?? const EdgeInsets.all(16),
         title: Column(
@@ -209,15 +223,27 @@ class HowWasYourExperienceTile extends StatelessWidget {
                   .apply(color: Colors.white),
             ),
             Text(
-              "How was your experience at",
+              booking.branch.name.value,
               style: Theme.of(context)
                   .textTheme
                   .subtitle1
                   .apply(color: Colors.white),
             ),
             BappRatingBar(
-              onRatingUpdated: (_) {},
-              ignoreGesture: true,
+              onRatingUpdated: (r) {
+                final previousRating =
+                    booking.rating.all[BookingRatingType.overAll];
+                booking.rating.update(
+                  previousRating.update(stars: r),
+                );
+                BappNavigator.bappPush(
+                  context,
+                  RateTheBookingScreen(
+                    booking: booking,
+                  ),
+                );
+              },
+              ignoreGesture: false,
             )
           ],
         ),

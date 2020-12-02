@@ -415,7 +415,7 @@ class BookingFlow {
   }
 
   List<BusinessBooking> getUnratedBookings() {
-    return branchBookings
+    return myBookings
         .where((element) =>
             element.status.value == BusinessBookingStatus.finished &&
             !element.rating.isRated)

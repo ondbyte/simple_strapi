@@ -61,6 +61,7 @@ abstract class _BusinessStore with Store {
     String businessName,
     String contactNumber,
     BusinessCategory category,
+    String type,
   }) async {
     ///create the first branch
     businessDoc =
@@ -75,6 +76,7 @@ abstract class _BusinessStore with Store {
       uid: FirebaseAuth.instance.currentUser.uid,
       email: FirebaseAuth.instance.currentUser.email,
       myDoc: businessDoc,
+      type: type,
     );
 
     await ap.addABranch(

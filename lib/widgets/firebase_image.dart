@@ -115,7 +115,12 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
 
   Widget _getLoader() {
     return Center(
-      child: SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2,)),
+      child: SizedBox(
+          height: 16,
+          width: 16,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+          )),
     );
   }
 }

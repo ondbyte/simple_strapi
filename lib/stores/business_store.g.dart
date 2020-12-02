@@ -78,13 +78,15 @@ mixin _$BusinessStore on _BusinessStore, Store {
       String address,
       String businessName,
       String contactNumber,
-      BusinessCategory category}) {
+      BusinessCategory category,
+      String type}) {
     return _$applyForBusinessAsyncAction.run(() => super.applyForBusiness(
         latlong: latlong,
         address: address,
         businessName: businessName,
         contactNumber: contactNumber,
-        category: category));
+        category: category,
+        type: type));
   }
 
   final _$getMyBusinessAsyncAction =

@@ -22,7 +22,9 @@ class _BusinessProfileServicesTabState
   @override
   Widget build(BuildContext context) {
     final sorted = <BusinessServiceCategory, List<BusinessService>>{};
-    final services = flow.branch.businessServices.value.all;
+    final services = flow.branch.businessServices.value.all
+        .where((element) => element.enabled.value)
+        .toList();
     final categories = flow.branch.businessServices.value.allCategories;
     categories.forEach((cat) {
       final all = services.where((serv) =>
@@ -32,7 +34,7 @@ class _BusinessProfileServicesTabState
       }
     });
     return ListView.builder(
-      padding: EdgeInsets.only(top:15),
+      padding: EdgeInsets.only(top: 15),
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       itemCount: sorted.length,

@@ -135,12 +135,24 @@ class _BusinessServicesTabState extends State<BusinessServicesTab>
                                       .elementAt(0)
                                   : kTemporaryPlaceHolderImage,
                         ),
-                        trailing: IconButton(
-                          icon: Icon(Icons.delete_forever),
-                          onPressed: () async {
-                            await businessStore.business.selectedBranch.value
+                        trailing: Switch(
+                          value: businessStore.business.selectedBranch.value
+                              .businessServices.value.all[index].enabled.value,
+                          onChanged: (b) {
+                            act(() {
+                              businessStore
+                                  .business
+                                  .selectedBranch
+                                  .value
+                                  .businessServices
+                                  .value
+                                  .all[index]
+                                  .enabled
+                                  .value = b;
+                            });
+                            businessStore.business.selectedBranch.value
                                 .businessServices.value
-                                .removeService(service);
+                                .updateService();
                           },
                         ),
                       );

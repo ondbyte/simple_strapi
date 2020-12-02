@@ -45,6 +45,7 @@ class BusinessBranch {
   String city = "";
   String locality = "";
   TheNumber misc;
+  final type = Observable("");
 
   BusinessBranch(
       {DocumentReference myDoc, @required BusinessDetails business}) {
@@ -210,6 +211,7 @@ class BusinessBranch {
     businessCategory.value = BusinessCategory.fromJson(j["businessCategory"]);
     description.value = j["description"] ?? "";
     tag.value = j["tag"] ?? "";
+    type.value = j["type"] ?? "";
     try {
       if (status.value == BusinessBranchActiveStatus.published) {
         iso2 = j["assignedAddress"]["iso2"];
@@ -264,7 +266,8 @@ class BusinessBranch {
         "iso2": iso2,
         "city": city,
         "locality": locality,
-      }
+      },
+      "type": type.value,
     };
   }
 

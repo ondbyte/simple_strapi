@@ -61,9 +61,12 @@ class BusinessServices {
     await branch.myDoc.value.update({
       "businessServices": FieldValue.arrayRemove([service.toMap()])
     });
-    await branch.myDoc.value.update({
-      "businessServices": FieldValue.arrayRemove([service.toMap()])
-    });
+  }
+
+  Future updateService() async {
+    await branch.myDoc.value.set(
+        {"businessServices": all.map((element) => element.toMap()).toList()},
+        SetOptions(merge: true));
   }
 
   Future addACategory({
@@ -110,6 +113,7 @@ class BusinessService {
   final description = Observable<String>("");
   final category = Observable<BusinessServiceCategory>(null);
   final images = ObservableMap<String, bool>();
+  final enabled = Observable(true);
 
   BusinessService.empty();
 
@@ -122,6 +126,7 @@ class BusinessService {
     final tmp = Map.fromIterable(j["images"],
         key: (s) => s as String, value: (_) => true);
     images.addAll(tmp);
+    enabled.value = j["enabled"] ?? true;
   }
 
   toMap() {
@@ -132,6 +137,7 @@ class BusinessService {
       "description": description.value,
       "category": category.value?.toMap() ?? {},
       "images": images.keys.toList(),
+      "enabled": enabled.value,
     };
   }
 
