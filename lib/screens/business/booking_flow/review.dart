@@ -192,42 +192,45 @@ class HowWasYourExperienceTile extends StatelessWidget {
       : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: borderRadius ?? BorderRadius.circular(6),
-      child: ListTile(
-        onTap: () {
-          BappNavigator.bappPush(
-            context,
-            RateTheBookingScreen(
-              booking: booking,
-            ),
-          );
-        },
-        tileColor: CardsColor.colors["lightGreen"],
-        contentPadding: padding ?? EdgeInsets.all(16),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              "How was your experience at",
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyText1
-                  .apply(color: Colors.white),
-            ),
-            Text(
-              "How was your experience at",
-              style: Theme.of(context)
-                  .textTheme
-                  .subtitle1
-                  .apply(color: Colors.white),
-            ),
-            BappRatingBar(
-              onRatingUpdated: (_) {},
-              ignoreGesture: true,
-            )
-          ],
+    return Container(
+       margin: EdgeInsets.only(top:16),
+      child: ClipRRect(
+        borderRadius: borderRadius ?? BorderRadius.circular(6),
+        child: ListTile(
+          onTap: () {
+            BappNavigator.bappPush(
+              context,
+              RateTheBookingScreen(
+                booking: booking,
+              ),
+            );
+          },
+          tileColor: CardsColor.colors["lightGreen"],
+          contentPadding: padding ?? EdgeInsets.all(16),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "How was your experience at",
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyText1
+                    .apply(color: Colors.white),
+              ),
+              Text(
+                "How was your experience at",
+                style: Theme.of(context)
+                    .textTheme
+                    .subtitle1
+                    .apply(color: Colors.white),
+              ),
+              BappRatingBar(
+                onRatingUpdated: (_) {},
+                ignoreGesture: true,
+              )
+            ],
+          ),
         ),
       ),
     );

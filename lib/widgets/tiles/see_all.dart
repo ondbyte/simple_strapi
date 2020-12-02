@@ -46,7 +46,7 @@ class SeeAllListTile extends StatelessWidget {
             ListTile(
               contentPadding: titlePadding ??
                   const EdgeInsets.only(
-                      left: 16, right: 16, top: 0, bottom: 0),
+                      left: 16, right: 16, top: 8, bottom: 0),
               title: Text(title, style: Theme.of(context).textTheme.headline6),
               trailing: GestureDetector(
                 child: Text(

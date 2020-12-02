@@ -72,13 +72,11 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     height: 20,
                   ),
                   _getFeaturedScroller(context),
-                  const SizedBox(
-                    height: 0,
-                  ),
+                 
                 ]),
               ),
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16,24,16,8),
+                padding: const EdgeInsets.fromLTRB(16,0,16,0),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate(
                     [

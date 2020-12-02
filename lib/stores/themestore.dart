@@ -375,6 +375,7 @@ abstract class _ThemeStore with Store {
         backgroundColor: Colors.grey[900],
       ),
       appBarTheme: const AppBarTheme(
+        centerTitle: false,
         brightness: Brightness.dark,
         color: Colors.black,
         // color: Colors.white,

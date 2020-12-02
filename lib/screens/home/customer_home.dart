@@ -21,6 +21,7 @@ class _CustomerHomeState extends State<CustomerHome> {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: _getPageTitle(_selectedPage),
+        centerTitle: false,
       ),
       endDrawer: Menu(),
       body: Padding(
