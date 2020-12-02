@@ -1,0 +1,8 @@
+include: package:pedantic/analysis_options.yaml
+
+linter:
+  rules:
+    unawaited_futures: false
+    prefer_interpolation_to_compose_strings: false
+    avoid_classes_with_only_static_members: false
+    prefer_single_quotes: false

@@ -445,6 +445,10 @@ class RatingConfig {
   static const reviewLabel = "Would you like share a short review?";
   static const reviewHint = "Write your review here.";
 
+  static String getThankYouForTheReviewForBooking(BusinessBooking booking){
+    return "Thank you for the review of "+ booking.branch.name.value+", looking forawrd to serve you better.";
+  }
+
   static String getFirstSentenceForRating(BookingRating rating) {
     switch (rating.type) {
       case BookingRatingType.overAll:
@@ -455,7 +459,7 @@ class RatingConfig {
         {
           return "How was the service provided by";
         }
-      case BookingRatingType.fecilities:
+      case BookingRatingType.facilities:
         {
           return "How was the facilities at";
         }
@@ -466,7 +470,7 @@ class RatingConfig {
       BookingRating rating, BusinessBooking booking) {
     switch (rating.type) {
       case BookingRatingType.overAll:
-      case BookingRatingType.fecilities:
+      case BookingRatingType.facilities:
         {
           return booking.branch.name.value;
         }

@@ -29,18 +29,19 @@ class BusinessBooking {
 
   final DocumentReference myDoc;
 
-  BusinessBooking(
-      {@required this.myDoc,
-      @required this.bookingUserType,
-      @required BusinessBookingStatus status,
-      @required this.bookedByNumber,
-      @required this.staff,
-      @required this.branch,
-      @required this.fromToTiming,
-      @required this.services,
-      @required this.remindTime,
-      @required this.bookedByName,
-      @required this.rating}) {
+  BusinessBooking({
+    @required this.myDoc,
+    @required this.bookingUserType,
+    @required BusinessBookingStatus status,
+    @required this.bookedByNumber,
+    @required this.staff,
+    @required this.branch,
+    @required this.fromToTiming,
+    @required this.services,
+    @required this.remindTime,
+    @required this.bookedByName,
+    @required this.rating,
+  }) {
     this.status.value = status;
   }
 
@@ -149,6 +150,16 @@ class BusinessBooking {
     return map;
   }
 
+  bool isActive() {
+    if (status == null) {
+      return false;
+    }
+    return status.value == BusinessBookingStatus.pending ||
+        status.value == BusinessBookingStatus.accepted;
+  }
+
+  Future sendBookingUpdate() async {}
+
   static Color getColor(BusinessBookingStatus status) {
     switch (status) {
       case BusinessBookingStatus.accepted:
@@ -215,13 +226,8 @@ class BusinessBooking {
         return "Unknown";
     }
   }
+  static Future sendUpdatesForBooking(BusinessBooking booking) async {
 
-  bool isActive() {
-    if (status == null) {
-      return false;
-    }
-    return status.value == BusinessBookingStatus.pending ||
-        status.value == BusinessBookingStatus.accepted;
   }
 }
 

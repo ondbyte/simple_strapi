@@ -4,6 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:mobx/mobx.dart';
 
+import '../fcm.dart';
+
 part 'updates_store.g.dart';
 
 class UpdatesStore = _UpdatesStore with _$UpdatesStore;
@@ -34,18 +36,18 @@ abstract class _UpdatesStore with Store {
 
   @action
   Future remove(NotificationUpdate u) async {
-    if (u.type == NotificationUpdateType.news) {
+    if (u.type == MessagOrUpdateType.news) {
       news.remove(u.state);
-    } else if (u.type == NotificationUpdateType.orderUpdate) {
+    } else if (u.type == MessagOrUpdateType.b) {
       updates.remove(u.state);
     }
   }
 
   @action
   Future undoRemove(NotificationUpdate u) async {
-    if (u.type == NotificationUpdateType.news) {
+    if (u.type == MessagOrUpdateType.news) {
       news[u.state] = u;
-    } else if (u.type == NotificationUpdateType.orderUpdate) {
+    } else if (u.type == MessagOrUpdateType.orderUpdate) {
       updates[u.state] = u;
     }
   }
@@ -94,7 +96,7 @@ abstract class _UpdatesStore with Store {
         if (element.viewed) {
           viewed[element.state] = element;
         } else {
-          if (element.type == NotificationUpdateType.news) {
+          if (element.type == MessagOrUpdateType.news) {
             news[element.state] = element;
           } else {
             updates[element.state] = element;

@@ -2,8 +2,10 @@ import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/classes/firebase_structures/rating.dart';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/helpers/extensions.dart';
-import 'package:bapp/helpers/helper.dart';
+
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
+import 'package:bapp/screens/home/bapp.dart';
+import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/widgets/loading_stack.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -25,13 +27,19 @@ class _RateTheBookingScreenState extends State<RateTheBookingScreen> {
           label: "Send feedback",
           onPressed: widget.booking.rating.isEdited()
               ? () async {
-                  act(() {
-                    kLoading.value = true;
-                  });
-                  await widget.booking.saveRating();
-                  act(() {
-                    kLoading.value = false;
-                  });
+                  BappNavigator.bappPushAndRemoveAll(
+                    context,
+                    ContextualMessageScreen(
+                      message: RatingConfig.getThankYouForTheReviewForBooking(widget.booking),
+                      buttonText: "Go to Home",
+                      onButtonPressed: (context){
+                        BappNavigator.bappPushAndRemoveAll(context, Bapp());
+                      },
+                      init: () async {
+                        await widget.booking.saveRating();
+                      },
+                    ),
+                  );
                   Navigator.pop(context);
                 }
               : null,
@@ -48,7 +56,7 @@ class _RateTheBookingScreenState extends State<RateTheBookingScreen> {
                   (i) {
                     final r = widget.booking.rating.all.values.elementAt(i);
                     return Padding(
-                      padding: EdgeInsets.only(bottom: 20),
+                      padding: const EdgeInsets.only(bottom: 20),
                       child: RatingTile(
                         firstSentence:
                             RatingConfig.getFirstSentenceForRating(r),
@@ -70,7 +78,7 @@ class _RateTheBookingScreenState extends State<RateTheBookingScreen> {
                   onChanged: (s) {
                     widget.booking.rating.review = s;
                   },
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: RatingConfig.reviewLabel,
                     hintText: RatingConfig.reviewHint,
                   ),
@@ -111,7 +119,7 @@ class RatingTile extends StatelessWidget {
             secondSentence,
             style: Theme.of(context).textTheme.subtitle1,
           ),
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
           BappRatingBar(
@@ -162,23 +170,7 @@ class BappRatingBar extends StatelessWidget {
       ),
       onRatingUpdate: onRatingUpdated,
     );
-    return RatingBar.builder(
-      allowHalfRating: false,
-      itemCount: 5,
-      minRating: 1,
-      maxRating: 5,
-      initialRating: 0,
-      ignoreGestures: ignoreGesture,
-      unratedColor: Theme.of(context).disabledColor,
-      itemBuilder: (_, __) {
-        return const Icon(
-          Icons.star,
-        );
-      },
-      onRatingUpdate: (r) {
-        onRatingUpdated(r);
-      },
-    );
+
   }
 }
 
@@ -204,7 +196,7 @@ class HowWasYourExperienceTile extends StatelessWidget {
           );
         },
         tileColor: CardsColor.colors["lightGreen"],
-        contentPadding: padding ?? EdgeInsets.all(16),
+        contentPadding: padding ?? const EdgeInsets.all(16),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,

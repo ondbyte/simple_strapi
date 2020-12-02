@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -33,22 +34,17 @@ class BappFCM {
 
   BappFCM._once();
 
-  void listenForStaffingAuthorizationOnce(Function(BappFCMMessage) fn,
-      {Duration duration = const Duration(seconds: 60)}) {
-    if (_staffingAuthorizationListener != null) {
-      throw Exception("this should never be the case @BappFCM");
-    }
-    _staffingAuthorizationListener = fn;
-    Future.delayed(duration, () {
-      if (_staffingAuthorizationListener != null) {
-        _staffingAuthorizationListener(null);
-        _staffingAuthorizationListener = null;
-      }
-    });
-  }
-
   void listenForBappMessages(Function(BappFCMMessage) fn) {
     _bappMessagesListener = fn;
+
+    ///deliver cached messages when listener is added
+    if (messageCache.isNotEmpty) {
+      final c = messageCache;
+      messageCache.clear();
+      c.forEach((element) {
+        _deliverToListener(element);
+      });
+    }
   }
 
   initForAndroid() {
@@ -69,6 +65,7 @@ class BappFCM {
       if (enabled) {
         _init(_fcm);
         _fcm.setAutoInitEnabled(true);
+        isFcmInitialized = true;
       } else {
         if (!isFcmInitialized) {
           _fcm.onIosSettingsRegistered.listen(
@@ -89,6 +86,7 @@ class BappFCM {
       var bappMessage;
       try {
         bappMessage = BappFCMMessage.fromJson(j: Map.castFrom(message["data"]));
+        _deliverToListener(bappMessage);
       } catch (e) {
         Helper.printLog(e.toString());
       }
@@ -113,63 +111,81 @@ class BappFCM {
     kNotifEnabled = true;
     print("FCM initialized for " + Platform.operatingSystem);
   }
+
+  ///cached messages
+  List<BappFCMMessage> messageCache = [];
+  void _deliverToListener([BappFCMMessage bappMessage]) {
+    ///as this is a singleton class, while this class is instantiated, the apps widget tree might not be built
+    ///so wait and cache the FCM until there is a listener available
+    if (_bappMessagesListener == null) {
+      messageCache.add(bappMessage);
+    } else {
+      _bappMessagesListener(bappMessage);
+    }
+  }
 }
 
 class BappFCMMessage {
-  BappFCMMessageType type;
-  String title;
-  String body;
-  Map<String, String> data;
+  final MessagOrUpdateType type;
+  final String title;
+  final String body;
 
   ///international number
-  String to;
+  final String to;
 
   ///international number
-  String frm;
-  String click_action;
-  BappFCMMessagePriority priority;
-  DateTime remindTime;
+  final String frm;
+  final String click_action;
+  final BappFCMMessagePriority priority;
+  final DateTime remindTime;
+  final Map<String, String> data;
+  final UserType forUserType;
 
-  BappFCMMessage(
-      {this.title = "",
-      this.body = "",
-      this.type,
-      this.data,
-      this.frm = "",
-      this.to = "",
-      this.priority = BappFCMMessagePriority.high,
-      this.click_action = "BAPP_NOTIFICATION_CLICK"}) {
-    data?.remove("type");
-    data?.remove("title");
-    data?.remove("body");
-    data?.remove("frm");
-    data?.remove("to");
-    data?.remove("priority");
-    data?.remove("click_action");
-  }
+  BappFCMMessage({
+    this.title = "",
+    this.body = "",
+    this.type,
+    this.data,
+    this.frm = "",
+    this.to = "",
+    this.remindTime,
+    this.priority = BappFCMMessagePriority.high,
+    this.click_action = "BAPP_NOTIFICATION_CLICK",
+    this.forUserType,
+  });
 
-  toReminderMessage({DateTime remindTime}) {
-    this.remindTime = remindTime;
-  }
-
-  BappFCMMessage.fromJson({Map<String, String> j}) {
-    type = EnumToString.fromString(BappFCMMessageType.values, j["type"]);
-    title = j.remove("title");
-    body = j.remove("body");
-    frm = j.remove("frm");
-    to = j.remove("to");
-    priority = EnumToString.fromString(
-      BappFCMMessagePriority.values,
-      j.remove("priority"),
+  static BappFCMMessage fromJson({Map<String, String> j}) {
+    return BappFCMMessage(
+      type: EnumToString.fromString(MessagOrUpdateType.values, j["type"]),
+      title: j.remove("title"),
+      body: j.remove("body"),
+      frm: j.remove("frm"),
+      to: j.remove("to"),
+      priority: EnumToString.fromString(
+        BappFCMMessagePriority.values,
+        j.remove("priority"),
+      ),
+      click_action: j.remove("click_action"),
+      data: j,
     );
-    click_action = j.remove("click_action");
-    data = j;
+  }
+
+  BappFCMMessage update({DateTime remindTime,String to}) {
+    return BappFCMMessage(
+      type: type,
+      title: title,
+      to: to??this.to,
+      frm: frm,
+      data: data,
+      priority: priority,
+      body: body,
+      click_action: click_action,
+      remindTime: remindTime??this.remindTime,
+    );
   }
 
   Map<String, String> toMap() {
-    List diet;
-
-    if (type == BappFCMMessageType.reminder) {
+    if (type == MessagOrUpdateType.reminder) {
       assert(remindTime != null, "reminder message must have a reminding time");
     }
     final m = {
@@ -189,9 +205,11 @@ class BappFCMMessage {
   }
 }
 
-enum BappFCMMessageType {
+enum MessagOrUpdateType {
   reminder,
   bookingUpdate,
+  bookingRating,
+  news
 }
 
 enum BappFCMMessagePriority { high }

@@ -5,8 +5,8 @@ class CompleteBookingRating {
   final all = <BookingRatingType, BookingRating>{
     BookingRatingType.overAll: BookingRating(type: BookingRatingType.overAll),
     BookingRatingType.staff: BookingRating(type: BookingRatingType.staff),
-    BookingRatingType.fecilities:
-        BookingRating(type: BookingRatingType.fecilities)
+    BookingRatingType.facilities:
+        BookingRating(type: BookingRatingType.facilities)
   };
   String review;
   final bool isRated;
@@ -74,4 +74,4 @@ class BookingRating {
   }
 }
 
-enum BookingRatingType { overAll, staff, fecilities }
+enum BookingRatingType { overAll, staff, facilities }

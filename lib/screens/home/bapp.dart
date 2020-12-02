@@ -25,26 +25,6 @@ class _BappState extends State<Bapp> {
       init: (cloudStore) async {
         await Provider.of<UpdatesStore>(context, listen: false).init(context);
         await Provider.of<BookingFlow>(context, listen: false).getMyBookings();
-        //await Provider.of<BusinessStore>(context, listen: false).init(context);
-        //Helper.printLog("setting up message layer");
-        BappFCM().listenForBappMessages(
-          (bappMessage) {
-            //Helper.printLog("bappMessage");
-            //print(bappMessage.toMap());
-            setState(
-              () async {
-                final result = await showDialog(
-                  context: context,
-                  builder: (_) {
-                    return BappFCMMesssageLayerWidget(
-                      latestMessage: bappMessage,
-                    );
-                  },
-                );
-              },
-            );
-          },
-        );
       },
       builder: (_, cloudStore) {
         return Stack(
@@ -89,9 +69,34 @@ class _BappFCMMesssageLayerWidgetState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      setState(() {
-        _latestMessage = widget.latestMessage;
-      });
+      BappFCM().listenForBappMessages(
+        (bappMessage) {
+          setState(
+            () async {
+              showDialog(
+                context: context,
+                builder: (_) {
+                  if (bappMessage == null) {
+                    return SizedBox();
+                  }
+                  return AlertDialog(
+                    title: Text(bappMessage.title),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(bappMessage.body),
+                        SizedBox(
+                          height: 20,
+                        )
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+          );
+        },
+      );
     });
   }
 

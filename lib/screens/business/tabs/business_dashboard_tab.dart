@@ -1,6 +1,7 @@
 import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/screens/business/booking_flow/booking_details.dart';
+import 'package:bapp/screens/business/booking_flow/see_all_booking.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
@@ -25,7 +26,7 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
           child: CustomScrollView(
             slivers: [
               SliverPadding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate(
                     [
@@ -41,10 +42,10 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
                                 Consumer<CloudStore>(
                                   builder: (_, authStore, __) {
                                     return Text(
-                                        "Hello " + authStore.user.displayName,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .headline1);
+                                      "Hello " + authStore.user.displayName,
+                                      style:
+                                          Theme.of(context).textTheme.headline1,
+                                    );
                                   },
                                 ),
                                 Text(
@@ -58,8 +59,9 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
                                         return Text(
                                           "For " +
                                               DateFormat("MMMM dd, yyyy")
-                                                  .format(businessStore
-                                                      .dayForTheDetails),
+                                                  .format(
+                                                businessStore.dayForTheDetails,
+                                              ),
                                           style: Theme.of(context)
                                               .textTheme
                                               .bodyText1,
@@ -72,7 +74,7 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
                             ),
                           ),
                           IconButton(
-                            icon: Icon(Icons.calendar_today_outlined),
+                            icon: const Icon(Icons.calendar_today_outlined),
                             onPressed: () async {
                               final store = Provider.of<BusinessStore>(context,
                                   listen: false);
@@ -80,7 +82,7 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
                                   context: context,
                                   initialDate: store.dayForTheDetails,
                                   firstDate: DateTime.now()
-                                      .subtract(Duration(days: 365)),
+                                      .subtract(const Duration(days: 365)),
                                   lastDate: DateTime.now());
                               store.dayForTheDetails =
                                   selectedDate ?? store.dayForTheDetails;
@@ -88,7 +90,7 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
                           )
                         ],
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 20,
                       ),
                       Text("Things that need your attention ",
@@ -105,13 +107,13 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
                     Observer(
                       builder: (_) {
                         if (flow.branchBookings.isEmpty) {
-                          return SizedBox();
+                          return const SizedBox();
                         }
                         return BookingsSeeAllTile(
                           title: "New Bookings",
                           bookings: flow.getNewBookings(),
-                          titlePadding: EdgeInsets.symmetric(horizontal: 16),
-                          childPadding: EdgeInsets.symmetric(horizontal: 8),
+                          titlePadding: const EdgeInsets.symmetric(horizontal: 16),
+                          childPadding: const EdgeInsets.symmetric(horizontal: 8),
                         );
                       },
                     )
@@ -124,13 +126,13 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
                     Observer(
                       builder: (_) {
                         if (flow.branchBookings.isEmpty) {
-                          return SizedBox();
+                          return const SizedBox();
                         }
                         return BookingsSeeAllTile(
                           title: "Upcoming Bookings",
                           bookings: flow.getUpcomingBookings(),
-                          titlePadding: EdgeInsets.symmetric(horizontal: 16),
-                          childPadding: EdgeInsets.symmetric(horizontal: 8),
+                          titlePadding: const EdgeInsets.symmetric(horizontal: 16),
+                          childPadding: const EdgeInsets.symmetric(horizontal: 8),
                         );
                       },
                     )
@@ -141,95 +143,6 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
           ),
         );
       },
-    );
-  }
-}
-
-class BookingsSeeAllTile extends StatelessWidget {
-  final String title;
-  final EdgeInsets padding, titlePadding, childPadding;
-  final List<BusinessBooking> bookings;
-
-  const BookingsSeeAllTile(
-      {Key key,
-      this.bookings,
-      this.title = "",
-      this.padding,
-      this.titlePadding,
-      this.childPadding})
-      : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    if (bookings.isEmpty) {
-      return SizedBox();
-    }
-    return SeeAllListTile(
-      title: title,
-      onSeeAll: () {
-        BappNavigator.bappPush(
-          context,
-          AllBookingsScreen(
-            bookings: bookings,
-          ),
-        );
-      },
-      itemCount: bookings.length,
-      padding: padding,
-      titlePadding: titlePadding,
-      childPadding: childPadding,
-      itemBuilder: (_, i) {
-        return BookingTile(
-          booking: bookings[i],
-          isCustomerView: false,
-          onTap: () {
-            BappNavigator.bappPush(
-              context,
-              BookingDetailsScreen(
-                booking: bookings[i],
-                isCustomerView: false,
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-}
-
-class AllBookingsScreen extends StatefulWidget {
-  final List<BusinessBooking> bookings;
-
-  const AllBookingsScreen({Key key, this.bookings}) : super(key: key);
-  @override
-  _AllBookingsScreenState createState() => _AllBookingsScreenState();
-}
-
-class _AllBookingsScreenState extends State<AllBookingsScreen> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("All bookings"),
-      ),
-      body: ListView.builder(
-        padding: EdgeInsets.symmetric(horizontal: 8),
-        itemCount: widget.bookings.length,
-        itemBuilder: (_, i) {
-          return BookingTile(
-            booking: widget.bookings[i],
-            isCustomerView: false,
-            onTap: () {
-              BappNavigator.bappPush(
-                context,
-                BookingDetailsScreen(
-                  booking: widget.bookings[i],
-                  isCustomerView: false,
-                ),
-              );
-            },
-          );
-        },
-      ),
     );
   }
 }
