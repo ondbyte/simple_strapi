@@ -72,13 +72,11 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     height: 20,
                   ),
                   _getFeaturedScroller(context),
-                  const SizedBox(
-                    height: 20,
-                  ),
+                 
                 ]),
               ),
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.fromLTRB(16,0,16,0),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate(
                     [
@@ -87,7 +85,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                       if (authStore.status == AuthStatus.userPresent)
                         _getHowWasYourExperience(context),
                       const SizedBox(
-                        height: 20,
+                        
                       ),
                       Consumer<CloudStore>(
                         builder: (_, cloudStore, __) {
@@ -127,7 +125,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
               if (snap.hasData && snap.data.isNotEmpty) {
                 return SeeAllListTile(
                   title: "Featured on Bapp",
-                  childPadding: EdgeInsets.all(16),
+                  childPadding: EdgeInsets.symmetric(horizontal:16),
                   onSeeAll: () {
                     BappNavigator.bappPush(
                       context,
@@ -155,8 +153,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
                         backgroundColor: CardsColor.colors["lightGreen"],
                         label: Text(
                           "Featured",
-                          style: Theme.of(context).textTheme.bodyText1.apply(
-                                color: Theme.of(context).backgroundColor,
+                          style: Theme.of(context).textTheme.overline.apply(
+                                color: Theme.of(context).primaryColorLight,
                               ),
                         ),
                       ),
