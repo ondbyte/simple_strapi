@@ -153,8 +153,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
                         backgroundColor: CardsColor.colors["lightGreen"],
                         label: Text(
                           "Featured",
-                          style: Theme.of(context).textTheme.bodyText1.apply(
-                                color: Theme.of(context).backgroundColor,
+                          style: Theme.of(context).textTheme.overline.apply(
+                                color: Theme.of(context).primaryColorLight,
                               ),
                         ),
                       ),
