@@ -85,7 +85,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                       if (authStore.status == AuthStatus.userPresent)
                         _getHowWasYourExperience(context),
                       const SizedBox(
-                        
+                        height: 20,
                       ),
                       Consumer<CloudStore>(
                         builder: (_, cloudStore, __) {

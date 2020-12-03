@@ -37,31 +37,38 @@ class _SplashScreenState extends State<SplashScreen>
         await Provider.of<ThemeStore>(context, listen: false).init();
         await _initCrashlytics();
         await Provider.of<CloudStore>(context, listen: false).init(
-            onLogin: () async {
-          if (mounted) {
-            //await FirebaseAuth.instance.signOut();
-            final cloudStore = Provider.of<CloudStore>(context, listen: false);
-            await Provider.of<BusinessStore>(context, listen: false)
-                .init(context);
+          onLogin: () async {
+            if (mounted) {
+              //await FirebaseAuth.instance.signOut();
+              final cloudStore =
+                  Provider.of<CloudStore>(context, listen: false);
+              await Provider.of<BusinessStore>(context, listen: false)
+                  .init(context);
 
-            if (cloudStore.myAddress != null) {
-              ///customer is not a first timer
-              BappNavigator.bappPushAndRemoveAll(context, Bapp());
-              killState = !killState;
-              return;
-            } else {
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                  RouteManager.pickAPlace, (route) => false);
-              killState = !killState;
-              return;
+              if (cloudStore.myAddress != null) {
+                ///customer is not a first timer
+                if (mounted) {
+                  BappNavigator.bappPushAndRemoveAll(context, Bapp());
+                }
+                killState = !killState;
+                return;
+              } else {
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  RouteManager.pickAPlace,
+                  (route) => false,
+                );
+                killState = !killState;
+                return;
+              }
             }
-          }
-        }, onNotLogin: () async {
-          if (mounted) {
-            Navigator.of(context).pushNamed(RouteManager.onBoardingScreen);
-          }
-          return;
-        });
+          },
+          onNotLogin: () async {
+            if (mounted) {
+              Navigator.of(context).pushNamed(RouteManager.onBoardingScreen);
+            }
+            return;
+          },
+        );
         //await context.read<FeedbackStore>().init();
       },
 

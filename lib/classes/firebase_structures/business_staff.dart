@@ -61,8 +61,7 @@ class BusinessStaff {
         business.branches.value.firstWhere((b) => b.myDoc.value == j["branch"]);
     contactNumber =
         TheCountryNumber().parseNumber(internationalNumber: j["contactNumber"]);
-    images = Map.fromIterable(j["images"],
-            key: (v) => v as String, value: (_) => true) ??
+    images = { for (var v in j["images"]) v as String : true } ??
         {};
     rating = j["rating"] ?? 0;
   }

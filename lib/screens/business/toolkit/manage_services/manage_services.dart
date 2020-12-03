@@ -1,6 +1,8 @@
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/firebase_image.dart';
@@ -105,60 +107,70 @@ class _BusinessServicesTabState extends State<BusinessServicesTab>
           builder: (_) {
             return Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  ...List.generate(
-                    businessStore.business.selectedBranch.value.businessServices
-                        .value.all.length,
-                    (index) {
-                      final service = businessStore.business.selectedBranch
-                          .value.businessServices.value.all[index];
-                      return ListTile(
-                        title: Text(service.serviceName.value),
-                        subtitle: Text(
-                          cloudStore.theNumber.country.currency +
-                              " " +
-                              service.price.value.ceil().toInt().toString() +
-                              ", " +
-                              service.duration.value.inMinutes.toString() +
-                              " Minutes" +
-                              "\n" +
-                              "Category : " +
-                              service.category.value.categoryName.value,
-                        ),
-                        leading: ListTileFirebaseImage(
-                          storagePathOrURL: service.images.isNotEmpty
-                              ? service.images.keys.elementAt(0)
-                              : service.category.value.images.isNotEmpty
-                                  ? service.category.value.images.keys
-                                      .elementAt(0)
-                                  : kTemporaryPlaceHolderImage,
-                        ),
-                        trailing: Switch(
-                          value: businessStore.business.selectedBranch.value
-                              .businessServices.value.all[index].enabled.value,
-                          onChanged: (b) {
-                            act(() {
-                              businessStore
-                                  .business
-                                  .selectedBranch
-                                  .value
-                                  .businessServices
-                                  .value
-                                  .all[index]
-                                  .enabled
-                                  .value = b;
-                            });
-                            businessStore.business.selectedBranch.value
-                                .businessServices.value
-                                .updateService();
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ...List.generate(
+                      businessStore.business.selectedBranch.value.businessServices
+                          .value.all.length,
+                          (index) {
+                        final service = businessStore.business.selectedBranch
+                            .value.businessServices.value.all[index];
+                        return ListTile(
+                          onTap: (){
+                            BappNavigator.bappPush(context, BusinessAddAServiceScreen(service: service,));
                           },
-                        ),
-                      );
-                    },
-                  )
-                ],
+                          title: Text(service.serviceName.value),
+                          subtitle: Text(
+                            cloudStore.theNumber.country.currency +
+                                " " +
+                                service.price.value.ceil().toInt().toString() +
+                                ", " +
+                                service.duration.value.inMinutes.toString() +
+                                " Minutes" +
+                                "\n" +
+                                "Category : " +
+                                service.category.value.categoryName.value,
+                          ),
+                          leading: ListTileFirebaseImage(
+                            storagePathOrURL: service.images.isNotEmpty
+                                ? service.images.keys.elementAt(0)
+                                : service.category.value.images.isNotEmpty
+                                ? service.category.value.images.keys
+                                .elementAt(0)
+                                : kTemporaryPlaceHolderImage,
+                          ),
+                          trailing: Switch(
+                            value: businessStore.business.selectedBranch.value
+                                .businessServices.value.all[index].enabled.value,
+                            onChanged: (b) {
+                              act(
+                                    () {
+                                  businessStore
+                                      .business
+                                      .selectedBranch
+                                      .value
+                                      .businessServices
+                                      .value
+                                      .all[index]
+                                      .enabled
+                                      .value = b;
+                                },
+                              );
+                              businessStore.business.selectedBranch.value
+                                  .businessServices.value
+                                  .save(
+                                service: businessStore.business.selectedBranch
+                                    .value.businessServices.value.all[index],
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    )
+                  ],
+                ),
               ),
             );
           },

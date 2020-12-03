@@ -10,6 +10,10 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
 class BusinessAddAServiceScreen extends StatefulWidget {
+  final BusinessService service;
+
+  const BusinessAddAServiceScreen({Key key, this.service}) : super(key: key);
+
   @override
   _BusinessAddAServiceScreenState createState() =>
       _BusinessAddAServiceScreenState();
@@ -17,8 +21,12 @@ class BusinessAddAServiceScreen extends StatefulWidget {
 
 class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
   final _key = GlobalKey<FormState>();
-  BusinessServiceCategory _category;
-  final _service = BusinessService.empty();
+  BusinessService _service;
+  @override
+  void initState() {
+    _service = widget.service ?? BusinessService.empty();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,13 +47,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
               act(() {
                 businessStore
                     .business.selectedBranch.value.businessServices.value
-                    .addAService(
-                        images: _service.images,
-                        category: _category,
-                        duration: _service.duration.value,
-                        description: _service.description.value,
-                        price: _service.price.value,
-                        serviceName: _service.serviceName.value);
+                    .save(service: _service);
                 Navigator.of(context).pop();
               });
               act(() {
@@ -53,7 +55,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
               });
             }
           },
-          label: "Add",
+          label: widget.service==null?"Add":"Update",
           padding: const EdgeInsets.all(16),
         ),
         body: GestureDetector(
@@ -84,6 +86,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                                     .toList();
                                 return DropdownButtonFormField<
                                     BusinessServiceCategory>(
+                                  value: _service?.category.value,
                                   decoration: const InputDecoration(
                                       labelText: "Category"),
                                   items: <
@@ -107,7 +110,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                                   },
                                   onChanged: (c) {
                                     act(() {
-                                      _category = c;
+                                      _service.category.value = c;
                                     });
                                     FocusScope.of(context).nextFocus();
                                   },
@@ -118,6 +121,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                               height: 20,
                             ),
                             TextFormField(
+                              initialValue: _service.serviceName.value,
                               decoration: const InputDecoration(
                                   labelText: "Name of the product"),
                               validator: (s) {
@@ -142,6 +146,8 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                               children: [
                                 Expanded(
                                   child: TextFormField(
+                                    initialValue:
+                                        "" + _service?.price.value.toString(),
                                     decoration: InputDecoration(
                                       labelText: "Price",
                                       suffix: Text(cloudStore
@@ -171,6 +177,9 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                                 ),
                                 Expanded(
                                   child: TextFormField(
+                                    initialValue: "" +
+                                        _service?.duration.value.inMinutes
+                                            .toString(),
                                     decoration: const InputDecoration(
                                       labelText: "Duration",
                                       suffix: Text("Minutes"),
@@ -206,6 +215,9 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                               height: 20,
                             ),
                             TextFormField(
+                              initialValue: _service == null
+                                  ? ""
+                                  : _service.description.value,
                               decoration: const InputDecoration(
                                 labelText: "Description",
                               ),

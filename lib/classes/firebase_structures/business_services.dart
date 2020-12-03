@@ -12,10 +12,10 @@ class BusinessServices {
 
   BusinessServices.empty({this.branch});
 
-  BusinessServices.fromJsonList(List<dynamic> l, {@required this.branch}) {
+  BusinessServices.fromJson(Map<String,dynamic> j, {@required this.branch}) {
     assert(branch != null);
-    l.forEach((i) {
-      final item = i as Map<String, dynamic>;
+    j.forEach((key, value) {
+      final item = value as Map<String,dynamic>;
       if (item.keys.contains("serviceName")) {
         all.add(BusinessService.fromJson(item));
       } else if (item.keys.contains("categoryName")) {
@@ -29,44 +29,28 @@ class BusinessServices {
         s.category.value.categoryName.value == category.categoryName.value);
   }
 
-  Future addAService({
-    String serviceName,
-    double price,
-    Duration duration,
-    String description,
-    BusinessServiceCategory category,
-    Map<String, bool> images,
-  }) async {
-    final imgs = await uploadImagesToStorageAndReturnStringList(images);
-    final service = BusinessService.empty()
-      ..category.value = category
-      ..serviceName.value = serviceName
-      ..price.value = price
-      ..duration.value = duration
-      ..description.value = description
-      ..images.clear()
-      ..images.addAll(imgs);
+  Future save({BusinessService service}) async {
+    final oldImgs = service.images;
+    final imgs = await uploadImagesToStorageAndReturnStringList(oldImgs);
+    service.images.clear();
+    service.images.addAll(imgs);
 
+
+    all.removeWhere((element) => element.serviceName==service.serviceName);
     all.add(service);
-    await branch.myDoc.value.update({
-      "businessServices": FieldValue.arrayUnion([service.toMap()])
-    });
-    await branch.myDoc.value.update({
-      "businessServices": FieldValue.arrayUnion([service.toMap()])
-    });
+    await branch.myDoc.value.update(
+      {
+        "businessServices": {
+          service.serviceName.value: service.toMap(),
+        },
+      },
+    );
   }
 
   Future removeService(BusinessService service) async {
     all.remove(service);
-    await branch.myDoc.value.update({
-      "businessServices": FieldValue.arrayRemove([service.toMap()])
-    });
-  }
-
-  Future updateService() async {
-    await branch.myDoc.value.set(
-        {"businessServices": all.map((element) => element.toMap()).toList()},
-        SetOptions(merge: true));
+    await branch.myDoc.value.update(
+        {"businessServices.${service.serviceName}": FieldValue.delete()});
   }
 
   Future addACategory({
@@ -94,15 +78,15 @@ class BusinessServices {
     });
   }
 
-  toList() {
-    final l = [];
+  Map<String,dynamic> toMap() {
+    final map = <String, dynamic>{};
     all.forEach((element) {
-      l.add(element.toMap());
+      map.addAll({element.serviceName.value: element.toMap()});
     });
     allCategories.forEach((element) {
-      l.add(element.toMap());
+      map.addAll({element.categoryName.value: element.toMap()});
     });
-    return l;
+    return map;
   }
 }
 

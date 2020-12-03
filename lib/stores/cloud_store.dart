@@ -205,17 +205,19 @@ abstract class _CloudStore with Store {
           } else if (type == FavoriteType.businessBranch) {
             branch = await getBranch(reference: entry.value["businessBranch"]);
           } else if (type == FavoriteType.businessService) {
-            service = BusinessService.fromJson(entry.value["businessService"]);
+            service = null;//BusinessService.fromJson(entry.value["businessService"]);
           }
-          favorites.add(
-            Favorite(
-              id: key,
-              type: type,
-              business: business,
-              businessBranch: branch,
-              businessService: service,
-            ),
-          );
+          if(business!=null||branch!=null||service!=null){
+            favorites.add(
+              Favorite(
+                id: key,
+                type: type,
+                business: business,
+                businessBranch: branch,
+                businessService: service,
+              ),
+            );
+          }
         });
       }
     }
@@ -513,6 +515,9 @@ abstract class _CloudStore with Store {
     }
     if (branches.containsKey(reference)) {
       return branches[reference];
+    }
+    if(reference==null){
+      return null;
     }
     final snap = await reference.get();
     if (snap.exists) {

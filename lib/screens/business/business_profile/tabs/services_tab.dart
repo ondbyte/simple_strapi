@@ -26,12 +26,8 @@ class _BusinessProfileServicesTabState
         .where((element) => element.enabled.value)
         .toList();
     final categories = flow.branch.businessServices.value.allCategories;
-    categories.forEach((cat) {
-      final all = services.where((serv) =>
-          serv.category.value.categoryName.value == cat.categoryName.value);
-      if (all.isNotEmpty) {
-        sorted.addAll({cat: all.toList()});
-      }
+    services.forEach((element) {
+      sorted.update(element.category.value, (value) => value..add(element),ifAbsent: ()=>[element]);
     });
     return ListView.builder(
       padding: EdgeInsets.only(top: 15),

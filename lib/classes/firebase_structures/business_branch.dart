@@ -190,17 +190,19 @@ class BusinessBranch {
       staff.addAll(List.castFrom(j["staff"])
           .map((e) => BusinessStaff.fromJson(business: business.value, j: e)));
     }
-    manager.value = j["manager"] != null
+    final managerData = j["manager"];
+    manager.value =  !isNullOrEmpty(managerData)
         ? BusinessStaff.fromJson(business: business.value, j: j["manager"])
         : null;
-    receptionist.value = j["receptionist"] != null
+    final recepData = j["receptionist"];
+    receptionist.value =  !isNullOrEmpty(j["receptionist"])
         ? BusinessStaff.fromJson(business: business.value, j: j["receptionist"])
         : null;
     contactNumber.value = j["contactNumber"];
     email.value = j["email"];
     rating.value = j["rating"];
     businessServices.value =
-        BusinessServices.fromJsonList(j["businessServices"], branch: this);
+        BusinessServices.fromJson(j["businessServices"], branch: this);
     businessTimings.value = BusinessTimings.fromJson(j["businessTimings"]);
     businessHolidays.value = BusinessHolidays.fromJsonList(
       j["businessHolidays"],
@@ -242,26 +244,26 @@ class BusinessBranch {
 
   Map<String, dynamic> toMap() {
     return {
-      "images": images.keys.toList(),
-      "name": name.value,
-      "address": address.value,
+      "images": images.keys.toList()??[],
+      "name": name.value??"",
+      "address": address.value??"",
       "latlong": latlong.value,
       "staff": staff.map((element) => element.toMap()).toList(),
-      "manager": manager.value?.toMap(),
-      "receptionist": receptionist.value?.toMap(),
+      "manager": manager.value?.toMap()??{},
+      "receptionist": receptionist.value?.toMap()??{},
       "business": business.value.myDoc.value,
       "myDoc": myDoc.value,
-      "contactNumber": contactNumber.value,
-      "email": email.value,
-      "rating": rating.value,
-      "businessServices": businessServices.value?.toList() ?? [],
+      "contactNumber": contactNumber.value??"",
+      "email": email.value??"",
+      "rating": rating.value??0.0,
+      "businessServices": businessServices.value?.toMap() ?? {},
       "businessTimings":
           businessTimings.value?.toMap() ?? BusinessTimings.empty().toMap(),
       "businessHolidays": businessHolidays.value?.toList() ?? [],
-      "status": EnumToString.convertToString(status.value),
-      "businessCategory": businessCategory.value.toMap(),
-      "tag": tag.value,
-      "description": description.value,
+      "status": EnumToString.convertToString(status.value)??"",
+      "businessCategory": businessCategory.value.toMap()??{},
+      "tag": tag.value??"",
+      "description": description.value??"",
       "assignedAddress": {
         "iso2": iso2,
         "city": city,

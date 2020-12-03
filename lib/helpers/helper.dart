@@ -78,6 +78,9 @@ bool isNullOrEmpty(dynamic variable) {
   if (variable == null) {
     return true;
   }
+  if(variable is Map){
+    return variable.isEmpty;
+  }
   if (variable is Iterable) {
     return variable.isEmpty;
   }
