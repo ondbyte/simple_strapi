@@ -24,6 +24,9 @@ class _BusinessManageContactDetailsScreenState
       builder: (_, businessStore, __) {
         _previousEmail =
             businessStore.business.selectedBranch.value.email.value;
+        _previousNumber = TheCountryNumber().parseNumber(internationalNumber: businessStore.business.contactNumber.value);
+        _enteredNumber = _previousNumber;
+        _email = _previousEmail;
         return Scaffold(
           appBar: AppBar(
             automaticallyImplyLeading: true,
@@ -37,6 +40,7 @@ class _BusinessManageContactDetailsScreenState
                       _email;
                   businessStore.business.selectedBranch.value.contactNumber
                       .value = _enteredNumber.internationalNumber;
+                  Navigator.pop(context);
                 },
               );
             },
