@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:bapp/classes/firebase_structures/business_category.dart';
 import 'package:bapp/classes/firebase_structures/business_details.dart';
 import 'package:bapp/config/config_data_types.dart';
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:bapp/stores/all_store.dart';
@@ -8,9 +11,7 @@ import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:mobx/mobx.dart';
-import 'package:provider/provider.dart';
 
 part 'business_store.g.dart';
 
@@ -30,13 +31,11 @@ abstract class _BusinessStore with Store {
 
   DocumentReference businessDoc;
 
-  CloudStore _cloudStore;
-
   AllStore _allStore;
 
   void setAllStore(AllStore allStore) => _allStore = allStore;
 
-  Future init(BuildContext context) async {
+  Future init() async {
     _user = _auth.currentUser;
     userRelatedUpdate();
     _auth.userChanges().listen((u) {
@@ -46,7 +45,6 @@ abstract class _BusinessStore with Store {
       }
     });
 
-    _cloudStore = Provider.of<CloudStore>(context, listen: false);
     await getMyBusiness();
   }
 
@@ -88,36 +86,41 @@ abstract class _BusinessStore with Store {
 
     await ap.saveBusiness();
 
-    _cloudStore.alterEgo = UserType.businessOwner;
+    _allStore.get<CloudStore>().alterEgo = UserType.businessOwner;
 
     business = ap;
   }
 
   @action
   Future getMyBusiness() async {
+    final completer = Completer<bool>();
     final cloudStore = _allStore.get<CloudStore>();
-    if(cloudStore.alterEgo == UserType.customer){
-      return;
+    if (cloudStore.userType == UserType.customer) {
+      return false;
     }
-    if(!cloudStore.myData.containsKey("branches")){
-      return;
+    if (!cloudStore.myData.containsKey("branches")) {
+      return false;
     }
-    final allBranchesData = cloudStore.myData["barnches"] as Map<String,dynamic>??{};
-    if(isNullOrEmpty(allBranchesData)){
-      return;
+    final allBranchesRef =
+        cloudStore.myData["branches"] as Map<String, dynamic> ?? {};
+    if (isNullOrEmpty(allBranchesRef)) {
+      return false;
     }
-    allBranchesData
-
-    final businessDetails = await _fireStore
-        .doc("businesses/${FirebaseAuth.instance.currentUser.uid}")
-        .get();
-
-    if (businessDetails.exists) {
-      final data = businessDetails.data();
-      //print(data);
-      business = BusinessDetails.fromJson(data);
-      _allStore.get<BookingFlow>().branch = business.selectedBranch.value;
-    }
+    final busRef = cloudStore.myData["business"] as DocumentReference;
+    busRef.snapshots().listen(
+      (event) {
+        business = BusinessDetails.fromJson(event.data());
+        final filtered = business.branches.value.where(
+          (element) => allBranchesRef.values
+              .any((el) => (el as DocumentReference) == element.myDoc.value),
+        );
+        business.branches.value.clear();
+        business.branches.value.addAll(filtered);
+        _allStore.get<BookingFlow>().branch = business.selectedBranch.value;
+        completer.cautiousComplete(true);
+      },
+    );
+    return completer.future;
   }
 
   @action

@@ -32,44 +32,45 @@ class _SplashScreenState extends State<SplashScreen>
     super.build(context);
     return InitWidget(
       initializer: () async {
-        ///init authentication store / load user
-        BappFCM().initForAndroid();
-        await Provider.of<ThemeStore>(context, listen: false).init();
-        await _initCrashlytics();
-        await Provider.of<CloudStore>(context, listen: false).init(
-          onLogin: () async {
-            if (mounted) {
-              //await FirebaseAuth.instance.signOut();
-              final cloudStore =
-                  Provider.of<CloudStore>(context, listen: false);
-              await Provider.of<BusinessStore>(context, listen: false)
-                  .init(context);
+        if (mounted) {
+          ///init authentication store / load user
+          BappFCM().initForAndroid();
+          await Provider.of<ThemeStore>(context, listen: false).init();
+          await _initCrashlytics();
+          await Provider.of<CloudStore>(context, listen: false).init(
+            onLogin: () async {
+              if (mounted) {
+                //await FirebaseAuth.instance.signOut();
+                final cloudStore =
+                    Provider.of<CloudStore>(context, listen: false);
+                await Provider.of<BusinessStore>(context, listen: false).init();
 
-              if (cloudStore.myAddress != null) {
-                ///customer is not a first timer
-                if (mounted) {
-                  BappNavigator.bappPushAndRemoveAll(context, Bapp());
+                if (cloudStore.myAddress != null) {
+                  ///customer is not a first timer
+                  if (mounted) {
+                    BappNavigator.bappPushAndRemoveAll(context, Bapp());
+                  }
+                  killState = !killState;
+                  return;
+                } else {
+                  Navigator.of(context).pushNamedAndRemoveUntil(
+                    RouteManager.pickAPlace,
+                    (route) => false,
+                  );
+                  killState = !killState;
+                  return;
                 }
-                killState = !killState;
-                return;
-              } else {
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  RouteManager.pickAPlace,
-                  (route) => false,
-                );
-                killState = !killState;
-                return;
               }
-            }
-          },
-          onNotLogin: () async {
-            if (mounted) {
-              Navigator.of(context).pushNamed(RouteManager.onBoardingScreen);
-            }
-            return;
-          },
-        );
-        //await context.read<FeedbackStore>().init();
+            },
+            onNotLogin: () async {
+              if (mounted) {
+                Navigator.of(context).pushNamed(RouteManager.onBoardingScreen);
+              }
+              return;
+            },
+          );
+          //await context.read<FeedbackStore>().init();
+        }
       },
 
       ///show splash screen while everything happens behind the scenes

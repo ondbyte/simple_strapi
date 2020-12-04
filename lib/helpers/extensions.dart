@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -111,17 +113,33 @@ extension BappNavigator<T> on Navigator {
     return Navigator.push(context, _materialPageRoute(routeWidget));
   }
 
-  static Future<T> bappPushAndRemoveUntill<T>(BuildContext context, Widget routeWidget,bool Function(Route) predicate) {
-    return Navigator.pushAndRemoveUntil(context, _materialPageRoute(routeWidget),predicate);
+  static Future<T> bappPushAndRemoveUntill<T>(BuildContext context,
+      Widget routeWidget, bool Function(Route) predicate) {
+    return Navigator.pushAndRemoveUntil(
+        context, _materialPageRoute(routeWidget), predicate);
   }
 
-  static Future<T> bappPushAndRemoveAll<T>(BuildContext context, Widget routeWidget,) {
-    return Navigator.pushAndRemoveUntil(context, _materialPageRoute(routeWidget),(_)=>false);
+  static Future<T> bappPushAndRemoveAll<T>(
+    BuildContext context,
+    Widget routeWidget,
+  ) {
+    return Navigator.pushAndRemoveUntil(
+        context, _materialPageRoute(routeWidget), (_) => false);
   }
 
   static Route _materialPageRoute(Widget w) {
     return MaterialPageRoute(builder: (_) {
       return w;
     });
+  }
+}
+
+extension CautiousCompleter on Completer {
+  bool cautiousComplete<T>(T value) {
+    if (isCompleted) {
+      return false;
+    }
+    complete(value);
+    return true;
   }
 }

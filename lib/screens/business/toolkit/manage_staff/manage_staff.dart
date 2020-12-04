@@ -2,8 +2,8 @@ import 'package:bapp/classes/firebase_structures/business_staff.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/business_store.dart';
+import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/firebase_image.dart';
-
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -53,10 +53,7 @@ class _BusinessManageStaffScreenState extends State<BusinessManageStaffScreen> {
                               Icons.delete,
                             ),
                             onPressed: () async {
-                              await businessStore.business.selectedBranch.value
-                                  .removeAStaff(
-                                staffs[index],
-                              );
+                              await staffs[index].delete();
                             },
                           ),
                         ),
@@ -81,12 +78,19 @@ class BusinessStaffListTile extends StatelessWidget {
       : super(key: key);
   @override
   Widget build(BuildContext context) {
+    final myNumber = Provider.of<CloudStore>(context, listen: false).theNumber;
+    final me =
+        staff.contactNumber.internationalNumber == myNumber.internationalNumber;
     return ListTile(
-      title: Text(staff.name),
-      subtitle: Text(EnumToString.convertToString(staff.role)),
-      trailing: trailing,
+      title: Text(me ? "Me" : staff.name),
+      subtitle: Text(
+        EnumToString.convertToString(staff.role),
+      ),
+      trailing: me ? null : trailing,
       leading: ListTileFirebaseImage(
-        storagePathOrURL: staff.images.isNotEmpty?staff.images.keys.elementAt(0):kTemporaryPlaceHolderImage,
+        storagePathOrURL: staff.images.isNotEmpty
+            ? staff.images.keys.elementAt(0)
+            : kTemporaryPlaceHolderImage,
       ),
     );
   }

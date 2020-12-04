@@ -131,10 +131,11 @@ class BusinessBranch {
 
   Future saveTimings() async {
     await myDoc.value.set(
-        {"businessTimings": businessTimings.value.toMap()},
-        SetOptions(
-          merge: true,
-        ));
+      {"businessTimings": businessTimings.value.toMap()},
+      SetOptions(
+        merge: true,
+      ),
+    );
   }
 
   Future _getBranch(DocumentReference myDoc) async {
@@ -169,17 +170,18 @@ class BusinessBranch {
     address.value = j["address"];
     latlong.value = j["latlong"];
     staff.clear();
-    if ((j["staff"] as List).isNotEmpty) {
-      staff.addAll(List.castFrom(j["staff"])
-          .map((e) => BusinessStaff.fromJson(business: business.value, j: e)));
+    if ((j["staff"] as Map).isNotEmpty) {
+      staff.addAll(Map.castFrom(j["staff"])
+          .values
+          .map((e) => BusinessStaff.fromJson(branch: this, j: e)));
     }
     final managerData = j["manager"];
-    manager.value =  !isNullOrEmpty(managerData)
-        ? BusinessStaff.fromJson(business: business.value, j: j["manager"])
+    manager.value = !isNullOrEmpty(managerData)
+        ? BusinessStaff.fromJson(branch: this, j: j["manager"])
         : null;
     final recepData = j["receptionist"];
-    receptionist.value =  !isNullOrEmpty(j["receptionist"])
-        ? BusinessStaff.fromJson(business: business.value, j: j["receptionist"])
+    receptionist.value = !isNullOrEmpty(j["receptionist"])
+        ? BusinessStaff.fromJson(branch: this, j: j["receptionist"])
         : null;
     contactNumber.value = j["contactNumber"];
     email.value = j["email"];
@@ -227,26 +229,27 @@ class BusinessBranch {
 
   Map<String, dynamic> toMap() {
     return {
-      "images": images.keys.toList()??[],
-      "name": name.value??"",
-      "address": address.value??"",
+      "images": images.keys.toList() ?? [],
+      "name": name.value ?? "",
+      "address": address.value ?? "",
       "latlong": latlong.value,
-      "staff": staff.map((element) => element.toMap()).toList(),
-      "manager": manager.value?.toMap()??{},
-      "receptionist": receptionist.value?.toMap()??{},
+      "staff": Map.fromEntries(
+          staff.map((element) => MapEntry(element.name, element.toMap()))),
+      "manager": manager.value?.toMap() ?? {},
+      "receptionist": receptionist.value?.toMap() ?? {},
       "business": business.value.myDoc.value,
       "myDoc": myDoc.value,
-      "contactNumber": contactNumber.value??"",
-      "email": email.value??"",
-      "rating": rating.value??0.0,
+      "contactNumber": contactNumber.value ?? "",
+      "email": email.value ?? "",
+      "rating": rating.value ?? 0.0,
       "businessServices": businessServices.value?.toMap() ?? {},
       "businessTimings":
           businessTimings.value?.toMap() ?? BusinessTimings.empty().toMap(),
       "businessHolidays": businessHolidays.value?.toList() ?? [],
-      "status": EnumToString.convertToString(status.value)??"",
-      "businessCategory": businessCategory.value.toMap()??{},
-      "tag": tag.value??"",
-      "description": description.value??"",
+      "status": EnumToString.convertToString(status.value) ?? "",
+      "businessCategory": businessCategory.value.toMap() ?? {},
+      "tag": tag.value ?? "",
+      "description": description.value ?? "",
       "assignedAddress": {
         "iso2": iso2,
         "city": city,
@@ -281,10 +284,9 @@ class BusinessBranch {
       List<String> expertise}) async {
     final imgs = await uploadImagesToStorageAndReturnStringList(images);
     final s = BusinessStaff(
-      business: business.value,
       contactNumber: userPhoneNumber,
       name: name,
-      branch: business.value.selectedBranch.value,
+      branch: this,
       role: role,
       dateOfJoining: dateOfJoining,
       expertise: expertise,

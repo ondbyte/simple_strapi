@@ -1,4 +1,5 @@
 import 'package:bapp/classes/firebase_structures/bapp_user.dart';
+import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
@@ -42,10 +43,13 @@ class AddCustomerDetails extends StatelessWidget {
                         number: _theNumber.value.internationalNumber);
                     if (user == null) {
                       user = BappUser(
-                        myDoc: BappUser.newReference(docName:_theNumber.value.internationalNumber),
+                        myDoc: BappUser.newReference(
+                            docName: _theNumber.value.internationalNumber),
                         email: _email,
                         name: _name,
                         theNumber: _theNumber.value,
+                        userType: UserType.customer,
+                        alterEgo: UserType.customer,
                       );
                       await user.save();
                     }

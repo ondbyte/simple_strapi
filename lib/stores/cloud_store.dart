@@ -150,7 +150,7 @@ abstract class _CloudStore with Store {
         if (snap.exists) {
           bappUser = BappUser.fromSnapShot(snap: snap);
           myData = snap.data() ?? {};
-          if(!completer.isCompleted){
+          if (!completer.isCompleted) {
             completer.complete(true);
           } else {
             await getMyAddress();
@@ -158,6 +158,7 @@ abstract class _CloudStore with Store {
             await getMyFavorites();
           }
         } else {
+          myData = {};
           completer.complete(false);
           Helper.printLog("This should never be the case");
         }
@@ -373,7 +374,6 @@ abstract class _CloudStore with Store {
         await setMyFcmToken();
       }, fireImmediately: true),
     );
-
   }
 
   Future updateProfile(
@@ -409,7 +409,8 @@ abstract class _CloudStore with Store {
       phoneNumber: number.phoneNumber,
       verificationCompleted: (PhoneAuthCredential phoneAuthCredential) async {
         onVerified();
-        await _link(phoneAuthCredential);
+        final linked = await _link(phoneAuthCredential);
+        if (linked) _mergePreviousData();
       },
       verificationFailed: (FirebaseAuthException exception) {
         onFail(exception);
@@ -429,6 +430,7 @@ abstract class _CloudStore with Store {
             final linked = await _link(phoneAuthCredential);
             //Helper.printLog(linked.toString());
             if (linked) {
+              _mergePreviousData();
               onVerified();
             } else {
               loadingForOTP = false;
@@ -439,6 +441,18 @@ abstract class _CloudStore with Store {
       },
       codeAutoRetrievalTimeout: (String verificationId) {},
     );
+  }
+
+  Future _mergePreviousData() async {
+    final snap = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(FirebaseAuth.instance.currentUser.phoneNumber)
+        .get();
+    final user = BappUser.fromSnapShot(snap: snap);
+    final newUser = user.updateWith(
+        myDoc: BappUser.newReference(
+            docName: FirebaseAuth.instance.currentUser.uid));
+    await newUser.save();
   }
 
   Future<bool> _link(PhoneAuthCredential phoneAuthCredential) async {
