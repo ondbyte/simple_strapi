@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/config/config_data_types.dart';
+import 'package:bapp/fcm.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info/device_info.dart';
@@ -78,7 +80,7 @@ bool isNullOrEmpty(dynamic variable) {
   if (variable == null) {
     return true;
   }
-  if(variable is Map){
+  if (variable is Map) {
     return variable.isEmpty;
   }
   if (variable is Iterable) {
@@ -193,4 +195,20 @@ PreferredSizeWidget getBappTabBar(BuildContext context, List<Widget> tabs) {
     labelPadding: const EdgeInsets.all(8),
     tabs: tabs,
   );
+}
+
+Future sendUpdatesForBooking(BusinessBooking booking) async {
+  final status = booking.status.value;
+  //final manager = booking.branch.manager??booking.branch.business.value.
+  switch (status) {
+    case BusinessBookingStatus.pending:
+      {
+        final message = BappFCMMessage(
+            type: MessagOrUpdateType.bookingUpdate,
+            title: "There's a new booking",
+            body:
+                "at ${booking.fromToTiming.from}, includes ${booking.getServicesSeperatedBycomma()}",
+            to: "");
+      }
+  }
 }

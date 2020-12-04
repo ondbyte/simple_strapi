@@ -205,9 +205,10 @@ abstract class _CloudStore with Store {
           } else if (type == FavoriteType.businessBranch) {
             branch = await getBranch(reference: entry.value["businessBranch"]);
           } else if (type == FavoriteType.businessService) {
-            service = null;//BusinessService.fromJson(entry.value["businessService"]);
+            service =
+                null; //BusinessService.fromJson(entry.value["businessService"]);
           }
-          if(business!=null||branch!=null||service!=null){
+          if (business != null || branch != null || service != null) {
             favorites.add(
               Favorite(
                 id: key,
@@ -516,7 +517,7 @@ abstract class _CloudStore with Store {
     if (branches.containsKey(reference)) {
       return branches[reference];
     }
-    if(reference==null){
+    if (reference == null) {
       return null;
     }
     final snap = await reference.get();
@@ -532,19 +533,22 @@ abstract class _CloudStore with Store {
 
   Future<BusinessDetails> getBusiness(
       {DocumentReference reference, Map<String, dynamic> forData}) async {
+    final completer = Completer<BusinessDetails>();
+
     if (forData != null) {
       final business = BusinessDetails.fromJson(forData);
       businesses.addAll({reference: business});
-      return business;
-    }
-    if (businesses.containsKey(reference)) {
+      completer.complete(business);
+    } else if (businesses.containsKey(reference)) {
       return businesses[reference];
+    } else {
+      final snap = await reference.get();
+      final data = snap.data();
+      final business = BusinessDetails.fromJson(data);
+      businesses.addAll({reference: business});
     }
-    final snap = await reference.get();
-    final data = snap.data();
-    final business = BusinessDetails.fromJson(data);
-    businesses.addAll({reference: business});
-    return business;
+
+    return completer.future;
   }
 
   Future<List<BusinessBranch>> getNearestFeatured() async {

@@ -137,7 +137,6 @@ class BappFCMMessage {
   final String frm;
   final String click_action;
   final BappFCMMessagePriority priority;
-  final DateTime remindTime;
   final Map<String, String> data;
   final UserType forUserType;
 
@@ -148,7 +147,6 @@ class BappFCMMessage {
     this.data,
     this.frm = "",
     this.to = "",
-    this.remindTime,
     this.priority = BappFCMMessagePriority.high,
     this.click_action = "BAPP_NOTIFICATION_CLICK",
     this.forUserType,
@@ -170,24 +168,20 @@ class BappFCMMessage {
     );
   }
 
-  BappFCMMessage update({DateTime remindTime,String to}) {
+  BappFCMMessage update({DateTime remindTime, String to}) {
     return BappFCMMessage(
       type: type,
       title: title,
-      to: to??this.to,
+      to: to ?? this.to,
       frm: frm,
       data: data,
       priority: priority,
       body: body,
       click_action: click_action,
-      remindTime: remindTime??this.remindTime,
     );
   }
 
   Map<String, String> toMap() {
-    if (type == MessagOrUpdateType.reminder) {
-      assert(remindTime != null, "reminder message must have a reminding time");
-    }
     final m = {
       "type": EnumToString.convertToString(type),
       "title": title,
@@ -196,7 +190,6 @@ class BappFCMMessage {
       "to": to,
       "priority": EnumToString.convertToString(priority),
       "click_action": click_action,
-      "remindTime": remindTime != null ? remindTime.toIso8601String() : "",
     };
     data?.forEach((key, value) {
       m.addAll({key: value});
@@ -205,11 +198,6 @@ class BappFCMMessage {
   }
 }
 
-enum MessagOrUpdateType {
-  reminder,
-  bookingUpdate,
-  bookingRating,
-  news
-}
+enum MessagOrUpdateType { reminder, bookingUpdate, bookingRating, news }
 
 enum BappFCMMessagePriority { high }
