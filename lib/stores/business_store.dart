@@ -1,6 +1,7 @@
 import 'package:bapp/classes/firebase_structures/business_category.dart';
 import 'package:bapp/classes/firebase_structures/business_details.dart';
 import 'package:bapp/config/config_data_types.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:bapp/stores/all_store.dart';
 import 'package:bapp/stores/booking_flow.dart';
@@ -94,6 +95,19 @@ abstract class _BusinessStore with Store {
 
   @action
   Future getMyBusiness() async {
+    final cloudStore = _allStore.get<CloudStore>();
+    if(cloudStore.alterEgo == UserType.customer){
+      return;
+    }
+    if(!cloudStore.myData.containsKey("branches")){
+      return;
+    }
+    final allBranchesData = cloudStore.myData["barnches"] as Map<String,dynamic>??{};
+    if(isNullOrEmpty(allBranchesData)){
+      return;
+    }
+    allBranchesData
+
     final businessDetails = await _fireStore
         .doc("businesses/${FirebaseAuth.instance.currentUser.uid}")
         .get();

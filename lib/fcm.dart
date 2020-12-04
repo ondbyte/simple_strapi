@@ -168,7 +168,7 @@ class BappFCMMessage {
     );
   }
 
-  BappFCMMessage update({DateTime remindTime, String to}) {
+  BappFCMMessage update({DateTime remindTime, String to,}) {
     return BappFCMMessage(
       type: type,
       title: title,

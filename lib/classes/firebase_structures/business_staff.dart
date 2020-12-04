@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:bapp/config/config_data_types.dart';
+import 'package:bapp/helpers/exceptions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/foundation.dart';
@@ -21,6 +24,8 @@ class BusinessStaff {
   BusinessStaff receptionist;
   TheNumber contactNumber;
   double rating = 0;
+
+  DocumentSnapshot _userSnap;
 
   BusinessStaff({
     this.role,
@@ -52,6 +57,68 @@ class BusinessStaff {
     };
   }
 
+  Future<DocumentSnapshot> _getUserSnap() async {
+    final completer = Completer<DocumentSnapshot>();
+    FirebaseFirestore.instance
+        .collection("users")
+        .where("contactNumber",
+            isEqualTo: "${contactNumber.internationalNumber}")
+        .snapshots()
+        .listen(
+      (snaps) {
+        if (snaps.docs.isEmpty) {
+          throw BappException(
+            msg: "This should never be the case",
+            whatHappened: ""
+                "when we search for a staff with their phone number in users collection it shouldn't return null",
+          );
+        } else if (snaps.docs.length > 1) {
+          throw BappException(
+            msg: "This should never be the case",
+            whatHappened: ""
+                "when we search for a staff with their phone number in users collection it shouldn't return more than one doc",
+          );
+        } else {
+          _userSnap = snaps.docs.first;
+          if(!completer.isCompleted){
+            completer.complete(_userSnap);
+          }
+        }
+      },
+    );
+    return completer.future;
+  }
+
+  Future save() async {
+    await branch.myDoc.value.update({"staff.$name": toMap()});
+  }
+
+  Future delete() async {
+    await branch.myDoc.value.update({"staff.$name": FieldValue.delete()});
+  }
+
+  Future updateForUser() async {
+    final snap = _userSnap?? (await _getUserSnap());
+    if(snap.exists){
+      await snap.reference.update({
+        "branches.${branch.myDoc.value.id}":branch.myDoc.value
+      });
+    } else {
+      print("user dont exist, this shouldn't be the case");
+    }
+  }
+
+  Future deleteForUser() async {
+    final snap = _userSnap?? (await _getUserSnap());
+    if(snap.exists){
+      await snap.reference.update({
+        "branches.${branch.myDoc.value.id}":FieldValue.delete()
+      });
+    } else {
+      print("user dont exist, this shouldn't be the case");
+    }
+  }
+
   void _fromJson(Map<String, dynamic> j) {
     role = EnumToString.fromString(UserType.values, j["role"]);
     name = j["name"];
@@ -61,8 +128,7 @@ class BusinessStaff {
         business.branches.value.firstWhere((b) => b.myDoc.value == j["branch"]);
     contactNumber =
         TheCountryNumber().parseNumber(internationalNumber: j["contactNumber"]);
-    images = { for (var v in j["images"]) v as String : true } ??
-        {};
+    images = {for (var v in j["images"]) v as String: true} ?? {};
     rating = j["rating"] ?? 0;
   }
 

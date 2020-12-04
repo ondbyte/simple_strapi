@@ -1,11 +1,14 @@
 import 'package:bapp/classes/firebase_structures/business_holidays.dart';
 import 'package:bapp/classes/firebase_structures/business_services.dart';
 import 'package:bapp/classes/firebase_structures/business_timings.dart';
+import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
+import 'package:thephonenumber/thecountrynumber.dart';
 
 import 'business_branch.dart';
 import 'business_category.dart';
@@ -168,6 +171,16 @@ class BusinessDetails {
       ..businessServices.value = BusinessServices.empty()
       ..type.value = type.value;
 
+    await branch.addAStaff(
+      dateOfJoining: DateTime.now(),
+      expertise: [],
+      images: {},
+      role: UserType.businessOwner,
+      name: FirebaseAuth.instance.currentUser.displayName,
+      userPhoneNumber: TheCountryNumber().parseNumber(
+        internationalNumber: FirebaseAuth.instance.currentUser.phoneNumber,
+      ),
+    );
     await branch.saveBranch();
 
     final old = branches.value;

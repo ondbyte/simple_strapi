@@ -117,7 +117,7 @@ Future<Map<String, bool>> uploadImagesToStorageAndReturnStringList(
   }
   final f = FirebaseStorage.instance;
   final a = FirebaseAuth.instance;
-  final Map<String, bool> storagePaths = {};
+  final storagePaths = <String, bool>{};
 
   final folder = path.isEmpty
       ? f.ref().child(a.currentUser.uid)
@@ -199,16 +199,17 @@ PreferredSizeWidget getBappTabBar(BuildContext context, List<Widget> tabs) {
 
 Future sendUpdatesForBooking(BusinessBooking booking) async {
   final status = booking.status.value;
-  //final manager = booking.branch.manager??booking.branch.business.value.
+
   switch (status) {
     case BusinessBookingStatus.pending:
       {
         final message = BappFCMMessage(
-            type: MessagOrUpdateType.bookingUpdate,
-            title: "There's a new booking",
-            body:
-                "at ${booking.fromToTiming.from}, includes ${booking.getServicesSeperatedBycomma()}",
-            to: "");
+          type: MessagOrUpdateType.bookingUpdate,
+          title: "There's a new booking",
+          body:
+              "at ${booking.fromToTiming.from}, includes ${booking.getServicesSeperatedBycomma()}",
+          to: "",
+        );
       }
   }
 }

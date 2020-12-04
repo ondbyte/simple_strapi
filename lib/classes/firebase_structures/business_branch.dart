@@ -114,23 +114,6 @@ class BusinessBranch {
         },
       ),
     );
-
-    _disposers.add(
-      reaction(
-        (_) => staff.length,
-        (_) async {
-          final list = [];
-          staff.forEach(
-            (element) {
-              list.add(element.toMap());
-            },
-          );
-          await myDoc.value?.update(
-            {"staff": list},
-          );
-        },
-      ),
-    );
   }
 
   bool anyStaffHasNumber(TheNumber tn) {
@@ -298,7 +281,7 @@ class BusinessBranch {
       List<String> expertise}) async {
     final imgs = await uploadImagesToStorageAndReturnStringList(images);
     final s = BusinessStaff(
-      business: this.business.value,
+      business: business.value,
       contactNumber: userPhoneNumber,
       name: name,
       branch: business.value.selectedBranch.value,
@@ -307,6 +290,8 @@ class BusinessBranch {
       expertise: expertise,
       images: imgs,
     );
+    await s.save();
+    await s.updateForUser();
     staff.add(s);
   }
 

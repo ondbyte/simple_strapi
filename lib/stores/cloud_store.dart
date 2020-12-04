@@ -143,13 +143,27 @@ abstract class _CloudStore with Store {
   }
 
   Future getUserData() async {
-    var snap = await _fireStore.doc("users/${user.uid}").get();
-    snap.reference.snapshots().listen((snap) {
-      if (snap.exists) {
-        bappUser = BappUser.fromSnapShot(snap: snap);
-      }
-    });
-    myData = snap.data() ?? {};
+    final completer = Completer<bool>();
+    var ref = await _fireStore.doc("users/${user.uid}");
+    ref.snapshots().listen(
+      (snap) async {
+        if (snap.exists) {
+          bappUser = BappUser.fromSnapShot(snap: snap);
+          myData = snap.data() ?? {};
+          if(!completer.isCompleted){
+            completer.complete(true);
+          } else {
+            await getMyAddress();
+            await getMyUserTypes();
+            await getMyFavorites();
+          }
+        } else {
+          completer.complete(false);
+          Helper.printLog("This should never be the case");
+        }
+      },
+    );
+    return completer.future;
   }
 
   @computed
@@ -177,12 +191,14 @@ abstract class _CloudStore with Store {
       userType = alterEgo;
       alterEgo = tmp;
       _allStore.get<EventBus>().fire(AppEvents.reboot);
+      setMyUserType();
       return true;
     } else {
       Flushbar(
         message: "Your business or any of your branch is not approved yet",
         duration: Duration(seconds: 2),
       ).show(context);
+      setMyUserType();
       return false;
     }
   }
@@ -191,35 +207,39 @@ abstract class _CloudStore with Store {
     if (myData.containsKey("favorites")) {
       final fs = myData["favorites"];
       if (fs is Map) {
-        await Future.forEach<MapEntry>(fs.entries, (entry) async {
-          final key = entry.key;
-          final type = EnumToString.fromString(
-            FavoriteType.values,
-            entry.value["type"],
-          );
-          var business;
-          var branch;
-          var service;
-          if (type == FavoriteType.business) {
-            business = await getBusiness(reference: entry.value["business"]);
-          } else if (type == FavoriteType.businessBranch) {
-            branch = await getBranch(reference: entry.value["businessBranch"]);
-          } else if (type == FavoriteType.businessService) {
-            service =
-                null; //BusinessService.fromJson(entry.value["businessService"]);
-          }
-          if (business != null || branch != null || service != null) {
-            favorites.add(
-              Favorite(
-                id: key,
-                type: type,
-                business: business,
-                businessBranch: branch,
-                businessService: service,
-              ),
+        await Future.forEach<MapEntry>(
+          fs.entries,
+          (entry) async {
+            final key = entry.key;
+            final type = EnumToString.fromString(
+              FavoriteType.values,
+              entry.value["type"],
             );
-          }
-        });
+            var business;
+            var branch;
+            var service;
+            if (type == FavoriteType.business) {
+              business = await getBusiness(reference: entry.value["business"]);
+            } else if (type == FavoriteType.businessBranch) {
+              branch =
+                  await getBranch(reference: entry.value["businessBranch"]);
+            } else if (type == FavoriteType.businessService) {
+              service =
+                  null; //BusinessService.fromJson(entry.value["businessService"]);
+            }
+            if (business != null || branch != null || service != null) {
+              favorites.add(
+                Favorite(
+                  id: key,
+                  type: type,
+                  business: business,
+                  businessBranch: branch,
+                  businessService: service,
+                ),
+              );
+            }
+          },
+        );
       }
     }
   }
@@ -232,6 +252,7 @@ abstract class _CloudStore with Store {
     } else {
       favorites.add(f);
     }
+    _saveFavorites();
   }
 
   bool isFavorite(Favorite f) {
@@ -273,7 +294,6 @@ abstract class _CloudStore with Store {
     }
   }
 
-  ///will auto run on change
   Future setMyUserType() async {
     var doc = _fireStore.doc("users/${FirebaseAuth.instance.currentUser.uid}");
     await doc.set(
@@ -282,7 +302,6 @@ abstract class _CloudStore with Store {
     );
   }
 
-  ///will auto run on change
   Future setMyAlterEgo() async {
     var doc = _fireStore.doc("users/${FirebaseAuth.instance.currentUser.uid}");
     await doc.set(
@@ -327,7 +346,6 @@ abstract class _CloudStore with Store {
     }
   }
 
-  ///will run auto when the location is updated
   Future setMyAddress() async {
     final doc = _fireStore.doc("users/${user.uid}");
     await doc.set({"myAddress": myAddress.toMap()}, SetOptions(merge: true));
@@ -350,39 +368,12 @@ abstract class _CloudStore with Store {
 
   void _setupAutoRun() {
     _disposers.add(
-      reaction((_) => myAddress, (_) async {
-        await setMyAddress();
-      }),
-    );
-    _disposers.add(
-      reaction((_) => userType, (_) async {
-        await setMyUserType();
-      }),
-    );
-    _disposers.add(
-      reaction((_) => alterEgo, (_) async {
-        await setMyAlterEgo();
-      }),
-    );
-    _disposers.add(
-      reaction((_) => theNumber, (_) async {
-        if (user != null) {
-          await setMyNumber();
-        }
-      }),
-    );
-    _disposers.add(
       reaction((_) => BappFCM().fcmToken.value, (val) async {
         fcmToken = val;
         await setMyFcmToken();
       }, fireImmediately: true),
     );
 
-    _disposers.add(
-      reaction((_) => favorites.length, (_) async {
-        await _saveFavorites();
-      }, fireImmediately: false),
-    );
   }
 
   Future updateProfile(

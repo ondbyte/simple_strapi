@@ -113,11 +113,13 @@ class PickAPlaceScreen extends StatelessWidget {
             style: Theme.of(context).textTheme.subtitle1,
           ),
           onTap: () {
-            Provider.of<CloudStore>(context, listen: false).myAddress =
+            final cloudStore = Provider.of<CloudStore>(context, listen: false);
+            cloudStore.myAddress =
                 MyAddress(
                   city: city,
                   country: country,
                 );
+            cloudStore.setMyAddress();
             Navigator.of(context)
                 .pushNamedAndRemoveUntil(RouteManager.home, (_) => false);
           },
@@ -129,7 +131,9 @@ class PickAPlaceScreen extends StatelessWidget {
             title: Text(city.localities[index].name,
                 style: Theme.of(context).textTheme.subtitle2),
             onTap: () {
-              context.read<CloudStore>().myAddress = MyAddress(country: country,city: city,locality: city.localities[index]);
+              final cloudStore = context.read<CloudStore>();
+              cloudStore.myAddress = MyAddress(country: country,city: city,locality: city.localities[index]);
+              cloudStore.setMyAddress();
               Navigator.of(context)
                   .pushNamedAndRemoveUntil(RouteManager.home, (_) => false,);
             },
