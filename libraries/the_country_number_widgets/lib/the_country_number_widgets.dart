@@ -52,6 +52,7 @@ class _TheCountryNumberInputState extends State<TheCountryNumberInput> {
         ),
         Expanded(
           child: TextFormField(
+          
             controller: _controller,
             decoration: InputDecoration(
               fillColor: widget.decoration.fillColor,
@@ -116,7 +117,7 @@ class ThePrefix extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(
-            padding: padding ?? const EdgeInsets.only(left: 16),
+            padding: padding ?? const EdgeInsets.only(left: 0,),
             child: TheCountryFlag(
               iso2: existingCountryNumber.country.iso2,
             ),
@@ -140,7 +141,7 @@ class TheCountryFlag extends StatelessWidget {
     return SizedBox(
       width: width,
       child: ClipRRect(
-        borderRadius: borderRadius ?? BorderRadius.circular(6),
+        borderRadius: borderRadius ?? BorderRadius.circular(2),
         child: Image.asset(
           "country_flags/${(iso2).toLowerCase()}.png",
           package: "the_country_number_widgets",

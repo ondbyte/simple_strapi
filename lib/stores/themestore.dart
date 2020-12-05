@@ -254,7 +254,7 @@ abstract class _ThemeStore with Store {
         selectedItemColor: Colors.teal,
         showUnselectedLabels: true,
         showSelectedLabels: true,
-        unselectedItemColor: Colors.white,
+        unselectedItemColor: Colors.grey,
         backgroundColor: Colors.black,
       ),
       brightness: Brightness.dark,
@@ -382,12 +382,12 @@ abstract class _ThemeStore with Store {
         elevation: 0,
         textTheme: TextTheme(
           headline6: TextStyle(
-            fontSize: 22,
+            fontSize: 20,
             letterSpacing: 0,
             height: 1,
             fontWeight: FontWeight.w800,
             fontFamily: 'Lato',
-            color: Colors.white,
+            color: Colors.white70
           ),
         ),
         iconTheme: IconThemeData(
