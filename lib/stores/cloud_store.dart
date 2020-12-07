@@ -35,18 +35,12 @@ abstract class _CloudStore with Store {
   final _auth = FirebaseAuth.instance;
   final _fireStore = FirebaseFirestore.instance;
 
-  Map<String, dynamic> myData;
+  Map<String, dynamic> myData = {};
   final List<ReactionDisposer> _disposers = [];
 
   @observable
-  MyAddress myAddress;
-  @observable
   List<Country> countries;
 
-  @observable
-  UserType userType;
-  @observable
-  UserType alterEgo;
   @observable
   User user;
 
@@ -59,8 +53,6 @@ abstract class _CloudStore with Store {
   @observable
   bool loadingForOTP = false;
   final favorites = ObservableList<Favorite>();
-
-  String fcmToken = "";
 
   String _previousUID = "";
 
@@ -77,14 +69,12 @@ abstract class _CloudStore with Store {
   Future _init() async {
     await getUserData();
     await getActiveCountries();
-    await getMyAddress();
-    await getMyUserTypes();
     await getMyFavorites();
     _setupAutoRun();
   }
 
   BusinessBookingStatus getCancelTypeForUserType() {
-    switch (userType) {
+    switch (bappUser.userType.value) {
       case UserType.customer:
         {
           return BusinessBookingStatus.cancelledByUser;
@@ -106,9 +96,9 @@ abstract class _CloudStore with Store {
   }
 
   String getAddressLabel() {
-    return (myAddress.locality != null
-        ? myAddress.locality.name
-        : myAddress.city.name);
+    return (bappUser.address.locality != null
+        ? bappUser.address
+        : bappUser.address.city);
   }
 
   void _listenForUserChange() {
@@ -120,6 +110,16 @@ abstract class _CloudStore with Store {
             status = AuthStatus.anonymousUser;
           } else {
             status = AuthStatus.userPresent;
+            final tmp = bappUser?.updateWith(
+              email: FirebaseAuth.instance.currentUser.email,
+              theNumber: TheCountryNumber().parseNumber(
+                  internationalNumber:
+                      FirebaseAuth.instance.currentUser.phoneNumber),
+              name: FirebaseAuth.instance.currentUser.displayName,
+            );
+            if (tmp != null) {
+              bappUser = tmp;
+            }
           }
           if (_previousUID != user?.uid) {
             await _init();
@@ -142,9 +142,31 @@ abstract class _CloudStore with Store {
     );
   }
 
+  GeoPoint getLatLongForAddress(Address address) {
+    countries.forEach(
+      (country) {
+        country.cities.forEach(
+          (city) {
+            if (city.name == address.city && country.iso2 == address.iso2) {
+              final local = city.localities.firstWhere(
+                  (loc) => loc.name == address.locality,
+                  orElse: () => null);
+              if (local != null) {
+                return local.latLong;
+              } else {
+                return city.localities.first.latLong;
+              }
+            }
+          },
+        );
+      },
+    );
+  }
+
   Future getUserData() async {
     final completer = Completer<bool>();
     var ref = await _fireStore.doc("users/${user.uid}");
+    myData = {};
     ref.snapshots().listen(
       (snap) async {
         if (snap.exists) {
@@ -153,12 +175,13 @@ abstract class _CloudStore with Store {
           if (!completer.isCompleted) {
             completer.complete(true);
           } else {
-            await getMyAddress();
-            await getMyUserTypes();
             await getMyFavorites();
           }
         } else {
           myData = {};
+          bappUser = BappUser(
+              myDoc: BappUser.newReference(
+                  docName: FirebaseAuth.instance.currentUser.uid));
           completer.complete(false);
           Helper.printLog("This should never be the case");
         }
@@ -172,7 +195,7 @@ abstract class _CloudStore with Store {
     final tmp =
         TheCountryNumber().parseNumber(internationalNumber: user.phoneNumber);
     if (tmp == null) {
-      return TheCountryNumber().parseNumber(iso2Code: myAddress.country.iso2);
+      return TheCountryNumber().parseNumber(iso2Code: bappUser.address.iso2);
     }
     return tmp;
   }
@@ -188,19 +211,27 @@ abstract class _CloudStore with Store {
         (businessStore.business.anyBranchInDraft() ||
             businessStore.business.anyBranchInPublished() ||
             businessStore.business.anyBranchInUnPublished())) {
-      final tmp = userType;
-      userType = alterEgo;
-      alterEgo = tmp;
+      final tmp = bappUser.userType.value;
+      bappUser =
+          bappUser.updateWith(userType: bappUser.alterEgo.value, alterEgo: tmp);
       _allStore.get<EventBus>().fire(AppEvents.reboot);
-      setMyUserType();
+      updateUser();
       return true;
     } else {
       Flushbar(
         message: "Your business or any of your branch is not approved yet",
         duration: Duration(seconds: 2),
       ).show(context);
-      setMyUserType();
+      updateUser();
       return false;
+    }
+  }
+
+  Future updateUser({BappUser user}) async {
+    if (user != null) {
+      await user.save();
+    } else {
+      await bappUser.save();
     }
   }
 
@@ -270,89 +301,6 @@ abstract class _CloudStore with Store {
   }
 
   @action
-  Future getMyUserTypes() async {
-    if (myData.containsKey("my_user_type")) {
-      final ut = UserType.values[myData["my_user_type"]];
-      if (myData.containsKey("my_alter_ego")) {
-        final ae = UserType.values[myData["my_alter_ego"]];
-        if (userType == null) {
-          userType = ut;
-          alterEgo = ae;
-        } else {
-          if (ut != UserType.customer) {
-            _allStore.get<EventBus>().fire(AppEvents.reboot);
-          }
-        }
-      } else {
-        alterEgo = UserType.customer;
-        setMyAlterEgo();
-      }
-    } else {
-      alterEgo = UserType.customer;
-      userType = UserType.customer;
-      setMyUserType();
-      setMyAlterEgo();
-    }
-  }
-
-  Future setMyUserType() async {
-    var doc = _fireStore.doc("users/${FirebaseAuth.instance.currentUser.uid}");
-    await doc.set(
-      {"my_user_type": userType.index},
-      SetOptions(merge: true),
-    );
-  }
-
-  Future setMyAlterEgo() async {
-    var doc = _fireStore.doc("users/${FirebaseAuth.instance.currentUser.uid}");
-    await doc.set(
-      {"my_alter_ego": alterEgo.index},
-      SetOptions(merge: true),
-    );
-  }
-
-  Future setMyNumber() async {
-    var doc = _fireStore.doc("users/${user.uid}");
-    await doc.set({
-      "contactNumber": theNumber?.internationalNumber,
-    }, SetOptions(merge: true));
-  }
-
-  Future setMyFcmToken() async {
-    var doc = _fireStore.doc("users/${user.uid}");
-    await doc.set({"fcmToken": fcmToken}, SetOptions(merge: true));
-  }
-
-  @action
-  Future getMyAddress() async {
-    if (myData.containsKey("myAddress")) {
-      var locationData = myData["myAddress"];
-
-      countries.forEach(
-        (country) {
-          country.cities.forEach(
-            (city) {
-              if (city.name == locationData["city"] &&
-                  country.iso2 == locationData["iso2"]) {
-                final local = city.localities.firstWhere(
-                    (loc) => loc.name == locationData["locality"],
-                    orElse: () => null);
-                myAddress =
-                    MyAddress(locality: local, city: city, country: country);
-              }
-            },
-          );
-        },
-      );
-    }
-  }
-
-  Future setMyAddress() async {
-    final doc = _fireStore.doc("users/${user.uid}");
-    await doc.set({"myAddress": myAddress.toMap()}, SetOptions(merge: true));
-  }
-
-  @action
   Future getActiveCountries() async {
     var countriesCollection = _fireStore.collection("active_countries");
     var countriesDocs =
@@ -369,10 +317,16 @@ abstract class _CloudStore with Store {
 
   void _setupAutoRun() {
     _disposers.add(
-      reaction((_) => BappFCM().fcmToken.value, (val) async {
-        fcmToken = val;
-        await setMyFcmToken();
-      }, fireImmediately: true),
+      reaction(
+        (_) => BappFCM().fcmToken.value,
+        (val) async {
+          if (val != null && bappUser != null) {
+            bappUser = bappUser.updateWith(fcmToken: val);
+            bappUser.save();
+          }
+        },
+        fireImmediately: true,
+      ),
     );
   }
 
@@ -560,11 +514,11 @@ abstract class _CloudStore with Store {
     final query = FirebaseFirestore.instance
         .collection("businesses")
         .where("status", isEqualTo: "published")
-        .where("assignedAddress.iso2", isEqualTo: myAddress.country.iso2)
-        .where("assignedAddress.city", isEqualTo: myAddress.city.name);
-    if (myAddress.locality != null) {
+        .where("assignedAddress.iso2", isEqualTo: bappUser.address.iso2)
+        .where("assignedAddress.city", isEqualTo: bappUser.address.city);
+    if (isNullOrEmpty(bappUser.address.locality)) {
       query.where("assignedAddress.locality",
-          isEqualTo: myAddress.locality.name);
+          isEqualTo: bappUser.address.locality);
     }
     final snaps = await query.get();
     final _branches = <BusinessBranch>[];
@@ -583,12 +537,12 @@ abstract class _CloudStore with Store {
         .collection("businesses")
         .where("status", isEqualTo: "published")
         .where("businessCategory.name", isEqualTo: category.name)
-        .where("assignedAddress.iso2", isEqualTo: myAddress.country.iso2)
-        .where("assignedAddress.city", isEqualTo: myAddress.city.name);
-    if (myAddress.locality != null) {
+        .where("assignedAddress.iso2", isEqualTo: bappUser.address.iso2)
+        .where("assignedAddress.city", isEqualTo: bappUser.address.city);
+    if (bappUser.address.locality != null) {
       query.where(
         "assignedAddress.locality",
-        isEqualTo: myAddress.locality.name,
+        isEqualTo: bappUser.address.locality,
       );
     }
     final snaps = await query.get();

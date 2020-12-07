@@ -2,6 +2,7 @@ import 'dart:isolate';
 
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/extensions.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/home/bapp.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/stores/business_store.dart';
@@ -45,7 +46,9 @@ class _SplashScreenState extends State<SplashScreen>
                     Provider.of<CloudStore>(context, listen: false);
                 await Provider.of<BusinessStore>(context, listen: false).init();
 
-                if (cloudStore.myAddress != null) {
+                if (cloudStore.bappUser != null &&
+                    !isNullOrEmpty(cloudStore.bappUser.address) &&
+                    !isNullOrEmpty(cloudStore.bappUser.address.iso2)) {
                   ///customer is not a first timer
                   if (mounted) {
                     BappNavigator.bappPushAndRemoveAll(context, Bapp());

@@ -1,5 +1,5 @@
+import 'package:bapp/classes/firebase_structures/bapp_user.dart';
 import 'package:bapp/classes/location.dart';
-import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/loading.dart';
@@ -82,14 +82,15 @@ class PickAPlaceScreen extends StatelessWidget {
                   style: Theme.of(context).textTheme.subtitle1,
                 ),
               ),
-              body:Builder(
-                builder: (_){
+              body: Builder(
+                builder: (_) {
                   final cities = country.cities;
                   return ListView(
                     children: List.generate(
                       cities.length,
-                          (index) => _getSubLocationWidget(
-                        context,cities[index],
+                      (index) => _getSubLocationWidget(
+                        context,
+                        cities[index],
                       ),
                     ),
                   );
@@ -102,44 +103,49 @@ class PickAPlaceScreen extends StatelessWidget {
     );
   }
 
-  Widget _getSubLocationWidget(
-      BuildContext context, City city) {
-    return city.enabled? Column(
-      children: [
-        ListTile(
-          trailing: Icon(Icons.arrow_forward_ios),
-          title: Text(
-            "All of ${city.name}",
-            style: Theme.of(context).textTheme.subtitle1,
-          ),
-          onTap: () {
-            final cloudStore = Provider.of<CloudStore>(context, listen: false);
-            cloudStore.myAddress =
-                MyAddress(
-                  city: city,
-                  country: country,
-                );
-            cloudStore.setMyAddress();
-            Navigator.of(context)
-                .pushNamedAndRemoveUntil(RouteManager.home, (_) => false);
-          },
-        ),
-        ...List.generate(
-          city.localities.length,
-          (index) => ListTile(
-            trailing: Icon(Icons.arrow_forward_ios),
-            title: Text(city.localities[index].name,
-                style: Theme.of(context).textTheme.subtitle2),
-            onTap: () {
-              final cloudStore = context.read<CloudStore>();
-              cloudStore.myAddress = MyAddress(country: country,city: city,locality: city.localities[index]);
-              cloudStore.setMyAddress();
-              Navigator.of(context)
-                  .pushNamedAndRemoveUntil(RouteManager.home, (_) => false,);
-            },
-          ),
-        ),
-      ],
-    ):SizedBox();
+  Widget _getSubLocationWidget(BuildContext context, City city) {
+    return city.enabled
+        ? Column(
+            children: [
+              ListTile(
+                trailing: Icon(Icons.arrow_forward_ios),
+                title: Text(
+                  "All of ${city.name}",
+                  style: Theme.of(context).textTheme.subtitle1,
+                ),
+                onTap: () {
+                  final cloudStore =
+                      Provider.of<CloudStore>(context, listen: false);
+                  cloudStore.bappUser = cloudStore.bappUser.updateWith(
+                      address: Address(city: city.name, iso2: country.iso2));
+                  cloudStore.bappUser.save();
+                  Navigator.of(context)
+                      .pushNamedAndRemoveUntil(RouteManager.home, (_) => false);
+                },
+              ),
+              ...List.generate(
+                city.localities.length,
+                (index) => ListTile(
+                  trailing: Icon(Icons.arrow_forward_ios),
+                  title: Text(city.localities[index].name,
+                      style: Theme.of(context).textTheme.subtitle2),
+                  onTap: () {
+                    final cloudStore = context.read<CloudStore>();
+                    cloudStore.bappUser = cloudStore.bappUser.updateWith(
+                        address: Address(
+                            iso2: country.iso2,
+                            city: city.name,
+                            locality: city.localities[index].name));
+cloudStore.bappUser.save();
+                    Navigator.of(context).pushNamedAndRemoveUntil(
+                      RouteManager.home,
+                      (_) => false,
+                    );
+                  },
+                ),
+              ),
+            ],
+          )
+        : SizedBox();
   }
 }

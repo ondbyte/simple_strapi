@@ -234,7 +234,8 @@ class BookingFlow {
   }
 
   void _setupReactions() {
-    if (_allStore.get<CloudStore>().userType != UserType.customer) {
+    if (_allStore.get<CloudStore>().bappUser.userType.value !=
+        UserType.customer) {
       _disposers.add(
         reaction(
           (_) => _allStore.get<BusinessStore>().business.selectedBranch.value,
@@ -283,7 +284,8 @@ class BookingFlow {
           timeWindow.value = FromToTiming.today();
           totalDurationMinutes.value = 0;
           totalPrice.value = 0.0;
-          if (_allStore.get<CloudStore>().userType == UserType.customer) {
+          if (_allStore.get<CloudStore>().bappUser.userType.value ==
+              UserType.customer) {
             professional.value = null;
           }
           selectedSubTitle.value = "";
@@ -304,7 +306,8 @@ class BookingFlow {
         (_) {
           _setPriceDuration();
           _setTitleSubTitle();
-          if (_allStore.get<CloudStore>().userType == UserType.customer) {
+          if (_allStore.get<CloudStore>().bappUser.userType.value ==
+              UserType.customer) {
             filteredStaffs.clear();
           } else {
             _filterStaffAndBookings();
@@ -375,7 +378,7 @@ class BookingFlow {
       bookedByNumber: number == null
           ? FirebaseAuth.instance.currentUser.phoneNumber
           : number.internationalNumber,
-      bookingUserType: _allStore.get<CloudStore>().userType,
+      bookingUserType: _allStore.get<CloudStore>().bappUser.userType.value,
       remindTime: from.subtract(const Duration(hours: 2)),
       myDoc: doc,
       bookedByName:

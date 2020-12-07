@@ -30,7 +30,7 @@ class _BappState extends State<Bapp> {
           children: [
             Observer(
               builder: (_) {
-                switch (cloudStore.userType) {
+                switch (cloudStore.bappUser.userType.value) {
                   case UserType.customer:
                     return CustomerHome();
                   case UserType.businessOwner:

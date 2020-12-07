@@ -29,9 +29,8 @@ class LocationLabelWidget extends StatelessWidget {
               return Observer(
                 builder: (_) {
                   return Text(
-                    cloudStore.myAddress.locality != null
-                        ? cloudStore.myAddress.locality.name
-                        : cloudStore.myAddress.city.name,
+                    cloudStore.bappUser.address.locality ??
+                        cloudStore.bappUser.address,
                     style: Theme.of(context).textTheme.subtitle1,
                   );
                 },

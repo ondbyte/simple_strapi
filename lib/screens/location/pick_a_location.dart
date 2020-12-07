@@ -2,12 +2,10 @@ import 'dart:async';
 
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
-import 'package:bapp/route_manager.dart';
 import 'package:bapp/screens/location/search_a_place.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/store_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -85,12 +83,14 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
             store: Provider.of<CloudStore>(context, listen: false),
             init: (cloudStore) {},
             builder: (_, cloudStore) {
-              if (cloudStore.myAddress.locality == null&&cloudStore.myAddress.city == null) {
+              if (cloudStore.bappUser.address.locality == null &&
+                  cloudStore.bappUser.address.city == null) {
                 return Center(
                   child: CircularProgressIndicator(),
                 );
               }
-              final latLong = cloudStore.myAddress.locality==null?cloudStore.myAddress.city.localities.first.latLong:cloudStore.myAddress.locality.latLong;
+              final latLong =
+                  cloudStore.getLatLongForAddress(cloudStore.bappUser.address);
               return GoogleMap(
                 myLocationButtonEnabled: false,
                 buildingsEnabled: true,
@@ -105,8 +105,7 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
                 zoomControlsEnabled: true,
                 zoomGesturesEnabled: true,
                 onMapCreated: (GoogleMapController controller) {
-                  _pickedLocation =
-                      PickedLocation(latLong, "");
+                  _pickedLocation = PickedLocation(latLong, "");
                   if (!_controller.isCompleted) {
                     _controller.complete(controller);
                   }

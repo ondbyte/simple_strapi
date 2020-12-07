@@ -4,7 +4,6 @@ import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/buttons.dart';
-import 'package:bapp/widgets/store_provider.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Consumer<CloudStore>(
-      builder: (_,cloudStore,__){
+      builder: (_, cloudStore, __) {
         return Scaffold(
           appBar: AppBar(
             leading: CloseButton(
@@ -100,7 +99,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
               ),
               ignoreBlank: true,
-              initialValue: _number ?? PhoneNumber(isoCode: cloudStore.myAddress.country.iso2),
+              initialValue: _number ??
+                  PhoneNumber(isoCode: cloudStore.bappUser.address.iso2),
             ),
             const SizedBox(
               height: 20,
@@ -140,7 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             Navigator.pushReplacementNamed(
                                 context, RouteManager.createProfileScreen);
                           } else {
-                            Navigator.pop(context,true);
+                            Navigator.pop(context, true);
                           }
                         },
                       );
@@ -228,31 +228,33 @@ class _LoginScreenState extends State<LoginScreen> {
                         height: 20,
                       ),
                       PinCodeTextField(
-                          autoFocus: true,
-                          enablePinAutofill: true,
-                          textStyle: Theme.of(context).textTheme.headline1,
-                          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                          pinTheme: PinTheme(
-                            activeColor: Theme.of(context).primaryColor,
-                            selectedColor: Theme.of(context).primaryColor,
-                            inactiveColor: Theme.of(context).primaryColor,
-                            borderWidth: 3.0,
-                          ),
-                          appContext: context,
-                          length: 6,
-                          onChanged: (v) {
-                            setState(
-                              () {
-                                if (v.length == 6) {
-                                  _otp = v;
-                                  _canVerifyotp = true;
-                                } else {
-                                  _otp = "";
-                                  _canVerifyotp = false;
-                                }
-                              },
-                            );
-                          },),
+                        autoFocus: true,
+                        enablePinAutofill: true,
+                        textStyle: Theme.of(context).textTheme.headline1,
+                        backgroundColor:
+                            Theme.of(context).scaffoldBackgroundColor,
+                        pinTheme: PinTheme(
+                          activeColor: Theme.of(context).primaryColor,
+                          selectedColor: Theme.of(context).primaryColor,
+                          inactiveColor: Theme.of(context).primaryColor,
+                          borderWidth: 3.0,
+                        ),
+                        appContext: context,
+                        length: 6,
+                        onChanged: (v) {
+                          setState(
+                            () {
+                              if (v.length == 6) {
+                                _otp = v;
+                                _canVerifyotp = true;
+                              } else {
+                                _otp = "";
+                                _canVerifyotp = false;
+                              }
+                            },
+                          );
+                        },
+                      ),
                       SizedBox(
                         height: 20,
                       ),
@@ -276,4 +278,3 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 }
-

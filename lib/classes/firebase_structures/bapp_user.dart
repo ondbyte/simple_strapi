@@ -1,6 +1,8 @@
 import 'package:bapp/config/config_data_types.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
+import 'package:mobx/mobx.dart';
 import 'package:thephonenumber/thecountrynumber.dart';
 
 class BappUser {
@@ -10,19 +12,23 @@ class BappUser {
   final DocumentReference business;
   final Map<String, DocumentReference> branches;
   final String image;
-  final UserType userType, alterEgo;
+  final userType = Observable<UserType>(UserType.customer),
+      alterEgo = Observable<UserType>(UserType.customer);
+  final Address address;
+  final String fcmToken;
 
-  BappUser({
-    this.business,
-    this.branches,
-    this.myDoc,
-    this.theNumber,
-    this.name,
-    this.email,
-    this.image,
-    this.userType,
-    this.alterEgo,
-  });
+  BappUser(
+      {this.business,
+      this.branches,
+      this.myDoc,
+      this.theNumber,
+      this.name,
+      this.email,
+      this.image,
+      UserType userType,
+      UserType alterEgo,
+      this.address,
+      this.fcmToken = ""});
 
   static DocumentReference newReference({String docName = ""}) {
     assert(docName.isNotEmpty);
@@ -47,29 +53,36 @@ class BappUser {
       Map<String, DocumentReference> branches,
       UserType userType,
       UserType alterEgo,
-      DocumentReference myDoc}) {
+      DocumentReference myDoc,
+      Address address,
+      String fcmToken}) {
     return BappUser(
-        myDoc: myDoc ?? this.myDoc,
-        name: name ?? this.name,
-        theNumber: theNumber ?? this.theNumber,
-        email: email ?? this.email,
-        image: image ?? this.image,
-        business: business ?? this.business,
-        branches: branches ?? this.branches,
-        userType: userType ?? this.userType,
-        alterEgo: alterEgo ?? this.alterEgo);
+      myDoc: myDoc ?? this.myDoc,
+      name: name ?? this.name,
+      theNumber: theNumber ?? this.theNumber,
+      email: email ?? this.email,
+      image: image ?? this.image,
+      business: business ?? this.business,
+      branches: branches ?? this.branches,
+      userType: userType ?? this.userType.value,
+      alterEgo: alterEgo ?? this.alterEgo.value,
+      address: address ?? this.address,
+      fcmToken: fcmToken ?? this.fcmToken,
+    );
   }
 
   toMap() {
     return {
-      "contactNumber": theNumber.internationalNumber ?? "",
+      "contactNumber": theNumber?.internationalNumber ?? "",
       "email": email ?? "",
       "name": name ?? "",
       "image": image ?? "",
       "business": business,
       "branches": branches ?? {},
-      "userType": EnumToString.convertToString(userType),
-      "alterEgo": EnumToString.convertToString(alterEgo),
+      "userType": EnumToString.convertToString(userType.value),
+      "alterEgo": EnumToString.convertToString(alterEgo.value),
+      "fcmToken": fcmToken,
+      "myAddress": address.toMap(),
     };
   }
 
@@ -77,9 +90,11 @@ class BappUser {
     final j = snap.data();
     return BappUser(
       myDoc: snap.reference,
-      theNumber: TheCountryNumber().parseNumber(
-        internationalNumber: j["contactNumber"],
-      ),
+      theNumber: !isNullOrEmpty(j["contactNumber"])
+          ? TheCountryNumber().parseNumber(
+              internationalNumber: j["contactNumber"],
+            )
+          : null,
       name: j["name"],
       email: j["email"],
       image: j['image'],
@@ -91,8 +106,31 @@ class BappUser {
             ),
           ) ??
           {},
-      userType: j["userType"],
-      alterEgo: j["alterEgo"],
+      userType: EnumToString.fromString(UserType.values, j["userType"]),
+      alterEgo: EnumToString.fromString(UserType.values, j["alterEgo"]),
+      address: Address.fromJson(j["myAddress"] ?? {}),
     );
+  }
+}
+
+class Address {
+  final String iso2, city, locality;
+
+  Address({this.iso2, this.city, this.locality});
+
+  static Address fromJson(Map<String, dynamic> j) {
+    return Address(
+      city: j["city"] ?? "",
+      iso2: j["iso2"] ?? "",
+      locality: j["locality"] ?? "",
+    );
+  }
+
+  toMap() {
+    return {
+      "city": city,
+      "iso2": iso2,
+      "locality": locality,
+    };
   }
 }

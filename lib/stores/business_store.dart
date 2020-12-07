@@ -86,7 +86,10 @@ abstract class _BusinessStore with Store {
 
     await ap.saveBusiness();
 
-    _allStore.get<CloudStore>().alterEgo = UserType.businessOwner;
+    _allStore.get<CloudStore>().bappUser = _allStore
+        .get<CloudStore>()
+        .bappUser
+        .updateWith(alterEgo: UserType.businessOwner);
 
     business = ap;
   }
@@ -95,7 +98,7 @@ abstract class _BusinessStore with Store {
   Future getMyBusiness() async {
     final completer = Completer<bool>();
     final cloudStore = _allStore.get<CloudStore>();
-    if (cloudStore.userType == UserType.customer) {
+    if (cloudStore.bappUser.userType == UserType.customer) {
       return false;
     }
     if (!cloudStore.myData.containsKey("branches")) {

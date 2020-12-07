@@ -17,21 +17,6 @@ mixin _$CloudStore on _CloudStore, Store {
               name: '_CloudStore.theNumber'))
           .value;
 
-  final _$myAddressAtom = Atom(name: '_CloudStore.myAddress');
-
-  @override
-  MyAddress get myAddress {
-    _$myAddressAtom.reportRead();
-    return super.myAddress;
-  }
-
-  @override
-  set myAddress(MyAddress value) {
-    _$myAddressAtom.reportWrite(value, super.myAddress, () {
-      super.myAddress = value;
-    });
-  }
-
   final _$countriesAtom = Atom(name: '_CloudStore.countries');
 
   @override
@@ -44,36 +29,6 @@ mixin _$CloudStore on _CloudStore, Store {
   set countries(List<Country> value) {
     _$countriesAtom.reportWrite(value, super.countries, () {
       super.countries = value;
-    });
-  }
-
-  final _$userTypeAtom = Atom(name: '_CloudStore.userType');
-
-  @override
-  UserType get userType {
-    _$userTypeAtom.reportRead();
-    return super.userType;
-  }
-
-  @override
-  set userType(UserType value) {
-    _$userTypeAtom.reportWrite(value, super.userType, () {
-      super.userType = value;
-    });
-  }
-
-  final _$alterEgoAtom = Atom(name: '_CloudStore.alterEgo');
-
-  @override
-  UserType get alterEgo {
-    _$alterEgoAtom.reportRead();
-    return super.alterEgo;
-  }
-
-  @override
-  set alterEgo(UserType value) {
-    _$alterEgoAtom.reportWrite(value, super.alterEgo, () {
-      super.alterEgo = value;
     });
   }
 
@@ -129,20 +84,6 @@ mixin _$CloudStore on _CloudStore, Store {
     return _$switchUserTypeAsyncAction.run(() => super.switchUserType(context));
   }
 
-  final _$getMyUserTypesAsyncAction = AsyncAction('_CloudStore.getMyUserTypes');
-
-  @override
-  Future<dynamic> getMyUserTypes() {
-    return _$getMyUserTypesAsyncAction.run(() => super.getMyUserTypes());
-  }
-
-  final _$getMyAddressAsyncAction = AsyncAction('_CloudStore.getMyAddress');
-
-  @override
-  Future<dynamic> getMyAddress() {
-    return _$getMyAddressAsyncAction.run(() => super.getMyAddress());
-  }
-
   final _$getActiveCountriesAsyncAction =
       AsyncAction('_CloudStore.getActiveCountries');
 
@@ -162,10 +103,7 @@ mixin _$CloudStore on _CloudStore, Store {
   @override
   String toString() {
     return '''
-myAddress: ${myAddress},
 countries: ${countries},
-userType: ${userType},
-alterEgo: ${alterEgo},
 user: ${user},
 status: ${status},
 loadingForOTP: ${loadingForOTP},
