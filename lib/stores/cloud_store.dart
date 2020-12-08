@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bapp/classes/firebase_structures/bapp_user.dart';
 import 'package:bapp/classes/firebase_structures/business_booking.dart';
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/main.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
@@ -24,10 +25,8 @@ import '../config/config_data_types.dart';
 import '../config/constants.dart';
 import '../fcm.dart';
 import '../helpers/helper.dart';
-import '../helpers/helper.dart';
 import 'all_store.dart';
 import 'business_store.dart';
-import 'package:bapp/helpers/extensions.dart';
 
 part 'cloud_store.g.dart';
 
@@ -98,9 +97,7 @@ abstract class _CloudStore with Store {
   }
 
   String getAddressLabel() {
-    return (bappUser.address.locality != null
-        ? bappUser.address
-        : bappUser.address.city);
+    return (bappUser.address.locality ?? bappUser.address.city);
   }
 
   void _listenForUserChange() {
@@ -175,6 +172,7 @@ abstract class _CloudStore with Store {
     );
     return ret;
   }
+
   StreamSubscription userSubscription;
   Future getUserData() async {
     final completer = Completer<bool>();
@@ -192,7 +190,7 @@ abstract class _CloudStore with Store {
     }
     userSubscription = ref.snapshots().listen(
       (snap) async {
-        if (snap.exists && snap.id == FirebaseAuth.instance.currentUser.uid) {
+        if (snap.exists) {
           bappUser = BappUser.fromSnapShot(snap: snap);
           myData = snap.data() ?? {};
           if (!completer.cautiousComplete(true)) {
@@ -219,13 +217,21 @@ abstract class _CloudStore with Store {
 
   @action
   Future<bool> switchUserType(BuildContext context) async {
+    if (bappUser.userType.value != UserType.customer) {
+      bappUser = bappUser.updateWith(
+          userType: UserType.customer, alterEgo: bappUser.userType.value);
+      await bappUser.save();
+      _allStore.get<EventBus>().fire(AppEvents.reboot);
+      return true;
+    }
     final businessStore = Provider.of<BusinessStore>(context, listen: false);
     await Future.forEach<BusinessBranch>(businessStore.business.branches.value,
         (element) async {
       await element.pull();
     });
+    final anyDraft = businessStore.business.anyBranchInDraft();
     if (businessStore.business != null &&
-        (businessStore.business.anyBranchInDraft() ||
+        (anyDraft ||
             businessStore.business.anyBranchInPublished() ||
             businessStore.business.anyBranchInUnPublished())) {
       final tmp = bappUser.userType.value;
@@ -523,6 +529,7 @@ abstract class _CloudStore with Store {
       final data = snap.data();
       final business = BusinessDetails.fromJson(data);
       businesses.addAll({reference: business});
+      completer.complete(business);
     }
 
     return completer.future;

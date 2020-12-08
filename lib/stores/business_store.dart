@@ -102,19 +102,18 @@ abstract class _BusinessStore with Store {
   Future getMyBusiness() async {
     final completer = Completer<bool>();
     final cloudStore = _allStore.get<CloudStore>();
-    if (cloudStore.bappUser.userType.value == UserType.customer) {
-      return false;
-    }
     if (isNullOrEmpty(cloudStore.bappUser.branches)) {
       return false;
     }
     cloudStore.bappUser.business.snapshots().listen(
       (event) {
         business = BusinessDetails.fromJson(event.data());
-        final filtered = business.branches.value.where(
-          (element) => cloudStore.bappUser.branches.values
-              .any((el) => (el) == element.myDoc.value),
-        );
+        final filtered = business.branches.value
+            .where(
+              (element) => cloudStore.bappUser.branches.values
+                  .any((el) => (el) == element.myDoc.value),
+            )
+            .toList();
         business.branches.value.clear();
         business.branches.value.addAll(filtered);
         _allStore.get<BookingFlow>().branch = business.selectedBranch.value;

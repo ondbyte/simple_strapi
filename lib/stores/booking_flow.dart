@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:bapp/classes/filtered_business_staff.dart';
@@ -88,7 +89,7 @@ class BookingFlow {
 
   BookingFlow(this._allStore);
 
-  void init(){
+  void init() {
     _setupReactions();
   }
 
@@ -103,11 +104,12 @@ class BookingFlow {
 
   List<BusinessBooking> getStaffBookingsForDay(DateTime day) {
     assert(professional.value != null);
-    return branchBookings
+    final list = branchBookings
         .where((element) =>
             element.fromToTiming.from.isDay(day) &&
             element.staff.name == professional.value.staff.name)
         .toList();
+    return list;
   }
 
   Future getMyBookings() async {
@@ -146,8 +148,12 @@ class BookingFlow {
     });
   }
 
+  StreamSubscription branchBookingSub;
   Future getBranchBookings() async {
-    FirebaseFirestore.instance
+    if (branchBookingSub != null) {
+      branchBookingSub.cancel();
+    }
+    branchBookingSub = FirebaseFirestore.instance
         .collection("bookings")
         .where("branch", isEqualTo: branch.myDoc.value)
         .where("from", isGreaterThanOrEqualTo: DateTime.now().toTimeStamp())
@@ -214,6 +220,10 @@ class BookingFlow {
       professional.value ??=
           filteredStaffs.isNotEmpty ? filteredStaffs.first : null;
     });
+    if (filteredStaffs.isNotEmpty) {
+      filteredStaffs.removeWhere(
+          (element) => element.staff.role != UserType.businessStaff);
+    }
   }
 
   void _getHolidays() {
@@ -257,7 +267,8 @@ class BookingFlow {
               .business
               .selectedBranch
               .value
-              .staff,
+              .staff
+              .length,
           (v) async {
             await getBranchBookings();
           },

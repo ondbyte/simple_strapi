@@ -41,46 +41,44 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
             label: "Confirm booking",
             onPressed: flow.slot.value == null
                 ? null
-                : widget.onSelect != null
-                    ? widget.onSelect
-                    : () async {
-                        await BappNavigator.bappPushAndRemoveAll(
-                          context,
-                          ContextualMessageScreen(
-                            svgAssetToDisplay: "assets/svg/success.svg",
-                            message:
-                                "Your booking has been placed, please show up minutes before the booking",
-                            buttonText:
-                                Platform.isIOS && !BappFCM().isFcmInitialized
-                                    ? "Enable reminder for this booking"
-                                    : "Back to home",
-                            init: () async {
-                              await flow.done();
-                            },
-                            onButtonPressed: (context) async {
-                              if (Platform.isIOS &&
-                                  !BappFCM().isFcmInitialized) {
-                                await BappFCM().initForIOS();
-                              } else {
-                                BappNavigator.bappPushAndRemoveAll(
-                                  context,
-                                  Bapp(),
-                                );
-                              }
-                            },
-                            secondarybuttonText:
-                                Platform.isIOS && !BappFCM().isFcmInitialized
-                                    ? "Back to home"
-                                    : null,
-                            secondaryButtonPressed: (context) {
+                : widget.onSelect ??
+                    () async {
+                      await BappNavigator.bappPushAndRemoveAll(
+                        context,
+                        ContextualMessageScreen(
+                          svgAssetToDisplay: "assets/svg/success.svg",
+                          message:
+                              "Your booking has been placed, please show up minutes before the booking",
+                          buttonText:
+                              Platform.isIOS && !BappFCM().isFcmInitialized
+                                  ? "Enable reminder for this booking"
+                                  : "Back to home",
+                          init: () async {
+                            await flow.done();
+                          },
+                          onButtonPressed: (context) async {
+                            if (Platform.isIOS && !BappFCM().isFcmInitialized) {
+                              await BappFCM().initForIOS();
+                            } else {
                               BappNavigator.bappPushAndRemoveAll(
                                 context,
                                 Bapp(),
                               );
-                            },
-                          ),
-                        );
-                      },
+                            }
+                          },
+                          secondarybuttonText:
+                              Platform.isIOS && !BappFCM().isFcmInitialized
+                                  ? "Back to home"
+                                  : null,
+                          secondaryButtonPressed: (context) {
+                            BappNavigator.bappPushAndRemoveAll(
+                              context,
+                              Bapp(),
+                            );
+                          },
+                        ),
+                      );
+                    },
           );
         },
       ),
@@ -92,8 +90,8 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
             return [
               SliverAppBar(
                 elevation: 0,
-                collapsedHeight: 140,
-                expandedHeight: 140,
+                collapsedHeight: 150,
+                expandedHeight: 150,
                 pinned: true,
                 automaticallyImplyLeading: false,
                 flexibleSpace: BappRowCalender(

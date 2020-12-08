@@ -1,6 +1,5 @@
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/screens/business/booking_flow/booking_details.dart';
-import 'package:bapp/screens/business/booking_flow/booking_details.dart';
 import 'package:bapp/widgets/bapp_calendar.dart';
 import 'package:bapp/widgets/login_widget.dart';
 import 'package:bapp/widgets/tiles/customer_booking_tile.dart';
@@ -128,8 +127,8 @@ class _BookingsTabState extends State<BookingsTab> {
   Widget _getCalender() {
     return SliverAppBar(
       elevation: 0,
-      collapsedHeight: 140,
-      expandedHeight: 140,
+      collapsedHeight: 150,
+      expandedHeight: 150,
       pinned: true,
       automaticallyImplyLeading: false,
       actions: [
