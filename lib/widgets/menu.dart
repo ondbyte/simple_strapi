@@ -37,10 +37,12 @@ class _MenuState extends State<Menu> {
           builder: (_, cloudStore, __) {
             return Observer(
               builder: (_) {
+                final bappUser = cloudStore.bappUser;
                 final items = Helper.filterMenuItems(
-                    cloudStore.bappUser.userType.value,
-                    cloudStore.bappUser.alterEgo.value,
-                    cloudStore.status);
+                  bappUser.userType.value,
+                  bappUser.alterEgo.value,
+                  cloudStore.status,
+                );
                 return ListView(
                   children: [
                     const SizedBox(

@@ -5,6 +5,8 @@ import 'package:enum_to_string/enum_to_string.dart';
 import 'package:mobx/mobx.dart';
 import 'package:thephonenumber/thecountrynumber.dart';
 
+import '../../config/config_data_types.dart';
+
 class BappUser {
   final DocumentReference myDoc;
   final String name, email;
@@ -28,7 +30,10 @@ class BappUser {
       UserType userType,
       UserType alterEgo,
       this.address,
-      this.fcmToken = ""});
+      this.fcmToken = ""}){
+    this.alterEgo.value = alterEgo??UserType.customer;
+    this.userType.value = userType??UserType.customer;
+  }
 
   static DocumentReference newReference({String docName = ""}) {
     assert(docName.isNotEmpty);
@@ -55,7 +60,7 @@ class BappUser {
       UserType alterEgo,
       DocumentReference myDoc,
       Address address,
-      String fcmToken}) {
+      String fcmToken,}) {
     return BappUser(
       myDoc: myDoc ?? this.myDoc,
       name: name ?? this.name,
@@ -82,7 +87,7 @@ class BappUser {
       "userType": EnumToString.convertToString(userType.value),
       "alterEgo": EnumToString.convertToString(alterEgo.value),
       "fcmToken": fcmToken,
-      "myAddress": address.toMap(),
+      "myAddress": address?.toMap()??{},
     };
   }
 
@@ -109,6 +114,7 @@ class BappUser {
       userType: EnumToString.fromString(UserType.values, j["userType"]),
       alterEgo: EnumToString.fromString(UserType.values, j["alterEgo"]),
       address: Address.fromJson(j["myAddress"] ?? {}),
+      fcmToken: j["fcmToken"],
     );
   }
 }

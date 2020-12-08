@@ -24,8 +24,10 @@ import '../config/config_data_types.dart';
 import '../config/constants.dart';
 import '../fcm.dart';
 import '../helpers/helper.dart';
+import '../helpers/helper.dart';
 import 'all_store.dart';
 import 'business_store.dart';
+import 'package:bapp/helpers/extensions.dart';
 
 part 'cloud_store.g.dart';
 
@@ -113,12 +115,14 @@ abstract class _CloudStore with Store {
             final tmp = bappUser?.updateWith(
               email: FirebaseAuth.instance.currentUser.email,
               theNumber: TheCountryNumber().parseNumber(
-                  internationalNumber:
-                      FirebaseAuth.instance.currentUser.phoneNumber),
+                internationalNumber:
+                    FirebaseAuth.instance.currentUser.phoneNumber,
+              ),
               name: FirebaseAuth.instance.currentUser.displayName,
             );
             if (tmp != null) {
               bappUser = tmp;
+              bappUser.save();
             }
           }
           if (_previousUID != user?.uid) {
@@ -142,7 +146,15 @@ abstract class _CloudStore with Store {
     );
   }
 
+  Future destroyAnonymous({String uid = ""}) async {
+    if (isNullOrEmpty(uid)) {
+      return;
+    }
+    await FirebaseFirestore.instance.collection("users").doc(uid).delete();
+  }
+
   GeoPoint getLatLongForAddress(Address address) {
+    var ret = GeoPoint(0, 0);
     countries.forEach(
       (country) {
         country.cities.forEach(
@@ -152,38 +164,43 @@ abstract class _CloudStore with Store {
                   (loc) => loc.name == address.locality,
                   orElse: () => null);
               if (local != null) {
-                return local.latLong;
+                ret = local.latLong;
               } else {
-                return city.localities.first.latLong;
+                ret = city.localities.first.latLong;
               }
             }
           },
         );
       },
     );
+    return ret;
   }
-
+  StreamSubscription userSubscription;
   Future getUserData() async {
     final completer = Completer<bool>();
     var ref = await _fireStore.doc("users/${user.uid}");
     myData = {};
-    ref.snapshots().listen(
+    final snap = await ref.get();
+    if (!snap.exists) {
+      myData = {};
+      final tmp = BappUser(
+        myDoc: ref,
+      );
+      Helper.printLog("the user document doesnt exists/ new user");
+      await tmp.save();
+      ref = tmp.myDoc;
+    }
+    userSubscription = ref.snapshots().listen(
       (snap) async {
-        if (snap.exists) {
+        if (snap.exists && snap.id == FirebaseAuth.instance.currentUser.uid) {
           bappUser = BappUser.fromSnapShot(snap: snap);
           myData = snap.data() ?? {};
-          if (!completer.isCompleted) {
-            completer.complete(true);
-          } else {
+          if (!completer.cautiousComplete(true)) {
             await getMyFavorites();
           }
         } else {
-          myData = {};
-          bappUser = BappUser(
-              myDoc: BappUser.newReference(
-                  docName: FirebaseAuth.instance.currentUser.uid));
-          completer.complete(false);
-          Helper.printLog("This should never be the case");
+          bappUser = null;
+          userSubscription.cancel();
         }
       },
     );
@@ -346,8 +363,6 @@ abstract class _CloudStore with Store {
       } on FirebaseAuthException catch (e) {
         onFail(e);
       }
-    } else {
-      onFail(FirebaseAuthException(message: "same-email", code: "same-email"));
     }
   }
 
@@ -402,6 +417,9 @@ abstract class _CloudStore with Store {
         .collection("users")
         .doc(FirebaseAuth.instance.currentUser.phoneNumber)
         .get();
+    if (!snap.exists) {
+      return;
+    }
     final user = BappUser.fromSnapShot(snap: snap);
     final newUser = user.updateWith(
         myDoc: BappUser.newReference(
@@ -417,14 +435,14 @@ abstract class _CloudStore with Store {
       //Helper.printLog("359" + e.code);
       print(e);
       if (e.code.toLowerCase() == "credential-already-in-use") {
-        await FirebaseFirestore.instance
-            .doc("users/${FirebaseAuth.instance.currentUser.uid}")
-            .delete();
+        await destroyAnonymous(uid: FirebaseAuth.instance.currentUser.uid);
         await FirebaseAuth.instance.currentUser.delete();
         return await signIn(phoneAuthCredential);
       } else if (e.code.toLowerCase() == "invalid-verification-code") {
         return false;
       } else if (e.message.contains("User has already been linked")) {
+        await destroyAnonymous(uid: FirebaseAuth.instance.currentUser.uid);
+        await FirebaseAuth.instance.currentUser.delete();
         return await signIn(phoneAuthCredential);
       }
     }

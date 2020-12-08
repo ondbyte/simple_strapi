@@ -5,6 +5,10 @@ import 'package:bapp/screens/business/tabs/business_toolkit_tab.dart';
 import 'package:bapp/widgets/business/business_branch_switch.dart';
 import 'package:bapp/widgets/menu.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:provider/provider.dart';
+
+import '../../stores/business_store.dart';
 
 class BusinessHome extends StatefulWidget {
   @override
@@ -22,14 +26,30 @@ class _BusinessHomeState extends State<BusinessHome> {
         title: BusinessBranchSwitchWidget(),
       ),
       endDrawer: Menu(),
-      body: IndexedStack(
-        children: [
-          BusinessDashboardTab(),
-          BusinessBookingsTab(),
-          BusinessToolkitTab(),
-          SizedBox(),
-        ],
-        index: _selectedPage,
+      body: Consumer<BusinessStore>(
+        builder: (_, businessStore, __) {
+          return Observer(
+            builder: (_) {
+              if (businessStore.business == null) {
+                return Center(
+                  child: Text(
+                    "No business is selected",
+                    textAlign: TextAlign.center,
+                  ),
+                );
+              }
+              return IndexedStack(
+                children: [
+                  BusinessDashboardTab(),
+                  BusinessBookingsTab(),
+                  BusinessToolkitTab(),
+                  SizedBox(),
+                ],
+                index: _selectedPage,
+              );
+            },
+          );
+        },
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,

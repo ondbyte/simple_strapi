@@ -7,6 +7,7 @@ import 'package:bapp/fcm.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info/device_info.dart';
+import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart' hide Action;
@@ -212,4 +213,8 @@ Future sendUpdatesForBooking(BusinessBooking booking) async {
         );
       }
   }
+}
+
+String readableEnum(dynamic value){
+  return EnumToString.convertToString(value).split(r"(?=[A-Z])").join(" ");
 }

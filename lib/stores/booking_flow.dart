@@ -86,7 +86,9 @@ class BookingFlow {
     });
   }
 
-  BookingFlow(this._allStore) {
+  BookingFlow(this._allStore);
+
+  void init(){
     _setupReactions();
   }
 
@@ -94,7 +96,8 @@ class BookingFlow {
       ObservableList<BusinessBooking> list) {
     return list
         .where(
-            (element) => element.fromToTiming.from.isDay(timeWindow.value.from))
+          (element) => element.fromToTiming.from.isDay(timeWindow.value.from),
+        )
         .toList();
   }
 

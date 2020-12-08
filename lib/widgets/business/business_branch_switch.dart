@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
+import '../../helpers/helper.dart';
+
 class BusinessBranchSwitchWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -20,9 +22,9 @@ class BusinessBranchSwitchWidget extends StatelessWidget {
               Observer(
                 builder: (_) {
                   final text =
-                      businessStore.business.selectedBranch.value.address.value;
+                      businessStore.business?.selectedBranch?.value?.address?.value;
                   return Text(
-                    text.isEmpty ? "Select a branch" : text.split(", ").first,
+                    isNullOrEmpty(text) ? "Select a branch" : text.split(", ").first,
                     style: Theme.of(context).textTheme.subtitle1,
                   );
                 },

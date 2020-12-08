@@ -18,21 +18,25 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: CustomScrollView(
-        slivers: [
-          SliverPadding(
-            padding: EdgeInsets.only(top: 0, left: 16, right: 16),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate(
-                [
-                  _getBranchTile(context),
-                  _getSubmitForVerificationButton(context),
-                ],
+      child: Consumer<BusinessStore>(
+        builder: (_, businessStore, __) {
+          return CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: EdgeInsets.only(top: 0, left: 16, right: 16),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate(
+                    [
+                      _getBranchTile(context),
+                      _getSubmitForVerificationButton(context),
+                    ],
+                  ),
+                ),
               ),
-            ),
-          ),
-          _getExpansionTiles(context),
-        ],
+              _getExpansionTiles(context),
+            ],
+          );
+        },
       ),
     );
   }

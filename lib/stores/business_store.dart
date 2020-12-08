@@ -13,6 +13,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
 
+import '../helpers/helper.dart';
+
 part 'business_store.g.dart';
 
 class BusinessStore = _BusinessStore with _$BusinessStore;
@@ -48,7 +50,7 @@ abstract class _BusinessStore with Store {
     await getMyBusiness();
   }
 
-  userRelatedUpdate() {
+  void userRelatedUpdate() {
     businessDoc =
         _fireStore.doc("businesses/${FirebaseAuth.instance.currentUser.uid}");
   }
@@ -91,6 +93,8 @@ abstract class _BusinessStore with Store {
         .bappUser
         .updateWith(alterEgo: UserType.businessOwner);
 
+    _allStore.get<CloudStore>().bappUser.save();
+
     business = ap;
   }
 
@@ -98,24 +102,18 @@ abstract class _BusinessStore with Store {
   Future getMyBusiness() async {
     final completer = Completer<bool>();
     final cloudStore = _allStore.get<CloudStore>();
-    if (cloudStore.bappUser.userType == UserType.customer) {
+    if (cloudStore.bappUser.userType.value == UserType.customer) {
       return false;
     }
-    if (!cloudStore.myData.containsKey("branches")) {
+    if (isNullOrEmpty(cloudStore.bappUser.branches)) {
       return false;
     }
-    final allBranchesRef =
-        cloudStore.myData["branches"] as Map<String, dynamic> ?? {};
-    if (isNullOrEmpty(allBranchesRef)) {
-      return false;
-    }
-    final busRef = cloudStore.myData["business"] as DocumentReference;
-    busRef.snapshots().listen(
+    cloudStore.bappUser.business.snapshots().listen(
       (event) {
         business = BusinessDetails.fromJson(event.data());
         final filtered = business.branches.value.where(
-          (element) => allBranchesRef.values
-              .any((el) => (el as DocumentReference) == element.myDoc.value),
+          (element) => cloudStore.bappUser.branches.values
+              .any((el) => (el) == element.myDoc.value),
         );
         business.branches.value.clear();
         business.branches.value.addAll(filtered);

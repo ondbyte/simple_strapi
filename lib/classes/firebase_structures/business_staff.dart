@@ -113,7 +113,7 @@ class BusinessStaff {
     final snap = _userSnap ?? (await _getUserSnap());
     if (snap.exists) {
       await snap.reference.set({
-        "branches.${branch.myDoc.value.id}": branch.myDoc.value,
+        "branches": {branch.myDoc.value.id:branch.myDoc.value},
         "business": branch.business.value.myDoc.value
       }, SetOptions(merge: true));
     } else {

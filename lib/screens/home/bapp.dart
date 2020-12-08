@@ -22,8 +22,7 @@ class _BappState extends State<Bapp> {
     return StoreProvider<CloudStore>(
       store: Provider.of<CloudStore>(context),
       init: (cloudStore) async {
-        //await Provider.of<UpdatesStore>(context, listen: false).init(context);
-        await Provider.of<BookingFlow>(context, listen: false).getMyBookings();
+        await Provider.of<BookingFlow>(context, listen: false)..init()..getMyBookings();
       },
       builder: (_, cloudStore) {
         return Stack(

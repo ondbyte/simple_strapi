@@ -11,6 +11,10 @@ import 'package:thephonenumber/thecountrynumber.dart';
 
 import '../../../../classes/firebase_structures/business_staff.dart';
 import '../../../../config/config_data_types.dart';
+import '../../../../config/config_data_types.dart';
+import '../../../../config/config_data_types.dart';
+import '../../../../config/config_data_types.dart';
+import '../../../../helpers/helper.dart';
 import '../../../../helpers/helper.dart';
 import '../../../../stores/business_store.dart';
 import '../../../../stores/cloud_store.dart';
@@ -61,6 +65,18 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                           [
                             DropdownButtonFormField<UserType>(
                               value: _staff.role,
+                              selectedItemBuilder: (_) {
+                                final ws = <Widget>[];
+                                final list = [
+                                  UserType.businessManager,
+                                  UserType.businessReceptionist,
+                                  UserType.businessStaff
+                                ];
+                                list.forEach((element) {
+                                  ws.add(Text(readableEnum(element)));
+                                });
+                                return ws;
+                              },
                               items: [
                                 DropdownMenuItem(
                                   child: Text(

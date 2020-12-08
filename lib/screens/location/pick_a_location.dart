@@ -89,8 +89,7 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
                   child: CircularProgressIndicator(),
                 );
               }
-              final latLong =
-                  cloudStore.getLatLongForAddress(cloudStore.bappUser.address);
+              final latLong = cloudStore.getLatLongForAddress(cloudStore.bappUser.address);
               return GoogleMap(
                 myLocationButtonEnabled: false,
                 buildingsEnabled: true,
