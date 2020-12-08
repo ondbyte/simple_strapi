@@ -30,7 +30,23 @@ class _BookingTimeLineWidgetState extends State<BookingTimeLineWidget> {
   Widget build(BuildContext context) {
     final list = widget.list;
     return DayView(
-      style: DayViewStyle(headerSize:0),
+      hoursColumnStyle: HoursColumnStyle(
+
+        color: Theme.of(context).scaffoldBackgroundColor,
+      ),
+      style: DayViewStyle(
+       
+           
+           headerSize: 0,
+            currentTimeCircleColor: Theme.of(context).primaryColor,
+            currentTimeRuleColor: Theme.of(context).primaryColor,
+            backgroundRulesColor: Theme.of(context).disabledColor,
+           
+            hourRowHeight: 120,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor
+
+        
+      ),
       date: widget.date,
       inScrollableWidget: true,
       userZoomable: false,

@@ -142,9 +142,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                                 );
                               },
                             ),
-                            const SizedBox(
-                              height: 20,
-                            ),
+                            
                             const SizedBox(
                               height: 20,
                             ),
@@ -184,6 +182,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                             Consumer<BusinessStore>(
                               builder: (_, businessStore, __) {
                                 return TextFieldTags(
+                                  textFieldStyler: TextFieldStyler(hintText: "Add Skills / Specialization", ),
                                   onTag: (s) {
                                     _staff.expertise.add(s);
                                   },

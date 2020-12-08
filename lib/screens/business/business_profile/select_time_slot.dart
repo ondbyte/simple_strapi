@@ -257,7 +257,7 @@ class _TimeSlotState extends State<TimeSlot> {
               decoration: BoxDecoration(
                   color: _selected
                       ? Theme.of(context).primaryColor
-                      : Theme.of(context).backgroundColor,
+                      : Theme.of(context).cardColor,
                   borderRadius: BorderRadius.all(Radius.circular(4))),
               margin: EdgeInsets.all(8),
               child: DefaultTextStyle(
