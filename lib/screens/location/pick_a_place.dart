@@ -72,32 +72,28 @@ class PickAPlaceScreen extends StatelessWidget {
     return StoreProvider<CloudStore>(
       store: Provider.of<CloudStore>(context, listen: false),
       builder: (context, cloudStore) {
-        return Observer(
-          builder: (context) {
-            return Scaffold(
-              appBar: AppBar(
-                automaticallyImplyLeading: true,
-                title: Text(
-                  "Pick a City",
-                  style: Theme.of(context).textTheme.subtitle1,
-                ),
-              ),
-              body: Builder(
-                builder: (_) {
-                  final cities = country.cities;
-                  return ListView(
-                    children: List.generate(
-                      cities.length,
+        return Scaffold(
+          appBar: AppBar(
+            automaticallyImplyLeading: true,
+            title: Text(
+              "Pick a City",
+              style: Theme.of(context).textTheme.subtitle1,
+            ),
+          ),
+          body: Builder(
+            builder: (_) {
+              final cities = country.cities;
+              return ListView(
+                children: List.generate(
+                  cities.length,
                       (index) => _getSubLocationWidget(
-                        context,
-                        cities[index],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            );
-          },
+                    context,
+                    cities[index],
+                  ),
+                ),
+              );
+            },
+          ),
         );
       },
     );

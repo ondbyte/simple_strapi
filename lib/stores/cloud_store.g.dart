@@ -47,6 +47,21 @@ mixin _$CloudStore on _CloudStore, Store {
     });
   }
 
+  final _$bappUserAtom = Atom(name: '_CloudStore.bappUser');
+
+  @override
+  BappUser get bappUser {
+    _$bappUserAtom.reportRead();
+    return super.bappUser;
+  }
+
+  @override
+  set bappUser(BappUser value) {
+    _$bappUserAtom.reportWrite(value, super.bappUser, () {
+      super.bappUser = value;
+    });
+  }
+
   final _$statusAtom = Atom(name: '_CloudStore.status');
 
   @override
@@ -105,6 +120,7 @@ mixin _$CloudStore on _CloudStore, Store {
     return '''
 countries: ${countries},
 user: ${user},
+bappUser: ${bappUser},
 status: ${status},
 loadingForOTP: ${loadingForOTP},
 theNumber: ${theNumber}

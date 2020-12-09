@@ -45,6 +45,7 @@ abstract class _CloudStore with Store {
   @observable
   User user;
 
+  @observable
   BappUser bappUser;
 
   Function _onLogin, _onNotLogin;
