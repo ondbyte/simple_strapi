@@ -1,3 +1,4 @@
+import 'package:bapp/widgets/network_error.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -17,33 +18,12 @@ void main() async {
   await Firebase.initializeApp();
   runApp(App());
 }
-
-enum AppEvents {
-  reboot,
-}
-
-class App extends StatefulWidget {
-  @override
-  _AppState createState() => _AppState();
-}
-
-class _AppState extends State<App> {
-  var _key = UniqueKey();
-
+class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bus = EventBus();
-
-    ///listen for reboot
-    bus.on<AppEvents>().listen((event) {
-      if (event == AppEvents.reboot) {
-        setState(() {
-          _key = UniqueKey();
-        });
-      }
-    });
-    return KeyedSubtree(
-      key: _key,
+    return BappEventsHandler(
+      bus: bus,
       child: Builder(
         builder: (_) {
           final allStore = AllStore();
@@ -100,3 +80,4 @@ class _AppState extends State<App> {
     );
   }
 }
+

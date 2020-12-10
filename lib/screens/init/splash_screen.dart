@@ -8,6 +8,7 @@ import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/themestore.dart';
+import 'package:bapp/widgets/network_error.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';

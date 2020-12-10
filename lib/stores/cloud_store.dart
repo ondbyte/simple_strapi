@@ -4,6 +4,7 @@ import 'package:bapp/classes/firebase_structures/bapp_user.dart';
 import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/main.dart';
+import 'package:bapp/widgets/network_error.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:event_bus/event_bus.dart';

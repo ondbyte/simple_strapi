@@ -1,4 +1,6 @@
+import 'package:bapp/widgets/network_error.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:event_bus/event_bus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
@@ -10,6 +12,7 @@ import 'package:provider/provider.dart';
 import '../../config/config.dart';
 import '../../helpers/extensions.dart';
 import '../../helpers/helper.dart';
+import '../../main.dart';
 import '../../stores/cloud_store.dart';
 import '../../widgets/buttons.dart';
 import '../../widgets/loading.dart';
@@ -149,8 +152,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                     message: "No network",
                     mainButton: FlatButton(
                       onPressed: () {
-                        Provider.of<CloudStore>(context,listen: false).status = AuthStatus.userNotPresent;
-                        BappNavigator.bappPushAndRemoveAll(context, OnBoardingScreen());
+                        Provider.of<EventBus>(context,listen: false).fire(AppEvents.reboot);
                       },
                       child: Text(
                         "Try again",

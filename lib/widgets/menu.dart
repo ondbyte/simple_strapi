@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
+import 'network_error.dart';
+
 class Menu extends StatefulWidget {
   @override
   _MenuState createState() => _MenuState();
