@@ -155,7 +155,7 @@ class BookingFlow {
     }
     branchBookingSub = FirebaseFirestore.instance
         .collection("bookings")
-        .where("branch", isEqualTo: branch.myDoc.value)
+        .where("branch", isEqualTo: branch?.myDoc?.value)
         .where("from", isGreaterThanOrEqualTo: DateTime.now().toTimeStamp())
         .where("from",
             isLessThanOrEqualTo:

@@ -2,6 +2,7 @@ import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/fcm.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/store_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -22,20 +23,29 @@ class _BappState extends State<Bapp> {
     return StoreProvider<CloudStore>(
       store: Provider.of<CloudStore>(context),
       init: (cloudStore) async {
-        await Provider.of<BookingFlow>(context, listen: false)..init()..getMyBookings();
+        await Provider.of<BookingFlow>(context, listen: false)
+          ..init()
+          ..getMyBookings();
       },
       builder: (_, cloudStore) {
         return Stack(
           children: [
             Observer(
               builder: (_) {
+                if (cloudStore.bappUser == null) {
+                  return LoadingWidget();
+                }
                 switch (cloudStore.bappUser.userType.value) {
                   case UserType.customer:
                     return CustomerHome();
                   case UserType.businessOwner:
-                    return BusinessHome();
+                    return BusinessHome(
+                      forRole: UserType.businessOwner,
+                    );
                   case UserType.businessStaff:
-                    return SizedBox();
+                    return BusinessHome(
+                      forRole: UserType.businessStaff,
+                    );
                   default:
                     return Container(
                       color: Colors.red,

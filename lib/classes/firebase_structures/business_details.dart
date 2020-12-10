@@ -28,7 +28,7 @@ class BusinessDetails {
 
   final List<ReactionDisposer> _disposers = [];
 
-  setupReactions() {
+  void setupReactions() {
     _disposers.add(
       reaction(
         (_) => selectedBranch.value,

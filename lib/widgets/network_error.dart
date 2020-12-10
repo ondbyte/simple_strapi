@@ -1,10 +1,16 @@
-import 'package:bapp/main.dart';
+import 'package:bapp/helpers/extensions.dart';
 import 'package:event_bus/event_bus.dart';
-import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 enum AppEvents { reboot, unHandledError }
+
+class AppEventsWithExtra {
+  final AppEvents event;
+  final Object extra;
+
+  AppEventsWithExtra(this.event, this.extra);
+}
 
 class BappEventsHandler extends StatefulWidget {
   final Widget child;
@@ -43,11 +49,15 @@ class _BappEventsHandlerState extends State<BappEventsHandler> {
               });
               break;
             }
+        }
+      },
+    );
+    widget.bus.on<AppEventsWithExtra>().listen(
+      (event) {
+        switch (event.event) {
           case AppEvents.unHandledError:
             {
-              setState(() {
-                _key = UniqueKey();
-              });
+              BappNavigator.bappPushAndRemoveAll(context, NoInternet());
               break;
             }
         }

@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:bapp/config/constants.dart';
 import 'package:bapp/widgets/network_error.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -16,18 +19,22 @@ import 'stores/updates_store.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(App());
+  runZoned(() {
+    runApp(App());
+  }, onError: (e) {
+    kBus.fire(AppEventsWithExtra(AppEvents.unHandledError, e));
+  });
 }
+
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final bus = EventBus();
     return BappEventsHandler(
-      bus: bus,
+      bus: kBus,
       child: Builder(
         builder: (_) {
           final allStore = AllStore();
-          allStore.set<EventBus>(bus);
+          allStore.set<EventBus>(kBus);
           final cloudStore = CloudStore()..setAllStore(allStore);
           allStore.set<CloudStore>(cloudStore);
           final businessStore = BusinessStore()..setAllStore(allStore);
@@ -37,7 +44,7 @@ class App extends StatelessWidget {
           return MultiProvider(
             providers: [
               Provider<EventBus>(
-                create: (_) => bus,
+                create: (_) => kBus,
               ),
               Provider<AllStore>(
                 create: (_) => allStore,
@@ -80,4 +87,3 @@ class App extends StatelessWidget {
     );
   }
 }
-

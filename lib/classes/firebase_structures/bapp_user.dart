@@ -6,6 +6,7 @@ import 'package:mobx/mobx.dart';
 import 'package:thephonenumber/thecountrynumber.dart';
 
 import '../../config/config_data_types.dart';
+import 'business_branch.dart';
 
 class BappUser {
   final DocumentReference myDoc;
@@ -18,6 +19,7 @@ class BappUser {
       alterEgo = Observable<UserType>(UserType.customer);
   final Address address;
   final String fcmToken;
+  final BusinessBranch selectedBranch;
 
   BappUser(
       {this.business,
@@ -30,9 +32,10 @@ class BappUser {
       UserType userType,
       UserType alterEgo,
       this.address,
-      this.fcmToken = ""}){
-    this.alterEgo.value = alterEgo??UserType.customer;
-    this.userType.value = userType??UserType.customer;
+      this.fcmToken = "",
+      this.selectedBranch}) {
+    this.alterEgo.value = alterEgo ?? UserType.customer;
+    this.userType.value = userType ?? UserType.customer;
   }
 
   static DocumentReference newReference({String docName = ""}) {
@@ -60,7 +63,8 @@ class BappUser {
       UserType alterEgo,
       DocumentReference myDoc,
       Address address,
-      String fcmToken,}) {
+      String fcmToken,
+      BusinessBranch selectedBranch}) {
     return BappUser(
       myDoc: myDoc ?? this.myDoc,
       name: name ?? this.name,
@@ -73,6 +77,7 @@ class BappUser {
       alterEgo: alterEgo ?? this.alterEgo.value,
       address: address ?? this.address,
       fcmToken: fcmToken ?? this.fcmToken,
+      selectedBranch: selectedBranch ?? this.selectedBranch,
     );
   }
 
@@ -87,7 +92,8 @@ class BappUser {
       "userType": EnumToString.convertToString(userType.value),
       "alterEgo": EnumToString.convertToString(alterEgo.value),
       "fcmToken": fcmToken,
-      "myAddress": address?.toMap()??{},
+      "myAddress": address?.toMap() ?? {},
+      "selectedBranch": selectedBranch.myDoc ?? branches?.values?.first,
     };
   }
 

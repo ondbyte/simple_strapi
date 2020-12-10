@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bapp/classes/firebase_structures/bapp_user.dart';
 import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/helpers/extensions.dart';
-import 'package:bapp/main.dart';
 import 'package:bapp/widgets/network_error.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
@@ -219,6 +218,10 @@ abstract class _CloudStore with Store {
 
   @action
   Future<bool> switchUserType(BuildContext context) async {
+    final businessStore = Provider.of<BusinessStore>(context, listen: false);
+    if (businessStore.business == null) {
+      await businessStore.getMyBusiness();
+    }
     if (bappUser.userType.value != UserType.customer) {
       bappUser = bappUser.updateWith(
           userType: UserType.customer, alterEgo: bappUser.userType.value);
@@ -226,7 +229,6 @@ abstract class _CloudStore with Store {
       _allStore.get<EventBus>().fire(AppEvents.reboot);
       return true;
     }
-    final businessStore = Provider.of<BusinessStore>(context, listen: false);
     await Future.forEach<BusinessBranch>(businessStore.business.branches.value,
         (element) async {
       await element.pull();

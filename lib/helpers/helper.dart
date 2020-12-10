@@ -145,8 +145,8 @@ Future<Map<String, bool>> uploadImagesToStorageAndReturnStringList(
         final task = folder
             .child(nameFromPath(entry.key, extension: ".png"))
             .putData(bytes);
-        final done = await task.onComplete;
-        storagePaths.addAll({done.ref.path: true});
+        final done = await task;
+        storagePaths.addAll({done.ref.fullPath: true});
       } else {
         storagePaths.addAll({entry.key: entry.value});
       }
@@ -174,7 +174,7 @@ Future uploadBusinessBranchApprovalPDF({File fileToUpload}) async {
       .child(DateTime.now().toIso8601String() + ".pdf");
 
   final task = file.putFile(fileToUpload);
-  await task.onComplete;
+  await task;
   print("File Uploaded");
 }
 
@@ -215,6 +215,6 @@ Future sendUpdatesForBooking(BusinessBooking booking) async {
   }
 }
 
-String readableEnum(dynamic value){
+String readableEnum(dynamic value) {
   return EnumToString.convertToString(value).split(r"(?=[A-Z])").join(" ");
 }

@@ -37,22 +37,18 @@ abstract class _BusinessStore with Store {
 
   void setAllStore(AllStore allStore) => _allStore = allStore;
 
+  StreamSubscription userChangeSubscription;
+
   Future init() async {
     _user = _auth.currentUser;
-    userRelatedUpdate();
-    _auth.userChanges().listen((u) {
+    if (userChangeSubscription != null) {
+      userChangeSubscription.cancel();
+    }
+    userChangeSubscription = _auth.userChanges().listen((u) {
       _user = u;
-      if (_user != null) {
-        userRelatedUpdate();
-      }
     });
 
     await getMyBusiness();
-  }
-
-  void userRelatedUpdate() {
-    businessDoc =
-        _fireStore.doc("businesses/${FirebaseAuth.instance.currentUser.uid}");
   }
 
   @action
