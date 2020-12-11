@@ -39,21 +39,6 @@ mixin _$BusinessStore on _BusinessStore, Store {
     });
   }
 
-  final _$_userAtom = Atom(name: '_BusinessStore._user');
-
-  @override
-  User get _user {
-    _$_userAtom.reportRead();
-    return super._user;
-  }
-
-  @override
-  set _user(User value) {
-    _$_userAtom.reportWrite(value, super._user, () {
-      super._user = value;
-    });
-  }
-
   final _$dayForTheDetailsAtom = Atom(name: '_BusinessStore.dayForTheDetails');
 
   @override

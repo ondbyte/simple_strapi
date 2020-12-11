@@ -142,28 +142,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
           hide: index != OnBoardingConfig.slides.length - 1,
           onPressed: () async {
             ///first time so sign in anonymously
-            try {
-              await context.read<CloudStore>().signInAnonymous();
-            } on FirebaseAuthException catch (e) {
-              Helper.printLog(e.toString());
-              if (e.code == "network-request-failed") {
-                unawaited(
-                  Flushbar(
-                    message: "No network",
-                    mainButton: FlatButton(
-                      onPressed: () {
-                        Provider.of<EventBus>(context,listen: false).fire(AppEvents.reboot);
-                      },
-                      child: Text(
-                        "Try again",
-                        style: Theme.of(context).textTheme.button.apply(
-                            color: Theme.of(context).scaffoldBackgroundColor),
-                      ),
-                    ),
-                  ).show(context),
-                );
-              }
-            }
+            await context.read<CloudStore>().signInAnonymous();
           },
         )
       ],

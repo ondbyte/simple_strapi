@@ -153,14 +153,18 @@ class BookingFlow {
     if (branchBookingSub != null) {
       branchBookingSub.cancel();
     }
-    branchBookingSub = FirebaseFirestore.instance
+    var q = FirebaseFirestore.instance
         .collection("bookings")
         .where("branch", isEqualTo: branch?.myDoc?.value)
         .where("from", isGreaterThanOrEqualTo: DateTime.now().toTimeStamp())
         .where("from",
-            isLessThanOrEqualTo:
-                DateTime.now().add(const Duration(days: 30)).toTimeStamp())
-        .snapshots()
+        isLessThanOrEqualTo:
+        DateTime.now().add(const Duration(days: 30)).toTimeStamp());
+    if(_allStore.get<CloudStore>().bappUser.userType.value==UserType.businessStaff){
+      q = q.where("staff",isEqualTo: branch.staff.first.name);
+    }
+    branchBookingSub =
+        q.snapshots()
         .listen(
       (bookingSnaps) async {
         if (branch != null) {

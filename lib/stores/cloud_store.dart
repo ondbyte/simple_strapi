@@ -120,6 +120,7 @@ abstract class _CloudStore with Store {
             );
             if (tmp != null) {
               bappUser = tmp;
+              _allStore.get<EventBus>().fire(bappUser);
               bappUser.save();
             }
           }

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bapp/classes/firebase_structures/bapp_user.dart';
 import 'package:bapp/classes/firebase_structures/business_category.dart';
 import 'package:bapp/classes/firebase_structures/business_details.dart';
 import 'package:bapp/config/config_data_types.dart';
@@ -10,6 +11,7 @@ import 'package:bapp/stores/all_store.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:event_bus/event_bus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
 
@@ -27,8 +29,6 @@ abstract class _BusinessStore with Store {
   @observable
   BusinessDetails business;
   @observable
-  User _user;
-  @observable
   DateTime dayForTheDetails = DateTime.now();
 
   DocumentReference businessDoc;
@@ -40,12 +40,13 @@ abstract class _BusinessStore with Store {
   StreamSubscription userChangeSubscription;
 
   Future init() async {
-    _user = _auth.currentUser;
     if (userChangeSubscription != null) {
       userChangeSubscription.cancel();
     }
-    userChangeSubscription = _auth.userChanges().listen((u) {
-      _user = u;
+    userChangeSubscription = _allStore.get<EventBus>().on<BappUser>().listen((bappUser) {
+      if(bappUser!=null){
+        getMyBusiness();
+      }
     });
 
     await getMyBusiness();
@@ -75,8 +76,8 @@ abstract class _BusinessStore with Store {
       myDoc: businessDoc,
       type: type,
     );
-
-    await ap.addABranch(
+    await _allStore.get<CloudStore>().bappUser.addBranch(
+      business: ap,
       branchName: businessName,
       imagesWithFiltered: {},
       pickedLocation: PickedLocation(latlong, address),
@@ -102,7 +103,7 @@ abstract class _BusinessStore with Store {
       return false;
     }
     cloudStore.bappUser.business.snapshots().listen(
-      (event) {
+      (event) async {
         business = BusinessDetails.fromJson(event.data());
         final filtered = business.branches.value
             .where(
@@ -112,6 +113,12 @@ abstract class _BusinessStore with Store {
             .toList();
         business.branches.value.clear();
         business.branches.value.addAll(filtered);
+        business.selectedBranch.value = business.branches.value.firstWhere(
+            (element) =>
+                element.myDoc.value == cloudStore.bappUser.selectedBranch,
+            orElse: () => business.branches.value.first);
+        await business.selectedBranch.value.pulled;
+        business.selectedBranch.value.personalizeForUser(cloudStore.bappUser);
         _allStore.get<BookingFlow>().branch = business.selectedBranch.value;
         completer.cautiousComplete(true);
       },

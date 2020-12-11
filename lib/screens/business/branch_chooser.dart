@@ -1,5 +1,7 @@
 import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/business_store.dart';
+import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Action;
@@ -18,8 +20,8 @@ class BranchChooserScreen extends StatelessWidget {
         title: Text("Choose your Branch"),
         centerTitle: false,
       ),
-      body: Consumer<BusinessStore>(
-        builder: (_, businessStore, __) {
+      body: Consumer2<BusinessStore,CloudStore>(
+        builder: (_, businessStore,cloudStore, __) {
           return Observer(
             builder: (context) {
               final branches = businessStore.business.branches.value;
@@ -39,6 +41,8 @@ class BranchChooserScreen extends StatelessWidget {
                               final neww = branches[i];
                               businessStore.business.selectedBranch.value =
                                   neww;
+                              cloudStore.bappUser = cloudStore.bappUser.updateWith(selectedBranch: neww.myDoc.value);
+                              cloudStore.bappUser.save();
                             },
                           );
                           Navigator.pop(context);

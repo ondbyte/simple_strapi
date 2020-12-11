@@ -120,28 +120,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future _initCrashlytics() async {
-    ///TO DO
-    //switch in release
-    if (kDebugMode) {
-      await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(false);
-      FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterError;
 
-      ///errors other than flutter
-      Isolate.current.addErrorListener(RawReceivePort((pair) async {
-        final List<dynamic> errorAndStacktrace = pair;
-        if (errorAndStacktrace.first
-            .toString()
-            .contains("The service is currently unavailable")) {
-          Provider.of<EventBus>(context, listen: false).fire(AppEvents.reboot);
-        }
-        await FirebaseCrashlytics.instance.recordError(
-          errorAndStacktrace.first,
-          errorAndStacktrace.last,
-        );
-        print(errorAndStacktrace.first);
-        print(errorAndStacktrace.last);
-      }).sendPort);
-    }
   }
 
   @override

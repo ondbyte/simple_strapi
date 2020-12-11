@@ -1,5 +1,7 @@
+import 'package:bapp/classes/firebase_structures/business_details.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:mobx/mobx.dart';
@@ -19,7 +21,7 @@ class BappUser {
       alterEgo = Observable<UserType>(UserType.customer);
   final Address address;
   final String fcmToken;
-  final BusinessBranch selectedBranch;
+  final DocumentReference selectedBranch;
 
   BappUser(
       {this.business,
@@ -64,7 +66,7 @@ class BappUser {
       DocumentReference myDoc,
       Address address,
       String fcmToken,
-      BusinessBranch selectedBranch}) {
+      DocumentReference selectedBranch}) {
     return BappUser(
       myDoc: myDoc ?? this.myDoc,
       name: name ?? this.name,
@@ -77,7 +79,7 @@ class BappUser {
       alterEgo: alterEgo ?? this.alterEgo.value,
       address: address ?? this.address,
       fcmToken: fcmToken ?? this.fcmToken,
-      selectedBranch: selectedBranch ?? this.selectedBranch,
+      selectedBranch: selectedBranch ?? (this.selectedBranch??(this.branches.values.isNotEmpty?this.branches.values.first:null)),
     );
   }
 
@@ -93,7 +95,7 @@ class BappUser {
       "alterEgo": EnumToString.convertToString(alterEgo.value),
       "fcmToken": fcmToken,
       "myAddress": address?.toMap() ?? {},
-      "selectedBranch": selectedBranch.myDoc ?? branches?.values?.first,
+      "selectedBranch": selectedBranch,
     };
   }
 
@@ -121,7 +123,38 @@ class BappUser {
       alterEgo: EnumToString.fromString(UserType.values, j["alterEgo"]),
       address: Address.fromJson(j["myAddress"] ?? {}),
       fcmToken: j["fcmToken"],
+      selectedBranch: j["selectedBranch"],
     );
+  }
+
+  Future removeBranch({BusinessDetails business,BusinessBranch branch}) async {
+    await business.removeBranch(branch);
+    final selectedChange = {};
+    if (branch.myDoc.value == selectedBranch) {
+      selectedChange.addAll({
+        "selectedBranch":business.branches.value[0].myDoc
+      });
+      business.selectedBranch.value = business.branches.value[0];
+    }
+    await myDoc.set({"branches.${branch.myDoc.value.id}":FieldValue.delete(),...selectedChange},SetOptions(merge: true));
+  }
+
+  Future addBranch({
+  BusinessDetails business,
+    String branchName,
+    PickedLocation pickedLocation,
+    Map<String,bool> imagesWithFiltered,
+}) async {
+    final b = await business.addABranch(
+      branchName: branchName,
+      pickedLocation: pickedLocation,
+      imagesWithFiltered: imagesWithFiltered,
+    );
+    await myDoc.set({
+      "branches":{
+        b.myDoc.value.id:b.myDoc
+      }
+    },SetOptions(merge: true));
   }
 }
 

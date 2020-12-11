@@ -106,8 +106,6 @@ class BusinessDetails {
     final tmp = j["branches"] as List;
     branches.value =
         tmp.map((e) => BusinessBranch(myDoc: e, business: this)).toList();
-    selectedBranch.value =
-        branches.value.firstWhere((b) => b.myDoc.value == j["selectedBranch"]);
     email.value = j["email"];
     myDoc.value = j["myDoc"];
     type.value = j["type"];
@@ -124,7 +122,6 @@ class BusinessDetails {
       "latLong": latlong.value,
       "uid": uid.value,
       "branches": branches.value.map((e) => e.myDoc.value).toList(),
-      "selectedBranch": selectedBranch.value.myDoc.value,
       "email": email.value,
       "myDoc": myDoc.value,
       "type": type.value,
@@ -137,13 +134,11 @@ class BusinessDetails {
     await branch.myDoc.value.delete();
     await act(() async {
       branches.value = old; //new
-      if (branch.myDoc == selectedBranch.value.myDoc) {
-        selectedBranch.value = branches.value[0];
-      }
+
     });
   }
 
-  Future addABranch({
+  Future<BusinessBranch> addABranch({
     String branchName,
     PickedLocation pickedLocation,
     Map<String, bool> imagesWithFiltered,
@@ -164,7 +159,7 @@ class BusinessDetails {
       ..email.value = email.value
       ..rating.value = 0.0
       ..status.value = BusinessBranchActiveStatus.lead
-      ..businessCategory.value = this.category.value
+      ..businessCategory.value = category.value
       ..myDoc.value = myDoc.value.parent.doc("b_" + kUUIDGen.v1())
       ..businessHolidays.value = BusinessHolidays.empty(business: this)
       ..businessTimings.value = BusinessTimings.empty()
@@ -188,6 +183,7 @@ class BusinessDetails {
       branches.value = [...old, branch];
       selectedBranch.value = branch;
     });
+    return branch;
   }
 
   Future saveBusiness() async {

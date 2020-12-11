@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/widgets/network_error.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -18,10 +20,13 @@ import 'stores/updates_store.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp();
-  runZoned(() {
-    runApp(App());
+  runApp(App());
+  runZoned(() async {
+
   }, onError: (e) {
+    Helper.printLog("EXCEPTION");
     kBus.fire(AppEventsWithExtra(AppEvents.unHandledError, e));
   });
 }

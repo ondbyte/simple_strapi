@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bapp/helpers/exceptions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
@@ -9,6 +11,7 @@ import 'package:thephonenumber/thecountrynumber.dart';
 import '../../config/config_data_types.dart';
 import '../../helpers/extensions.dart';
 import '../../helpers/helper.dart';
+import 'bapp_user.dart';
 import 'business_category.dart';
 import 'business_details.dart';
 import 'business_holidays.dart';
@@ -47,6 +50,8 @@ class BusinessBranch {
   TheNumber misc;
   final type = Observable("");
 
+
+
   BusinessBranch(
       {DocumentReference myDoc, @required BusinessDetails business}) {
     this.business.value = business;
@@ -58,7 +63,7 @@ class BusinessBranch {
     return staff.firstWhere((s) => s.name == name);
   }
 
-  var _disposers = <ReactionDisposer>[];
+  final _disposers = <ReactionDisposer>[];
   void _setupReactions() {
     _disposers.add(
       reaction(
@@ -138,6 +143,9 @@ class BusinessBranch {
     );
   }
 
+  Future<bool> get pulled=>_pulled.future;
+
+  final  _pulled = Completer<bool>();
   Future _getBranch(DocumentReference myDoc) async {
     if (myDoc == null) {
       print("WARNING: empty docRef");
@@ -148,6 +156,7 @@ class BusinessBranch {
       _fromJson(snap.data());
     }
     _setupReactions();
+    _pulled.cautiousComplete(true);
   }
 
   BusinessBranch.fromSnapShot(DocumentSnapshot snap,
@@ -309,6 +318,14 @@ class BusinessBranch {
             " to " +
             timings.last.to.toStringWithAmOrPm())
         : "Not open today";
+  }
+
+  void personalizeForUser(BappUser bappUser) {
+    if (bappUser.userType.value == UserType.businessStaff) {
+      staff.removeWhere((s) =>
+          s.contactNumber.internationalNumber !=
+          bappUser.theNumber.internationalNumber);
+    }
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:bapp/stores/business_store.dart';
+import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/shake_widget.dart';
 import 'package:bapp/widgets/store_provider.dart';
@@ -168,10 +169,16 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
                       final business =
                           Provider.of<BusinessStore>(context, listen: false)
                               .business;
-                      await business.addABranch(
-                          branchName: _controller.text,
-                          pickedLocation: _pickedLocation,
-                          imagesWithFiltered: _filteredExistingImages);
+                      final bappUser =
+                          Provider.of<CloudStore>(context, listen: false)
+                              .bappUser;
+
+                      await bappUser.addBranch(
+                        business: business,
+                        branchName: _controller.text,
+                        pickedLocation: _pickedLocation,
+                        imagesWithFiltered: _filteredExistingImages,
+                      );
                       Navigator.of(context).pop();
                     },
             ),
