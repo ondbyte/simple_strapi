@@ -433,8 +433,13 @@ abstract class _CloudStore with Store {
     }
     final user = BappUser.fromSnapShot(snap: snap);
     final newUser = user.updateWith(
-        myDoc: BappUser.newReference(
-            docName: FirebaseAuth.instance.currentUser.uid));
+      myDoc: BappUser.newReference(
+        docName: FirebaseAuth.instance.currentUser.uid,
+      ),
+      address: bappUser.address,
+      fcmToken: bappUser.fcmToken,
+    );
+    await snap.reference.delete();
     await newUser.save();
   }
 

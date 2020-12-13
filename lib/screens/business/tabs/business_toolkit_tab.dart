@@ -1,5 +1,6 @@
 import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/config/config.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
@@ -17,6 +18,7 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
   int _expandedPanel = -1;
   @override
   Widget build(BuildContext context) {
+    Helper.printLog("build");
     return SafeArea(
       child: Consumer<BusinessStore>(
         builder: (_, businessStore, __) {

@@ -33,7 +33,9 @@ class _BappState extends State<Bapp> {
             Observer(
               builder: (_) {
                 if (cloudStore.bappUser == null) {
-                  return LoadingWidget();
+                  return Material(
+                    child: LoadingWidget(),
+                  );
                 }
                 switch (cloudStore.bappUser.userType.value) {
                   case UserType.customer:

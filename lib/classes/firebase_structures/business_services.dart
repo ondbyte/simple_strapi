@@ -12,10 +12,10 @@ class BusinessServices {
 
   BusinessServices.empty({this.branch});
 
-  BusinessServices.fromJson(Map<String,dynamic> j, {@required this.branch}) {
+  BusinessServices.fromJson(Map<String, dynamic> j, {@required this.branch}) {
     assert(branch != null);
     j.forEach((key, value) {
-      final item = value as Map<String,dynamic>;
+      final item = value as Map<String, dynamic>;
       if (item.keys.contains("serviceName")) {
         all.add(BusinessService.fromJson(item));
       } else if (item.keys.contains("categoryName")) {
@@ -35,8 +35,7 @@ class BusinessServices {
     service.images.clear();
     service.images.addAll(imgs);
 
-
-    all.removeWhere((element) => element.serviceName==service.serviceName);
+    all.removeWhere((element) => element.serviceName == service.serviceName);
     all.add(service);
     await branch.myDoc.value.update(
       {
@@ -49,8 +48,9 @@ class BusinessServices {
 
   Future removeService(BusinessService service) async {
     all.remove(service);
-    await branch.myDoc.value.update(
-        {"businessServices.${service.serviceName}": FieldValue.delete()});
+    await branch.myDoc.value.update({
+      "businessServices": {service.serviceName.value: FieldValue.delete()}
+    });
   }
 
   Future addACategory({
@@ -66,19 +66,19 @@ class BusinessServices {
       ..images.addAll(imgs);
 
     allCategories.add(category);
-    await branch.myDoc.value.update({
-      "businessServices": FieldValue.arrayUnion([category.toMap()])
-    });
+    await branch.myDoc.value.set({
+      "businessServices": {category.categoryName.value: category.toMap()}
+    }, SetOptions(merge: true));
   }
 
   Future removeCategory(BusinessServiceCategory category) async {
     allCategories.remove(category);
     await branch.myDoc.value.update({
-      "businessServices": FieldValue.arrayRemove([category.toMap()])
+      "businessServices": {category.categoryName.value: FieldValue.delete()}
     });
   }
 
-  Map<String,dynamic> toMap() {
+  Map<String, dynamic> toMap() {
     final map = <String, dynamic>{};
     all.forEach((element) {
       map.addAll({element.serviceName.value: element.toMap()});
@@ -107,8 +107,7 @@ class BusinessService {
     duration.value = Duration(minutes: j["duration"] ?? 0);
     description.value = j["description"] ?? "";
     category.value = BusinessServiceCategory.fromJson(j["category"]);
-    final tmp = Map.fromIterable(j["images"],
-        key: (s) => s as String, value: (_) => true);
+    final tmp = {for (var s in j["images"]) s as String: true};
     images.addAll(tmp);
     enabled.value = j["enabled"] ?? true;
   }
@@ -151,12 +150,11 @@ class BusinessServiceCategory {
     _fromJson(j);
   }
 
-  _fromJson(Map<String, dynamic> j) {
-    this.categoryName.value = j["categoryName"] ?? "";
+  void _fromJson(Map<String, dynamic> j) {
+    categoryName.value = j["categoryName"] ?? "";
     this.description.value = j["description"] ?? "";
-    final tmp = Map.fromIterable(j["images"],
-        key: (s) => s as String, value: (_) => true);
-    this.images.addAll(tmp);
+    final tmp = {for (var s in j["images"]) s as String: true};
+    images.addAll(tmp);
   }
 
   toMap() {
