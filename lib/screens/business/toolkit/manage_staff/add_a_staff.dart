@@ -40,6 +40,15 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
   bool _numberValidated = false;
   TheNumber _theNumber;
 
+
+  @override
+  void initState() {
+    super.initState();
+    act((){
+      kLoading.value = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return LoadingStackWidget(

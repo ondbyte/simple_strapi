@@ -21,14 +21,12 @@ import 'stores/updates_store.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp();
-  runApp(App());
-  runZoned(() async {
-
-  }, onError: (e) {
+  FlutterError.onError = (e){
     Helper.printLog("EXCEPTION");
     kBus.fire(AppEventsWithExtra(AppEvents.unHandledError, e));
-  });
+  };
+  await Firebase.initializeApp();
+  runApp(App());
 }
 
 class App extends StatelessWidget {

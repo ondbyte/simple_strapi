@@ -21,12 +21,12 @@ import '../../fcm.dart';
 import '../../main.dart';
 import '../../route_manager.dart';
 
-class SplashScreen extends StatefulWidget {
+class BappInitScreen extends StatefulWidget {
   @override
-  _SplashScreenState createState() => _SplashScreenState();
+  _BappInitScreenState createState() => _BappInitScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class _BappInitScreenState extends State<BappInitScreen>
     with AutomaticKeepAliveClientMixin {
   bool killState = false;
   @override
@@ -38,7 +38,6 @@ class _SplashScreenState extends State<SplashScreen>
           ///init authentication store / load user
           BappFCM().initForAndroid();
           await Provider.of<ThemeStore>(context, listen: false).init();
-          await _initCrashlytics();
           await Provider.of<CloudStore>(context, listen: false).init(
             onLogin: () async {
               if (mounted) {
@@ -78,11 +77,17 @@ class _SplashScreenState extends State<SplashScreen>
       },
 
       ///show splash screen while everything happens behind the scenes
-      child: _getSplashScreen(),
+      child: Splash(),
     );
   }
 
-  Widget _getSplashScreen() {
+  @override
+  bool get wantKeepAlive => !killState;
+}
+
+class Splash extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
     return Material(
       color: Theme.of(context).scaffoldBackgroundColor,
       child: Center(
@@ -118,11 +123,4 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
   }
-
-  Future _initCrashlytics() async {
-
-  }
-
-  @override
-  bool get wantKeepAlive => !killState;
 }

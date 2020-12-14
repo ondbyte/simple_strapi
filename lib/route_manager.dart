@@ -296,7 +296,7 @@ class RouteManager {
       case "/":
         return MaterialPageRoute(
           builder: (_) {
-            return SplashScreen();
+            return BappInitScreen();
           },
         );
       case onBoardingScreen:

@@ -60,7 +60,7 @@ class BusinessBranch {
   }
 
   BusinessStaff getStaffFor({String name}) {
-    return staff.firstWhere((s) => s.name == name);
+    return staff?.firstWhere((s) => s.name == name,orElse: ()=>null);
   }
 
   final _disposers = <ReactionDisposer>[];
