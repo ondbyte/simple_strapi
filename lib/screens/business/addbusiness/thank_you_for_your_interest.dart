@@ -1,7 +1,9 @@
 import 'package:bapp/classes/firebase_structures/business_category.dart';
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
+import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/shake_widget.dart';
@@ -168,11 +170,11 @@ class _ThankYouForYourInterestScreenState
         onPressed: () {
           if (_key.currentState.validate()) {
             if (_pickedLocation != null) {
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                RouteManager.contextualMessage,
-                (route) => route.settings.name == RouteManager.home,
-                arguments: [
-                  () async {
+              BappNavigator.pushAndRemoveAll(
+                context,
+                ContextualMessageScreen(
+                  message: "Thank you, we\'ll reach you out soon",
+                  init: () async {
                     final tmp =
                         await Provider.of<BusinessStore>(context, listen: false)
                             .applyForBusiness(
@@ -185,8 +187,7 @@ class _ThankYouForYourInterestScreenState
                     );
                     return tmp;
                   },
-                  "Thank you, we\'ll reach you out soon"
-                ],
+                ),
               );
             } else {
               setState(

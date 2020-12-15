@@ -47,9 +47,8 @@ abstract class _ThemeStore with Store {
   }
 
   ///changes to the light theme should be done here
-  static ThemeData getLightThemeData() {
+  ThemeData getLightThemeData() {
     return ThemeData(
-      ///should add this to darker version too
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
         selectedItemColor: Colors.teal,
         showUnselectedLabels: true,
@@ -248,7 +247,7 @@ abstract class _ThemeStore with Store {
   }
 
   ///changes to the dark theme should be done here
-  static ThemeData getDarkThemeData() {
+  ThemeData getDarkThemeData() {
     return ThemeData(
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         selectedItemColor: Colors.teal,

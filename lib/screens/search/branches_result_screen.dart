@@ -86,7 +86,7 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
                               
                                 onTap: () async {
                                   flow.branch = snap.data[i];
-                                  BappNavigator.bappPush(
+                                  BappNavigator.push(
                                     context,
                                     BusinessProfileScreen(),
                                   );

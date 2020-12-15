@@ -1,7 +1,9 @@
 import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/business/toolkit/manage_branches/add_a_branch.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/firebase_image.dart';
@@ -31,8 +33,7 @@ class _BusinessManageBranchesScreenState
               .value;
           if (branches.any((element) =>
               element.status.value == BusinessBranchActiveStatus.published)) {
-            Navigator.of(context)
-                .pushNamed(RouteManager.businessAddABranchScreeen);
+            BappNavigator.push(context, BusinessAddABranchScreen());
           } else {
             Flushbar(
               message:
@@ -61,9 +62,10 @@ class _BusinessManageBranchesScreenState
                 itemBuilder: (_, i) {
                   return ListTile(
                     leading: ListTileFirebaseImage(
+                      ifEmpty: Initial(forName: branches[i].name.value,),
                       storagePathOrURL: branches[i].images.isNotEmpty
                           ? branches[i].images.keys.elementAt(0)
-                          : kTemporaryPlaceHolderImage,
+                          : null,
                     ),
                     title: Text(branches[i].name.value),
                     subtitle: Text(removeNewLines(branches[i].address.value)),

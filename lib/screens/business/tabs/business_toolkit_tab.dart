@@ -1,7 +1,9 @@
 import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/config/config.dart';
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/business/toolkit/submit_for_verification.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
@@ -111,7 +113,8 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
                                 onClick: BusinessExpandingPanelConfigs
                                         .cfgs[i].tiles[index].enabled
                                     ? () {
-                                        Navigator.of(context).pushNamed(
+                                        BappNavigator.pushReplacement(
+                                          context,
                                           BusinessExpandingPanelConfigs.cfgs[i]
                                               .tiles[index].onClickRoute,
                                         );
@@ -219,8 +222,7 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
                         onTap: docuVerification
                             ? null
                             : () {
-                                Navigator.of(context).pushNamed(
-                                    RouteManager.businessVerificationScreen);
+                          BappNavigator.push(context, BusinessSubmitBranchForVerificationScreen());
                               },
                       ),
                     ),

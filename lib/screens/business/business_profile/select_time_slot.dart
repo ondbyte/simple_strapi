@@ -43,7 +43,7 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
                 ? null
                 : widget.onSelect ??
                     () async {
-                      await BappNavigator.bappPushAndRemoveAll(
+                      await BappNavigator.pushAndRemoveAll(
                         context,
                         ContextualMessageScreen(
                           svgAssetToDisplay: "assets/svg/success.svg",
@@ -60,7 +60,7 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
                             if (Platform.isIOS && !BappFCM().isFcmInitialized) {
                               await BappFCM().initForIOS();
                             } else {
-                              BappNavigator.bappPushAndRemoveAll(
+                              BappNavigator.pushAndRemoveAll(
                                 context,
                                 Bapp(),
                               );
@@ -71,7 +71,7 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
                                   ? "Back to home"
                                   : null,
                           secondaryButtonPressed: (context) {
-                            BappNavigator.bappPushAndRemoveAll(
+                            BappNavigator.pushAndRemoveAll(
                               context,
                               Bapp(),
                             );

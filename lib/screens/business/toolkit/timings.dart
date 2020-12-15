@@ -7,12 +7,12 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:time_range_picker/time_range_picker.dart';
 
-class BusinessTimingsScreen extends StatefulWidget {
+class BusinessManageWorkingHoursScreen extends StatefulWidget {
   @override
-  _BusinessTimingsScreenState createState() => _BusinessTimingsScreenState();
+  _BusinessManageWorkingHoursScreenState createState() => _BusinessManageWorkingHoursScreenState();
 }
 
-class _BusinessTimingsScreenState extends State<BusinessTimingsScreen> {
+class _BusinessManageWorkingHoursScreenState extends State<BusinessManageWorkingHoursScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

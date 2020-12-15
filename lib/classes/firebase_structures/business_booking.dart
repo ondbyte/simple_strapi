@@ -26,6 +26,10 @@ class BusinessBooking {
   final DateTime remindTime;
   final String bookedByName;
   final CompleteBookingRating rating;
+  final String staffNumber;
+  final String managerNumber;
+  final String receptionistNumber;
+  final String ownerNumber;
 
   final DocumentReference myDoc;
 
@@ -41,6 +45,10 @@ class BusinessBooking {
     @required this.remindTime,
     @required this.bookedByName,
     @required this.rating,
+    @required this.staffNumber,
+    @required this.managerNumber,
+    @required this.receptionistNumber,
+    @required this.ownerNumber,
   }) {
     this.status.value = status;
   }
@@ -90,6 +98,10 @@ class BusinessBooking {
       "bookingUserType": EnumToString.convertToString(bookingUserType),
       "bookedByName": bookedByName,
       "rating": rating.toMap(),
+      "staffNumber": staffNumber,
+      "receptionistNumber": receptionistNumber,
+      "managerNumber": managerNumber,
+      "ownerNumber": ownerNumber,
     };
   }
 
@@ -119,6 +131,10 @@ class BusinessBooking {
       remindTime: (j["remindTime"] as Timestamp)?.toDate(),
       bookedByName: j["bookedByName"] ?? "",
       rating: CompleteBookingRating.fromJson(j["rating"] ?? {}),
+      staffNumber: j["staffNumber"] ?? "",
+      receptionistNumber: j["receptionistNumber"] ?? "",
+      managerNumber: j["managerNumber"] ?? "",
+      ownerNumber: j["ownerNumber"] ?? "",
     );
   }
 
@@ -226,9 +242,8 @@ class BusinessBooking {
         return "Unknown";
     }
   }
-  static Future sendUpdatesForBooking(BusinessBooking booking) async {
 
-  }
+  static Future sendUpdatesForBooking(BusinessBooking booking) async {}
 }
 
 enum BusinessBookingStatus {

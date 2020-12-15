@@ -63,6 +63,10 @@ class BusinessBranch {
     return staff?.firstWhere((s) => s.name == name,orElse: ()=>null);
   }
 
+  BusinessStaff getStaffForRole({UserType role}) {
+    return staff?.firstWhere((s) => s.role == role,orElse: ()=>null);
+  }
+
   final _disposers = <ReactionDisposer>[];
   void _setupReactions() {
     _disposers.add(

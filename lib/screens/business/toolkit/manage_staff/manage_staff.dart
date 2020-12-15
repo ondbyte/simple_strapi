@@ -1,7 +1,9 @@
 import 'package:bapp/classes/firebase_structures/business_staff.dart';
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/business/toolkit/manage_staff/add_a_staff.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/firebase_image.dart';
@@ -35,7 +37,7 @@ class _BusinessManageStaffScreenState extends State<BusinessManageStaffScreen> {
           color: Theme.of(context).indicatorColor,
         ),
         onPressed: () {
-          Navigator.of(context).pushNamed(RouteManager.businessAddAStaffScreen);
+          BappNavigator.push(context, BusinessAddAStaffScreen());
         },
       ),
       body: Consumer<BusinessStore>(
@@ -91,9 +93,10 @@ class BusinessStaffListTile extends StatelessWidget {
       ),
       trailing: me ? null : trailing,
       leading: ListTileFirebaseImage(
+        ifEmpty: Initial(forName: staff.name,),
         storagePathOrURL: staff.images.isNotEmpty
             ? staff.images.keys.elementAt(0)
-            : kTemporaryPlaceHolderImage,
+            : null,
       ),
     );
   }

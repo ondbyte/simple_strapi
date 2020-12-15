@@ -1,4 +1,4 @@
-import 'package:bapp/widgets/network_error.dart';
+import 'package:bapp/widgets/app/bapp_navigator_widget.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:firebase_auth/firebase_auth.dart';

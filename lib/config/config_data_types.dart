@@ -91,7 +91,7 @@ class BusinessExpandingPanelConfig {
 class BusinessExpandingTile {
   final IconData iconData;
   final String name;
-  final String onClickRoute;
+  final Widget onClickRoute;
   final bool enabled;
 
   BusinessExpandingTile(

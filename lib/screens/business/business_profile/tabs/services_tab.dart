@@ -141,9 +141,10 @@ class BusinessServiceChildWidget extends StatelessWidget {
       subtitle: _makeSubTitle(context),
       trailing: bookWidget,
       leading: ListTileFirebaseImage(
+        ifEmpty: Initial(forName: service.serviceName.value,),
         storagePathOrURL: service.images.isNotEmpty
             ? service.images.keys.elementAt(0)
-            : kTemporaryPlaceHolderImage,
+            : null,
       ),
     );
   }

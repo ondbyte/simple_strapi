@@ -17,16 +17,16 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class BusinessSubmitBranchForVerification extends StatefulWidget {
-  BusinessSubmitBranchForVerification({Key key}) : super(key: key);
+class BusinessSubmitBranchForVerificationScreen extends StatefulWidget {
+  BusinessSubmitBranchForVerificationScreen({Key key}) : super(key: key);
 
   @override
-  _BusinessSubmitBranchForVerificationState createState() =>
-      _BusinessSubmitBranchForVerificationState();
+  _BusinessSubmitBranchForVerificationScreenState createState() =>
+      _BusinessSubmitBranchForVerificationScreenState();
 }
 
-class _BusinessSubmitBranchForVerificationState
-    extends State<BusinessSubmitBranchForVerification> {
+class _BusinessSubmitBranchForVerificationScreenState
+    extends State<BusinessSubmitBranchForVerificationScreen> {
   final Map<String, bool> _businessDocs = {};
   final Map<String, bool> _ownerDoc = {};
   @override

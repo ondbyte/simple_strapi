@@ -1,13 +1,18 @@
 import 'dart:async';
 
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/config/theme_config.dart';
 import 'package:bapp/helpers/helper.dart';
-import 'package:bapp/widgets/network_error.dart';
+import 'package:bapp/widgets/app/bapp_navigator_widget.dart';
+import 'package:bapp/widgets/app/bapp_themed_app.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 import 'route_manager.dart';
@@ -20,10 +25,10 @@ import 'stores/updates_store.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  FlutterError.onError = (e){
-    Helper.printLog("EXCEPTION");
-    kBus.fire(AppEventsWithExtra(AppEvents.unHandledError, e));
+  ///all the error should go to through us
+  FlutterError.onError = (e) {
+    FlutterError.dumpErrorToConsole(e);
+    //kBus.fire(AppEventsWithExtra(AppEvents.unHandledError, e));
   };
   await Firebase.initializeApp();
   runApp(App());
@@ -32,61 +37,12 @@ void main() async {
 class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BappEventsHandler(
-      bus: kBus,
-      child: Builder(
-        builder: (_) {
-          final allStore = AllStore();
-          allStore.set<EventBus>(kBus);
-          final cloudStore = CloudStore()..setAllStore(allStore);
-          allStore.set<CloudStore>(cloudStore);
-          final businessStore = BusinessStore()..setAllStore(allStore);
-          allStore.set<BusinessStore>(businessStore);
-          final flow = BookingFlow(allStore);
-          allStore.set<BookingFlow>(flow);
-          return MultiProvider(
-            providers: [
-              Provider<EventBus>(
-                create: (_) => kBus,
-              ),
-              Provider<AllStore>(
-                create: (_) => allStore,
-              ),
-              Provider<ThemeStore>(
-                create: (_) => ThemeStore(),
-              ),
-              Provider<CloudStore>(
-                create: (_) => cloudStore,
-              ),
-              Provider<UpdatesStore>(
-                create: (_) => UpdatesStore(),
-              ),
-              Provider<BusinessStore>(
-                create: (_) => businessStore,
-              ),
-              Provider<BookingFlow>(
-                create: (_) => flow,
-              ),
-            ],
-            builder: (context, w) {
-              return Consumer<ThemeStore>(
-                builder: (_, themeStore, __) {
-                  return Observer(
-                    builder: (_) {
-                      return MaterialApp(
-                        title: "Bapp",
-                        theme: themeStore.selectedThemeData,
-                        initialRoute: "/",
-                        onGenerateRoute: RouteManager.onGenerate,
-                      );
-                    },
-                  );
-                },
-              );
-            },
-          );
-        },
+    return BappThemedApp(
+      home: BappNavigatorWidget(
+        bus: kBus,
       ),
     );
   }
 }
+
+

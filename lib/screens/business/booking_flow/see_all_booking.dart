@@ -27,7 +27,7 @@ class BookingsSeeAllTile extends StatelessWidget {
     return SeeAllListTile(
       title: title,
       onSeeAll: () {
-        BappNavigator.bappPush(
+        BappNavigator.push(
           context,
           AllBookingsScreen(
             bookings: bookings,
@@ -43,7 +43,7 @@ class BookingsSeeAllTile extends StatelessWidget {
           booking: bookings[i],
           isCustomerView: false,
           onTap: () {
-            BappNavigator.bappPush(
+            BappNavigator.push(
               context,
               BookingDetailsScreen(
                 booking: bookings[i],
@@ -80,7 +80,7 @@ class _AllBookingsScreenState extends State<AllBookingsScreen> {
             booking: widget.bookings[i],
             isCustomerView: false,
             onTap: () {
-              BappNavigator.bappPush(
+              BappNavigator.push(
                 context,
                 BookingDetailsScreen(
                   booking: widget.bookings[i],

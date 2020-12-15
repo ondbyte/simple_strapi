@@ -1,12 +1,22 @@
 import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/classes/firebase_structures/rating.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/business/toolkit/manage_branches/manage_branches.dart';
+import 'package:bapp/screens/business/toolkit/manage_contact.dart';
+import 'package:bapp/screens/business/toolkit/manage_holidays/holidays.dart';
+import 'package:bapp/screens/business/toolkit/manage_media.dart';
+import 'package:bapp/screens/business/toolkit/manage_services/manage_services.dart';
+import 'package:bapp/screens/business/toolkit/manage_staff/manage_staff.dart';
+import 'package:bapp/screens/business/toolkit/store_name_address.dart';
+import 'package:bapp/screens/business/toolkit/submit_for_verification.dart';
+import 'package:bapp/screens/business/toolkit/timings.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart' hide Tab;
 import 'package:flutter/widgets.dart';
 
 import 'config_data_types.dart';
+
 
 ///add colors of cards across the app (color will be picked up randomly most of the time)
 class CardsColor {
@@ -277,43 +287,43 @@ class BusinessExpandingPanelConfigs {
         BusinessExpandingTile(
           name: "Reports & Insights",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessReportsAndInsightsScreen,
+          onClickRoute: SizedBox(),
           enabled: false,
         ),
         BusinessExpandingTile(
           name: "Offers & Promotions",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessOffersAndPromoScreen,
+          onClickRoute: SizedBox(),
           enabled: false,
         ),
         BusinessExpandingTile(
           name: "Vouchers",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessVoucherScreen,
+          onClickRoute: SizedBox(),
           enabled: false,
         ),
         BusinessExpandingTile(
           name: "Loyalty Program",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessLoyaltyProgramScreen,
+          onClickRoute: SizedBox(),
           enabled: false,
         ),
         BusinessExpandingTile(
           name: "Sell Merchandise",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessSeleMerchScreen,
+          onClickRoute: SizedBox(),
           enabled: false,
         ),
         BusinessExpandingTile(
           name: "Manage Campaigns",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessManageCampaignScreen,
+          onClickRoute: SizedBox(),
           enabled: false,
         ),
         BusinessExpandingTile(
           name: "Booking Channel",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessBookingChannelsScreen,
+          onClickRoute: SizedBox(),
           enabled: false,
         ),
       ],
@@ -325,19 +335,19 @@ class BusinessExpandingPanelConfigs {
         BusinessExpandingTile(
           name: "Your Clients",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessYourClientsScreen,
+          onClickRoute: SizedBox(),
           enabled: false,
         ),
         BusinessExpandingTile(
           name: "Customer Support",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessCustomerSupportScreen,
+          onClickRoute: SizedBox(),
           enabled: false,
         ),
         BusinessExpandingTile(
           name: "Customer Feedback",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessCustomerFeedbackScreen,
+          onClickRoute: SizedBox(),
           enabled: false,
         ),
       ],
@@ -349,19 +359,19 @@ class BusinessExpandingPanelConfigs {
         BusinessExpandingTile(
           name: "Manage Staff",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessManageStaffScreen,
+          onClickRoute: BusinessManageStaffScreen(),
           enabled: true,
         ),
         BusinessExpandingTile(
           name: "Leaves",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessLeavesScreen,
+          onClickRoute: SizedBox(),
           enabled: false,
         ),
         BusinessExpandingTile(
           name: "Salaries",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessSalariesScreen,
+          onClickRoute: SizedBox(),
           enabled: false,
         ),
       ],
@@ -373,13 +383,13 @@ class BusinessExpandingPanelConfigs {
         BusinessExpandingTile(
           name: "Stocks",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessStocksScreen,
+          onClickRoute: SizedBox(),
           enabled: false,
         ),
         BusinessExpandingTile(
           name: "Merchandise",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessMerchScreen,
+          onClickRoute: SizedBox(),
           enabled: false,
         ),
       ],
@@ -391,49 +401,49 @@ class BusinessExpandingPanelConfigs {
         BusinessExpandingTile(
           name: "Store Name & Address",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessNameAndAddressScreen,
+          onClickRoute: BusinessStoreNameAddress(),
           enabled: true,
         ),
         BusinessExpandingTile(
           name: "Manage Media",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessManageMediaScreen,
+          onClickRoute: BusinessManageMediaScreen(),
           enabled: true,
         ),
         BusinessExpandingTile(
           name: "Products & Pricing",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessProductsPricingScreen,
+          onClickRoute: BusinessProductsPricingScreen(),
           enabled: true,
         ),
         BusinessExpandingTile(
           name: "Contact Details",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessContactDetailsScreen,
+          onClickRoute: BusinessManageContactDetailsScreen(),
           enabled: true,
         ),
         BusinessExpandingTile(
           name: "Business Hours",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessTimingssScreen,
+          onClickRoute: BusinessManageWorkingHoursScreen(),
           enabled: true,
         ),
         BusinessExpandingTile(
           name: "Holidays",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessHolidaysScreen,
+          onClickRoute: BusinessManageHolidaysScreen(),
           enabled: true,
         ),
         BusinessExpandingTile(
           name: "Manage Branches",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessManageBranchesScreen,
+          onClickRoute: BusinessManageBranchesScreen(),
           enabled: true,
         ),
         BusinessExpandingTile(
           name: "Business Verification",
           iconData: FeatherIcons.alertOctagon,
-          onClickRoute: RouteManager.businessVerificationScreen,
+          onClickRoute: BusinessSubmitBranchForVerificationScreen(),
           enabled: true,
         ),
       ],

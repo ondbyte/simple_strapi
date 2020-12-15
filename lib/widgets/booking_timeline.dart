@@ -57,7 +57,7 @@ class _BookingTimeLineWidgetState extends State<BookingTimeLineWidget> {
           (index) => FlutterWeekViewEvent(
             
             onTap: () {
-              BappNavigator.bappPush(
+              BappNavigator.push(
                 context,
                 BookingDetailsScreen(
                   booking: list[index],

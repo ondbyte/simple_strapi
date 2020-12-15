@@ -1,4 +1,6 @@
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/home/bapp.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -76,8 +78,7 @@ class _ContextualMessageScreenState extends State<ContextualMessageScreen> {
                             if (widget.onButtonPressed != null) {
                               widget.onButtonPressed(context);
                             } else {
-                              Navigator.of(context).pushNamedAndRemoveUntil(
-                                  RouteManager.home, (route) => false);
+                              BappNavigator.pushAndRemoveAll(context, Bapp());
                             }
                           },
                     child: Text(widget.buttonText),

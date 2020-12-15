@@ -8,7 +8,6 @@ import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/search_bar.dart';
-import 'package:bapp/widgets/store_provider.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:bapp/widgets/tiles/see_all.dart';
 import 'package:flutter/material.dart';
@@ -23,9 +22,8 @@ class DiscoverTab extends StatefulWidget {
 class _DiscoverTabState extends State<DiscoverTab> {
   @override
   Widget build(BuildContext context) {
-    return StoreProvider<CloudStore>(
-      store: context.watch<CloudStore>(),
-      builder: (_, authStore) {
+    return Consumer<CloudStore>(
+      builder: (_, authStore,__) {
         return Observer(builder: (_) {
           return CustomScrollView(
             slivers: <Widget>[
@@ -127,7 +125,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   title: "Featured on Bapp",
                   childPadding: EdgeInsets.symmetric(horizontal:16),
                   onSeeAll: () {
-                    BappNavigator.bappPush(
+                    BappNavigator.push(
                       context,
                       BranchesResultScreen(
                         title: "Featured Service",
@@ -171,12 +169,9 @@ class _DiscoverTabState extends State<DiscoverTab> {
   }
 
   Widget _getSearchBar() {
-    return StoreProvider<BusinessStore>(
-      store: Provider.of<BusinessStore>(context),
-      init: (businessStore) async {
-        await businessStore.getCategories();
-      },
-      builder: (_, businessStore) {
+    return Consumer<BusinessStore>(
+      builder: (_, businessStore,__) {
+        businessStore.getCategories();
         return Observer(
           builder: (_) {
             return SearchBarWidget(
@@ -302,7 +297,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     businessStore.categories.length,
                     (index) => TextButton(
                       onPressed: () {
-                        BappNavigator.bappPush(
+                        BappNavigator.push(
                           context,
                           BranchesResultScreen(
                             placeName: cloudStore.getAddressLabel(),

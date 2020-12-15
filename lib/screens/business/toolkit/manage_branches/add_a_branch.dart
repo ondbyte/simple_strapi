@@ -3,7 +3,6 @@ import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/shake_widget.dart';
-import 'package:bapp/widgets/store_provider.dart';
 import 'package:bapp/widgets/tiles/add_image_sliver.dart';
 import 'package:bapp/widgets/wheres_it_located.dart';
 import 'package:flutter/material.dart';
@@ -59,15 +58,12 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
                           SizedBox(
                             height: 20,
                           ),
-                          StoreProvider<BusinessStore>(
-                            store: Provider.of<BusinessStore>(context),
-                            init: (businessStore) {
+                          Consumer<BusinessStore>(
+                            builder: (_, businessStore,__) {
                               if (_controller.text.isEmpty) {
                                 _controller.text =
                                     businessStore.business.businessName.value;
                               }
-                            },
-                            builder: (_, businessStore) {
                               return TextFormField(
                                 controller: _controller,
                                 style: Theme.of(context).textTheme.headline3,

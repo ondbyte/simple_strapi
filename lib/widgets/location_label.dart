@@ -1,6 +1,5 @@
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/stores/cloud_store.dart';
-import 'package:bapp/widgets/store_provider.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -23,9 +22,8 @@ class LocationLabelWidget extends StatelessWidget {
           SizedBox(
             width: 10,
           ),
-          StoreProvider<CloudStore>(
-            store: Provider.of<CloudStore>(context, listen: false),
-            builder: (_, cloudStore) {
+          Consumer<CloudStore>(
+            builder: (_, cloudStore,__) {
               return Observer(
                 builder: (_) {
                   final bappUser = cloudStore.bappUser;

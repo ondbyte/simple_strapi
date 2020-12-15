@@ -18,8 +18,7 @@ final kPrivacy = "https://www.thebapp.app/privacy-policy.html";
 ///currently uses the one from bapp not bapp-dev
 final kMapsKey = "AIzaSyDp-XSgu-pZdyYRgyLdasTR1FEid_Lh_dA";
 
-final kTemporaryPlaceHolderImage = "assets/svg/ico-spa.svg";
-final kTemporaryBusinessImageStorageRefPath = "download.jpeg";
+//final kTemporaryPlaceHolderImage = "assets/svg/ico-spa.svg";
 
 final kUUIDGen = Uuid();
 

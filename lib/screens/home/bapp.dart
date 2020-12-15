@@ -3,7 +3,6 @@ import 'package:bapp/fcm.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/loading.dart';
-import 'package:bapp/widgets/store_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -20,40 +19,67 @@ class Bapp extends StatefulWidget {
 class _BappState extends State<Bapp> {
   @override
   Widget build(BuildContext context) {
-    return StoreProvider<CloudStore>(
-      store: Provider.of<CloudStore>(context),
-      init: (cloudStore) async {
-        await Provider.of<BookingFlow>(context, listen: false)
-          ..init()
-          ..getMyBookings();
+    return WillPopScope(
+      onWillPop: () async {
+        return _askToQuit();
       },
-      builder: (_, cloudStore) {
-        return Stack(
-          children: [
-            Observer(
-              builder: (_) {
-                if (cloudStore.bappUser == null) {
-                  return Material(
-                    child: LoadingWidget(),
-                  );
-                }
-                switch (cloudStore.bappUser.userType.value) {
-                  case UserType.customer:
-                    return CustomerHome();
-                  case UserType.businessOwner:
-                    return BusinessHome(
-                      forRole: UserType.businessOwner,
+      child: Consumer<CloudStore>(
+        builder: (_, cloudStore, __) {
+          Provider.of<BookingFlow>(context, listen: false)
+            ..init()
+            ..getMyBookings();
+          return Stack(
+            children: [
+              Observer(
+                builder: (_) {
+                  if (cloudStore.bappUser == null) {
+                    return Material(
+                      child: LoadingWidget(),
                     );
-                  case UserType.businessStaff:
-                    return BusinessHome(
-                      forRole: UserType.businessStaff,
-                    );
-                  default:
-                    return Container(
-                      color: Colors.red,
-                    );
-                }
+                  }
+                  switch (cloudStore.bappUser.userType.value) {
+                    case UserType.customer:
+                      return CustomerHome();
+                    case UserType.businessOwner:
+                      return BusinessHome(
+                        forRole: UserType.businessOwner,
+                      );
+                    case UserType.businessStaff:
+                      return BusinessHome(
+                        forRole: UserType.businessStaff,
+                      );
+                    default:
+                      return Container(
+                        color: Colors.red,
+                      );
+                  }
+                },
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Future<bool> _askToQuit() {
+    return showDialog(
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+          content: Text("Close app and exit?"),
+          actions: [
+            FlatButton(
+              onPressed: () {
+                Navigator.pop(context, true);
               },
+              child: Text("Yes"),
+            ),
+            FlatButton(
+              onPressed: () {
+                Navigator.pop(context, false);
+              },
+              child: Text("No"),
             ),
           ],
         );

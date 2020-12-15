@@ -55,7 +55,7 @@ class _FavoritesTabState extends State<FavoritesTab> {
                                   branch: favBranches[i].businessBranch,
                                   onTap: () async {
                                     flow.branch = favBranches[i].businessBranch;
-                                    BappNavigator.bappPush(
+                                    BappNavigator.push(
                                       context,
                                       BusinessProfileScreen(),
                                     );

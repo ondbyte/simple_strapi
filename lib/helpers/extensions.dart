@@ -101,30 +101,41 @@ extension RemoveCopies<T> on List<T> {
   void removeSuccessiveCopies(bool Function(T a, T b) fn) {
     for (var t = 0; t < this.length - 1; t++) {
       if (fn(this[t], this[t + 1])) {
-        this.removeAt(t + 1);
-        this.remove(t);
+        removeAt(t + 1);
+        remove(t);
       }
     }
   }
 }
 
 extension BappNavigator<T> on Navigator {
-  static Future<T> bappPush<T>(BuildContext context, Widget routeWidget) {
+  static Future<T> push<T>(BuildContext context, Widget routeWidget) {
     return Navigator.push(context, _materialPageRoute(routeWidget));
   }
 
-  static Future<T> bappPushAndRemoveUntill<T>(BuildContext context,
+  static Future<T> pushAndRemoveUntill<T>(BuildContext context,
       Widget routeWidget, bool Function(Route) predicate) {
     return Navigator.pushAndRemoveUntil(
         context, _materialPageRoute(routeWidget), predicate);
   }
 
-  static Future<T> bappPushAndRemoveAll<T>(
+  static Future<T> pushAndRemoveAll<T>(
     BuildContext context,
     Widget routeWidget,
   ) {
     return Navigator.pushAndRemoveUntil(
         context, _materialPageRoute(routeWidget), (_) => false);
+  }
+
+  static void pop(BuildContext context,T result){
+    Navigator.pop(context,result);
+  }
+
+  static Future<T> pushReplacement<T>(
+      BuildContext context,
+      Widget routeWidget,
+      ){
+    return Navigator.pushReplacement(context, _materialPageRoute(routeWidget));
   }
 
   static Route _materialPageRoute(Widget w) {

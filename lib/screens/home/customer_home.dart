@@ -4,7 +4,7 @@ import 'package:bapp/screens/tabs/discover_tab.dart';
 import 'package:bapp/screens/tabs/favorites_tab.dart';
 import 'package:bapp/screens/tabs/updates_tab.dart';
 import 'package:bapp/widgets/location_label.dart';
-import 'package:bapp/widgets/menu.dart';
+import 'package:bapp/widgets/app/menu.dart';
 import 'package:flutter/material.dart';
 
 class CustomerHome extends StatefulWidget {

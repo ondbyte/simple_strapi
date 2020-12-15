@@ -1,7 +1,6 @@
 import 'package:bapp/classes/notification_update.dart';
 import 'package:bapp/config/config.dart' hide Tab;
 import 'package:bapp/stores/updates_store.dart';
-import 'package:bapp/widgets/store_provider.dart';
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
@@ -18,9 +17,8 @@ class _UpdatesTabState extends State<UpdatesTab> {
   int _selectedUpdateTab = 0;
   @override
   Widget build(BuildContext context) {
-    return StoreProvider<UpdatesStore>(
-      store: Provider.of<UpdatesStore>(context, listen: false),
-      builder: (_, updatesStore) {
+    return Consumer<UpdatesStore>(
+      builder: (_, updatesStore,__) {
         return Padding(
           padding: EdgeInsets.all(16),
           child: DefaultTabController(

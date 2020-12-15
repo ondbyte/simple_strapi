@@ -2,6 +2,7 @@ import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/business/toolkit/manage_services/add_a_category.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
@@ -35,11 +36,9 @@ class _BusinessProductsPricingScreenState
             onPressed: () {
               final selected = DefaultTabController.of(context).index;
               if (selected == 0) {
-                Navigator.of(context)
-                    .pushNamed(RouteManager.businessAddAServiceScreen);
+                BappNavigator.push(context, BusinessAddAServiceScreen());
               } else if (selected == 1) {
-                Navigator.of(context)
-                    .pushNamed(RouteManager.businessAddAServiceCategoryScreen);
+                BappNavigator.push(context, BusinessAddServiceCategoryScreen());
               }
             },
           ),
@@ -119,7 +118,7 @@ class _BusinessServicesTabState extends State<BusinessServicesTab>
                             .value.businessServices.value.all[index];
                         return ListTile(
                           onTap: (){
-                            BappNavigator.bappPush(context, BusinessAddAServiceScreen(service: service,));
+                            BappNavigator.push(context, BusinessAddAServiceScreen(service: service,));
                           },
                           title: Text(service.serviceName.value),
                           subtitle: Text(
@@ -134,12 +133,13 @@ class _BusinessServicesTabState extends State<BusinessServicesTab>
                                 service.category.value.categoryName.value,
                           ),
                           leading: ListTileFirebaseImage(
+                            ifEmpty: Initial(forName: service.serviceName.value,),
                             storagePathOrURL: service.images.isNotEmpty
                                 ? service.images.keys.elementAt(0)
                                 : service.category.value.images.isNotEmpty
                                 ? service.category.value.images.keys
                                 .elementAt(0)
-                                : kTemporaryPlaceHolderImage,
+                                : null,
                           ),
                           trailing: Switch(
                             value: businessStore.business.selectedBranch.value
@@ -219,9 +219,10 @@ class _BusinessServiceCategoriesTabState
                             title: Text(t.categoryName.value),
                             subtitle: Text(t.description.value),
                             leading: ListTileFirebaseImage(
+                              ifEmpty: Initial(forName: t.categoryName.value,),
                               storagePathOrURL: t.images.isNotEmpty
                                   ? t.images.keys.elementAt(0)
-                                  : kTemporaryPlaceHolderImage,
+                                  : null,
                             ),
                             trailing: IconButton(
                               icon: Icon(Icons.delete_forever),

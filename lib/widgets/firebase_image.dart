@@ -1,7 +1,9 @@
 import 'dart:typed_data';
 
 import 'package:async/async.dart';
+import 'package:bapp/config/config.dart';
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -14,16 +16,16 @@ class FirebaseStorageImage extends StatefulWidget {
   final BoxFit fit;
   final double height;
   final double width;
-  final bool circular;
+  final Widget ifEmpty;
 
-  const FirebaseStorageImage({
-    Key key,
-    @required this.storagePathOrURL,
-    this.fit = BoxFit.cover,
-    this.height,
-    this.width,
-    this.circular = false,
-  }) : super(key: key);
+  const FirebaseStorageImage(
+      {Key key,
+      @required this.storagePathOrURL,
+      this.fit = BoxFit.cover,
+      this.height,
+      this.width,
+      this.ifEmpty})
+      : super(key: key);
 
   @override
   _FirebaseStorageImageState createState() => _FirebaseStorageImageState();
@@ -34,7 +36,7 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
 
   @override
   void initState() {
-    if (!widget.storagePathOrURL.endsWith(".svg")) {
+    if (!isNullOrEmpty(widget.storagePathOrURL)) {
       _mem();
     }
     super.initState();
@@ -68,47 +70,31 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
 
   @override
   Widget build(BuildContext context) {
+    assert(!isNullOrEmpty(widget.storagePathOrURL)||(isNullOrEmpty(widget.storagePathOrURL) && widget.ifEmpty != null),
+        "ifEmpty widget cannot be null if the URL is null");
     return LayoutBuilder(
       builder: (_, cons) {
-        return widget.storagePathOrURL.endsWith("svg")
-            ? widget.circular
-                ? CircleAvatar(
-                    backgroundImage: svg.Svg(kTemporaryPlaceHolderImage),
-                  )
-                : SvgPicture.asset(
-                    widget.storagePathOrURL,
-                    fit: BoxFit.contain,
-                    width: widget.width ?? cons.maxWidth,
-                    height: widget.height ?? cons.maxHeight,
-                  )
-            : FutureBuilder<Uint8List>(
-                future: _memoizer.future,
-                builder: (_, snap) {
-                  if (snap.hasData) {
-                    if (widget.circular) {
-                      return SizedBox(
-                        height: widget.height,
-                        width: widget.width,
-                        child: CircleAvatar(
-                          backgroundImage: MemoryImage(snap.data),
-                        ),
-                      );
-                    } else {
-                      return Image.memory(
-                        snap.data,
-                        fit: widget.fit,
-                        width: widget.width ?? cons.maxWidth,
-                        height: widget.height ?? cons.maxHeight,
-                      );
-                    }
-                  }
-                  return SizedBox(
-                    height: widget.height,
-                    width: widget.width,
-                    child: _getLoader(),
-                  );
-                },
+        if (isNullOrEmpty(widget.storagePathOrURL)) {
+          return widget.ifEmpty;
+        }
+        return FutureBuilder<Uint8List>(
+          future: _memoizer.future,
+          builder: (_, snap) {
+            if (snap.hasData) {
+              return Image.memory(
+                snap.data,
+                fit: widget.fit??BoxFit.cover,
+                width: widget.width ?? cons.maxWidth,
+                height: widget.height ?? cons.maxHeight,
               );
+            }
+            return SizedBox(
+              height: widget.height,
+              width: widget.width,
+              child: _getLoader(),
+            );
+          },
+        );
       },
     );
   }
@@ -116,29 +102,30 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
   Widget _getLoader() {
     return Center(
       child: SizedBox(
-          height: 16,
-          width: 16,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-          )),
+        height: 16,
+        width: 16,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+        ),
+      ),
     );
   }
 }
 
 class ListTileFirebaseImage extends StatelessWidget {
   final String storagePathOrURL;
-  final bool circular;
+  final Widget ifEmpty;
 
   const ListTileFirebaseImage(
-      {Key key, this.storagePathOrURL, this.circular = false})
+      {Key key, this.storagePathOrURL, this.ifEmpty})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
     return RRFirebaseStorageImage(
       height: 48,
       width: 48,
-      circular: circular,
       storagePathOrURL: storagePathOrURL,
+      ifEmpty: ifEmpty,
     );
   }
 }
@@ -146,15 +133,17 @@ class ListTileFirebaseImage extends StatelessWidget {
 class RRFirebaseStorageImage extends StatelessWidget {
   final String storagePathOrURL;
   final double width, height;
-  final bool circular;
+  final BoxFit fit;
+  final Widget ifEmpty;
 
-  const RRFirebaseStorageImage(
-      {Key key,
-      this.storagePathOrURL,
-      this.width,
-      this.height,
-      this.circular = false})
-      : super(key: key);
+  const RRFirebaseStorageImage({
+    Key key,
+    this.storagePathOrURL,
+    this.width,
+    this.height,
+    this.fit,
+    this.ifEmpty,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -163,8 +152,26 @@ class RRFirebaseStorageImage extends StatelessWidget {
       child: FirebaseStorageImage(
         width: width,
         height: height,
-        circular: circular,
         storagePathOrURL: storagePathOrURL,
+        fit: fit,
+        ifEmpty: ifEmpty,
+      ),
+    );
+  }
+}
+
+class Initial extends StatelessWidget {
+  final String forName;
+
+  const Initial({Key key, this.forName}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: CardsColor.next(),
+      child: Text(
+        forName?.substring(0,2),
+        textAlign: TextAlign.center,
+        style: TextStyle(color: Colors.white),
       ),
     );
   }

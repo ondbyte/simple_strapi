@@ -121,11 +121,12 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                               contentPadding:
                                   EdgeInsets.symmetric(horizontal: 16),
                               leading: ListTileFirebaseImage(
+                                ifEmpty: Initial(forName: widget.booking.staff.name,),
                                 storagePathOrURL:
                                     widget.booking.staff.images.isNotEmpty
                                         ? widget.booking.staff.images.keys
                                             .elementAt(0)
-                                        : kTemporaryPlaceHolderImage,
+                                        : null,
                               ),
                               title: Text(
                                 "Your booking is with",

@@ -19,116 +19,127 @@ class _BusinessAddServiceCategoryScreenState
   String _description = "";
   Map<String, bool> _image = {};
   final _key = GlobalKey<FormState>();
+  
   @override
   Widget build(BuildContext context) {
     return LoadingStackWidget(
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: true,
-          title: const Text("Add a category"),
-          actions: [FlatButton(onPressed: () {}, child: Text(""))],
-        ),
-        bottomNavigationBar: BottomPrimaryButton(
-          label: "Add",
-          onPressed: () async {
-            _name = _name.trim();
-            _description = _description.trim();
-            final business =
-                Provider.of<BusinessStore>(context, listen: false).business;
-            if (business
-                .selectedBranch.value.businessServices.value.allCategories
-                .any((c) => c.categoryName.value == _name)) {
-              Flushbar(
-                message: "That category exists",
-                duration: const Duration(
-                  seconds: 2,
-                ),
-              ).show(context);
-              return;
-            }
-            act(() {
-              kLoading.value = true;
-            });
-            await business.selectedBranch.value.businessServices.value
-                .addACategory(
-              categoryName: _name,
-              description: _description,
-              images: _image,
-            );
-            Navigator.of(context).pop();
-            act(() {
-              kLoading.value = false;
-            });
-          },
-        ),
-        body: GestureDetector(
-          onTap: (){
-            FocusScope.of(context).unfocus();
-          },
-          child: CustomScrollView(
-            slivers: [
-              SliverPadding(
-                padding: EdgeInsets.all(16),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate(
-                    [
-                      Form(
-                        key: _key,
-                        child: Column(
-                          children: [
-                            TextFormField(
-                              decoration:
-                              InputDecoration(labelText: "Category name"),
-                              onChanged: (s) {
-                                _name = s;
-                              },
-                              validator: (s) {
-                                if (s.isEmpty) {
-                                  return "Enter a valid name";
-                                }
-                                return null;
-                              },
-                            ),
-                            SizedBox(
-                              height: 20,
-                            ),
-                            TextFormField(
-                              decoration:
-                              InputDecoration(labelText: "Description"),
-                              onChanged: (s) {
-                                _description = s;
-                              },
-                              validator: (s) {
-                                if (s.isEmpty) {
-                                  return "Enter a valid description";
-                                }
-                                return null;
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SliverList(
-                delegate: SliverChildListDelegate(
-                  [
-                    AddImageTileWidget(
-                      maxImage: 1,
-                      title: "Add an image",
-                      subTitle: "(optional)",
-                      onImagesSelected: (imgs) {
-                        _image = imgs;
-                      },
+      child: Consumer<BusinessStore>(
+        builder: (_,businessStore,__){
+          return Scaffold(
+            appBar: AppBar(
+              automaticallyImplyLeading: true,
+              title: const Text("Add a category"),
+              actions: [FlatButton(onPressed: () {}, child: Text(""))],
+            ),
+            bottomNavigationBar: BottomPrimaryButton(
+              label: "Add",
+              onPressed: () async {
+                if(!_key.currentState.validate()){
+                  return;
+                }
+                _name = _name.trim();
+                _description = _description.trim();
+                final business =
+                    businessStore.business;
+                if (business
+                    .selectedBranch.value.businessServices.value.allCategories
+                    .any((c) => c.categoryName.value == _name)) {
+                  Flushbar(
+                    message: "That category exists",
+                    duration: const Duration(
+                      seconds: 2,
                     ),
-                  ],
-                ),
+                  ).show(context);
+                  return;
+                }
+                act(() {
+                  kLoading.value = true;
+                });
+                await business.selectedBranch.value.businessServices.value
+                    .addACategory(
+                  categoryName: _name,
+                  description: _description,
+                  images: _image,
+                );
+                Navigator.of(context).pop();
+                act(() {
+                  kLoading.value = false;
+                });
+              },
+            ),
+            body: GestureDetector(
+              onTap: (){
+                FocusScope.of(context).unfocus();
+              },
+              child: CustomScrollView(
+                slivers: [
+                  SliverPadding(
+                    padding: EdgeInsets.all(16),
+                    sliver: SliverList(
+                      delegate: SliverChildListDelegate(
+                        [
+                          Form(
+                            key: _key,
+                            child: Column(
+                              children: [
+                                TextFormField(
+                                  decoration:
+                                  InputDecoration(labelText: "Category name"),
+                                  onChanged: (s) {
+                                    _name = s;
+                                  },
+                                  validator: (s) {
+                                    if (s.isEmpty) {
+                                      return "Enter a valid name";
+                                    }
+                                    if(businessStore.business.selectedBranch.value.businessServices.value.anyServiceOrCategoryExistsWithName(s)){
+                                      return "Named service or category exists";
+                                    }
+                                      return null;
+                                  },
+                                ),
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                TextFormField(
+                                  decoration:
+                                  InputDecoration(labelText: "Description"),
+                                  onChanged: (s) {
+                                    _description = s;
+                                  },
+                                  validator: (s) {
+                                    if (s.isEmpty) {
+                                      return "Enter a valid description";
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SliverList(
+                    delegate: SliverChildListDelegate(
+                      [
+                        AddImageTileWidget(
+                          maxImage: 1,
+                          title: "Add an image",
+                          subTitle: "(optional)",
+                          onImagesSelected: (imgs) {
+                            _image = imgs;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

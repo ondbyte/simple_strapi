@@ -7,7 +7,7 @@ import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/business/business_branch_switch.dart';
-import 'package:bapp/widgets/menu.dart';
+import 'package:bapp/widgets/app/menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';

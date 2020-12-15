@@ -29,9 +29,9 @@ class BusinessProfileServicesScreen extends StatelessWidget {
           onPressed: flow.services.isEmpty
               ? null
               : () {
-                  BappNavigator.bappPush(context, SelectTimeSlotScreen(
+                  BappNavigator.push(context, SelectTimeSlotScreen(
                     onSelect: () {
-                      BappNavigator.bappPush(context, AddCustomerDetails());
+                      BappNavigator.push(context, AddCustomerDetails());
                     },
                   ));
                 },

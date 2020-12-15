@@ -83,16 +83,16 @@ class _SelectAProfessionalScreenState extends State<SelectAProfessionalScreen> {
                       act(() {
                         flow.professional.value = s;
                       });
-                      BappNavigator.bappPush(context, SelectTimeSlotScreen());
+                      BappNavigator.push(context, SelectTimeSlotScreen());
                     },
               contentPadding: EdgeInsets.symmetric(vertical: 8),
               title: Text(s.staff.name),
               trailing: Icon(Icons.arrow_forward_rounded),
               leading: ListTileFirebaseImage(
-                circular: true,
+                ifEmpty: Initial(forName: s.staff.name,),
                 storagePathOrURL: s.staff.images.isNotEmpty
                     ? s.staff.images.keys.elementAt(0)
-                    : kTemporaryPlaceHolderImage,
+                    : null,
               ),
               subtitle: RatingBar.builder(
                   itemSize: 16,

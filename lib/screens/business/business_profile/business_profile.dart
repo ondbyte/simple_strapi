@@ -44,7 +44,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                       ? null
                       : () async {
                           flow.getBranchBookings();
-                          await BappNavigator.bappPush(
+                          await BappNavigator.push(
                               context, const SelectAProfessionalScreen());
                         },
                 )
@@ -59,7 +59,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                   onPressed: flow.services.isEmpty
                       ? null
                       : () async {
-                          await BappNavigator.bappPush(context, LoginScreen());
+                          await BappNavigator.push(context, LoginScreen());
                         },
                 );
         },
@@ -112,7 +112,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                     fit: BoxFit.cover,
                     storagePathOrURL: flow.branch.images.isNotEmpty
                         ? flow.branch.images.keys.elementAt(0)
-                        : kTemporaryPlaceHolderImage,
+                        : null,
                   ),
                 ),
               ),

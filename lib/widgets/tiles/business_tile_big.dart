@@ -31,7 +31,7 @@ class BusinessTileBigWidget extends StatelessWidget {
                     RRFirebaseStorageImage(
                       storagePathOrURL: branch.images.isNotEmpty
                           ? branch.images.keys.elementAt(0)
-                          : kTemporaryPlaceHolderImage,
+                          : null,
                     ),
                     Padding(
                       padding: const EdgeInsets.only(left: 16, bottom: 8),
@@ -85,7 +85,8 @@ class BusinessTileWidget extends StatelessWidget {
         maxLines: 1,
       ),
       leading: withImage? ListTileFirebaseImage(
-        storagePathOrURL: branch.images.isNotEmpty?branch.images.keys.elementAt(0):kTemporaryPlaceHolderImage,
+        ifEmpty: Initial(forName: branch.name.value,),
+        storagePathOrURL: branch.images.isNotEmpty?branch.images.keys.elementAt(0):null,
       ):null,
       trailing: Column(
         mainAxisAlignment: MainAxisAlignment.center,

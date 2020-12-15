@@ -53,7 +53,7 @@ class AddCustomerDetails extends StatelessWidget {
                       );
                       await user.save();
                     }
-                    await BappNavigator.bappPushAndRemoveAll(
+                    await BappNavigator.pushAndRemoveAll(
                       context,
                       ContextualMessageScreen(
                         message: "Successfully added a walk-in booking",
@@ -62,7 +62,7 @@ class AddCustomerDetails extends StatelessWidget {
                           await flow.done(number: _theNumber.value);
                         },
                         onButtonPressed: (context) {
-                          BappNavigator.bappPushAndRemoveAll(context, Bapp());
+                          BappNavigator.pushAndRemoveAll(context, Bapp());
                         },
                       ),
                     );

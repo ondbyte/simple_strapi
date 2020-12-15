@@ -1,16 +1,23 @@
 import 'package:bapp/config/config_data_types.dart';
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/main.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/authentication/create_profile.dart';
+import 'package:bapp/screens/authentication/login_screen.dart';
+import 'package:bapp/screens/business/addbusiness/choose_category.dart';
+import 'package:bapp/screens/settings/settings.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/themestore.dart';
+import 'package:bapp/widgets/app/bapp_themed_app.dart';
+import 'package:bapp/widgets/tiles/theme_switcher.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
-import 'network_error.dart';
+import 'bapp_navigator_widget.dart';
 
 class Menu extends StatefulWidget {
   @override
@@ -30,7 +37,7 @@ class _MenuState extends State<Menu> {
             IconButton(
               icon: Icon(FeatherIcons.xCircle),
               onPressed: () {
-                Navigator.of(context).pop();
+                BappNavigator.pop(context, null);
               },
             )
           ],
@@ -51,27 +58,7 @@ class _MenuState extends State<Menu> {
                       height: 20,
                     ),
                     ..._getMenuItems(context, items),
-                    Consumer<ThemeStore>(
-                      builder: (_, themeStore, __) {
-                        return Observer(
-                          builder: (_) {
-                            return ListTile(
-                              title: Text("Dark mode"),
-                              trailing: Switch(
-                                value: themeStore.brightness == Brightness.dark,
-                                onChanged: (b) {
-                                  if (b) {
-                                    themeStore.brightness = Brightness.dark;
-                                  } else {
-                                    themeStore.brightness = Brightness.light;
-                                  }
-                                },
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    )
+                    ThemeSwitcherTile(),
                   ],
                 );
               },
@@ -113,30 +100,27 @@ class _MenuState extends State<Menu> {
     switch (kind) {
       case MenuItemKind.yourProfile:
         {
-          Navigator.of(context)
-              .popAndPushNamed(RouteManager.createProfileScreen);
+          BappNavigator.pushReplacement(context, CreateYourProfileScreen());
           break;
         }
       case MenuItemKind.settings:
         {
-          Navigator.of(context).popAndPushNamed(RouteManager.settingsScreen);
+          BappNavigator.pushReplacement(context, SettingsScreen());
           break;
         }
       case MenuItemKind.rateTheApp:
         {
-          Navigator.of(context).popAndPushNamed(RouteManager.rateMyAppScreen);
+          BappNavigator.pushReplacement(context, SizedBox());
           break;
         }
       case MenuItemKind.helpUsImprove:
         {
-          Navigator.of(context)
-              .popAndPushNamed(RouteManager.helpUsImproveScreen);
+          BappNavigator.pushReplacement(context, SizedBox());
           break;
         }
       case MenuItemKind.referABusiness:
         {
-          Navigator.of(context)
-              .popAndPushNamed(RouteManager.selectBusinessCategoryScreen);
+          BappNavigator.pushReplacement(context, ChooseYourBusinessCategoryScreen());
           break;
         }
       case MenuItemKind.logOut:
@@ -150,7 +134,7 @@ class _MenuState extends State<Menu> {
         }
       case MenuItemKind.logIn:
         {
-          Navigator.of(context).popAndPushNamed(RouteManager.loginScreen);
+          BappNavigator.pushReplacement(context, LoginScreen());
           break;
         }
       case MenuItemKind.switchTosShopping:

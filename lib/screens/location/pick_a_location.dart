@@ -4,7 +4,6 @@ import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/location/search_a_place.dart';
 import 'package:bapp/stores/cloud_store.dart';
-import 'package:bapp/widgets/store_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:geocoder/geocoder.dart';
@@ -20,9 +19,9 @@ class PickAPlaceLocationScreen extends StatefulWidget {
 
 class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
   PickedLocation _pickedLocation;
-  Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
+  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
   bool _loading = false;
-  GooglePlace _googlePlace = GooglePlace(kMapsKey);
+  final GooglePlace _googlePlace = GooglePlace(kMapsKey);
 
   @override
   Widget build(BuildContext context) {
@@ -79,10 +78,8 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
       body: Stack(
         alignment: Alignment.topCenter,
         children: [
-          StoreProvider<CloudStore>(
-            store: Provider.of<CloudStore>(context, listen: false),
-            init: (cloudStore) {},
-            builder: (_, cloudStore) {
+          Consumer<CloudStore>(
+            builder: (_, cloudStore,__) {
               if (cloudStore.bappUser.address.locality == null &&
                   cloudStore.bappUser.address.city == null) {
                 return Center(

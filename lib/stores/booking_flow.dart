@@ -158,14 +158,13 @@ class BookingFlow {
         .where("branch", isEqualTo: branch?.myDoc?.value)
         .where("from", isGreaterThanOrEqualTo: DateTime.now().toTimeStamp())
         .where("from",
-        isLessThanOrEqualTo:
-        DateTime.now().add(const Duration(days: 30)).toTimeStamp());
-    if(_allStore.get<CloudStore>().bappUser.userType.value==UserType.businessStaff){
-      q = q.where("staff",isEqualTo: branch.staff.first.name);
+            isLessThanOrEqualTo:
+                DateTime.now().add(const Duration(days: 30)).toTimeStamp());
+    if (_allStore.get<CloudStore>().bappUser.userType.value ==
+        UserType.businessStaff) {
+      q = q.where("staff", isEqualTo: branch.staff.first.name);
     }
-    branchBookingSub =
-        q.snapshots()
-        .listen(
+    branchBookingSub = q.snapshots().listen(
       (bookingSnaps) async {
         if (branch != null) {
           markRemoved(oldBookings: branchBookings);
@@ -402,6 +401,22 @@ class BookingFlow {
       bookedByName:
           number == null ? FirebaseAuth.instance.currentUser.displayName : "",
       rating: CompleteBookingRating(),
+      staffNumber: professional.value.staff.contactNumber.internationalNumber,
+      receptionistNumber: branch
+              .getStaffForRole(role: UserType.businessReceptionist)
+              ?.contactNumber
+              ?.internationalNumber ??
+          "",
+      managerNumber: branch
+              .getStaffForRole(role: UserType.businessManager)
+              ?.contactNumber
+              ?.internationalNumber ??
+          "",
+      ownerNumber: branch
+              .getStaffForRole(role: UserType.businessOwner)
+              ?.contactNumber
+              ?.internationalNumber ??
+          "",
     );
     await b.save();
     if (number == null) {

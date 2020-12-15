@@ -35,9 +35,10 @@ class _BappUserTileState extends State<BappUserTile> {
       title: Text(widget.user.name ?? "no name"),
       subtitle: Text(widget.user.theNumber.internationalNumber ?? "no number"),
       leading: ListTileFirebaseImage(
-        storagePathOrURL: widget.user.image ?? kTemporaryPlaceHolderImage,
+        ifEmpty: Initial(forName: widget.user.name,),
+        storagePathOrURL: widget.user.image,
       ),
-      trailing: widget.trailing ?? null,
+      trailing: widget.trailing,
     );
   }
 }

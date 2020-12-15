@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/screens/authentication/create_profile.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/buttons.dart';
 import 'package:flushbar/flushbar.dart';
@@ -137,8 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         onVerified: () {
                           if (isNullOrEmpty(cloudStore.user.email) ||
                               isNullOrEmpty(cloudStore.user.displayName)) {
-                            Navigator.pushReplacementNamed(
-                                context, RouteManager.createProfileScreen);
+                            BappNavigator.pushReplacement(context, CreateYourProfileScreen());
                           } else {
                             Navigator.pop(context, true);
                           }

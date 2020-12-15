@@ -28,6 +28,11 @@ class BusinessServices {
     return all.any((s) =>
         s.category.value.categoryName.value == category.categoryName.value);
   }
+  
+  bool anyServiceOrCategoryExistsWithName(String s){
+    final name = s.trim();
+    return all.any((s) => s.serviceName.value==name)||allCategories.any((c) => c.categoryName.value==name);
+  }
 
   Future save({BusinessService service}) async {
     final oldImgs = service.images;

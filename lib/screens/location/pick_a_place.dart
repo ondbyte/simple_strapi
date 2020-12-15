@@ -1,9 +1,11 @@
 import 'package:bapp/classes/firebase_structures/bapp_user.dart';
 import 'package:bapp/classes/location.dart';
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/home/bapp.dart';
+import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/loading.dart';
-import 'package:bapp/widgets/store_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -24,14 +26,8 @@ class PickAPlaceScreen extends StatelessWidget {
   }
 
   Widget _showCountries(BuildContext context) {
-    return StoreProvider<CloudStore>(
-      store: Provider.of<CloudStore>(context, listen: false),
-      init: (cloudStore) async {
-        ///initialize user data
-        //await cloudStore.init(context);
-        //await cloudStore.getActiveCountries();
-      },
-      builder: (_, cloudStore) {
+    return Consumer<CloudStore>(
+      builder: (_, cloudStore, __) {
         return Observer(
           builder: (context) {
             return Scaffold(
@@ -51,10 +47,7 @@ class PickAPlaceScreen extends StatelessWidget {
                             trailing: Icon(Icons.arrow_forward_ios),
                             onTap: () async {
                               //cloudStore.getLocationsInCountry(e);
-                              Navigator.of(context).pushNamed(
-                                RouteManager.pickAPlace,
-                                arguments: e,
-                              );
+                              BappNavigator.push(context, PickAPlaceLocationScreen());
                             },
                           ),
                         ),
@@ -69,9 +62,8 @@ class PickAPlaceScreen extends StatelessWidget {
   }
 
   Widget _showLocations(BuildContext context) {
-    return StoreProvider<CloudStore>(
-      store: Provider.of<CloudStore>(context, listen: false),
-      builder: (context, cloudStore) {
+    return Consumer<CloudStore>(
+      builder: (context, cloudStore, __) {
         return Scaffold(
           appBar: AppBar(
             automaticallyImplyLeading: true,
@@ -86,7 +78,7 @@ class PickAPlaceScreen extends StatelessWidget {
               return ListView(
                 children: List.generate(
                   cities.length,
-                      (index) => _getSubLocationWidget(
+                  (index) => _getSubLocationWidget(
                     context,
                     cities[index],
                   ),
@@ -115,8 +107,7 @@ class PickAPlaceScreen extends StatelessWidget {
                   cloudStore.bappUser = cloudStore.bappUser.updateWith(
                       address: Address(city: city.name, iso2: country.iso2));
                   cloudStore.bappUser.save();
-                  Navigator.of(context)
-                      .pushNamedAndRemoveUntil(RouteManager.home, (_) => false);
+                  BappNavigator.pushAndRemoveAll(context, Bapp());
                 },
               ),
               ...List.generate(
@@ -132,11 +123,8 @@ class PickAPlaceScreen extends StatelessWidget {
                             iso2: country.iso2,
                             city: city.name,
                             locality: city.localities[index].name));
-cloudStore.bappUser.save();
-                    Navigator.of(context).pushNamedAndRemoveUntil(
-                      RouteManager.home,
-                      (_) => false,
-                    );
+                    cloudStore.bappUser.save();
+                    BappNavigator.pushAndRemoveAll(context, Bapp());
                   },
                 ),
               ),

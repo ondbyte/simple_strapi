@@ -48,7 +48,7 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
             ? SizedBox()
             : FloatingActionButton(
                 onPressed: () {
-                  BappNavigator.bappPush(
+                  BappNavigator.push(
                       context, BusinessProfileServicesScreen());
                 },
                 child: Icon(FeatherIcons.plus),
@@ -75,7 +75,7 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
                         trailing: IconButton(
                           icon: Icon(FeatherIcons.refreshCcw),
                           onPressed: () async {
-                            BappNavigator.bappPush(
+                            BappNavigator.push(
                               context,
                               SelectAProfessionalScreen(
                                 onSelected: (proffesional) {
@@ -91,7 +91,7 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
                     if (flow.professional.value == null)
                       ListTile(
                         onTap: () async {
-                          BappNavigator.bappPush(
+                          BappNavigator.push(
                             context,
                             SelectAProfessionalScreen(
                               onSelected: (proffesional) {

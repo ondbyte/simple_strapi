@@ -49,14 +49,14 @@ class _RateTheBookingScreenState extends State<RateTheBookingScreen> {
           label: "Send feedback",
           onPressed: booking.rating.isEdited()
               ? () async {
-                  BappNavigator.bappPushAndRemoveAll(
+                  BappNavigator.pushAndRemoveAll(
                     context,
                     ContextualMessageScreen(
                       message: RatingConfig.getThankYouForTheReviewForBooking(
                           booking),
                       buttonText: "Go to Home",
                       onButtonPressed: (context) {
-                        BappNavigator.bappPushAndRemoveAll(context, Bapp());
+                        BappNavigator.pushAndRemoveAll(context, Bapp());
                       },
                       init: () async {
                         await booking.saveRating();
@@ -236,7 +236,7 @@ class HowWasYourExperienceTile extends StatelessWidget {
                 booking.rating.update(
                   previousRating.update(stars: r),
                 );
-                BappNavigator.bappPush(
+                BappNavigator.push(
                   context,
                   RateTheBookingScreen(
                     booking: booking,

@@ -5,10 +5,12 @@ import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/home/bapp.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
+import 'package:bapp/screens/location/pick_a_location.dart';
+import 'package:bapp/screens/onboarding/onboardingscreen.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/themestore.dart';
-import 'package:bapp/widgets/network_error.dart';
+import 'package:bapp/widgets/app/bapp_navigator_widget.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
@@ -37,7 +39,6 @@ class _BappInitScreenState extends State<BappInitScreen>
         if (mounted) {
           ///init authentication store / load user
           BappFCM().initForAndroid();
-          await Provider.of<ThemeStore>(context, listen: false).init();
           await Provider.of<CloudStore>(context, listen: false).init(
             onLogin: () async {
               if (mounted) {
@@ -51,15 +52,12 @@ class _BappInitScreenState extends State<BappInitScreen>
                     !isNullOrEmpty(cloudStore.bappUser.address.iso2)) {
                   ///customer is not a first timer
                   if (mounted) {
-                    BappNavigator.bappPushAndRemoveAll(context, Bapp());
+                    BappNavigator.pushAndRemoveAll(context, Bapp());
                   }
                   killState = !killState;
                   return;
                 } else {
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                    RouteManager.pickAPlace,
-                    (route) => false,
-                  );
+                  BappNavigator.pushAndRemoveAll(context, PickAPlaceLocationScreen());
                   killState = !killState;
                   return;
                 }
@@ -67,7 +65,7 @@ class _BappInitScreenState extends State<BappInitScreen>
             },
             onNotLogin: () async {
               if (mounted) {
-                Navigator.of(context).pushNamed(RouteManager.onBoardingScreen);
+                BappNavigator.push(context, OnBoardingScreen());
               }
               return;
             },

@@ -1,11 +1,12 @@
 
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/business/addbusiness/thank_you_for_your_interest.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/choose_category.dart';
 import 'package:bapp/widgets/login_widget.dart';
-import 'package:bapp/widgets/store_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -29,13 +30,9 @@ class _ChooseYourBusinessCategoryScreenState
               return cloudStore.status == AuthStatus.userPresent
                   ? Padding(
                 padding: EdgeInsets.all(16),
-                child: StoreProvider<BusinessStore>(
-                  store:
-                  Provider.of<BusinessStore>(context, listen: false),
-                  init: (businessStore) async {
-                    await businessStore.getCategories();
-                  },
-                  builder: (_, businessStore) {
+                child: Consumer<BusinessStore>(
+                  builder: (_, businessStore,__) {
+                    businessStore.getCategories();
                     return Observer(
                       builder: (_) {
                         return AnimatedContainer(
@@ -70,11 +67,8 @@ class _ChooseYourBusinessCategoryScreenState
                                 elements: businessStore.categories
                                     .toList(),
                                 onCategorySelected: (c) {
-                                  Navigator.of(context).pushNamed(
-                                    RouteManager
-                                        .thankYouForYourInterestScreen,
-                                    arguments: c,
-                                  );
+                                  BappNavigator.pushReplacement(context, ThankYouForYourInterestScreen(category: c,));
+
                                 },
                               )
                             ],

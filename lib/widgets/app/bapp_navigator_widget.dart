@@ -1,7 +1,13 @@
 import 'package:bapp/helpers/extensions.dart';
+import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/main.dart';
+import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/misc/error.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
+import 'bapp_provider_initializer.dart';
 
 enum AppEvents { reboot, unHandledError }
 
@@ -12,17 +18,18 @@ class AppEventsWithExtra {
   AppEventsWithExtra(this.event, this.extra);
 }
 
-class BappEventsHandler extends StatefulWidget {
+class BappNavigatorWidget extends StatefulWidget {
   final Widget child;
   final EventBus bus;
 
-  const BappEventsHandler({Key key, this.child, this.bus}) : super(key: key);
+  const BappNavigatorWidget({Key key, this.child, this.bus}) : super(key: key);
   @override
-  _BappEventsHandlerState createState() => _BappEventsHandlerState();
+  _BappNavigatorWidgetState createState() => _BappNavigatorWidgetState();
 }
 
-class _BappEventsHandlerState extends State<BappEventsHandler> {
+class _BappNavigatorWidgetState extends State<BappNavigatorWidget> {
   var _key = UniqueKey();
+  var _navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   void didChangeDependencies() {
@@ -34,7 +41,15 @@ class _BappEventsHandlerState extends State<BappEventsHandler> {
   Widget build(BuildContext context) {
     return KeyedSubtree(
       key: _key,
-      child: widget.child,
+      child: BappProviderInitializerWidget(
+        builder:(_){
+          return Navigator(
+            key: _navigatorKey,
+            onGenerateRoute: RouteManager.onGenerate,
+            initialRoute: "/",
+          );
+        },
+      ),
     );
   }
 
@@ -46,6 +61,7 @@ class _BappEventsHandlerState extends State<BappEventsHandler> {
             {
               setState(() {
                 _key = UniqueKey();
+                _navigatorKey = GlobalKey<NavigatorState>();
               });
               break;
             }
@@ -57,7 +73,8 @@ class _BappEventsHandlerState extends State<BappEventsHandler> {
         switch (event.event) {
           case AppEvents.unHandledError:
             {
-              BappNavigator.bappPushAndRemoveAll(context, NoInternet());
+              Helper.printLog("ERROR, Showing error screen");
+              BappNavigator.pushAndRemoveAll(_navigatorKey.currentContext, NoInternet());
               break;
             }
         }
@@ -66,32 +83,3 @@ class _BappEventsHandlerState extends State<BappEventsHandler> {
   }
 }
 
-class NoInternet extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Icon(Icons.network_check),
-          SizedBox(
-            height: 20,
-          ),
-          Text("Please check your networ"),
-          SizedBox(
-            height: 20,
-          ),
-          FlatButton(
-            onPressed: () {
-              Provider.of<EventBus>(context, listen: false)
-                  .fire(AppEvents.reboot);
-            },
-            child: Text("Try again"),
-          )
-        ],
-      ),
-    );
-  }
-}

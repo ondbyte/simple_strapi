@@ -1,7 +1,9 @@
 import 'package:bapp/classes/firebase_structures/business_holidays.dart';
 import 'package:bapp/config/config.dart';
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/business/toolkit/manage_holidays/add_a_holiday.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -26,8 +28,7 @@ class _BusinessManageHolidaysScreenState
           color: Theme.of(context).indicatorColor,
         ),
         onPressed: () {
-          Navigator.of(context)
-              .pushNamed(RouteManager.businessAddAHolidayScreen);
+          BappNavigator.push(context, BusinessAddAHolidayScreen());
         },
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

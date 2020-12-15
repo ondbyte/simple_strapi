@@ -1,5 +1,7 @@
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/authentication/login_screen.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/buttons.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -184,12 +186,7 @@ class _CreateYourProfileScreenState extends State<CreateYourProfileScreen> {
                                                     mainButton: FlatButton(
                                                       onPressed: () async {
                                                         final loggedIn =
-                                                            await Navigator.of(
-                                                                    context)
-                                                                .pushNamed(
-                                                          RouteManager
-                                                              .loginScreen,
-                                                        );
+                                                        await BappNavigator.push(context, LoginScreen());
                                                         if (loggedIn) {
                                                           Flushbar(
                                                             message:

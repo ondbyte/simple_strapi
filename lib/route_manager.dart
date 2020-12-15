@@ -164,7 +164,7 @@ class RouteManager {
       case businessTimingssScreen:
         return MaterialPageRoute(
           builder: (_) {
-            return BusinessTimingsScreen();
+            return BusinessManageWorkingHoursScreen();
           },
         );
 
@@ -185,7 +185,7 @@ class RouteManager {
       case businessVerificationScreen:
         return MaterialPageRoute(
           builder: (_) {
-            return BusinessSubmitBranchForVerification();
+            return BusinessSubmitBranchForVerificationScreen();
           },
         );
 
