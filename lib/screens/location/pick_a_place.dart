@@ -1,9 +1,7 @@
 import 'package:bapp/classes/firebase_structures/bapp_user.dart';
 import 'package:bapp/classes/location.dart';
 import 'package:bapp/helpers/extensions.dart';
-import 'package:bapp/route_manager.dart';
 import 'package:bapp/screens/home/bapp.dart';
-import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/loading.dart';
 import 'package:flutter/material.dart';
@@ -47,7 +45,11 @@ class PickAPlaceScreen extends StatelessWidget {
                             trailing: Icon(Icons.arrow_forward_ios),
                             onTap: () async {
                               //cloudStore.getLocationsInCountry(e);
-                              BappNavigator.push(context, PickAPlaceLocationScreen());
+                              BappNavigator.push(
+                                  context,
+                                  PickAPlaceScreen(
+                                    country: e,
+                                  ));
                             },
                           ),
                         ),

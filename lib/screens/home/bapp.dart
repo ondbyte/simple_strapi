@@ -19,46 +19,41 @@ class Bapp extends StatefulWidget {
 class _BappState extends State<Bapp> {
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        return _askToQuit();
-      },
-      child: Consumer<CloudStore>(
-        builder: (_, cloudStore, __) {
-          Provider.of<BookingFlow>(context, listen: false)
-            ..init()
-            ..getMyBookings();
-          return Stack(
-            children: [
-              Observer(
-                builder: (_) {
-                  if (cloudStore.bappUser == null) {
-                    return Material(
-                      child: LoadingWidget(),
+    return Consumer<CloudStore>(
+      builder: (_, cloudStore, __) {
+        Provider.of<BookingFlow>(context, listen: false)
+          ..init()
+          ..getMyBookings();
+        return Stack(
+          children: [
+            Observer(
+              builder: (_) {
+                if (cloudStore.bappUser == null) {
+                  return Material(
+                    child: LoadingWidget(),
+                  );
+                }
+                switch (cloudStore.bappUser.userType.value) {
+                  case UserType.customer:
+                    return CustomerHome();
+                  case UserType.businessOwner:
+                    return BusinessHome(
+                      forRole: UserType.businessOwner,
                     );
-                  }
-                  switch (cloudStore.bappUser.userType.value) {
-                    case UserType.customer:
-                      return CustomerHome();
-                    case UserType.businessOwner:
-                      return BusinessHome(
-                        forRole: UserType.businessOwner,
-                      );
-                    case UserType.businessStaff:
-                      return BusinessHome(
-                        forRole: UserType.businessStaff,
-                      );
-                    default:
-                      return Container(
-                        color: Colors.red,
-                      );
-                  }
-                },
-              ),
-            ],
-          );
-        },
-      ),
+                  case UserType.businessStaff:
+                    return BusinessHome(
+                      forRole: UserType.businessStaff,
+                    );
+                  default:
+                    return Container(
+                      color: Colors.red,
+                    );
+                }
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 

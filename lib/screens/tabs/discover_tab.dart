@@ -3,6 +3,7 @@ import 'package:bapp/config/config.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/screens/business/booking_flow/review.dart';
+import 'package:bapp/screens/business/business_profile/business_profile.dart';
 import 'package:bapp/screens/search/branches_result_screen.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/business_store.dart';
@@ -23,7 +24,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
   @override
   Widget build(BuildContext context) {
     return Consumer<CloudStore>(
-      builder: (_, authStore,__) {
+      builder: (_, authStore, __) {
         return Observer(builder: (_) {
           return CustomScrollView(
             slivers: <Widget>[
@@ -70,11 +71,10 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     height: 20,
                   ),
                   _getFeaturedScroller(context),
-                 
                 ]),
               ),
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16,0,16,0),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate(
                     [
@@ -123,7 +123,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
               if (snap.hasData && snap.data.isNotEmpty) {
                 return SeeAllListTile(
                   title: "Featured on Bapp",
-                  childPadding: EdgeInsets.symmetric(horizontal:16),
+                  childPadding: EdgeInsets.symmetric(horizontal: 16),
                   onSeeAll: () {
                     BappNavigator.push(
                       context,
@@ -143,9 +143,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                       onTap: () {
                         Provider.of<BookingFlow>(context, listen: false)
                             .branch = snap.data[i];
-                        Navigator.of(context).pushNamed(
-                            RouteManager.businessProfileScreen,
-                            arguments: [snap.data[i]]);
+                        BappNavigator.push(context, BusinessProfileScreen());
                       },
                       tag: Chip(
                         backgroundColor: CardsColor.colors["lightGreen"],
@@ -170,7 +168,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
 
   Widget _getSearchBar() {
     return Consumer<BusinessStore>(
-      builder: (_, businessStore,__) {
+      builder: (_, businessStore, __) {
         businessStore.getCategories();
         return Observer(
           builder: (_) {

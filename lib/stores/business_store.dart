@@ -43,8 +43,9 @@ abstract class _BusinessStore with Store {
     if (userChangeSubscription != null) {
       userChangeSubscription.cancel();
     }
-    userChangeSubscription = _allStore.get<EventBus>().on<BappUser>().listen((bappUser) {
-      if(bappUser!=null){
+    userChangeSubscription =
+        _allStore.get<EventBus>().on<BappUser>().listen((bappUser) {
+      if (bappUser != null) {
         getMyBusiness();
       }
     });
@@ -77,11 +78,11 @@ abstract class _BusinessStore with Store {
       type: type,
     );
     await _allStore.get<CloudStore>().bappUser.addBranch(
-      business: ap,
-      branchName: businessName,
-      imagesWithFiltered: {},
-      pickedLocation: PickedLocation(latlong, address),
-    );
+          business: ap,
+          branchName: businessName,
+          imagesWithFiltered: {},
+          pickedLocation: PickedLocation(latlong, address),
+        );
 
     await ap.saveBusiness();
 
@@ -99,7 +100,7 @@ abstract class _BusinessStore with Store {
   Future getMyBusiness() async {
     final completer = Completer<bool>();
     final cloudStore = _allStore.get<CloudStore>();
-    if (isNullOrEmpty(cloudStore.bappUser.branches)) {
+    if (isNullOrEmpty(cloudStore.bappUser?.branches)) {
       return false;
     }
     cloudStore.bappUser.business.snapshots().listen(

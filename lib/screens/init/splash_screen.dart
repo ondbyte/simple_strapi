@@ -1,27 +1,18 @@
-import 'dart:isolate';
-
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/home/bapp.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
-import 'package:bapp/screens/location/pick_a_location.dart';
+import 'package:bapp/screens/location/pick_a_place.dart';
 import 'package:bapp/screens/onboarding/onboardingscreen.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
-import 'package:bapp/stores/themestore.dart';
-import 'package:bapp/widgets/app/bapp_navigator_widget.dart';
-import 'package:event_bus/event_bus.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../../fcm.dart';
-import '../../main.dart';
-import '../../route_manager.dart';
 
 class BappInitScreen extends StatefulWidget {
   @override
@@ -57,7 +48,7 @@ class _BappInitScreenState extends State<BappInitScreen>
                   killState = !killState;
                   return;
                 } else {
-                  BappNavigator.pushAndRemoveAll(context, PickAPlaceLocationScreen());
+                  BappNavigator.pushAndRemoveAll(context, PickAPlaceScreen());
                   killState = !killState;
                   return;
                 }

@@ -127,14 +127,14 @@ extension BappNavigator<T> on Navigator {
         context, _materialPageRoute(routeWidget), (_) => false);
   }
 
-  static void pop(BuildContext context,T result){
-    Navigator.pop(context,result);
+  static void pop<T>(BuildContext context, T result) {
+    Navigator.pop(context, result);
   }
 
   static Future<T> pushReplacement<T>(
-      BuildContext context,
-      Widget routeWidget,
-      ){
+    BuildContext context,
+    Widget routeWidget,
+  ) {
     return Navigator.pushReplacement(context, _materialPageRoute(routeWidget));
   }
 

@@ -106,26 +106,26 @@ abstract class _CloudStore with Store {
       (u) async {
         user = u;
         if (user != null) {
-          if (user.isAnonymous) {
-            status = AuthStatus.anonymousUser;
-          } else {
-            status = AuthStatus.userPresent;
-            final tmp = bappUser?.updateWith(
-              email: FirebaseAuth.instance.currentUser.email,
-              theNumber: TheCountryNumber().parseNumber(
-                internationalNumber:
-                    FirebaseAuth.instance.currentUser.phoneNumber,
-              ),
-              name: FirebaseAuth.instance.currentUser.displayName,
-            );
-            if (tmp != null) {
-              bappUser = tmp;
-              _allStore.get<EventBus>().fire(bappUser);
-              bappUser.save();
-            }
-          }
           if (_previousUID != user?.uid) {
             await _init();
+            if (user.isAnonymous) {
+              status = AuthStatus.anonymousUser;
+            } else {
+              status = AuthStatus.userPresent;
+              final tmp = bappUser?.updateWith(
+                email: FirebaseAuth.instance.currentUser.email,
+                theNumber: TheCountryNumber().parseNumber(
+                  internationalNumber:
+                      FirebaseAuth.instance.currentUser.phoneNumber,
+                ),
+                name: FirebaseAuth.instance.currentUser.displayName,
+              );
+              if (tmp != null) {
+                bappUser = tmp;
+                _allStore.get<EventBus>().fire(bappUser);
+                bappUser.save();
+              }
+            }
             if (_onLogin != null) {
               _onLogin();
               _onLogin = null;
