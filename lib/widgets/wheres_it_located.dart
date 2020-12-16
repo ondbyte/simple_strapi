@@ -1,3 +1,4 @@
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:flutter/material.dart';
 
@@ -20,7 +21,7 @@ class _WheresItLocatedTileWidgetState extends State<WheresItLocatedTileWidget> {
     return ListTile(
       onTap: () async {
         final tmp =
-            await Navigator.of(context).pushNamed(RouteManager.pickALocation);
+            await BappNavigator.push(context, PickAPlaceLocationScreen());
         if (tmp != null) {
           setState(() {
             _pickedLocation = tmp;

@@ -1,3 +1,4 @@
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/business_store.dart';
@@ -45,7 +46,7 @@ class BranchChooserScreen extends StatelessWidget {
                               cloudStore.bappUser.save();
                             },
                           );
-                          Navigator.pop(context);
+                          BappNavigator.pop(context, null);
                         });
                     /*return ListTile(
                     onTap: () {
@@ -56,7 +57,7 @@ class BranchChooserScreen extends StatelessWidget {
                           businessStore.business.selectedBranch.value = neww;
                         },
                       );
-                      Navigator.pop(context);
+                                            BappNavigator.pop(context, null);
                     },
                     title: Text(
                       branches[i].name.value,

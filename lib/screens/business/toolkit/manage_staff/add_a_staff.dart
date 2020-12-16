@@ -1,3 +1,4 @@
+import 'package:bapp/helpers/extensions.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flushbar/flushbar.dart';
@@ -286,7 +287,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                                     images: _staff.images,
                                     expertise: _staff.expertise,
                                   );
-                                  Navigator.of(context).pop();
+                                  BappNavigator.pop(context, null);
                                   act(() {
                                     kLoading.value = false;
                                   });

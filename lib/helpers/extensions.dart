@@ -4,6 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+
+export 'package:bapp/widgets/app/bapp_navigator_widget.dart';
+
 extension DateTimeOfDay on TimeOfDay {
   ///returns a [DateTime] from the current [TimeOfDay], [year] [month] [day] respects the Unix Epoch but can be altered with the optional parameters
   DateTime toDateAndTime({
@@ -108,42 +111,6 @@ extension RemoveCopies<T> on List<T> {
   }
 }
 
-extension BappNavigator<T> on Navigator {
-  static Future<T> push<T>(BuildContext context, Widget routeWidget) {
-    return Navigator.push(context, _materialPageRoute(routeWidget));
-  }
-
-  static Future<T> pushAndRemoveUntill<T>(BuildContext context,
-      Widget routeWidget, bool Function(Route) predicate) {
-    return Navigator.pushAndRemoveUntil(
-        context, _materialPageRoute(routeWidget), predicate);
-  }
-
-  static Future<T> pushAndRemoveAll<T>(
-    BuildContext context,
-    Widget routeWidget,
-  ) {
-    return Navigator.pushAndRemoveUntil(
-        context, _materialPageRoute(routeWidget), (_) => false);
-  }
-
-  static void pop<T>(BuildContext context, T result) {
-    Navigator.pop(context, result);
-  }
-
-  static Future<T> pushReplacement<T>(
-    BuildContext context,
-    Widget routeWidget,
-  ) {
-    return Navigator.pushReplacement(context, _materialPageRoute(routeWidget));
-  }
-
-  static Route _materialPageRoute(Widget w) {
-    return MaterialPageRoute(builder: (_) {
-      return w;
-    });
-  }
-}
 
 extension CautiousCompleter on Completer {
   bool cautiousComplete<T>(T value) {

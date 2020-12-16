@@ -1,6 +1,7 @@
 
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/config/theme_config.dart';
+import 'package:bapp/widgets/app/bapp_navigator_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
@@ -10,9 +11,9 @@ enum BappChangeThemeEvent{
 }
 
 class BappThemedApp extends StatefulWidget {
-  final Widget home;
+  final Widget child;
 
-  const BappThemedApp({Key key, this.home}) : super(key: key);
+  const BappThemedApp({Key key, this.child,}) : super(key: key);
   @override
   _BappThemedAppState createState() => _BappThemedAppState();
 
@@ -26,6 +27,8 @@ class BappThemedApp extends StatefulWidget {
 }
 
 class _BappThemedAppState extends State<BappThemedApp> {
+  var _navigatorKey = GlobalKey<NavigatorState>();
+  var _rebootKey = UniqueKey();
   Brightness brightness;
 
   bool get _isDarkTheme=>brightness==Brightness.dark;
@@ -36,10 +39,22 @@ class _BappThemedAppState extends State<BappThemedApp> {
     });
   }
 
+  void _listenForReboot(){
+    kBus.on<AppEvents>().listen((event) {
+      if(event==AppEvents.reboot){
+        setState(() {
+          _navigatorKey = GlobalKey<NavigatorState>();
+          _rebootKey = UniqueKey();
+        });
+      }
+    });
+  }
+
   @override
   void initState() {
     _init();
     super.initState();
+    _listenForReboot();
   }
 
   Future _init() async {
@@ -72,7 +87,10 @@ class _BappThemedAppState extends State<BappThemedApp> {
       themeMode: brightness==null? ThemeMode.system:(brightness==Brightness.dark?ThemeMode.dark:ThemeMode.light),
       theme: getLightThemeData(),
       darkTheme: getDarkThemeData(),
-      home: widget.home,
+      home: KeyedSubtree(
+        key: _rebootKey,
+        child: widget.child,
+      ),
     );
   }
 }

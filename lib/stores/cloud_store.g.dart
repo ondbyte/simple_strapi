@@ -32,21 +32,6 @@ mixin _$CloudStore on _CloudStore, Store {
     });
   }
 
-  final _$userAtom = Atom(name: '_CloudStore.user');
-
-  @override
-  User get user {
-    _$userAtom.reportRead();
-    return super.user;
-  }
-
-  @override
-  set user(User value) {
-    _$userAtom.reportWrite(value, super.user, () {
-      super.user = value;
-    });
-  }
-
   final _$bappUserAtom = Atom(name: '_CloudStore.bappUser');
 
   @override
@@ -119,7 +104,6 @@ mixin _$CloudStore on _CloudStore, Store {
   String toString() {
     return '''
 countries: ${countries},
-user: ${user},
 bappUser: ${bappUser},
 status: ${status},
 loadingForOTP: ${loadingForOTP},

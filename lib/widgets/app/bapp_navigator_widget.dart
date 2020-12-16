@@ -1,7 +1,9 @@
+import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/main.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/init/splash_screen.dart';
 import 'package:bapp/screens/misc/error.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
@@ -18,18 +20,46 @@ class AppEventsWithExtra {
   AppEventsWithExtra(this.event, this.extra);
 }
 
-class BappNavigatorWidget extends StatefulWidget {
+class BappNavigator extends StatefulWidget {
   final Widget child;
-  final EventBus bus;
 
-  const BappNavigatorWidget({Key key, this.child, this.bus}) : super(key: key);
+  const BappNavigator({
+    Key key,
+    this.child,
+  }) : super(key: key);
   @override
-  _BappNavigatorWidgetState createState() => _BappNavigatorWidgetState();
+  _BappNavigatorState createState() => _BappNavigatorState();
+
+  static Future push<T>(BuildContext context,Widget routeWidget){
+    final state = context.findAncestorStateOfType<_BappNavigatorState>();
+    return state._navKey.currentState.push<T>(_materialPageRoute(routeWidget));
+  }
+
+  static Future pushAndRemoveAll<T>(BuildContext context,Widget routeWidget){
+    final state = context.findAncestorStateOfType<_BappNavigatorState>();
+    return state._navKey.currentState.pushAndRemoveUntil<T>(_materialPageRoute(routeWidget), (route) => false);
+  }
+
+  static Future pushReplacement<T,TO>(BuildContext context,Widget routeWidget,{TO result}){
+    final state = context.findAncestorStateOfType<_BappNavigatorState>();
+    return state._navKey.currentState.pushReplacement<T,TO>(_materialPageRoute(routeWidget),result: result);
+  }
+
+  static void pop<T>(BuildContext context,T result){
+    final state = context.findAncestorStateOfType<_BappNavigatorState>();
+    return state._navKey.currentState.pop(result);
+  }
+
+
+  static Route _materialPageRoute(Widget routeWidget) {
+    return MaterialPageRoute(builder: (_) {
+      return routeWidget;
+    });
+  }
 }
 
-class _BappNavigatorWidgetState extends State<BappNavigatorWidget> {
-  var _key = UniqueKey();
-  var _navigatorKey = GlobalKey<NavigatorState>();
+class _BappNavigatorState extends State<BappNavigator> {
+  final _key = GlobalKey<NavigatorState>();
 
   @override
   void didChangeDependencies() {
@@ -37,44 +67,72 @@ class _BappNavigatorWidgetState extends State<BappNavigatorWidget> {
     super.didChangeDependencies();
   }
 
+  GlobalKey<NavigatorState> get _navKey=>_key;
+
   @override
   Widget build(BuildContext context) {
-    return KeyedSubtree(
-      key: _key,
-      child: BappProviderInitializerWidget(
-        builder:(_){
-          return Navigator(
-            key: _navigatorKey,
-            onGenerateRoute: RouteManager.onGenerate,
-            initialRoute: "/",
+    return WillPopScope(
+      child: Navigator(
+        key: _key,
+        onPopPage: (r, res) {
+          Helper.printLog("pop");
+          return r.didPop(res);
+        },
+        onGenerateRoute: (s) {
+          return MaterialPageRoute(
+            builder: (_) {
+              return BappInitScreen();
+            },
           );
         },
       ),
+      onWillPop: () async {
+        if(_navKey.currentState.canPop()){
+          _navKey.currentState.pop();
+          return false;
+        } else{
+          return true;
+        }
+      },
+    );
+  }
+
+  Future<bool> _askToQuit(BuildContext context) {
+    return showDialog(
+      context: _navKey.currentContext,
+      builder: (context) {
+        return AlertDialog(
+          content: Text("Close app and exit?"),
+          actions: [
+            FlatButton(
+              onPressed: () {
+                _navKey.currentState.pop(true);
+              },
+              child: Text("Yes"),
+            ),
+            FlatButton(
+              onPressed: () {
+                _navKey.currentState.pop(false);
+              },
+              child: Text("No"),
+            ),
+          ],
+        );
+      },
     );
   }
 
   void _listenForEvents(BuildContext context) {
-    widget.bus.on<AppEvents>().listen(
-      (event) {
-        switch (event) {
-          case AppEvents.reboot:
-            {
-              setState(() {
-                _key = UniqueKey();
-                _navigatorKey = GlobalKey<NavigatorState>();
-              });
-              break;
-            }
-        }
-      },
-    );
-    widget.bus.on<AppEventsWithExtra>().listen(
+    kBus.on<AppEventsWithExtra>().listen(
       (event) {
         switch (event.event) {
           case AppEvents.unHandledError:
             {
-              Helper.printLog("ERROR, Showing error screen");
-              BappNavigator.pushAndRemoveAll(_navigatorKey.currentContext, NoInternet());
+              Helper.printLog("ERROR Showing error screen");
+              BappNavigator.pushAndRemoveAll(
+                _key.currentContext,
+                NoInternet(),
+              );
               break;
             }
         }
@@ -82,4 +140,3 @@ class _BappNavigatorWidgetState extends State<BappNavigatorWidget> {
     );
   }
 }
-

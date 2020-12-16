@@ -1,5 +1,7 @@
 import 'package:bapp/config/config_data_types.dart';
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/business/branch_chooser.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:flutter/material.dart';
@@ -16,9 +18,7 @@ class BusinessBranchSwitchWidget extends StatelessWidget {
         return GestureDetector(
           onTap: _branchChangeAllowed(cloudStore)
               ? () {
-                  Navigator.of(context).pushNamed(
-                    RouteManager.businessBranchChooserScreen,
-                  );
+            BappNavigator.push(context, BranchChooserScreen());
                 }
               : null,
           child: Row(

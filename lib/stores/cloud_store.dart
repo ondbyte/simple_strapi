@@ -42,8 +42,6 @@ abstract class _CloudStore with Store {
   @observable
   List<Country> countries;
 
-  @observable
-  User user;
 
   @observable
   BappUser bappUser;
@@ -101,48 +99,37 @@ abstract class _CloudStore with Store {
     return (bappUser.address.locality ?? bappUser.address.city);
   }
 
+  User get user=>FirebaseAuth.instance.currentUser;
+
   void _listenForUserChange() {
-    _auth.userChanges().listen(
-      (u) async {
-        user = u;
-        if (user != null) {
-          if (_previousUID != user?.uid) {
-            await _init();
-            if (user.isAnonymous) {
-              status = AuthStatus.anonymousUser;
-            } else {
-              status = AuthStatus.userPresent;
-              final tmp = bappUser?.updateWith(
-                email: FirebaseAuth.instance.currentUser.email,
-                theNumber: TheCountryNumber().parseNumber(
-                  internationalNumber:
-                      FirebaseAuth.instance.currentUser.phoneNumber,
-                ),
-                name: FirebaseAuth.instance.currentUser.displayName,
-              );
-              if (tmp != null) {
-                bappUser = tmp;
-                _allStore.get<EventBus>().fire(bappUser);
-                bappUser.save();
-              }
-            }
-            if (_onLogin != null) {
-              _onLogin();
-              _onLogin = null;
-            }
-            _previousUID = user.uid;
-          }
+    FirebaseAuth.instance.userChanges().listen((user) async {
+      Helper.printLog("user change: $user");
+      if(user!=null){
+        await _init();
+        if(user.isAnonymous){
+          status = AuthStatus.anonymousUser;
         } else {
-          status = AuthStatus.userNotPresent;
-          _previousUID = "";
-          if (_onNotLogin != null) {
-            _onNotLogin();
-            _onNotLogin = null;
-          }
+          status = AuthStatus.userPresent;
+          bappUser = bappUser.updateWith(
+            email: user.email,
+            name: user.displayName,
+            theNumber: TheCountryNumber().parseNumber(internationalNumber: user.phoneNumber)
+          );
+          bappUser.save();
+          _allStore.get<EventBus>().fire(bappUser);
         }
-        Helper.printLog("user change: $user");
-      },
-    );
+        if (_onLogin != null) {
+          _onLogin();
+          _onLogin = null;
+        }
+      } else {
+        status = AuthStatus.userNotPresent;
+        if (_onNotLogin != null) {
+          _onNotLogin();
+          _onNotLogin = null;
+        }
+      }
+    });
   }
 
   Future destroyAnonymous({String uid = ""}) async {
@@ -178,7 +165,7 @@ abstract class _CloudStore with Store {
   StreamSubscription userSubscription;
   Future getUserData() async {
     final completer = Completer<bool>();
-    var ref = await _fireStore.doc("users/${user.uid}");
+    var ref = await _fireStore.doc("users/${FirebaseAuth.instance.currentUser.uid}");
     myData = {};
     final snap = await ref.get();
     if (!snap.exists) {
@@ -189,6 +176,7 @@ abstract class _CloudStore with Store {
       Helper.printLog("the user document doesnt exists/ new user");
       await tmp.save();
       ref = tmp.myDoc;
+      completer.cautiousComplete(true);
     }
     userSubscription = ref.snapshots().listen(
       (snap) async {
@@ -199,7 +187,6 @@ abstract class _CloudStore with Store {
             await getMyFavorites();
           }
         } else {
-          bappUser = null;
           userSubscription.cancel();
         }
       },
@@ -210,7 +197,7 @@ abstract class _CloudStore with Store {
   @computed
   TheNumber get theNumber {
     final tmp =
-        TheCountryNumber().parseNumber(internationalNumber: user.phoneNumber);
+        TheCountryNumber().parseNumber(internationalNumber: FirebaseAuth.instance.currentUser.phoneNumber);
     if (tmp == null) {
       return TheCountryNumber().parseNumber(iso2Code: bappUser.address.iso2);
     }
@@ -363,6 +350,7 @@ abstract class _CloudStore with Store {
       String email,
       @required Function(FirebaseAuthException) onFail,
       @required Function() onSuccess}) async {
+    final user = FirebaseAuth.instance.currentUser;
     if (user.displayName != displayName) {
       await user.updateProfile(displayName: displayName);
     }
@@ -487,7 +475,7 @@ abstract class _CloudStore with Store {
 
   @action
   Future signOut() async {
-    if (user.isAnonymous) {
+    if (FirebaseAuth.instance.currentUser.isAnonymous) {
       return;
     }
     await FirebaseAuth.instance.signOut();

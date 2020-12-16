@@ -139,7 +139,7 @@ class _CreateYourProfileScreenState extends State<CreateYourProfileScreen> {
                                           email: _email,
                                           onSuccess: () {
                                             //Helper.printLog("Success");
-                                            Navigator.of(context).pop();
+                                            BappNavigator.pop(context, null);
                                           },
                                           onFail: (e) {
                                             //Helper.printLog("Fail");

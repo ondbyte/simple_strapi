@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';
@@ -45,7 +46,7 @@ class _BusinessSubmitBranchForVerificationScreenState
                       message:
                           "Your selected branch is disabled or in process of verification",
                       onButtonPressed: (context) {
-                        Navigator.pop(context);
+                        BappNavigator.pop(context, null);
                       },
                     )
                   : CustomScrollView(
@@ -261,23 +262,25 @@ class _BusinessSubmitBranchForVerificationScreenState
 
     await uploadBusinessBranchApprovalPDF(fileToUpload: theFileToUpload);
 
-    Navigator.of(context)
-        .popAndPushNamed(RouteManager.contextualMessage, arguments: [
-      () {
-        act(
-          () {
-            final business =
-                Provider.of<BusinessStore>(context, listen: false).business;
-            final branch = business.branches.value.firstWhere((element) =>
-                business.selectedBranch.value.myDoc == element.myDoc);
-            branch.status.value =
-                BusinessBranchActiveStatus.documentVerification;
-            business.selectedBranch.value = branch;
+    BappNavigator.pushReplacement(
+        context,
+        ContextualMessageScreen(
+          init: () {
+            act(
+              () {
+                final business =
+                    Provider.of<BusinessStore>(context, listen: false).business;
+                final branch = business.branches.value.firstWhere((element) =>
+                    business.selectedBranch.value.myDoc == element.myDoc);
+                branch.status.value =
+                    BusinessBranchActiveStatus.documentVerification;
+                business.selectedBranch.value = branch;
+              },
+            );
           },
-        );
-      },
-      "Thank you for sending the documents, we will contact you on your registered number to update you the status."
-    ]);
+          message:
+              "Thank you for sending the documents, we will contact you on your registered number to update you the status.",
+        ));
     act(() {
       kLoading.value = true;
     });

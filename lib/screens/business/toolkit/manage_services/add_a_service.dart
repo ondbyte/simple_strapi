@@ -1,4 +1,5 @@
 import 'package:bapp/classes/firebase_structures/business_services.dart';
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
@@ -48,7 +49,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                 businessStore
                     .business.selectedBranch.value.businessServices.value
                     .save(service: _service);
-                Navigator.of(context).pop();
+                BappNavigator.pop(context, null);
               });
               act(() {
                 kLoading.value = false;

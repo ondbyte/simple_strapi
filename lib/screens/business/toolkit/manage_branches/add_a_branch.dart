@@ -1,3 +1,4 @@
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
@@ -175,7 +176,7 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
                         pickedLocation: _pickedLocation,
                         imagesWithFiltered: _filteredExistingImages,
                       );
-                      Navigator.of(context).pop();
+                      BappNavigator.pop(context, null);
                     },
             ),
     );

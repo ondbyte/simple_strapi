@@ -250,7 +250,9 @@ class BookingFlow {
   }
 
   void _setupReactions() {
-    if (_allStore.get<CloudStore>().bappUser.userType.value !=
+    final cloudStore = _allStore.get<CloudStore>();
+    cloudStore.user;
+    if (cloudStore.bappUser.userType.value !=
         UserType.customer) {
       _disposers.add(
         reaction(

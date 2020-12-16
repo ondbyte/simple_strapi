@@ -1,6 +1,7 @@
 import 'package:bapp/classes/firebase_structures/bapp_user.dart';
 import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/stores/cloud_store.dart';
@@ -62,7 +63,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                               act(() {
                                 kLoading.value = false;
                               });
-                              Navigator.pop(context);
+                              BappNavigator.pop(context, null);
                             },
                           )
                         : widget.booking.status.value ==
@@ -78,7 +79,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                   act(() {
                                     kLoading.value = false;
                                   });
-                                  Navigator.pop(context);
+                                  BappNavigator.pop(context, null);
                                 },
                                 onReject: () async {
                                   act(() {
@@ -90,7 +91,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                   act(() {
                                     kLoading.value = false;
                                   });
-                                  Navigator.pop(context);
+                                  BappNavigator.pop(context, null);
                                 },
                               )
                             : SizedBox()

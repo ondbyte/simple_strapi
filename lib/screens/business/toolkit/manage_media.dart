@@ -1,3 +1,4 @@
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/widgets/loading_stack.dart';
@@ -38,7 +39,7 @@ class _BusinessManageMediaScreenState extends State<BusinessManageMediaScreen> {
                   ? null
                   : () async {
                       if (_images.isEmpty) {
-                        Navigator.of(context).pop();
+                        BappNavigator.pop(context, null);
                         return;
                       }
                       act(() {
@@ -53,7 +54,7 @@ class _BusinessManageMediaScreenState extends State<BusinessManageMediaScreen> {
                           .selectedBranch
                           .value
                           .updateImages(imgs: _images);
-                      Navigator.of(context).pop();
+                      BappNavigator.pop(context, null);
                       act(() {
                         kLoading.value = false;
                       });

@@ -77,7 +77,7 @@ class _SelectAProfessionalScreenState extends State<SelectAProfessionalScreen> {
               onTap: widget.onSelected != null
                   ? () {
                       widget.onSelected(s);
-                      Navigator.of(context).pop();
+                      BappNavigator.pop(context, null);
                     }
                   : () {
                       act(() {

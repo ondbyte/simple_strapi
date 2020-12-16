@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/location/search_a_place.dart';
 import 'package:bapp/stores/cloud_store.dart';
@@ -31,7 +32,8 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
         leading: IconButton(
           icon: Icon(Icons.close),
           onPressed: () {
-            Navigator.pop(context, null);
+
+            BappNavigator.pop(context, null);
           },
         ),
         actions: [
@@ -65,7 +67,8 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
                         adr[0],
                       ),
                     );
-                    Navigator.pop(context, _pickedLocation);
+
+                    BappNavigator.pop(context, _pickedLocation);
                   }
                 : null,
             child: Text(

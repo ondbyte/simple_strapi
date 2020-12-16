@@ -2,6 +2,7 @@ import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/business/addbusiness/choose_category.dart';
 import 'package:bapp/screens/business/booking_flow/review.dart';
 import 'package:bapp/screens/business/business_profile/business_profile.dart';
 import 'package:bapp/screens/search/branches_result_screen.dart';
@@ -34,13 +35,9 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   delegate: SliverChildListDelegate(
                     [
                       Consumer<CloudStore>(builder: (_, authStore, __) {
-                        return Observer(
-                          builder: (_) {
-                            return authStore.user?.displayName == null
-                                ? const SizedBox()
-                                : Text("Hey, " + authStore.user.displayName);
-                          },
-                        );
+                        return authStore.user?.displayName == null
+                            ? const SizedBox()
+                            : Text("Hey, " + authStore.user.displayName);
                       }),
                       const SizedBox(
                         height: 10,
@@ -193,8 +190,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
           borderRadius: BorderRadius.circular(6)),
       child: ListTile(
         onTap: () {
-          Navigator.of(context)
-              .pushNamed(RouteManager.selectBusinessCategoryScreen);
+          BappNavigator.push(context, ChooseYourBusinessCategoryScreen());
         },
         title: Text(
           "Own A Business",

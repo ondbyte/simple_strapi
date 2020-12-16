@@ -11,10 +11,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 ///class for initializing the provider
-class BappProviderInitializerWidget extends StatelessWidget {
-  final Widget Function(BuildContext) builder;
+class BappProviderInitializerWidget extends StatefulWidget {
+  final Widget child;
 
-  const BappProviderInitializerWidget({Key key, this.builder}) : super(key: key);
+  const BappProviderInitializerWidget({Key key, this.child}) : super(key: key);
+  @override
+  _BappProviderInitializerWidgetState createState() => _BappProviderInitializerWidgetState();
+}
+
+class _BappProviderInitializerWidgetState extends State<BappProviderInitializerWidget> {
   @override
   Widget build(BuildContext context) {
     return Builder(
@@ -49,7 +54,7 @@ class BappProviderInitializerWidget extends StatelessWidget {
             ),
           ],
           builder: (context, w) {
-            return builder(context);
+            return widget.child;
           },
         );
       },

@@ -251,6 +251,7 @@ enum BusinessBookingStatus {
   cancelledByStaff,
   cancelledByReceptionist,
   cancelledByManager,
+  cancelledByOwner,
   walkin,
   pending,
   accepted,

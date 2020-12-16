@@ -43,7 +43,7 @@ class _LoginScreenState extends State<LoginScreen> {
           appBar: AppBar(
             leading: CloseButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                BappNavigator.pop(context, null);
               },
             ),
           ),
@@ -141,7 +141,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               isNullOrEmpty(cloudStore.user.displayName)) {
                             BappNavigator.pushReplacement(context, CreateYourProfileScreen());
                           } else {
-                            Navigator.pop(context, true);
+                            BappNavigator.pop(context, true);
                           }
                         },
                       );

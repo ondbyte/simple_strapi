@@ -82,13 +82,13 @@ class _BusinessManageBranchesScreenState
                                 actions: [
                                   FlatButton(
                                     onPressed: () {
-                                      Navigator.pop(context, true);
+                                      BappNavigator.pop(context, true);
                                     },
                                     child: Text("Remove"),
                                   ),
                                   FlatButton(
                                     onPressed: () {
-                                      Navigator.pop(context, false);
+                                      BappNavigator.pop(context, false);
                                     },
                                     child: Text("Cancel"),
                                   ),

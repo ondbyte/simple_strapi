@@ -1,4 +1,6 @@
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/route_manager.dart';
+import 'package:bapp/screens/authentication/login_screen.dart';
 import 'package:bapp/widgets/buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -49,7 +51,7 @@ class AskToLoginWidget extends StatelessWidget {
                 PrimaryButton("Sign In or Sign Up",
                   fullWidth: false,
                   onPressed: () {
-                    Navigator.of(context).pushNamed(RouteManager.loginScreen);
+                    BappNavigator.push(context, LoginScreen());
                   },
                 ),
               ],

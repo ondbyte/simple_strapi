@@ -1,3 +1,4 @@
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/stores/business_store.dart';
@@ -40,7 +41,7 @@ class _BusinessManageContactDetailsScreenState
                       _email;
                   businessStore.business.selectedBranch.value.contactNumber
                       .value = _enteredNumber.internationalNumber;
-                  Navigator.pop(context);
+                  BappNavigator.pop(context, null);
                 },
               );
             },

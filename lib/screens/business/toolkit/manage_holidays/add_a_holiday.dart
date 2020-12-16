@@ -1,4 +1,5 @@
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:date_range_picker/date_range_picker.dart' as DateRagePicker;
@@ -89,7 +90,7 @@ class _BusinessAddAHolidayScreenState extends State<BusinessAddAHolidayScreen> {
               details: _details,
               fromToDate: _pickedDates,
             );
-            Navigator.of(context).pop();
+            BappNavigator.pop(context, null);
           }
         },
       ),

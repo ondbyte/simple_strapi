@@ -4,6 +4,7 @@ import 'package:bapp/config/constants.dart';
 import 'package:bapp/config/theme_config.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/widgets/app/bapp_navigator_widget.dart';
+import 'package:bapp/widgets/app/bapp_provider_initializer.dart';
 import 'package:bapp/widgets/app/bapp_themed_app.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -38,8 +39,8 @@ class App extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BappThemedApp(
-      home: BappNavigatorWidget(
-        bus: kBus,
+      child: BappProviderInitializerWidget(
+        child: BappNavigator(),
       ),
     );
   }

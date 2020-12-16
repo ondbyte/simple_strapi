@@ -1,3 +1,4 @@
+import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/stores/business_store.dart';
@@ -61,7 +62,7 @@ class _BusinessAddServiceCategoryScreenState
                   description: _description,
                   images: _image,
                 );
-                Navigator.of(context).pop();
+                BappNavigator.pop(context, null);
                 act(() {
                   kLoading.value = false;
                 });
