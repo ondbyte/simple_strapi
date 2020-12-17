@@ -6,7 +6,7 @@ import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mobx/mobx.dart';
-import 'package:thephonenumber/thecountrynumber.dart';
+import 'package:the_country_number/the_country_number.dart';
 
 import '../../config/config_data_types.dart';
 import '../../helpers/extensions.dart';

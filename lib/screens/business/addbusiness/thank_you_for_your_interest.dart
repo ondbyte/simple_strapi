@@ -12,8 +12,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
+import 'package:the_country_number/the_country_number.dart';
 import 'package:the_country_number_widgets/the_country_number_widgets.dart';
-import 'package:thephonenumber/thecountrynumber.dart';
 
 class ThankYouForYourInterestScreen extends StatefulWidget {
   final BusinessCategory category;
@@ -124,14 +124,14 @@ class _ThankYouForYourInterestScreenState
                               if (tn == null) {
                                 return "Enter a valid number";
                               }
-                              if (tn.validLength) {
+                              if (tn.isValidLength) {
                                 return null;
                               }
                               return "Enter a valid number";
                             },
                             onChanged: (tn) {
                               _validNumber = tn;
-                              if (_validNumber.validLength) {
+                              if (_validNumber.isValidLength) {
                                 setState(
                                   () {},
                                 );

@@ -1,15 +1,9 @@
 import 'package:bapp/config/constants.dart';
-import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
-import 'package:bapp/main.dart';
-import 'package:bapp/route_manager.dart';
 import 'package:bapp/screens/init/splash_screen.dart';
 import 'package:bapp/screens/misc/error.dart';
-import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import 'bapp_provider_initializer.dart';
 
 enum AppEvents { reboot, unHandledError }
 

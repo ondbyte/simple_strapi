@@ -8,7 +8,7 @@ import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
-import 'package:thephonenumber/thecountrynumber.dart';
+import 'package:the_country_number/the_country_number.dart';
 
 import 'business_branch.dart';
 import 'business_category.dart';

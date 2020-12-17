@@ -15,7 +15,7 @@ import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
-import 'package:thephonenumber/thecountrynumber.dart';
+import 'package:the_country_number/the_country_number.dart';
 
 import '../helpers/helper.dart';
 import 'all_store.dart';
@@ -251,7 +251,7 @@ class BookingFlow {
 
   void _setupReactions() {
     final cloudStore = _allStore.get<CloudStore>();
-    cloudStore.user;
+    cloudStore.hashCode;
     if (cloudStore.bappUser.userType.value !=
         UserType.customer) {
       _disposers.add(

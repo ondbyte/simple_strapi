@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:country_pickers/utils/utils.dart';
 import 'package:mobx/mobx.dart';
-import 'package:thephonenumber/thecountrynumber.dart';
-import 'package:bapp/helpers/extensions.dart';
+import 'package:the_country_number/the_country_number.dart';
 
 class Locality {
   final String name;

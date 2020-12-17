@@ -11,9 +11,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
+import 'package:the_country_number/the_country_number.dart';
+import 'package:the_country_number_widgets/the_country_number_widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../route_manager.dart';
@@ -24,7 +25,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  PhoneNumber _number;
+  TheNumber _number;
   bool _canVerify = false, _canVerifyotp = false;
   bool _askOTP = false;
   List<Completer<String>> _otpFutureCompleters = [];
@@ -86,23 +87,15 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(
               height: 20,
             ),
-            InternationalPhoneNumberInput(
-              onInputChanged: (PhoneNumber number) {
-                _number = number;
+            TheCountryNumberInput(
+              TheCountryNumber()
+                  .parseNumber(iso2Code: cloudStore.bappUser.address.iso2),
+              onChanged: (tn){
+                _number = tn;
+                setState(() {
+                  _canVerify = _number.isValidLength;
+                });
               },
-              onInputValidated: (bool value) {
-                setState(
-                  () {
-                    _canVerify = value;
-                  },
-                );
-              },
-              selectorConfig: SelectorConfig(
-                selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
-              ),
-              ignoreBlank: true,
-              initialValue: _number ??
-                  PhoneNumber(isoCode: cloudStore.bappUser.address.iso2),
             ),
             const SizedBox(
               height: 20,
@@ -139,7 +132,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         onVerified: () {
                           if (isNullOrEmpty(cloudStore.user.email) ||
                               isNullOrEmpty(cloudStore.user.displayName)) {
-                            BappNavigator.pushReplacement(context, CreateYourProfileScreen());
+                            BappNavigator.pushReplacement(
+                                context, CreateYourProfileScreen());
                           } else {
                             BappNavigator.pop(context, true);
                           }

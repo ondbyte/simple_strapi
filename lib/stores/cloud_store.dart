@@ -10,10 +10,9 @@ import 'package:event_bus/event_bus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
-import 'package:thephonenumber/thecountrynumber.dart';
+import 'package:the_country_number/the_country_number.dart';
 
 import '../classes/firebase_structures/business_branch.dart';
 import '../classes/firebase_structures/business_category.dart';
@@ -181,6 +180,7 @@ abstract class _CloudStore with Store {
     userSubscription = ref.snapshots().listen(
       (snap) async {
         if (snap.exists) {
+          this.hashCode;
           bappUser = BappUser.fromSnapShot(snap: snap);
           myData = snap.data() ?? {};
           if (!completer.cautiousComplete(true)) {
@@ -366,7 +366,7 @@ abstract class _CloudStore with Store {
   }
 
   Future loginOrSignUpWithNumber({
-    PhoneNumber number,
+    TheNumber number,
     Function onVerified,
     Function(FirebaseAuthException) onFail,
     Future<String> Function(bool) onAskOTP,
@@ -374,7 +374,7 @@ abstract class _CloudStore with Store {
   }) async {
     loadingForOTP = false;
     await _auth.verifyPhoneNumber(
-      phoneNumber: number.phoneNumber,
+      phoneNumber: number.internationalNumber,
       verificationCompleted: (PhoneAuthCredential phoneAuthCredential) async {
         onVerified();
         final linked = await _link(phoneAuthCredential);

@@ -27,7 +27,6 @@ class BappThemedApp extends StatefulWidget {
 }
 
 class _BappThemedAppState extends State<BappThemedApp> {
-  var _navigatorKey = GlobalKey<NavigatorState>();
   var _rebootKey = UniqueKey();
   Brightness brightness;
 
@@ -43,7 +42,6 @@ class _BappThemedAppState extends State<BappThemedApp> {
     kBus.on<AppEvents>().listen((event) {
       if(event==AppEvents.reboot){
         setState(() {
-          _navigatorKey = GlobalKey<NavigatorState>();
           _rebootKey = UniqueKey();
         });
       }

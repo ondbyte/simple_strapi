@@ -12,8 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
+import 'package:the_country_number/the_country_number.dart';
 import 'package:the_country_number_widgets/the_country_number_widgets.dart';
-import 'package:thephonenumber/thecountrynumber.dart';
 
 class AddCustomerDetails extends StatelessWidget {
   final _theNumber = Observable<TheNumber>(null);
@@ -37,7 +37,7 @@ class AddCustomerDetails extends StatelessWidget {
         bottomNavigationBar: Observer(builder: (_) {
           return BottomPrimaryButton(
             label: "Confirm booking",
-            onPressed: _theNumber.value != null && _theNumber.value.validLength
+            onPressed: _theNumber.value != null && _theNumber.value.isValidLength
                 ? () async {
                     var user = await cloudStore.getUserForNumber(
                         number: _theNumber.value.internationalNumber);
@@ -91,7 +91,7 @@ class AddCustomerDetails extends StatelessWidget {
                     },
                     customValidator: (tn) {
                       if (tn != null) {
-                        if (tn.validLength) {
+                        if (tn.isValidLength) {
                           return null;
                         }
                       }

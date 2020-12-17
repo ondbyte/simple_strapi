@@ -8,7 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mobx/mobx.dart';
-import 'package:thephonenumber/thecountrynumber.dart';
+import 'package:the_country_number/the_country_number.dart';
 
 import 'business_branch.dart';
 
@@ -132,6 +132,8 @@ class BusinessStaff {
   }
 
   void _fromJson(Map<String, dynamic> j) {
+
+
     role = EnumToString.fromString(UserType.values, j["role"]);
     name = j["name"];
     dateOfJoining = (j["dateOfJoining"] as Timestamp).toDate();
@@ -141,7 +143,6 @@ class BusinessStaff {
     images = {for (var v in j["images"]) v as String: true} ?? {};
     rating = j["rating"] ?? 0;
   }
-
   BusinessStaff.fromJson({@required this.branch, Map<String, dynamic> j}) {
     _fromJson(j);
   }

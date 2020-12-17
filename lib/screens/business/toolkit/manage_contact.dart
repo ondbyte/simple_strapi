@@ -4,8 +4,8 @@ import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart
 import 'package:bapp/stores/business_store.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:the_country_number/the_country_number.dart';
 import 'package:the_country_number_widgets/the_country_number_widgets.dart';
-import 'package:thephonenumber/thecountrynumber.dart';
 
 class BusinessManageContactDetailsScreen extends StatefulWidget {
   @override
@@ -79,7 +79,7 @@ class _BusinessManageContactDetailsScreenState
                     },
                     customValidator: (tn) {
                       if (tn != null) {
-                        if (tn.validLength) {
+                        if (tn.isValidLength) {
                           return null;
                         }
                       }

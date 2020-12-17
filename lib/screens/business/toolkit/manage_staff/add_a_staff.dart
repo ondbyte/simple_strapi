@@ -7,8 +7,8 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:textfield_tags/textfield_tags.dart';
+import 'package:the_country_number/the_country_number.dart';
 import 'package:the_country_number_widgets/the_country_number_widgets.dart';
-import 'package:thephonenumber/thecountrynumber.dart';
 
 import '../../../../classes/firebase_structures/business_staff.dart';
 import '../../../../config/config_data_types.dart';
@@ -137,7 +137,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                                       .anyStaffHasNumber(tn)) {
                                     return "Existing staff";
                                   }
-                                  if (tn.validLength) {
+                                  if (tn.isValidLength) {
                                     return null;
                                   }
                                 }
@@ -147,7 +147,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                                 setState(
                                   () {
                                     _theNumber = tn;
-                                    _numberValidated = tn.validLength;
+                                    _numberValidated = tn.isValidLength;
                                   },
                                 );
                               },
