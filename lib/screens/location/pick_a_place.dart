@@ -46,10 +46,11 @@ class PickAPlaceScreen extends StatelessWidget {
                             onTap: () async {
                               //cloudStore.getLocationsInCountry(e);
                               BappNavigator.push(
-                                  context,
-                                  PickAPlaceScreen(
-                                    country: e,
-                                  ));
+                                context,
+                                PickAPlaceScreen(
+                                  country: e,
+                                ),
+                              );
                             },
                           ),
                         ),
@@ -107,7 +108,11 @@ class PickAPlaceScreen extends StatelessWidget {
                   final cloudStore =
                       Provider.of<CloudStore>(context, listen: false);
                   cloudStore.bappUser = cloudStore.bappUser.updateWith(
-                      address: Address(city: city.name, iso2: country.iso2));
+                    address: Address(
+                      city: city.name,
+                      iso2: country.iso2,
+                    ),
+                  );
                   cloudStore.bappUser.save();
                   BappNavigator.pushAndRemoveAll(context, Bapp());
                 },

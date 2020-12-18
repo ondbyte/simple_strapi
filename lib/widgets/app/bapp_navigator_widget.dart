@@ -36,7 +36,8 @@ class BappNavigator extends StatefulWidget {
 
   static Future pushReplacement<T,TO>(BuildContext context,Widget routeWidget,{TO result}){
     final state = context.findAncestorStateOfType<_BappNavigatorState>();
-    return state._navKey.currentState.pushReplacement<T,TO>(_materialPageRoute(routeWidget),result: result);
+    state._navKey.currentState.pop(result);
+    return state._navKey.currentState.push<T>(_materialPageRoute(routeWidget));
   }
 
   static void pop<T>(BuildContext context,T result){

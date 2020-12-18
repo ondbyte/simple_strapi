@@ -6,6 +6,7 @@ import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:mobx/mobx.dart';
 
+import 'classes/firebase_structures/bapp_fcm_message.dart';
 import 'config/constants.dart';
 
 Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) async {
@@ -23,7 +24,6 @@ Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) async {
 class BappFCM {
   static final BappFCM _bappFCM = BappFCM._once();
   final fcmToken = Observable("");
-  Function(BappFCMMessage) _staffingAuthorizationListener;
   Function(BappFCMMessage) _bappMessagesListener;
 
   factory BappFCM() {
@@ -47,7 +47,17 @@ class BappFCM {
     }
   }
 
-  initForAndroid() {
+  void init() {
+    initForAndroid();
+    final _fcm = FirebaseMessaging();
+    _fcm.onTokenRefresh.listen(
+      (event) {
+        Helper.printLog("YAAAAA");
+      },
+    );
+  }
+
+  void initForAndroid() {
     if (!isFcmInitialized) {
       if (Platform.isAndroid) {
         _init(FirebaseMessaging());
@@ -56,6 +66,7 @@ class BappFCM {
   }
 
   Future<bool> initForIOS() async {
+    Helper.printLog("INIT for IOOOS");
     if (Platform.isIOS) {
       final _fcm = FirebaseMessaging();
       final enabled = await _fcm.requestNotificationPermissions(
@@ -95,7 +106,7 @@ class BappFCM {
     }
   }
 
-  _init(FirebaseMessaging _fcm) {
+  void _init(FirebaseMessaging _fcm) {
     _fcm.configure(
       onBackgroundMessage:
           Platform.isAndroid ? myBackgroundMessageHandler : null,
@@ -124,80 +135,3 @@ class BappFCM {
     }
   }
 }
-
-class BappFCMMessage {
-  final MessagOrUpdateType type;
-  final String title;
-  final String body;
-
-  ///international number
-  final String to;
-
-  ///international number
-  final String frm;
-  final String click_action;
-  final BappFCMMessagePriority priority;
-  final Map<String, String> data;
-  final UserType forUserType;
-
-  BappFCMMessage({
-    this.title = "",
-    this.body = "",
-    this.type,
-    this.data,
-    this.frm = "",
-    this.to = "",
-    this.priority = BappFCMMessagePriority.high,
-    this.click_action = "BAPP_NOTIFICATION_CLICK",
-    this.forUserType,
-  });
-
-  static BappFCMMessage fromJson({Map<String, String> j}) {
-    return BappFCMMessage(
-      type: EnumToString.fromString(MessagOrUpdateType.values, j["type"]),
-      title: j.remove("title"),
-      body: j.remove("body"),
-      frm: j.remove("frm"),
-      to: j.remove("to"),
-      priority: EnumToString.fromString(
-        BappFCMMessagePriority.values,
-        j.remove("priority"),
-      ),
-      click_action: j.remove("click_action"),
-      data: j,
-    );
-  }
-
-  BappFCMMessage update({DateTime remindTime, String to,}) {
-    return BappFCMMessage(
-      type: type,
-      title: title,
-      to: to ?? this.to,
-      frm: frm,
-      data: data,
-      priority: priority,
-      body: body,
-      click_action: click_action,
-    );
-  }
-
-  Map<String, String> toMap() {
-    final m = {
-      "type": EnumToString.convertToString(type),
-      "title": title,
-      "body": body,
-      "frm": frm,
-      "to": to,
-      "priority": EnumToString.convertToString(priority),
-      "click_action": click_action,
-    };
-    data?.forEach((key, value) {
-      m.addAll({key: value});
-    });
-    return m;
-  }
-}
-
-enum MessagOrUpdateType { reminder, bookingUpdate, bookingRating, news }
-
-enum BappFCMMessagePriority { high }

@@ -1,11 +1,12 @@
+import 'package:bapp/classes/firebase_structures/bapp_fcm_message.dart';
 import 'package:bapp/classes/notification_update.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mobx/mobx.dart';
 
 class UpdatesStore {
-  final updates = ObservableList<NotificationUpdate>();
-  final news = ObservableList<NotificationUpdate>();
+  final updates = ObservableList<BappFCMMessage>();
+  final news = ObservableList<BappFCMMessage>();
   DateTime fromDay;
 
   UpdatesStore();
@@ -22,6 +23,7 @@ class UpdatesStore {
     }
     FirebaseFirestore.instance
         .collection("updates")
-        .where("at", isGreaterThan: fromDay.toTimeStamp());
+        .where("at", isGreaterThan: fromDay.toTimeStamp(),
+    );
   }
 }

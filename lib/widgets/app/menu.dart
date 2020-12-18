@@ -1,15 +1,11 @@
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
-import 'package:bapp/main.dart';
-import 'package:bapp/route_manager.dart';
 import 'package:bapp/screens/authentication/create_profile.dart';
 import 'package:bapp/screens/authentication/login_screen.dart';
 import 'package:bapp/screens/business/addbusiness/choose_category.dart';
 import 'package:bapp/screens/settings/settings.dart';
 import 'package:bapp/stores/cloud_store.dart';
-import 'package:bapp/stores/themestore.dart';
-import 'package:bapp/widgets/app/bapp_themed_app.dart';
 import 'package:bapp/widgets/tiles/theme_switcher.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';

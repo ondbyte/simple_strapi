@@ -27,7 +27,6 @@ class BappThemedApp extends StatefulWidget {
 }
 
 class _BappThemedAppState extends State<BappThemedApp> {
-  var _rebootKey = UniqueKey();
   Brightness brightness;
 
   bool get _isDarkTheme=>brightness==Brightness.dark;
@@ -38,21 +37,10 @@ class _BappThemedAppState extends State<BappThemedApp> {
     });
   }
 
-  void _listenForReboot(){
-    kBus.on<AppEvents>().listen((event) {
-      if(event==AppEvents.reboot){
-        setState(() {
-          _rebootKey = UniqueKey();
-        });
-      }
-    });
-  }
-
   @override
   void initState() {
     _init();
     super.initState();
-    _listenForReboot();
   }
 
   Future _init() async {
@@ -85,10 +73,7 @@ class _BappThemedAppState extends State<BappThemedApp> {
       themeMode: brightness==null? ThemeMode.system:(brightness==Brightness.dark?ThemeMode.dark:ThemeMode.light),
       theme: getLightThemeData(),
       darkTheme: getDarkThemeData(),
-      home: KeyedSubtree(
-        key: _rebootKey,
-        child: widget.child,
-      ),
+      home: widget.child,
     );
   }
 }

@@ -29,7 +29,7 @@ class _BappInitScreenState extends State<BappInitScreen>
       initializer: () async {
         if (mounted) {
           ///init authentication store / load user
-          BappFCM().initForAndroid();
+          BappFCM().init();
           await Provider.of<CloudStore>(context, listen: false).init(
             onLogin: () async {
               if (mounted) {

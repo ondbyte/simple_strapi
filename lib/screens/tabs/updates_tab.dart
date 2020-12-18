@@ -1,3 +1,4 @@
+import 'package:bapp/classes/firebase_structures/bapp_fcm_message.dart';
 import 'package:bapp/classes/notification_update.dart';
 import 'package:bapp/config/config.dart' hide Tab;
 import 'package:bapp/stores/updates_store.dart';
@@ -113,7 +114,7 @@ class _UpdatesTabState extends State<UpdatesTab> {
   }
 
   ///updates tab
-  Widget _getUpdates(List<NotificationUpdate> updates) {
+  Widget _getUpdates(List<BappFCMMessage> updates) {
     return updates.isNotEmpty
         ? CustomScrollView(
             slivers: <Widget>[
@@ -128,7 +129,7 @@ class _UpdatesTabState extends State<UpdatesTab> {
   }
 
   ///news tab
-  Widget _getNews(List<NotificationUpdate> updates) {
+  Widget _getNews(List<BappFCMMessage> updates) {
     return updates.isNotEmpty
         ? CustomScrollView(
             slivers: <Widget>[
@@ -142,13 +143,13 @@ class _UpdatesTabState extends State<UpdatesTab> {
         : _getEmpty();
   }
 
-  List<Widget> _getTiles(List<NotificationUpdate> updates) {
+  List<Widget> _getTiles(List<BappFCMMessage> updates) {
     final ws = <Widget>[];
     updates.forEach(
       (element) {
         ws.add(
           Dismissible(
-            key: Key(element.myDoc.path),
+            key: UniqueKey(),
             onDismissed: (d) {},
             child: NotificationUpdateTileWidget(
               update: element,
@@ -168,7 +169,7 @@ class _UpdatesTabState extends State<UpdatesTab> {
 }
 
 class NotificationUpdateTileWidget extends StatelessWidget {
-  final NotificationUpdate update;
+  final BappFCMMessage update;
 
   const NotificationUpdateTileWidget({Key key, this.update}) : super(key: key);
 
@@ -198,7 +199,7 @@ class NotificationUpdateTileWidget extends StatelessWidget {
                   height: 10,
                 ),
                 Text(
-                  update.description,
+                  update.body,
                   style: Theme.of(context).textTheme.bodyText1.apply(
                         color: Theme.of(context).indicatorColor,
                       ),

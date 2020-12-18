@@ -1,6 +1,7 @@
 
 
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/all_store.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/business_store.dart';
@@ -20,8 +21,13 @@ class BappProviderInitializerWidget extends StatefulWidget {
 }
 
 class _BappProviderInitializerWidgetState extends State<BappProviderInitializerWidget> {
+  Widget _widget;
   @override
   Widget build(BuildContext context) {
+    ///we will run this build method only once! for a state
+    if(_widget!=null){
+      return _widget;
+    }
     final allStore = AllStore();
     allStore.set<EventBus>(kBus);
     final cloudStore = CloudStore()..setAllStore(allStore);
@@ -30,7 +36,7 @@ class _BappProviderInitializerWidgetState extends State<BappProviderInitializerW
     allStore.set<BusinessStore>(businessStore);
     final flow = BookingFlow(allStore);
     allStore.set<BookingFlow>(flow);
-    return MultiProvider(
+    _widget = MultiProvider(
       providers: [
         Provider<EventBus>(
           create: (_) => kBus,
@@ -55,5 +61,6 @@ class _BappProviderInitializerWidgetState extends State<BappProviderInitializerW
         return widget.child;
       },
     );
+    return _widget;
   }
 }

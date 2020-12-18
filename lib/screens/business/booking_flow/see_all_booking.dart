@@ -1,7 +1,7 @@
 import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/widgets/tiles/customer_booking_tile.dart';
-import 'package:bapp/widgets/tiles/see_all.dart';
+import 'package:bapp/widgets/tiles/see_all_tile.dart';
 import 'package:flutter/material.dart';
 
 import 'booking_details.dart';

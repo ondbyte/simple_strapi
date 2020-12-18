@@ -53,7 +53,6 @@ abstract class _CloudStore with Store {
   bool loadingForOTP = false;
   final favorites = ObservableList<Favorite>();
 
-  String _previousUID = "";
 
   AllStore _allStore;
 
@@ -95,26 +94,33 @@ abstract class _CloudStore with Store {
   }
 
   String getAddressLabel() {
-    return (bappUser.address.locality ?? bappUser.address.city);
+    return ( isNullOrEmpty(bappUser.address.locality)? bappUser.address.city:bappUser.address.locality );
   }
 
   User get user=>FirebaseAuth.instance.currentUser;
 
+  var lastUid = "";
   void _listenForUserChange() {
     FirebaseAuth.instance.userChanges().listen((user) async {
       Helper.printLog("user change: $user");
       if(user!=null){
-        await _init();
+        if(lastUid!=user.uid||lastUid.isEmpty){
+          lastUid = user.uid;
+          await _init();
+        }
+        if(bappUser==null){
+          return;
+        }
         if(user.isAnonymous){
           status = AuthStatus.anonymousUser;
         } else {
           status = AuthStatus.userPresent;
-          bappUser = bappUser.updateWith(
+          bappUser = bappUser?.updateWith(
             email: user.email,
             name: user.displayName,
             theNumber: TheCountryNumber().parseNumber(internationalNumber: user.phoneNumber)
           );
-          bappUser.save();
+          bappUser?.save();
           _allStore.get<EventBus>().fire(bappUser);
         }
         if (_onLogin != null) {
@@ -180,12 +186,9 @@ abstract class _CloudStore with Store {
     userSubscription = ref.snapshots().listen(
       (snap) async {
         if (snap.exists) {
-          this.hashCode;
           bappUser = BappUser.fromSnapShot(snap: snap);
           myData = snap.data() ?? {};
-          if (!completer.cautiousComplete(true)) {
-            await getMyFavorites();
-          }
+          completer.cautiousComplete(true);
         } else {
           userSubscription.cancel();
         }
@@ -254,9 +257,9 @@ abstract class _CloudStore with Store {
     if (myData.containsKey("favorites")) {
       final fs = myData["favorites"];
       if (fs is Map) {
-        await Future.forEach<MapEntry>(
-          fs.entries,
-          (entry) async {
+        favorites.clear();
+        for (final entry in fs.entries){
+          {
             final key = entry.key;
             final type = EnumToString.fromString(
               FavoriteType.values,
@@ -269,10 +272,10 @@ abstract class _CloudStore with Store {
               business = await getBusiness(reference: entry.value["business"]);
             } else if (type == FavoriteType.businessBranch) {
               branch =
-                  await getBranch(reference: entry.value["businessBranch"]);
+              await getBranch(reference: entry.value["businessBranch"]);
             } else if (type == FavoriteType.businessService) {
               service =
-                  null; //BusinessService.fromJson(entry.value["businessService"]);
+              null; //BusinessService.fromJson(entry.value["businessService"]);
             }
             if (business != null || branch != null || service != null) {
               favorites.add(
@@ -285,8 +288,8 @@ abstract class _CloudStore with Store {
                 ),
               );
             }
-          },
-        );
+          }
+        }
       }
     }
   }

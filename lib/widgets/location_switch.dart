@@ -1,6 +1,5 @@
 import 'package:bapp/helpers/extensions.dart';
-import 'package:bapp/route_manager.dart';
-import 'package:bapp/screens/location/pick_a_location.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/location/pick_a_place.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
@@ -8,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
-class LocationLabelWidget extends StatelessWidget {
+class LocationSwitch extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -31,8 +30,8 @@ class LocationLabelWidget extends StatelessWidget {
                 builder: (_) {
                   final bappUser = cloudStore.bappUser;
                   return Text(
-                    bappUser.address.locality ??
-                        bappUser.address.city,
+                    isNullOrEmpty(bappUser.address.locality)?
+                        bappUser.address.city:bappUser.address.locality,
                     style: Theme.of(context).textTheme.subtitle1,
                   );
                 },

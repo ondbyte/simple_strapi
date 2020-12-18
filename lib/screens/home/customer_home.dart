@@ -3,7 +3,7 @@ import 'package:bapp/screens/tabs/bookings_tab.dart';
 import 'package:bapp/screens/tabs/discover_tab.dart';
 import 'package:bapp/screens/tabs/favorites_tab.dart';
 import 'package:bapp/screens/tabs/updates_tab.dart';
-import 'package:bapp/widgets/location_label.dart';
+import 'package:bapp/widgets/location_switch.dart';
 import 'package:bapp/widgets/app/menu.dart';
 import 'package:flutter/material.dart';
 
@@ -61,7 +61,7 @@ class _CustomerHomeState extends State<CustomerHome> {
     switch (i) {
       case 0:
         {
-          return LocationLabelWidget();
+          return LocationSwitch();
         }
       case 1:
         {

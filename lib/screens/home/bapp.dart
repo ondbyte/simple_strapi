@@ -1,3 +1,4 @@
+import 'package:bapp/classes/firebase_structures/bapp_fcm_message.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/fcm.dart';
 import 'package:bapp/helpers/extensions.dart';
