@@ -49,8 +49,9 @@ class BusinessBranch {
   String locality = "";
   TheNumber misc;
   final type = Observable("");
-
-
+  final website = Observable("");
+  final facebook = Observable("");
+  final instagram = Observable("");
 
   BusinessBranch(
       {DocumentReference myDoc, @required BusinessDetails business}) {
@@ -60,11 +61,11 @@ class BusinessBranch {
   }
 
   BusinessStaff getStaffFor({String name}) {
-    return staff?.firstWhere((s) => s.name == name,orElse: ()=>null);
+    return staff?.firstWhere((s) => s.name == name, orElse: () => null);
   }
 
   BusinessStaff getStaffForRole({UserType role}) {
-    return staff?.firstWhere((s) => s.role == role,orElse: ()=>null);
+    return staff?.firstWhere((s) => s.role == role, orElse: () => null);
   }
 
   final _disposers = <ReactionDisposer>[];
@@ -123,6 +124,33 @@ class BusinessBranch {
         },
       ),
     );
+
+    _disposers.add(
+      reaction(
+        (_) => website.value,
+        (_) async {
+          await myDoc.value?.update({"website": website.value});
+        },
+      ),
+    );
+
+    _disposers.add(
+      reaction(
+        (_) => facebook.value,
+        (_) async {
+          await myDoc.value?.update({"facebook": facebook.value});
+        },
+      ),
+    );
+
+    _disposers.add(
+      reaction(
+        (_) => instagram.value,
+        (_) async {
+          await myDoc.value?.update({"instagram": instagram.value});
+        },
+      ),
+    );
   }
 
   bool anyStaffHasNumber(TheNumber tn) {
@@ -147,9 +175,9 @@ class BusinessBranch {
     );
   }
 
-  Future<bool> get pulled=>_pulled.future;
+  Future<bool> get pulled => _pulled.future;
 
-  final  _pulled = Completer<bool>();
+  final _pulled = Completer<bool>();
   Future _getBranch(DocumentReference myDoc) async {
     if (myDoc == null) {
       print("WARNING: empty docRef");
@@ -212,6 +240,9 @@ class BusinessBranch {
     description.value = j["description"] ?? "";
     tag.value = j["tag"] ?? "";
     type.value = j["type"] ?? "";
+    website.value = j["website"] ?? "";
+    facebook.value = j["facebook"] ?? "";
+    instagram.value = j["instagram"] ?? "";
     try {
       if (status.value == BusinessBranchActiveStatus.published) {
         iso2 = j["assignedAddress"]["iso2"];

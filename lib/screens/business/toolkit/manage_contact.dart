@@ -17,7 +17,7 @@ class _BusinessManageContactDetailsScreenState
     extends State<BusinessManageContactDetailsScreen> {
   TheNumber _enteredNumber, _previousNumber;
   bool _correct = false;
-  String _email = "", _previousEmail = "";
+  String _email = "", _previousEmail = "", _website = "", _fb = "", _insta = "";
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,8 @@ class _BusinessManageContactDetailsScreenState
       builder: (_, businessStore, __) {
         _previousEmail =
             businessStore.business.selectedBranch.value.email.value;
-        _previousNumber = TheCountryNumber().parseNumber(internationalNumber: businessStore.business.contactNumber.value);
+        _previousNumber = TheCountryNumber().parseNumber(
+            internationalNumber: businessStore.business.contactNumber.value);
         _enteredNumber = _previousNumber;
         _email = _previousEmail;
         return Scaffold(
@@ -39,6 +40,12 @@ class _BusinessManageContactDetailsScreenState
                 () {
                   businessStore.business.selectedBranch.value.email.value =
                       _email;
+                  businessStore.business.selectedBranch.value.website.value =
+                      _website;
+                  businessStore.business.selectedBranch.value.facebook.value =
+                      _fb;
+                  businessStore.business.selectedBranch.value.instagram.value =
+                      _insta;
                   businessStore.business.selectedBranch.value.contactNumber
                       .value = _enteredNumber.internationalNumber;
                   BappNavigator.pop(context, null);
@@ -84,6 +91,54 @@ class _BusinessManageContactDetailsScreenState
                         }
                       }
                       return "Enter a valid number";
+                    },
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  TextFormField(
+                    initialValue: () {
+                      _website = businessStore
+                          .business.selectedBranch.value.website.value;
+                      return _website;
+                    }(),
+                    decoration: InputDecoration(
+                      labelText: "Website",
+                    ),
+                    onChanged: (s) {
+                      _website = s;
+                    },
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  TextFormField(
+                    initialValue: () {
+                      _fb = businessStore
+                          .business.selectedBranch.value.facebook.value;
+                      return _fb;
+                    }(),
+                    decoration: InputDecoration(
+                      labelText: "Facebook url",
+                    ),
+                    onChanged: (s) {
+                      _fb = s;
+                    },
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  TextFormField(
+                    initialValue: () {
+                      _insta = businessStore
+                          .business.selectedBranch.value.instagram.value;
+                      return _insta;
+                    }(),
+                    decoration: InputDecoration(
+                      labelText: "Instagram url",
+                    ),
+                    onChanged: (s) {
+                      _insta = s;
                     },
                   ),
                 ],
