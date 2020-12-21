@@ -55,8 +55,8 @@ class OnBoardingConfig {
     ///3
     Slide(
       img: "assets/svg/review.svg",
-      title: "Only The Best",
-      description: "Choose from the best service providers\naround you.",
+      title: "Choose from the best",
+      description: "Choose from our handpicked service providers\naround you.",
     ),
   ];
 }

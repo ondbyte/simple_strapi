@@ -33,7 +33,7 @@ class PickAPlaceScreen extends StatelessWidget {
                 automaticallyImplyLeading: true,
                 title: Text(
                   "Pick a Country",
-                  style: Theme.of(context).textTheme.subtitle1,
+                  style: Theme.of(context).textTheme.headline1,
                 ),
               ),
               body: cloudStore.countries != null
@@ -72,7 +72,7 @@ class PickAPlaceScreen extends StatelessWidget {
             automaticallyImplyLeading: true,
             title: Text(
               "Pick a City",
-              style: Theme.of(context).textTheme.subtitle1,
+              style: Theme.of(context).textTheme.headline1,
             ),
           ),
           body: Builder(
