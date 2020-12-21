@@ -28,7 +28,6 @@ class BookingTile extends StatefulWidget {
 }
 
 class _BookingTileState extends State<BookingTile> {
-  final _key = GlobalKey();
   @override
   Widget build(BuildContext context) {
     final color = BusinessBooking.getColor(widget.booking.status.value);
@@ -39,7 +38,6 @@ class _BookingTileState extends State<BookingTile> {
     return GestureDetector(
       onTap: widget.onTap,
       child: Padding(
-        key: _key,
         padding: widget.margin ?? EdgeInsets.all(8),
         child: RenderAfterChildWidget(
           child: Container(

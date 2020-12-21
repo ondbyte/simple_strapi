@@ -70,7 +70,7 @@ class _BookingsTabState extends State<BookingsTab> {
             height: cons.maxHeight,
             width: cons.maxWidth / 2,
             child: NestedScrollView(
-              headerSliverBuilder: (_,__){
+              headerSliverBuilder: (_, __) {
                 return [_getCalender()];
               },
               body: _getBookingsScroll(),
@@ -90,6 +90,7 @@ class _BookingsTabState extends State<BookingsTab> {
             return const SizedBox();
           }
           return ListView.builder(
+            key: UniqueKey(),
             padding: EdgeInsets.all(0),
             shrinkWrap: true,
             itemCount: list.length,
