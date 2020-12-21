@@ -70,9 +70,17 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   _getFeaturedScroller(context),
                 ]),
               ),
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    _getNearestFeatured(context),
+                  ],
+                ),
+              ),
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
                 sliver: SliverList(
+                  
                   delegate: SliverChildListDelegate(
                     [
                       if (authStore.status == AuthStatus.userPresent)
@@ -80,7 +88,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                       if (authStore.status == AuthStatus.userPresent)
                         _getHowWasYourExperience(context),
                       const SizedBox(
-                        height: 20,
+                        height: 10,
                       ),
                       Consumer<CloudStore>(
                         builder: (_, cloudStore, __) {
@@ -96,13 +104,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   ),
                 ),
               ),
-              SliverList(
-                delegate: SliverChildListDelegate(
-                  [
-                    _getNearestFeatured(context),
-                  ],
-                ),
-              ),
+              
+            
             ],
           );
         });
@@ -186,28 +189,26 @@ class _DiscoverTabState extends State<DiscoverTab> {
   Widget _getOwnABusiness(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          color: CardsColor.colors["purple"],
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(6)),
       child: ListTile(
+        dense: true,
         onTap: () {
           BappNavigator.push(context, ChooseYourBusinessCategoryScreen());
         },
         title: Text(
-          "Own A Business",
-          style: Theme.of(context).textTheme.subtitle1.apply(
-                color: Colors.white,
-              ),
+          "Own a business",
+          style: Theme.of(context).textTheme.subtitle1
         ),
         subtitle: Text(
-          "List your business on Bapp",
-          style: Theme.of(context).textTheme.bodyText1.apply(
-                color: Colors.white,
-              ),
+          "List your business on Bapp for free.",
+          style: Theme.of(context).textTheme.bodyText2
         ),
         trailing: const Icon(
           Icons.arrow_forward_ios,
-          color: Colors.white,
+         
         ),
+       
       ),
     );
   }
