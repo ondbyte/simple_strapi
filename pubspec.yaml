@@ -35,12 +35,8 @@ dependencies:
   screen: ^0.0.5
 
   #GIT
-  the_country_number_widgets:
-    git:
-      url: https://github.com/ondbyte/the_country_number_widgets.git
-  the_country_number:
-    git:
-      url: https://github.com/ondbyte/the_country_number.git
+  the_country_number_widgets: 0.9.0
+  the_country_number: 0.9.0
 
   #ICONS
   feather_icons_flutter: ^4.7.4

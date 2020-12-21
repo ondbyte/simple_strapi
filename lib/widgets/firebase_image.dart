@@ -2,14 +2,11 @@ import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:bapp/config/config.dart';
-import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:flutter_svg_provider/flutter_svg_provider.dart' as svg;
 
 class FirebaseStorageImage extends StatefulWidget {
   final String storagePathOrURL;
@@ -70,12 +67,18 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
 
   @override
   Widget build(BuildContext context) {
-    assert(!isNullOrEmpty(widget.storagePathOrURL)||(isNullOrEmpty(widget.storagePathOrURL) && widget.ifEmpty != null),
+    assert(
+        !isNullOrEmpty(widget.storagePathOrURL) ||
+            (isNullOrEmpty(widget.storagePathOrURL) && widget.ifEmpty != null),
         "ifEmpty widget cannot be null if the URL is null");
     return LayoutBuilder(
       builder: (_, cons) {
         if (isNullOrEmpty(widget.storagePathOrURL)) {
-          return widget.ifEmpty;
+          return SizedBox(
+            width: widget.width ?? cons.maxWidth,
+            height: widget.height ?? cons.maxHeight,
+            child: widget.ifEmpty,
+          );
         }
         return FutureBuilder<Uint8List>(
           future: _memoizer.future,
@@ -83,7 +86,7 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
             if (snap.hasData) {
               return Image.memory(
                 snap.data,
-                fit: widget.fit??BoxFit.cover,
+                fit: widget.fit ?? BoxFit.cover,
                 width: widget.width ?? cons.maxWidth,
                 height: widget.height ?? cons.maxHeight,
               );
@@ -116,8 +119,7 @@ class ListTileFirebaseImage extends StatelessWidget {
   final String storagePathOrURL;
   final Widget ifEmpty;
 
-  const ListTileFirebaseImage(
-      {Key key, this.storagePathOrURL, this.ifEmpty})
+  const ListTileFirebaseImage({Key key, this.storagePathOrURL, this.ifEmpty})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -168,10 +170,11 @@ class Initial extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: CardsColor.next(),
+      alignment: Alignment.center,
       child: Text(
-        forName?.substring(0,2),
+        forName?.substring(0, 2),
         textAlign: TextAlign.center,
-        style: TextStyle(color: Colors.white),
+        style: Theme.of(context).textTheme.subtitle1.apply(color: Colors.white),
       ),
     );
   }

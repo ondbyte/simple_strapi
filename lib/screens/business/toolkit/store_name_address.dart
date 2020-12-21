@@ -1,6 +1,9 @@
 import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 
 class BusinessStoreNameAddress extends StatefulWidget {
@@ -14,10 +17,53 @@ class BusinessStoreNameAddress extends StatefulWidget {
 class _BusinessStoreNameAddressState extends State<BusinessStoreNameAddress> {
   String _storeName = "", _beforeName = "";
   String _storeAddress = "", _beforeAddress = "";
+  final _updatable = Observable(false);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      bottomNavigationBar: Observer(
+        builder: (_) {
+          return BottomPrimaryButton(
+            label: "Update",
+            onPressed: !_updatable.value
+                ? null
+                : () async {
+                    act(() {
+                      _updatable.value = false;
+                    });
+                    if (_storeAddress.isNotEmpty) {
+                      if (_storeAddress != _beforeAddress) {
+                        await act(
+                          () {
+                            Provider.of<BusinessStore>(context, listen: false)
+                                .business
+                                .selectedBranch
+                                .value
+                                .address
+                                .value = _storeAddress;
+                          },
+                        );
+                      }
+                    }
+                    if (_storeName.isNotEmpty) {
+                      if (_storeName != _beforeName) {
+                        await act(
+                          () {
+                            Provider.of<BusinessStore>(context, listen: false)
+                                .business
+                                .selectedBranch
+                                .value
+                                .name
+                                .value = _storeName;
+                          },
+                        );
+                      }
+                    }
+                  },
+          );
+        },
+      ),
       appBar: AppBar(
         automaticallyImplyLeading: true,
       ),
@@ -25,96 +71,69 @@ class _BusinessStoreNameAddressState extends State<BusinessStoreNameAddress> {
         onTap: () {
           FocusScope.of(context).unfocus();
         },
-        child: WillPopScope(
-          onWillPop: () async {
-            if (_storeAddress.isNotEmpty) {
-              if (_storeAddress != _beforeAddress) {
-                await act(
-                  () {
-                    Provider.of<BusinessStore>(context, listen: false)
-                        .business
-                        .selectedBranch
-                        .value
-                        .address
-                        .value = _storeAddress;
-                  },
-                );
-              }
-            }
-            if (_storeName.isNotEmpty) {
-              if (_storeName != _beforeName) {
-                await act(
-                  () {
-                    Provider.of<BusinessStore>(context, listen: false)
-                        .business
-                        .selectedBranch
-                        .value
-                        .name
-                        .value = _storeName;
-                  },
-                );
-              }
-            }
-            return true;
-          },
-          child: CustomScrollView(
-            slivers: [
-              SliverPadding(
-                padding: EdgeInsets.all(16),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate(
-                    [
-                      Text(
-                        "Update details",
-                        style: Theme.of(context).textTheme.headline1,
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Consumer<BusinessStore>(
-                        builder: (_, businessStore, __) {
-                          _beforeName = businessStore
-                              .business.selectedBranch.value.name.value;
-                          return TextFormField(
-                            maxLength: 32,
-                            maxLengthEnforced: true,
-                            initialValue: _beforeName,
-                            decoration: InputDecoration(
-                              labelText: "Store name",
-                            ),
-                            onChanged: (s) {
-                              _storeName = s;
-                            },
-                          );
-                        },
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Consumer<BusinessStore>(
-                        builder: (_, businessStore, __) {
-                          _beforeAddress = businessStore
-                              .business.selectedBranch.value.address.value;
-                          return TextFormField(
-                            maxLength: 256,
-                            maxLengthEnforced: true,
-                            maxLines: 5,
-                            initialValue: _beforeAddress,
-                            decoration: InputDecoration(
-                              labelText: "Store address",
-                            ),
-                            onChanged: (s) {
-                              _storeAddress = s;
-                            },
-                          );
-                        },
-                      ),
-                    ],
-                  ),
+        child: CustomScrollView(
+          slivers: [
+            SliverPadding(
+              padding: EdgeInsets.all(16),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    Text(
+                      "Update details",
+                      style: Theme.of(context).textTheme.headline1,
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Consumer<BusinessStore>(
+                      builder: (_, businessStore, __) {
+                        _beforeName = businessStore
+                            .business.selectedBranch.value.name.value;
+                        return TextFormField(
+                          maxLength: 32,
+                          maxLengthEnforced: true,
+                          initialValue: _beforeName,
+                          decoration: InputDecoration(
+                            labelText: "Store name",
+                          ),
+                          onChanged: (s) {
+                            _storeName = s;
+                            act(() {
+                              _updatable.value = true;
+                            });
+                          },
+                        );
+                      },
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Consumer<BusinessStore>(
+                      builder: (_, businessStore, __) {
+                        _beforeAddress = businessStore
+                            .business.selectedBranch.value.address.value;
+                        return TextFormField(
+                          maxLength: 256,
+                          maxLengthEnforced: true,
+                          maxLines: 5,
+                          initialValue: _beforeAddress,
+                          decoration: InputDecoration(
+                            labelText: "Store address",
+                          ),
+                          onChanged: (s) {
+                            _storeAddress = s;
+                            act(() {
+                              _updatable.value = true;
+                            });
+                          },
+                        );
+                      },
+                    ),
+                  ],
                 ),
-              )
-            ],
-          ),
+              ),
+            )
+          ],
         ),
       ),
     );
