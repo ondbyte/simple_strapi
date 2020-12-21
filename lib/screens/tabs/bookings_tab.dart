@@ -42,14 +42,18 @@ class _BookingsTabState extends State<BookingsTab> {
                         secondaryReason:
                             LoginConfig.bookingTabLoginReason.secondary,
                       )
-                    : o == Orientation.portrait
-                        ? CustomScrollView(
-                            slivers: <Widget>[
-                              _getCalender(),
-                              _getBookingsScroll()
-                            ],
+                    : CustomScrollView(
+                        slivers: <Widget>[
+                          _getCalender(),
+                          SliverList(
+                            delegate: SliverChildListDelegate(
+                              [
+                                _getBookingsScroll(),
+                              ],
+                            ),
                           )
-                        : _getLandscape();
+                        ],
+                      );
               },
             );
           },
@@ -65,19 +69,11 @@ class _BookingsTabState extends State<BookingsTab> {
           SizedBox(
             height: cons.maxHeight,
             width: cons.maxWidth / 2,
-            child: CustomScrollView(
-              slivers: [
-                _getCalender(),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: cons.maxHeight,
-            width: cons.maxWidth / 2,
-            child: CustomScrollView(
-              slivers: [
-                _getBookingsScroll(),
-              ],
+            child: NestedScrollView(
+              headerSliverBuilder: (_,__){
+                return [_getCalender()];
+              },
+              body: _getBookingsScroll(),
             ),
           ),
         ],
@@ -86,39 +82,32 @@ class _BookingsTabState extends State<BookingsTab> {
   }
 
   Widget _getBookingsScroll() {
-    return SliverList(
-      delegate: SliverChildListDelegate(
-        [
-          const SizedBox(
-            height: 10,
-          ),
-          Observer(
-            builder: (_) {
-              final list = flow.getBookingsForSelectedDay(flow.myBookings);
-              if (list.isEmpty) {
-                return const SizedBox();
-              }
-              return ListView.builder(
-                padding: EdgeInsets.all(0),
-                shrinkWrap: true,
-                itemCount: list.length,
-                itemBuilder: (_, i) {
-                  return BookingTile(
-                    onTap: () {
-                      BappNavigator.push(
-                        context,
-                        BookingDetailsScreen(
-                          booking: list[i],
-                        ),
-                      );
-                    },
-                    booking: list[i],
+    return SafeArea(
+      child: Observer(
+        builder: (_) {
+          final list = flow.getBookingsForSelectedDay(flow.myBookings);
+          if (list.isEmpty) {
+            return const SizedBox();
+          }
+          return ListView.builder(
+            padding: EdgeInsets.all(0),
+            shrinkWrap: true,
+            itemCount: list.length,
+            itemBuilder: (_, i) {
+              return BookingTile(
+                onTap: () {
+                  BappNavigator.push(
+                    context,
+                    BookingDetailsScreen(
+                      booking: list[i],
+                    ),
                   );
                 },
+                booking: list[i],
               );
             },
-          )
-        ],
+          );
+        },
       ),
     );
   }

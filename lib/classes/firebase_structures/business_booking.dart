@@ -243,7 +243,13 @@ class BusinessBooking {
     }
   }
 
-  static Future sendUpdatesForBooking(BusinessBooking booking) async {}
+  @override
+  bool operator ==(Object other) {
+    if(other is BusinessBooking){
+      return myDoc==other.myDoc;
+    }
+    return false;
+  }
 }
 
 enum BusinessBookingStatus {

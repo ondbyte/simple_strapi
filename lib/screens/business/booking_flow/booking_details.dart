@@ -309,7 +309,7 @@ class ConfirmOrRejectButton extends StatelessWidget {
             child: FlatButton(
               color: Theme.of(context).errorColor,
               textTheme: ButtonTextTheme.primary,
-              onPressed: onConfirm,
+              onPressed: onReject,
               child: Text(rejectLabel),
             ),
           )

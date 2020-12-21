@@ -113,9 +113,10 @@ class BookingFlow {
   }
 
   Future getMyBookings() async {
+    final completer = Completer<bool>();
     if (FirebaseAuth.instance.currentUser.phoneNumber == null) {
       Helper.printLog("no number to get bookings");
-      return;
+      return false;
     }
     FirebaseFirestore.instance
         .collection("bookings")
@@ -126,18 +127,23 @@ class BookingFlow {
       ///clear old bookings;
       markRemoved(oldBookings: myBookings);
       myBookings.clear();
-      await Future.forEach<DocumentSnapshot>(bookingSnaps.docs,
-          (booking) async {
+      final _bookings = <BusinessBooking>{};
+      for (var booking in bookingSnaps.docs){
         final cloudStore = _allStore.get<CloudStore>();
         final b = await cloudStore.getBranch(reference: booking["branch"]);
         final bkin = BusinessBooking.fromSnapShot(snap: booking, branch: b);
-        myBookings.add(bkin);
-      });
+        _bookings.add(bkin);
+      }
+      myBookings.addAll(_bookings);
+      completer.cautiousComplete(true);
     }, onDone: () {
       Helper.printLog("Listening for my bookings stopped");
+      completer.cautiousComplete(false);
     }, onError: (e, s) {
       Helper.printLog("error while Listening for my bookings");
+      completer.cautiousComplete(false);
     });
+    return completer.future;
   }
 
   void markRemoved({ObservableList<BusinessBooking> oldBookings}) {

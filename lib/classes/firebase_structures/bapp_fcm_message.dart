@@ -1,5 +1,8 @@
 import 'package:bapp/config/config_data_types.dart';
+import 'package:country_pickers/utils/my_alert_dialog.dart';
 import 'package:enum_to_string/enum_to_string.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class BappFCMMessage {
   final MessagOrUpdateType type;
@@ -50,7 +53,6 @@ class BappFCMMessage {
     );
   }
 
-
   Map<String, String> toMap() {
     final m = {
       "type": EnumToString.convertToString(type),
@@ -60,7 +62,7 @@ class BappFCMMessage {
       "to": to,
       "priority": EnumToString.convertToString(priority),
       "click_action": click_action,
-      "time":time.millisecondsSinceEpoch.toString(),
+      "time": time.millisecondsSinceEpoch.toString(),
     };
     data?.forEach((key, value) {
       m.addAll({key: value});
