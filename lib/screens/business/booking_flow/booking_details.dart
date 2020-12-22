@@ -82,6 +82,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                   BappNavigator.pop(context, null);
                                 },
                                 onReject: () async {
+                                  await _getReasonFor
                                   act(() {
                                     kLoading.value = true;
                                   });

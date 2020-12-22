@@ -4,7 +4,6 @@ import 'package:bapp/screens/init/splash_screen.dart';
 import 'package:bapp/screens/misc/error.dart';
 import 'package:flutter/material.dart';
 
-
 enum AppEvents { reboot, unHandledError }
 
 class AppEventsWithExtra {
@@ -24,32 +23,43 @@ class BappNavigator extends StatefulWidget {
   @override
   _BappNavigatorState createState() => _BappNavigatorState();
 
-  static Future push<T>(BuildContext context,Widget routeWidget){
+  static Future<T> push<T>(BuildContext context, Widget routeWidget) {
     final state = context.findAncestorStateOfType<_BappNavigatorState>();
     return state._navKey.currentState.push<T>(_materialPageRoute(routeWidget));
   }
 
-  static Future pushAndRemoveAll<T>(BuildContext context,Widget routeWidget){
+  static Future<T> pushAndRemoveAll<T>(
+      BuildContext context, Widget routeWidget) {
     final state = context.findAncestorStateOfType<_BappNavigatorState>();
-    return state._navKey.currentState.pushAndRemoveUntil<T>(_materialPageRoute(routeWidget), (route) => false);
+    return state._navKey.currentState.pushAndRemoveUntil<T>(
+        _materialPageRoute(routeWidget), (route) => false);
   }
 
-  static Future pushReplacement<T,TO>(BuildContext context,Widget routeWidget,{TO result}){
+  static Future<T> pushReplacement<T, TO>(
+      BuildContext context, Widget routeWidget,
+      {TO result}) {
     final state = context.findAncestorStateOfType<_BappNavigatorState>();
     state._navKey.currentState.pop(result);
     return state._navKey.currentState.push<T>(_materialPageRoute(routeWidget));
   }
 
-  static void pop<T>(BuildContext context,T result){
+  static void pop<T>(BuildContext context, T result) {
     final state = context.findAncestorStateOfType<_BappNavigatorState>();
     return state._navKey.currentState.pop(result);
   }
 
+  static Future<T> showDialog<T>(BuildContext context, Widget dialog) {
+    final state = context.findAncestorStateOfType<_BappNavigatorState>();
+    return state._navKey.currentState.push(_materialPageRoute(dialog,isDialog: true));
+  }
 
-  static Route _materialPageRoute(Widget routeWidget) {
-    return MaterialPageRoute(builder: (_) {
-      return routeWidget;
-    });
+  static Route _materialPageRoute(Widget routeWidget,{bool isDialog=false}) {
+    return MaterialPageRoute(
+      fullscreenDialog: isDialog,
+      builder: (_) {
+        return routeWidget;
+      },
+    );
   }
 }
 
@@ -62,7 +72,7 @@ class _BappNavigatorState extends State<BappNavigator> {
     super.didChangeDependencies();
   }
 
-  GlobalKey<NavigatorState> get _navKey=>_key;
+  GlobalKey<NavigatorState> get _navKey => _key;
 
   @override
   Widget build(BuildContext context) {
@@ -82,10 +92,10 @@ class _BappNavigatorState extends State<BappNavigator> {
         },
       ),
       onWillPop: () async {
-        if(_navKey.currentState.canPop()){
+        if (_navKey.currentState.canPop()) {
           _navKey.currentState.pop();
           return false;
-        } else{
+        } else {
           return true;
         }
       },
