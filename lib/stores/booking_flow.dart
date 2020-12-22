@@ -126,14 +126,14 @@ class BookingFlow {
         .listen((bookingSnaps) async {
       ///clear old bookings;
       markRemoved(oldBookings: myBookings);
-      myBookings.clear();
       final _bookings = <BusinessBooking>{};
-      for (var booking in bookingSnaps.docs){
+      for (var booking in bookingSnaps.docs) {
         final cloudStore = _allStore.get<CloudStore>();
         final b = await cloudStore.getBranch(reference: booking["branch"]);
         final bkin = BusinessBooking.fromSnapShot(snap: booking, branch: b);
         _bookings.add(bkin);
       }
+      myBookings.clear();
       myBookings.addAll(_bookings);
       completer.cautiousComplete(true);
     }, onDone: () {
@@ -258,8 +258,7 @@ class BookingFlow {
   void _setupReactions() {
     final cloudStore = _allStore.get<CloudStore>();
     cloudStore.hashCode;
-    if (cloudStore.bappUser.userType.value !=
-        UserType.customer) {
+    if (cloudStore.bappUser.userType.value != UserType.customer) {
       _disposers.add(
         reaction(
           (_) => _allStore.get<BusinessStore>().business.selectedBranch.value,
