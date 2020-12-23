@@ -30,6 +30,7 @@ class BusinessBooking {
   final String managerNumber;
   final String receptionistNumber;
   final String ownerNumber;
+  final cancelReason = Observable("");
 
   final DocumentReference myDoc;
 
@@ -49,8 +50,10 @@ class BusinessBooking {
     @required this.managerNumber,
     @required this.receptionistNumber,
     @required this.ownerNumber,
+    String cancelReason="",
   }) {
     this.status.value = status;
+    this.cancelReason.value = cancelReason;
   }
 
   static DocumentReference newDoc() {
@@ -59,6 +62,7 @@ class BusinessBooking {
 
   Future<bool> save() async {
     await myDoc.set(toMap());
+    return true;
   }
 
   Future saveRating() async {
@@ -67,10 +71,11 @@ class BusinessBooking {
     await myDoc.update({"rating": tmp});
   }
 
-  Future<bool> cancel({@required BusinessBookingStatus withStatus}) {
+  Future<bool> cancel({@required BusinessBookingStatus withStatus,String reason=""}) {
     var done = Future.value(false);
     act(() {
       status.value = withStatus;
+      cancelReason.value = reason;
       done = save();
     });
     return done;
@@ -102,6 +107,7 @@ class BusinessBooking {
       "receptionistNumber": receptionistNumber,
       "managerNumber": managerNumber,
       "ownerNumber": ownerNumber,
+      "cancelReason":cancelReason.value
     };
   }
 
@@ -135,6 +141,7 @@ class BusinessBooking {
       receptionistNumber: j["receptionistNumber"] ?? "",
       managerNumber: j["managerNumber"] ?? "",
       ownerNumber: j["ownerNumber"] ?? "",
+      cancelReason: j["cancelReason"]??"",
     );
   }
 
@@ -174,7 +181,6 @@ class BusinessBooking {
         status.value == BusinessBookingStatus.accepted;
   }
 
-  Future sendBookingUpdate() async {}
 
   static Color getColor(BusinessBookingStatus status) {
     switch (status) {

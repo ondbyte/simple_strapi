@@ -3,6 +3,7 @@ import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/screens/business/booking_flow/cancellation_confirmation.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/firebase_image.dart';
@@ -30,16 +31,22 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
   Widget build(BuildContext context) {
     final map = widget.booking.getServiceNamesWithDuration();
     final servicesChildren = <Widget>[];
-    map.forEach((key, value) {
-      servicesChildren.add(PaddedText(
-        key,
-        style: Theme.of(context).textTheme.subtitle1,
-      ));
-      servicesChildren.add(PaddedText(
-        value,
-        style: Theme.of(context).textTheme.caption,
-      ));
-    });
+    map.forEach(
+      (key, value) {
+        servicesChildren.add(
+          PaddedText(
+            key,
+            style: Theme.of(context).textTheme.subtitle1,
+          ),
+        );
+        servicesChildren.add(
+          PaddedText(
+            value,
+            style: Theme.of(context).textTheme.caption,
+          ),
+        );
+      },
+    );
     return LoadingStackWidget(
       child: Consumer<CloudStore>(
         builder: (_, cloudStore, __) {
@@ -54,12 +61,26 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                         ? BottomPrimaryButton(
                             label: "Cancel booking",
                             onPressed: () async {
+                              final confirm = await BappNavigator.dialog<
+                                  CancellationConfirm>(
+                                context,
+                                CancellationConfirmDialog(
+                                  title: "Cancel",
+                                  message: "Please specify a reason",
+                                  needReason: true,
+                                ),
+                              );
+                              if (!confirm.confirm) {
+                                return;
+                              }
                               act(() {
                                 kLoading.value = true;
                               });
                               await widget.booking.cancel(
                                   withStatus:
-                                      cloudStore.getCancelTypeForUserType());
+                                      cloudStore.getCancelTypeForUserType(),
+                                reason:confirm.reason,
+                              );
                               act(() {
                                 kLoading.value = false;
                               });
@@ -82,7 +103,18 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                   BappNavigator.pop(context, null);
                                 },
                                 onReject: () async {
-                                  await _getReasonFor
+                                  final confirm = await BappNavigator
+                                      .dialog<CancellationConfirm>(
+                                    context,
+                                    CancellationConfirmDialog(
+                                      title: "Reject",
+                                      message:
+                                          "Please specify a reason",
+                                    ),
+                                  );
+                                  if (!confirm.confirm) {
+                                    return;
+                                  }
                                   act(() {
                                     kLoading.value = true;
                                   });
@@ -123,7 +155,9 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                               contentPadding:
                                   EdgeInsets.symmetric(horizontal: 16),
                               leading: ListTileFirebaseImage(
-                                ifEmpty: Initial(forName: widget.booking.staff.name,),
+                                ifEmpty: Initial(
+                                  forName: widget.booking.staff.name,
+                                ),
                                 storagePathOrURL:
                                     widget.booking.staff.images.isNotEmpty
                                         ? widget.booking.staff.images.keys

@@ -42,12 +42,15 @@ class BusinessServices {
 
     all.removeWhere((element) => element.serviceName == service.serviceName);
     all.add(service);
-    await branch.myDoc.value.update(
+    await branch.myDoc.value.set(
       {
         "businessServices": {
           service.serviceName.value: service.toMap(),
         },
       },
+      SetOptions(
+        merge: true
+      ),
     );
   }
 

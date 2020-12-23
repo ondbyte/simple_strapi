@@ -1,35 +1,95 @@
 import 'package:bapp/helpers/extensions.dart';
 import 'package:flutter/material.dart';
 
-class CancellationCinfirmDialog extends StatefulWidget {
-  final String title,message;
+class CancellationConfirm {
+  final bool confirm;
+  final String reason;
 
-  const CancellationCinfirmDialog({Key key, this.title, this.message,}) : super(key: key);
-  @override
-  _CancellationCinfirmDialogState createState() => _CancellationCinfirmDialogState();
+  CancellationConfirm({this.confirm = false, this.reason = ""});
 }
 
-class _CancellationCinfirmDialogState extends State<CancellationCinfirmDialog> {
+class CancellationConfirmDialog extends StatefulWidget {
+  final String title, message;
+  final bool needReason;
+
+  const CancellationConfirmDialog({
+    Key key,
+    this.title,
+    this.message,
+    this.needReason = false,
+  }) : super(key: key);
+  @override
+  _CancellationConfirmDialogState createState() =>
+      _CancellationConfirmDialogState();
+}
+
+class _CancellationConfirmDialogState extends State<CancellationConfirmDialog> {
+  final _controller = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text(widget.title),
-      content: Text(widget.message),
-      actions: [
-        FlatButton(
-          child: Text("Yes"),
-          onPressed: (){
-            BappNavigator.pop(context, true);
-          },
+    return WillPopScope(
+      onWillPop: () async {
+        BappNavigator.pop(context, CancellationConfirm());
+        return false;
+      },
+      child: AlertDialog(
+        title: Text(widget.title),
+        content: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(widget.message),
+              SizedBox(height: 20,),
+              if (widget.needReason)
+                TextFormField(
+                  decoration: InputDecoration(labelText: "Reason"),
+                  validator: (s) {
+                    if (s.isEmpty) {
+                      return "Enter a reason";
+                    }
+                    return null;
+                  },
+                )
+            ],
+          ),
         ),
-        FlatButton(
-          child: Text("No"),
-          onPressed: (){
-            BappNavigator.pop(context, false)
-          },
-        ),
-      ],
+        actions: [
+          FlatButton(
+            child: Text("Yes"),
+            onPressed: () {
+              if (!_formKey.currentState.validate()) {
+                return;
+              }
+              BappNavigator.pop(
+                context,
+                CancellationConfirm(
+                  confirm: true,
+                  reason: widget.needReason ? "" : _controller.text,
+                ),
+              );
+            },
+          ),
+          FlatButton(
+            child: Text("No"),
+            onPressed: () {
+              BappNavigator.pop(
+                context,
+                CancellationConfirm(),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
-

@@ -25,14 +25,15 @@ class BappNavigator extends StatefulWidget {
 
   static Future<T> push<T>(BuildContext context, Widget routeWidget) {
     final state = context.findAncestorStateOfType<_BappNavigatorState>();
-    return state._navKey.currentState.push<T>(_materialPageRoute(routeWidget));
+    return state._navKey.currentState
+        .push<T>(_pageRoute<T>(routeWidget));
   }
 
   static Future<T> pushAndRemoveAll<T>(
       BuildContext context, Widget routeWidget) {
     final state = context.findAncestorStateOfType<_BappNavigatorState>();
     return state._navKey.currentState.pushAndRemoveUntil<T>(
-        _materialPageRoute(routeWidget), (route) => false);
+        _pageRoute<T>(routeWidget), (route) => false);
   }
 
   static Future<T> pushReplacement<T, TO>(
@@ -40,7 +41,8 @@ class BappNavigator extends StatefulWidget {
       {TO result}) {
     final state = context.findAncestorStateOfType<_BappNavigatorState>();
     state._navKey.currentState.pop(result);
-    return state._navKey.currentState.push<T>(_materialPageRoute(routeWidget));
+    return state._navKey.currentState
+        .push<T>(_pageRoute<T>(routeWidget));
   }
 
   static void pop<T>(BuildContext context, T result) {
@@ -48,15 +50,24 @@ class BappNavigator extends StatefulWidget {
     return state._navKey.currentState.pop(result);
   }
 
-  static Future<T> showDialog<T>(BuildContext context, Widget dialog) {
-    final state = context.findAncestorStateOfType<_BappNavigatorState>();
-    return state._navKey.currentState.push(_materialPageRoute(dialog,isDialog: true));
+  static Future<T> dialog<T>(BuildContext context, Widget dialog) {
+    return showDialog<T>(
+      context: context,
+      useRootNavigator: false,
+      builder: (_){
+        return dialog;
+      }
+    );
   }
 
-  static Route _materialPageRoute(Widget routeWidget,{bool isDialog=false}) {
-    return MaterialPageRoute(
+  static Route<T> _pageRoute<T>(Widget routeWidget,
+      {bool isDialog = false}) {
+    Helper.printLog(isDialog);
+    return PageRouteBuilder(
       fullscreenDialog: isDialog,
-      builder: (_) {
+      barrierColor: Colors.transparent,
+      opaque: isDialog,
+      pageBuilder: (_, __, ___) {
         return routeWidget;
       },
     );
