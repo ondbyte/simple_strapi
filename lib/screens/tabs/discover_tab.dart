@@ -12,6 +12,7 @@ import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/search_bar.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:bapp/widgets/tiles/see_all_tile.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -21,53 +22,60 @@ class DiscoverTab extends StatefulWidget {
   _DiscoverTabState createState() => _DiscoverTabState();
 }
 
-class _DiscoverTabState extends State<DiscoverTab> {
+class _DiscoverTabState extends State < DiscoverTab > {
   @override
   Widget build(BuildContext context) {
-    return Consumer<CloudStore>(
+    return Consumer < CloudStore > (
       builder: (_, authStore, __) {
         return Observer(builder: (_) {
           return CustomScrollView(
-            slivers: <Widget>[
+            slivers: < Widget > [
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate(
-                    [
-                      Consumer<CloudStore>(builder: (_, authStore, __) {
-                        return authStore.user?.displayName == null
-                            ? const SizedBox()
-                            : Text("Hey, " + authStore.user.displayName);
-                      }),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Text(
-                        'What can we help you book?',
-                        style: Theme.of(context).textTheme.headline1,
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      _getSearchBar(),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      const Text("Or explore categories"),
-                    ],
+                  sliver: SliverList(
+                    delegate: SliverChildListDelegate(
+                      [
+                        Consumer < CloudStore > (builder: (_, authStore, __) {
+                          return authStore.user?.displayName == null ?
+                            const SizedBox(): Text("Hey, " + authStore.user.displayName);
+                        }),
+                        const SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            'What can we help you book?',
+                            style: Theme.of(context).textTheme.headline1,
+                          ),
+                          const SizedBox(
+                              height: 20,
+                            ),
+                            _getSearchBar(),
+                            const SizedBox(
+                              height: 20,
+                            ),
+
+                      ],
+                    ),
                   ),
-                ),
               ),
               SliverList(
                 delegate: SliverChildListDelegate([
                   const SizedBox(
-                    height: 0,
-                  ),
-                  _getCategoriesScroller(context),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  _getFeaturedScroller(context),
+                      height: 10,
+                    ),
+                    _getFeaturedScroller(context),
+
+                    const SizedBox(
+                        height: 30,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Text("Top services", style: Theme.of(context).textTheme.headline6, ),
+                      ),
+                      const SizedBox(
+                          height: 20,
+                        ),
+                        _getCategoriesScroller(context),
                 ]),
               ),
               SliverList(
@@ -79,33 +87,32 @@ class _DiscoverTabState extends State<DiscoverTab> {
               ),
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-                sliver: SliverList(
-                  
-                  delegate: SliverChildListDelegate(
-                    [
-                      if (authStore.status == AuthStatus.userPresent)
-                        _getCompleteOrder(context),
-                      if (authStore.status == AuthStatus.userPresent)
-                        _getHowWasYourExperience(context),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Consumer<CloudStore>(
-                        builder: (_, cloudStore, __) {
-                          final businessStore = Provider.of<BusinessStore>(
-                              context,
-                              listen: false);
-                          return (businessStore.business != null)
-                              ? const SizedBox()
-                              : _getOwnABusiness(context);
-                        },
-                      ),
-                    ],
+                  sliver: SliverList(
+
+                    delegate: SliverChildListDelegate(
+                      [
+                        if (authStore.status == AuthStatus.userPresent)
+                          _getCompleteOrder(context),
+                          if (authStore.status == AuthStatus.userPresent)
+                            _getHowWasYourExperience(context),
+                            const SizedBox(
+                                height: 10,
+                              ),
+                              Consumer < CloudStore > (
+                                builder: (_, cloudStore, __) {
+                                  final businessStore = Provider.of < BusinessStore > (
+                                    context,
+                                    listen: false);
+                                  return (businessStore.business != null) ?
+                                    const SizedBox(): _getOwnABusiness(context);
+                                },
+                              ),
+                      ],
+                    ),
                   ),
-                ),
               ),
-              
-            
+
+
             ],
           );
         });
@@ -114,9 +121,9 @@ class _DiscoverTabState extends State<DiscoverTab> {
   }
 
   Widget _getNearestFeatured(BuildContext context) {
-    return Consumer<CloudStore>(
+    return Consumer < CloudStore > (
       builder: (_, cloudStore, __) {
-        return FutureBuilder<List<BusinessBranch>>(
+        return FutureBuilder < List < BusinessBranch >> (
           future: cloudStore.getNearestFeatured(),
           builder: (_, snap) {
             return LayoutBuilder(builder: (_, cons) {
@@ -141,8 +148,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     return BusinessTileBigWidget(
                       branch: snap.data[i],
                       onTap: () {
-                        Provider.of<BookingFlow>(context, listen: false)
-                            .branch = snap.data[i];
+                        Provider.of < BookingFlow > (context, listen: false)
+                          .branch = snap.data[i];
                         BappNavigator.push(context, BusinessProfileScreen());
                       },
                       tag: Chip(
@@ -150,8 +157,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
                         label: Text(
                           "Featured",
                           style: Theme.of(context).textTheme.overline.apply(
-                                color: Theme.of(context).primaryColorLight,
-                              ),
+                            color: Theme.of(context).primaryColorLight,
+                          ),
                         ),
                       ),
                     );
@@ -167,18 +174,18 @@ class _DiscoverTabState extends State<DiscoverTab> {
   }
 
   Widget _getSearchBar() {
-    return Consumer<BusinessStore>(
+    return Consumer < BusinessStore > (
       builder: (_, businessStore, __) {
         businessStore.getCategories();
         return Observer(
           builder: (_) {
             return SearchBarWidget(
-              possibilities: Provider.of<BusinessStore>(context, listen: false)
-                  .categories
-                  .map<String>(
-                    (element) => element.name,
-                  )
-                  .toList(),
+              possibilities: Provider.of < BusinessStore > (context, listen: false)
+              .categories
+              .map < String > (
+                (element) => element.name,
+              )
+              .toList(),
             );
           },
         );
@@ -189,8 +196,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
   Widget _getOwnABusiness(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(6)),
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(6)),
       child: ListTile(
         dense: true,
         onTap: () {
@@ -206,9 +213,9 @@ class _DiscoverTabState extends State<DiscoverTab> {
         ),
         trailing: const Icon(
           Icons.arrow_forward_ios,
-         
+
         ),
-       
+
       ),
     );
   }
@@ -230,7 +237,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
     );
   }
 
-  BookingFlow get flow => Provider.of<BookingFlow>(context, listen: false);
+  BookingFlow get flow => Provider.of < BookingFlow > (context, listen: false);
 
   Widget _getCompleteOrder(BuildContext context) {
     return SizedBox();
@@ -242,37 +249,37 @@ class _DiscoverTabState extends State<DiscoverTab> {
       child: Row(
         children: [
           const SizedBox(
-            width: 16,
-          ),
-          ...HomeScreenFeaturedConfig.slides.map(
-            (e) => Container(
-              height: 125,
-              width: 142,
-              margin: const EdgeInsets.only(right: 20),
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                  color: e.cardColor, borderRadius: BorderRadius.circular(6)),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    e.icon,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(
-                    height: 6,
-                  ),
-                  Text(
-                    e.title,
-                    style: Theme.of(context).textTheme.headline3.apply(
+              width: 16,
+            ),
+            ...HomeScreenFeaturedConfig.slides.map(
+              (e) => Container(
+                height: 125,
+                width: 142,
+                margin: const EdgeInsets.only(right: 20),
+                  padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: e.cardColor, borderRadius: BorderRadius.circular(6)),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          e.icon,
                           color: Colors.white,
                         ),
-                  ),
-                ],
+                        const SizedBox(
+                            height: 6,
+                          ),
+                          Text(
+                            e.title,
+                            style: Theme.of(context).textTheme.headline3.apply(
+                              color: Colors.white,
+                            ),
+                          ),
+                      ],
+                    ),
               ),
-            ),
-          )
+            )
         ],
       ),
     );
@@ -280,9 +287,9 @@ class _DiscoverTabState extends State<DiscoverTab> {
 
   Widget _getCategoriesScroller(BuildContext context) {
     return SingleChildScrollView(
-      padding: EdgeInsets.only(left: 10),
+      padding: EdgeInsets.only(left: 10, ),
       scrollDirection: Axis.horizontal,
-      child: Consumer2<BusinessStore, CloudStore>(
+      child: Consumer2 < BusinessStore, CloudStore > (
         builder: (_, businessStore, cloudStore, __) {
           return Observer(
             builder: (_) {
@@ -290,27 +297,59 @@ class _DiscoverTabState extends State<DiscoverTab> {
                 children: [
                   ...List.generate(
                     businessStore.categories.length,
-                    (index) => TextButton(
-                      onPressed: () {
-                        BappNavigator.push(
-                          context,
-                          BranchesResultScreen(
-                            placeName: cloudStore.getAddressLabel(),
-                            categoryName: businessStore.categories[index].name,
-                            title:
+                    (index) => CachedNetworkImage(
+                      imageUrl: businessStore.categories[index].image,
+                      imageBuilder: (context, imageProvider) => Container(
+                        margin: EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
+                          image: DecorationImage(
+                            image: imageProvider,
+                            fit: BoxFit.cover,
+                            colorFilter:
+                            ColorFilter.mode(Colors.black54, BlendMode.multiply)),
+                        ),
+                        child: InkWell(
+                          onTap: () {
+                            BappNavigator.push(
+                              context,
+                              BranchesResultScreen(
+                                placeName: cloudStore.getAddressLabel(),
+                                categoryName: businessStore.categories[index].name,
+                                categoryImage: businessStore.categories[index].image,
+                                title:
                                 "Top " + businessStore.categories[index].name,
-                            subTitle: "In " + cloudStore.getAddressLabel(),
-                            futureBranchList: cloudStore.getBranchesForCategory(
-                              businessStore.categories[index],
+                                subTitle: "In " + cloudStore.getAddressLabel(),
+                                futureBranchList: cloudStore.getBranchesForCategory(
+                                  businessStore.categories[index],
+                                ),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(12),
+
+                            width: 120,
+                            height: 80,
+                            child: Align(
+                              alignment: Alignment.bottomLeft,
+                              child: Text(
+                                businessStore.categories[index].name,
+                                style: Theme.of(context).textTheme.subtitle1.apply(color: Theme.of(context).primaryColorLight),
+                              ),
                             ),
+
+
                           ),
-                        );
-                      },
-                      child: Text(
-                        businessStore.categories[index].name,
-                        style: Theme.of(context).textTheme.subtitle1,
-                      ),
-                    ),
+                        )), placeholder: (context, url) =>
+                      Center(child: CircularProgressIndicator()),
+                      errorWidget: (context, url, error) => Icon(Icons.error),
+                    )
+
+
+
+
+
                   ),
                 ],
               );

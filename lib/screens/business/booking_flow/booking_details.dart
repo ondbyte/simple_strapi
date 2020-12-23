@@ -223,7 +223,7 @@ class TitledListTile extends StatelessWidget {
           if (title != null)
             PaddedText(
               title,
-              style: Theme.of(context).textTheme.headline2,
+              style: Theme.of(context).textTheme.headline6,
             ),
           if (title != null) SizedBox(height: 20),
           if (secondaryTitle != null)
@@ -239,8 +239,8 @@ class TitledListTile extends StatelessWidget {
           if (secondaryTile != null) secondaryTile,
           if (bottomTag != null)
             Divider(
-              color: Theme.of(context).indicatorColor,
-              thickness: .5,
+              color: Theme.of(context).dividerColor,
+              
             ),
           if (bottomTag != null)
             Padding(

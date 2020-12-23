@@ -6,10 +6,10 @@ import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:cached_network_image/cached_network_image.dart';
 class BranchesResultScreen extends StatefulWidget {
   final Future<List<BusinessBranch>> futureBranchList;
-  final String title, subTitle, placeName, categoryName;
+  final String title, subTitle, placeName, categoryName, categoryImage;
 
   const BranchesResultScreen(
       {Key key,
@@ -17,7 +17,9 @@ class BranchesResultScreen extends StatefulWidget {
       this.title,
       this.subTitle,
       this.placeName,
-      this.categoryName})
+      this.categoryName,
+      this.categoryImage
+      })
       : super(key: key);
   @override
   _BranchesResultScreenState createState() => _BranchesResultScreenState();
@@ -30,11 +32,16 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            backgroundColor: Colors.black,
+            backgroundColor: Theme.of(context).accentColor,
             expandedHeight: 120,
+            brightness: Brightness.dark,
             flexibleSpace: FlexibleSpaceBar(
-              background: SizedBox(
+              background: Container(
                 height:100,
+                decoration: BoxDecoration(
+                  image:widget.categoryImage != null ? DecorationImage(image: CachedNetworkImageProvider(widget.categoryImage), fit: BoxFit.cover, colorFilter: ColorFilter.mode(Colors.black54, BlendMode.multiply)):null
+                  
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.end,
                   crossAxisAlignment: CrossAxisAlignment.center,
