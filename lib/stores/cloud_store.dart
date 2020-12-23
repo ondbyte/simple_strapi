@@ -41,7 +41,6 @@ abstract class _CloudStore with Store {
   @observable
   List<Country> countries;
 
-
   @observable
   BappUser bappUser;
 
@@ -52,7 +51,6 @@ abstract class _CloudStore with Store {
   @observable
   bool loadingForOTP = false;
   final favorites = ObservableList<Favorite>();
-
 
   AllStore _allStore;
 
@@ -94,32 +92,34 @@ abstract class _CloudStore with Store {
   }
 
   String getAddressLabel() {
-    return ( isNullOrEmpty(bappUser.address.locality)? bappUser.address.city:bappUser.address.locality );
+    return (isNullOrEmpty(bappUser.address.locality)
+        ? bappUser.address.city
+        : bappUser.address.locality);
   }
 
-  User get user=>FirebaseAuth.instance.currentUser;
+  User get user => FirebaseAuth.instance.currentUser;
 
   var lastUid = "";
   void _listenForUserChange() {
     FirebaseAuth.instance.userChanges().listen((user) async {
       Helper.printLog("user change: $user");
-      if(user!=null){
-        if(lastUid!=user.uid||lastUid.isEmpty){
+      if (user != null) {
+        if (lastUid != user.uid || lastUid.isEmpty) {
           lastUid = user.uid;
           await _init();
         }
-        if(bappUser==null){
+        if (bappUser == null) {
           return;
         }
-        if(user.isAnonymous){
+        if (user.isAnonymous) {
           status = AuthStatus.anonymousUser;
         } else {
           status = AuthStatus.userPresent;
           bappUser = bappUser?.updateWith(
-            email: user.email,
-            name: user.displayName,
-            theNumber: TheCountryNumber().parseNumber(internationalNumber: user.phoneNumber)
-          );
+              email: user.email,
+              name: user.displayName,
+              theNumber: TheCountryNumber()
+                  .parseNumber(internationalNumber: user.phoneNumber));
           bappUser?.save();
           _allStore.get<EventBus>().fire(bappUser);
         }
@@ -170,7 +170,8 @@ abstract class _CloudStore with Store {
   StreamSubscription userSubscription;
   Future getUserData() async {
     final completer = Completer<bool>();
-    var ref = await _fireStore.doc("users/${FirebaseAuth.instance.currentUser.uid}");
+    var ref =
+        await _fireStore.doc("users/${FirebaseAuth.instance.currentUser.uid}");
     myData = {};
     final snap = await ref.get();
     if (!snap.exists) {
@@ -199,8 +200,8 @@ abstract class _CloudStore with Store {
 
   @computed
   TheNumber get theNumber {
-    final tmp =
-        TheCountryNumber().parseNumber(internationalNumber: FirebaseAuth.instance.currentUser.phoneNumber);
+    final tmp = TheCountryNumber().parseNumber(
+        internationalNumber: FirebaseAuth.instance.currentUser.phoneNumber);
     if (tmp == null) {
       return TheCountryNumber().parseNumber(iso2Code: bappUser.address.iso2);
     }
@@ -258,7 +259,7 @@ abstract class _CloudStore with Store {
       final fs = myData["favorites"];
       if (fs is Map) {
         favorites.clear();
-        for (final entry in fs.entries){
+        for (final entry in fs.entries) {
           {
             final key = entry.key;
             final type = EnumToString.fromString(
@@ -272,10 +273,10 @@ abstract class _CloudStore with Store {
               business = await getBusiness(reference: entry.value["business"]);
             } else if (type == FavoriteType.businessBranch) {
               branch =
-              await getBranch(reference: entry.value["businessBranch"]);
+                  await getBranch(reference: entry.value["businessBranch"]);
             } else if (type == FavoriteType.businessService) {
               service =
-              null; //BusinessService.fromJson(entry.value["businessService"]);
+                  null; //BusinessService.fromJson(entry.value["businessService"]);
             }
             if (business != null || branch != null || service != null) {
               favorites.add(
@@ -537,15 +538,17 @@ abstract class _CloudStore with Store {
   }
 
   Future<List<BusinessBranch>> getNearestFeatured() async {
-    final query = FirebaseFirestore.instance
-        .collection("businesses")
-        .where("status", isEqualTo: "published")
-        .where("assignedAddress.iso2", isEqualTo: bappUser.address.iso2)
-        .where("assignedAddress.city", isEqualTo: bappUser.address.city);
-    if (isNullOrEmpty(bappUser.address.locality)) {
-      query.where("assignedAddress.locality",
-          isEqualTo: bappUser.address.locality);
+    final collec = FirebaseFirestore.instance
+        .collection("businesses");
+    final query = collec.where("assignedAddress.iso2", isEqualTo: bappUser.address.iso2);
+    if (!isNullOrEmpty(bappUser.address.locality)) {
+      query.where(
+        "assignedAddress.locality",
+        isEqualTo: bappUser.address.locality,
+      );
     }
+    query.where("status", isEqualTo: "published")
+        .where("assignedAddress.city", isEqualTo: bappUser.address.city);
     final snaps = await query.get();
     final _branches = <BusinessBranch>[];
     if (snaps.docs.isNotEmpty) {

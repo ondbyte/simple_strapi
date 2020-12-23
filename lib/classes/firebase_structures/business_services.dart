@@ -28,10 +28,11 @@ class BusinessServices {
     return all.any((s) =>
         s.category.value.categoryName.value == category.categoryName.value);
   }
-  
-  bool anyServiceOrCategoryExistsWithName(String s){
+
+  bool anyServiceOrCategoryExistsWithName(String s) {
     final name = s.trim();
-    return all.any((s) => s.serviceName.value==name)||allCategories.any((c) => c.categoryName.value==name);
+    return all.any((s) => s.serviceName.value == name) ||
+        allCategories.any((c) => c.categoryName.value == name);
   }
 
   Future save({BusinessService service}) async {
@@ -48,9 +49,7 @@ class BusinessServices {
           service.serviceName.value: service.toMap(),
         },
       },
-      SetOptions(
-        merge: true
-      ),
+      SetOptions(merge: true),
     );
   }
 
@@ -74,16 +73,21 @@ class BusinessServices {
       ..images.addAll(imgs);
 
     allCategories.add(category);
-    await branch.myDoc.value.set({
-      "businessServices": {category.categoryName.value: category.toMap()}
-    }, SetOptions(merge: true));
+    await branch.myDoc.value.set(
+      {
+        "businessServices": {category.categoryName.value: category.toMap()}
+      },
+      SetOptions(merge: true),
+    );
   }
 
   Future removeCategory(BusinessServiceCategory category) async {
     allCategories.remove(category);
-    await branch.myDoc.value.update({
-      "businessServices": {category.categoryName.value: FieldValue.delete()}
-    });
+    await branch.myDoc.value.update(
+      {
+        "businessServices": {category.categoryName.value: FieldValue.delete()}
+      },
+    );
   }
 
   Map<String, dynamic> toMap() {

@@ -15,14 +15,15 @@ class FirebaseStorageImage extends StatefulWidget {
   final double width;
   final Widget ifEmpty;
 
-  const FirebaseStorageImage(
-      {Key key,
-      @required this.storagePathOrURL,
-      this.fit = BoxFit.cover,
-      this.height,
-      this.width,
-      this.ifEmpty})
-      : super(key: key);
+  const FirebaseStorageImage({
+    Key key,
+    @required this.storagePathOrURL,
+    this.fit = BoxFit.cover,
+    this.height,
+    this.width,
+    this.ifEmpty,
+  })  : assert((storagePathOrURL != null) || (ifEmpty!=null)),
+        super(key: key);
 
   @override
   _FirebaseStorageImageState createState() => _FirebaseStorageImageState();
@@ -67,10 +68,6 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
 
   @override
   Widget build(BuildContext context) {
-    assert(
-        !isNullOrEmpty(widget.storagePathOrURL) ||
-            (isNullOrEmpty(widget.storagePathOrURL) && widget.ifEmpty != null),
-        "ifEmpty widget cannot be null if the URL is null");
     return LayoutBuilder(
       builder: (_, cons) {
         if (isNullOrEmpty(widget.storagePathOrURL)) {
