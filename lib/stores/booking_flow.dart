@@ -461,7 +461,7 @@ class BookingFlow {
     return myBookings
         .where((element) =>
             element.status.value == BusinessBookingStatus.finished &&
-            !element.rating.isRated)
+            (element.rating.bookingRatingPhase.value == BookingRatingPhase.notRated))
         .toList();
   }
 }

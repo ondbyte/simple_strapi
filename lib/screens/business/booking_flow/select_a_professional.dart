@@ -3,7 +3,7 @@ import 'package:bapp/classes/firebase_structures/business_timings.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
-import 'package:bapp/screens/business/business_profile/select_time_slot.dart';
+import 'package:bapp/screens/business/booking_flow/select_time_slot.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/widgets/firebase_image.dart';
 import 'package:bapp/widgets/tiles/rr_list_tile.dart';
@@ -69,7 +69,6 @@ class _SelectAProfessionalScreenState extends State<SelectAProfessionalScreen> {
   Widget _getProffessionalsTiles() {
     return Observer(builder: (_) {
       final list = <Widget>[];
-
       flow.filteredStaffs.forEach(
         (s) {
           list.add(
@@ -89,23 +88,27 @@ class _SelectAProfessionalScreenState extends State<SelectAProfessionalScreen> {
               title: Text(s.staff.name),
               trailing: Icon(Icons.arrow_forward_rounded),
               leading: ListTileFirebaseImage(
-                ifEmpty: Initial(forName: s.staff.name,),
+                ifEmpty: Initial(
+                  forName: s.staff.name,
+                ),
                 storagePathOrURL: s.staff.images.isNotEmpty
                     ? s.staff.images.keys.elementAt(0)
                     : null,
               ),
               subtitle: RatingBar.builder(
-                  itemSize: 16,
-                  itemBuilder: (_, __) {
-                    return Icon(
-                      FeatherIcons.star,
-                    );
-                  },
-                  allowHalfRating: true,
-                  ignoreGestures: true,
-                  initialRating: s.staff.rating,
-                  maxRating: 5,
-                  onRatingUpdate: (_) {}),
+                itemSize: 16,
+                itemBuilder: (_, __) {
+                  return Icon(
+                    FeatherIcons.star,
+                    color: Colors.amber,
+                  );
+                },
+                allowHalfRating: true,
+                ignoreGestures: true,
+                initialRating: s.staff.rating,
+                maxRating: 5,
+                onRatingUpdate: (_) {},
+              ),
             ),
           );
         },

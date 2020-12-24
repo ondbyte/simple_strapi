@@ -1,6 +1,6 @@
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/screens/business/booking_flow/add_customer_details.dart';
-import 'package:bapp/screens/business/business_profile/select_time_slot.dart';
+import 'package:bapp/screens/business/booking_flow/select_time_slot.dart';
 import 'package:bapp/screens/business/business_profile/tabs/services_tab.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/stores/booking_flow.dart';

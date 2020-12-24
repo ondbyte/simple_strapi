@@ -141,7 +141,7 @@ class BusinessStaff {
     contactNumber =
         TheCountryNumber().parseNumber(internationalNumber: j["contactNumber"]);
     images = {for (var v in j["images"]) v as String: true} ?? {};
-    rating = j["rating"] ?? 0;
+    rating = (j["rating"]).toDouble() ?? 0;
   }
   BusinessStaff.fromJson({@required this.branch, Map<String, dynamic> j}) {
     _fromJson(j);

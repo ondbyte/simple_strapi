@@ -1,7 +1,7 @@
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/booking_flow/services_screen.dart';
-import 'package:bapp/screens/business/business_profile/select_a_professional.dart';
+import 'package:bapp/screens/business/booking_flow/select_a_professional.dart';
 import 'package:bapp/screens/business/toolkit/manage_staff/manage_staff.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/business_store.dart';

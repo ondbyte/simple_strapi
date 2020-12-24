@@ -22,20 +22,25 @@ class _RateTheBookingScreenState extends State<RateTheBookingScreen> {
   BusinessBooking booking;
   @override
   void initState() {
-    act(() {
-      kLoading.value = true;
-    });
-    widget.booking.saveRating();
-    widget.booking.myDoc.snapshots().listen((snap) async {
-      setState(() {
-        booking = BusinessBooking.fromSnapShot(
-            snap: snap, branch: widget.booking.branch);
-        act(() {
-          kLoading.value = false;
-        });
-      });
-    });
+    booking = widget.booking;
     super.initState();
+    /*WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      act(() {
+        kLoading.value = true;
+      });
+
+      *//*widget.booking.myDoc.snapshots().listen((snap) async {
+        if(mounted){
+          setState(() {
+            booking = BusinessBooking.fromSnapShot(
+                snap: snap, branch: widget.booking.branch);
+            act(() {
+              kLoading.value = false;
+            });
+          });
+        }
+      });*//*
+    });*/
   }
 
   @override
@@ -43,74 +48,83 @@ class _RateTheBookingScreenState extends State<RateTheBookingScreen> {
     if (booking == null) {
       return SizedBox();
     }
-    return LoadingStackWidget(
-      child: Scaffold(
-        bottomNavigationBar: BottomPrimaryButton(
-          label: "Send feedback",
-          onPressed: booking.rating.isEdited()
-              ? () async {
-                  BappNavigator.pushAndRemoveAll(
-                    context,
-                    ContextualMessageScreen(
-                      message: RatingConfig.getThankYouForTheReviewForBooking(
-                          booking),
-                      buttonText: "Go to Home",
-                      onButtonPressed: (context) {
-                        BappNavigator.pushAndRemoveAll(context, Bapp());
-                      },
-                      init: () async {
-                        await booking.saveRating();
+    return WillPopScope(
+        onWillPop: () async {
+          widget.booking.rating.updatePhase(BookingRatingPhase.overallRated);
+          widget.booking.saveRating();
+          return true;
+        },
+        child: LoadingStackWidget(
+          child: Scaffold(
+            bottomNavigationBar: BottomPrimaryButton(
+              label: "Send feedback",
+              onPressed: booking.rating.isEdited()
+                  ? () async {
+                      BappNavigator.pushAndRemoveAll(
+                        context,
+                        ContextualMessageScreen(
+                          message:
+                              RatingConfig.getThankYouForTheReviewForBooking(
+                                  booking),
+                          buttonText: "Go to Home",
+                          onButtonPressed: (context) {
+                            BappNavigator.pushAndRemoveAll(context, Bapp());
+                          },
+                          init: () async {
+                            booking.rating
+                                .updatePhase(BookingRatingPhase.fullyRated);
+                            await booking.saveRating();
+                          },
+                        ),
+                      );
+                    }
+                  : null,
+            ),
+            appBar: AppBar(),
+            body: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    ...List.generate(
+                      booking.rating.all.length,
+                      (i) {
+                        final r = booking.rating.all.values.elementAt(i);
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          child: RatingTile(
+                            firstSentence:
+                                RatingConfig.getFirstSentenceForRating(r),
+                            secondSentence: RatingConfig
+                                    .getSecondSentenceForRatingWithBooking(
+                                        r, booking) +
+                                "?",
+                            rating: r,
+                            onRatingUpdated: (newR) {
+                              booking.rating.update(newR);
+                              setState(() {});
+                            },
+                          ),
+                        );
                       },
                     ),
-                  );
-                }
-              : null,
-        ),
-        appBar: AppBar(),
-        body: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: ListView(
-              shrinkWrap: true,
-              children: [
-                ...List.generate(
-                  booking.rating.all.length,
-                  (i) {
-                    final r = booking.rating.all.values.elementAt(i);
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: RatingTile(
-                        firstSentence:
-                            RatingConfig.getFirstSentenceForRating(r),
-                        secondSentence:
-                            RatingConfig.getSecondSentenceForRatingWithBooking(
-                                    r, booking) +
-                                "?",
-                        rating: r,
-                        onRatingUpdated: (newR) {
-                          booking.rating.update(newR);
-                          setState(() {});
-                        },
+                    TextFormField(
+                      initialValue: booking.rating.review,
+                      onChanged: (s) {
+                        booking.rating.review = s;
+                      },
+                      decoration: const InputDecoration(
+                        labelText: RatingConfig.reviewLabel,
+                        hintText: RatingConfig.reviewHint,
                       ),
-                    );
-                  },
+                    )
+                  ],
                 ),
-                TextFormField(
-                  initialValue: booking.rating.review,
-                  onChanged: (s) {
-                    booking.rating.review = s;
-                  },
-                  decoration: const InputDecoration(
-                    labelText: RatingConfig.reviewLabel,
-                    hintText: RatingConfig.reviewHint,
-                  ),
-                )
-              ],
+              ),
             ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 }
 

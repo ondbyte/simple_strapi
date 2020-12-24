@@ -1,5 +1,13 @@
+import 'package:bapp/helpers/helper.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:mobx/mobx.dart';
+
+enum BookingRatingPhase {
+  notRated,
+  overallRated,
+  fullyRated,
+}
 
 class CompleteBookingRating {
   final all = <BookingRatingType, BookingRating>{
@@ -9,19 +17,28 @@ class CompleteBookingRating {
         BookingRating(type: BookingRatingType.facilities)
   };
   String review;
-  final bool isRated;
+  final  bookingRatingPhase = Observable<BookingRatingPhase>(null);
 
-  CompleteBookingRating({this.review = "", this.isRated = false});
+  CompleteBookingRating(
+      {this.review = "",BookingRatingPhase bookingRatingPhase = BookingRatingPhase.notRated}){
+    this.bookingRatingPhase.value = bookingRatingPhase;
+  }
+
+  void updatePhase(BookingRatingPhase phase){
+    act((){
+      bookingRatingPhase.value = phase;
+    });
+  }
 
   bool isEdited() {
-    double i = 0;
+    var i = 0.0;
     all.forEach((key, value) {
       i += value.stars;
     });
     return i != 0;
   }
 
-  BookingRating update(BookingRating rating) {
+  void update(BookingRating rating) {
     all[rating.type] = rating;
   }
 
@@ -29,9 +46,11 @@ class CompleteBookingRating {
     return all[type];
   }
 
-  static fromJson(Map<String, dynamic> j) {
+  static CompleteBookingRating fromJson(Map<String, dynamic> j) {
     final _new = CompleteBookingRating(
-        review: j.remove("review"), isRated: j.remove("isRated"));
+        review: j.remove("review"),
+        bookingRatingPhase: EnumToString.fromString(
+            BookingRatingPhase.values, j.remove("bookingRatingPhase")));
     j.forEach((key, value) {
       _new.update(BookingRating.fromJson(value));
     });
@@ -41,7 +60,11 @@ class CompleteBookingRating {
   Map<String, dynamic> toMap() {
     final tmp = all.map((key, value) =>
         MapEntry(EnumToString.convertToString(key), value.toMap()));
-    return {...tmp, "review": review, "isRated": isRated};
+    return {
+      ...tmp,
+      "review": review,
+      "bookingRatingPhase": EnumToString.convertToString(bookingRatingPhase.value),
+    };
   }
 }
 

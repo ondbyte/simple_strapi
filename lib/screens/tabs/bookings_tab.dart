@@ -87,7 +87,11 @@ class _BookingsTabState extends State<BookingsTab> {
         builder: (_) {
           final list = flow.getBookingsForSelectedDay(flow.myBookings);
           if (list.isEmpty) {
-            return const SizedBox();
+            return const SizedBox(
+              child: Center(
+                child: Text("No bookings"),
+              ),
+            );
           }
           return ListView.builder(
             key: UniqueKey(),

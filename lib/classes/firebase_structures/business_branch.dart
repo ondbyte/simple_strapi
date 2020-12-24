@@ -226,7 +226,7 @@ class BusinessBranch {
         : null;
     contactNumber.value = j["contactNumber"];
     email.value = j["email"];
-    rating.value = j["rating"];
+    rating.value = (j["rating"]).toDouble();
     businessServices.value =
         BusinessServices.fromJson(j["businessServices"], branch: this);
     businessTimings.value = BusinessTimings.fromJson(j["businessTimings"]);

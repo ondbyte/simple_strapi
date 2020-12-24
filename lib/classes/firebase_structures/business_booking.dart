@@ -67,7 +67,6 @@ class BusinessBooking {
 
   Future saveRating() async {
     final tmp = rating.toMap();
-    tmp["isRated"] = true;
     await myDoc.update({"rating": tmp});
   }
 

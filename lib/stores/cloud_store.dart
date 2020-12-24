@@ -540,14 +540,14 @@ abstract class _CloudStore with Store {
   Future<List<BusinessBranch>> getNearestFeatured() async {
     final collec = FirebaseFirestore.instance
         .collection("businesses");
-    final query = collec.where("assignedAddress.iso2", isEqualTo: bappUser.address.iso2);
+    var query = collec.where("assignedAddress.iso2", isEqualTo: bappUser.address.iso2);
     if (!isNullOrEmpty(bappUser.address.locality)) {
-      query.where(
+      query = query.where(
         "assignedAddress.locality",
         isEqualTo: bappUser.address.locality,
       );
     }
-    query.where("status", isEqualTo: "published")
+    query = query.where("status", isEqualTo: "published")
         .where("assignedAddress.city", isEqualTo: bappUser.address.city);
     final snaps = await query.get();
     final _branches = <BusinessBranch>[];
