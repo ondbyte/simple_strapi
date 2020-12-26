@@ -176,4 +176,15 @@ class BusinessServiceCategory {
       "images": images.keys.toList(),
     };
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is BusinessServiceCategory) {
+      return categoryName.value == other.categoryName.value;
+    }
+    return false;
+  }
+
+  @override
+  int get hashCode => categoryName.value.hashCode;
 }

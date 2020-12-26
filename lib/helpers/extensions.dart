@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-
 export 'package:bapp/widgets/app/bapp_navigator_widget.dart';
 
 extension DateTimeOfDay on TimeOfDay {
@@ -68,11 +67,11 @@ extension TimeOfDayDateAndTime on DateTime {
   }
 
   bool isPM() {
-    return this.toTimeOfDay().isPM();
+    return toTimeOfDay().isPM();
   }
 
   bool isAM() {
-    return this.toTimeOfDay().isAM();
+    return toTimeOfDay().isAM();
   }
 
   ///returns day name like "Sunday"
@@ -110,7 +109,6 @@ extension RemoveCopies<T> on List<T> {
     }
   }
 }
-
 
 extension CautiousCompleter on Completer {
   bool cautiousComplete<T>(T value) {

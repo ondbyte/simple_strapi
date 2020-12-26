@@ -1,6 +1,5 @@
 import 'package:bapp/classes/firebase_structures/bapp_user.dart';
 import 'package:bapp/classes/firebase_structures/business_booking.dart';
-import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/booking_flow/cancellation_confirmation.dart';
@@ -77,9 +76,9 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                 kLoading.value = true;
                               });
                               await widget.booking.cancel(
-                                  withStatus:
-                                      cloudStore.getCancelTypeForUserType(),
-                                reason:confirm.reason,
+                                withStatus:
+                                    cloudStore.getCancelTypeForUserType(),
+                                reason: confirm.reason,
                               );
                               act(() {
                                 kLoading.value = false;
@@ -89,7 +88,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                           )
                         : widget.booking.status.value ==
                                 BusinessBookingStatus.pending
-                            ? ConfirmOrRejectButton(
+                            ? AcceptOrRejectButton(
                                 confirmLabel: "Confirm Booking",
                                 rejectLabel: "Reject",
                                 onConfirm: () async {
@@ -103,13 +102,12 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                   BappNavigator.pop(context, null);
                                 },
                                 onReject: () async {
-                                  final confirm = await BappNavigator
-                                      .dialog<CancellationConfirm>(
+                                  final confirm = await BappNavigator.dialog<
+                                      CancellationConfirm>(
                                     context,
                                     CancellationConfirmDialog(
                                       title: "Reject",
-                                      message:
-                                          "Please specify a reason",
+                                      message: "Please specify a reason",
                                     ),
                                   );
                                   if (!confirm.confirm) {
@@ -127,7 +125,37 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                   BappNavigator.pop(context, null);
                                 },
                               )
-                            : SizedBox()
+                            : widget.booking.status.value ==
+                                    BusinessBookingStatus.accepted
+                                ? StartJobOrNoShowButton(
+                                    noShowLabel: "No Show",
+                                    startJobLabel: "Start Job",
+                                    onNoShow: () async {
+                                      final confirm = await BappNavigator
+                                          .dialog<CancellationConfirm>(
+                                        context,
+                                        CancellationConfirmDialog(
+                                          title: "No show",
+                                          message: "Mark this as no show?",
+                                        ),
+                                      );
+                                      if (!confirm.confirm) {
+                                        return;
+                                      }
+                                      act(() {
+                                        kLoading.value = true;
+                                      });
+                                      await widget.booking.cancel(
+                                          withStatus:
+                                              BusinessBookingStatus.noShow,
+                                          reason: "");
+                                      act(() {
+                                        kLoading.value = false;
+                                      });
+                                      BappNavigator.pop(context, null);
+                                    },
+                                  )
+                                : null
                     : null,
                 body: ListView(
                   shrinkWrap: true,
@@ -275,7 +303,6 @@ class TitledListTile extends StatelessWidget {
           if (bottomTag != null)
             Divider(
               color: Theme.of(context).dividerColor,
-              
             ),
           if (bottomTag != null)
             Padding(
@@ -306,13 +333,62 @@ class TitledListTile extends StatelessWidget {
   }
 }
 
-class ConfirmOrRejectButton extends StatelessWidget {
+class StartJobOrNoShowButton extends StatelessWidget {
+  final Function onStart, onNoShow;
+  final String startJobLabel, noShowLabel;
+  final Color backGroundColor;
+  final EdgeInsets padding;
+
+  const StartJobOrNoShowButton(
+      {Key key,
+      this.onStart,
+      this.onNoShow,
+      this.startJobLabel,
+      this.noShowLabel,
+      this.backGroundColor,
+      this.padding})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: padding ?? EdgeInsets.all(16),
+      color: backGroundColor ?? Theme.of(context).backgroundColor,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Expanded(
+            child: FlatButton(
+              color: Theme.of(context).primaryColor,
+              textTheme: ButtonTextTheme.primary,
+              onPressed: onStart,
+              child: Text(startJobLabel),
+            ),
+          ),
+          SizedBox(
+            width: 8,
+          ),
+          Expanded(
+            child: FlatButton(
+              color: Theme.of(context).errorColor,
+              textTheme: ButtonTextTheme.primary,
+              onPressed: onNoShow,
+              child: Text(noShowLabel),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class AcceptOrRejectButton extends StatelessWidget {
   final Function onConfirm, onReject;
   final String confirmLabel, rejectLabel;
   final Color backGroundColor;
   final EdgeInsets padding;
 
-  const ConfirmOrRejectButton(
+  const AcceptOrRejectButton(
       {Key key,
       this.onConfirm,
       this.onReject,

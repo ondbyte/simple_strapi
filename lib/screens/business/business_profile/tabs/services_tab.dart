@@ -1,5 +1,4 @@
 import 'package:bapp/classes/firebase_structures/business_services.dart';
-import 'package:bapp/config/constants.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/widgets/firebase_image.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +26,10 @@ class _BusinessProfileServicesTabState
         .toList();
     final categories = flow.branch.businessServices.value.allCategories;
     services.forEach((element) {
-      sorted.update(element.category.value, (value) => value..add(element),ifAbsent: ()=>[element]);
+      sorted.update(element.category.value, (value) {
+        value.add(element);
+        return value;
+      }, ifAbsent: () => [element]);
     });
     return ListView.builder(
       padding: EdgeInsets.only(top: 15),
@@ -141,10 +143,11 @@ class BusinessServiceChildWidget extends StatelessWidget {
       subtitle: _makeSubTitle(context),
       trailing: bookWidget,
       leading: ListTileFirebaseImage(
-        ifEmpty: Initial(forName: service.serviceName.value,),
-        storagePathOrURL: service.images.isNotEmpty
-            ? service.images.keys.elementAt(0)
-            : null,
+        ifEmpty: Initial(
+          forName: service.serviceName.value,
+        ),
+        storagePathOrURL:
+            service.images.isNotEmpty ? service.images.keys.elementAt(0) : null,
       ),
     );
   }

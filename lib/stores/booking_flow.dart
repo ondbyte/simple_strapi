@@ -104,6 +104,7 @@ class BookingFlow {
 
   List<BusinessBooking> getStaffBookingsForDay(DateTime day) {
     assert(professional.value != null);
+
     final list = branchBookings
         .where((element) =>
             element.fromToTiming.from.isDay(day) &&
@@ -162,7 +163,9 @@ class BookingFlow {
     var q = FirebaseFirestore.instance
         .collection("bookings")
         .where("branch", isEqualTo: branch?.myDoc?.value)
-        .where("from", isGreaterThanOrEqualTo: DateTime.now().toTimeStamp())
+        .where("from",
+            isGreaterThanOrEqualTo:
+                DateTime.now().subtract(const Duration(days: 30)).toTimeStamp())
         .where("from",
             isLessThanOrEqualTo:
                 DateTime.now().add(const Duration(days: 30)).toTimeStamp());
@@ -174,18 +177,20 @@ class BookingFlow {
       (bookingSnaps) async {
         if (branch != null) {
           markRemoved(oldBookings: branchBookings);
-          branchBookings.clear();
+          final bbookings = <BusinessBooking>[];
           await Future.forEach<DocumentSnapshot>(
             bookingSnaps.docs,
             (booking) async {
               final cloudStore = _allStore.get<CloudStore>();
               final b =
                   await cloudStore.getBranch(reference: booking["branch"]);
-              branchBookings.add(
+              bbookings.add(
                 BusinessBooking.fromSnapShot(snap: booking, branch: b),
               );
             },
           );
+          branchBookings.clear();
+          branchBookings.addAll(bbookings);
           if (branch != null) {
             _filterStaffAndBookings();
           }
@@ -461,7 +466,8 @@ class BookingFlow {
     return myBookings
         .where((element) =>
             element.status.value == BusinessBookingStatus.finished &&
-            (element.rating.bookingRatingPhase.value == BookingRatingPhase.notRated))
+            (element.rating.bookingRatingPhase.value ==
+                BookingRatingPhase.notRated))
         .toList();
   }
 }

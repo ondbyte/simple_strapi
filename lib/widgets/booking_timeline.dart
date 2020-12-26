@@ -2,7 +2,6 @@ import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/screens/business/booking_flow/booking_details.dart';
-import 'package:bapp/screens/business/booking_flow/booking_details.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_week_view/flutter_week_view.dart';
@@ -31,22 +30,15 @@ class _BookingTimeLineWidgetState extends State<BookingTimeLineWidget> {
     final list = widget.list;
     return DayView(
       hoursColumnStyle: HoursColumnStyle(
-
         color: Theme.of(context).scaffoldBackgroundColor,
       ),
       style: DayViewStyle(
-       
-           
-           headerSize: 0,
-            currentTimeCircleColor: Theme.of(context).primaryColor,
-            currentTimeRuleColor: Theme.of(context).primaryColor,
-            backgroundRulesColor: Theme.of(context).disabledColor,
-           
-            hourRowHeight: 120,
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor
-
-        
-      ),
+          headerSize: 0,
+          currentTimeCircleColor: Theme.of(context).primaryColor,
+          currentTimeRuleColor: Theme.of(context).primaryColor,
+          backgroundRulesColor: Theme.of(context).disabledColor,
+          hourRowHeight: 120,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor),
       date: widget.date,
       inScrollableWidget: true,
       userZoomable: false,
@@ -55,7 +47,9 @@ class _BookingTimeLineWidgetState extends State<BookingTimeLineWidget> {
         ...List.generate(
           list.length,
           (index) => FlutterWeekViewEvent(
-            
+            eventTextBuilder: (event, _, dayView, a, b) {
+              return Text(event.title);
+            },
             onTap: () {
               BappNavigator.push(
                 context,
