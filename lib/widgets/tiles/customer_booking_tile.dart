@@ -108,7 +108,8 @@ class _BookingTileState extends State<BookingTile> {
                       ),
                       Text(
                         BusinessBooking.getButtonLabel(
-                            widget.booking.status.value),
+                          widget.booking.status.value,
+                        ),
                         style: Theme.of(context)
                             .textTheme
                             .subtitle1

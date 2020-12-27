@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bapp/classes/firebase_structures/bapp_user.dart';
 import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/helpers/extensions.dart';
@@ -26,6 +28,37 @@ class BookingDetailsScreen extends StatefulWidget {
 }
 
 class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
+  var canBeginJob = false;
+  Timer _timer;
+  @override
+  void initState() {
+    _decideCanBeginJob();
+    super.initState();
+  }
+
+  void _decideCanBeginJob() {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      final now = DateTime.now();
+      final shouldWaitToStartJob =
+          widget.booking.fromToTiming.from.isAfter(now);
+      if (shouldWaitToStartJob) {
+        final difference = widget.booking.fromToTiming.from.difference(now);
+        Helper.printLog(difference);
+        _timer = Timer(difference, () {
+          if (mounted) {
+            setState(() {
+              canBeginJob = true;
+            });
+          }
+        });
+      } else {
+        setState(() {
+          canBeginJob = true;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final map = widget.booking.getServiceNamesWithDuration();
@@ -46,202 +79,218 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
         );
       },
     );
-    return LoadingStackWidget(
-      child: Consumer<CloudStore>(
-        builder: (_, cloudStore, __) {
-          return Observer(
-            builder: (_) {
-              return Scaffold(
-                appBar: AppBar(
-                  title: Text("Booking Details"),
-                ),
-                bottomNavigationBar: widget.booking.isActive()
-                    ? widget.isCustomerView
-                        ? BottomPrimaryButton(
-                            label: "Cancel booking",
-                            onPressed: () async {
-                              final confirm = await BappNavigator.dialog<
-                                  CancellationConfirm>(
-                                context,
-                                CancellationConfirmDialog(
-                                  title: "Cancel",
-                                  message: "Please specify a reason",
-                                  needReason: true,
-                                ),
-                              );
-                              if (!confirm.confirm) {
-                                return;
-                              }
-                              act(() {
-                                kLoading.value = true;
-                              });
-                              await widget.booking.cancel(
-                                withStatus:
-                                    cloudStore.getCancelTypeForUserType(),
-                                reason: confirm.reason,
-                              );
-                              act(() {
-                                kLoading.value = false;
-                              });
-                              BappNavigator.pop(context, null);
-                            },
-                          )
-                        : widget.booking.status.value ==
-                                BusinessBookingStatus.pending
-                            ? AcceptOrRejectButton(
-                                confirmLabel: "Confirm Booking",
-                                rejectLabel: "Reject",
-                                onConfirm: () async {
-                                  act(() {
-                                    kLoading.value = true;
-                                  });
-                                  await widget.booking.accept();
-                                  act(() {
-                                    kLoading.value = false;
-                                  });
-                                  BappNavigator.pop(context, null);
-                                },
-                                onReject: () async {
-                                  final confirm = await BappNavigator.dialog<
-                                      CancellationConfirm>(
-                                    context,
-                                    CancellationConfirmDialog(
-                                      title: "Reject",
-                                      message: "Please specify a reason",
-                                    ),
-                                  );
-                                  if (!confirm.confirm) {
-                                    return;
-                                  }
-                                  act(() {
-                                    kLoading.value = true;
-                                  });
-                                  await widget.booking.cancel(
-                                      withStatus: cloudStore
-                                          .getCancelTypeForUserType());
-                                  act(() {
-                                    kLoading.value = false;
-                                  });
-                                  BappNavigator.pop(context, null);
-                                },
-                              )
-                            : widget.booking.status.value ==
-                                    BusinessBookingStatus.accepted
-                                ? StartJobOrNoShowButton(
-                                    noShowLabel: "No Show",
-                                    startJobLabel: "Start Job",
-                                    onNoShow: () async {
-                                      final confirm = await BappNavigator
-                                          .dialog<CancellationConfirm>(
-                                        context,
-                                        CancellationConfirmDialog(
-                                          title: "No show",
-                                          message: "Mark this as no show?",
-                                        ),
-                                      );
-                                      if (!confirm.confirm) {
-                                        return;
-                                      }
-                                      act(() {
-                                        kLoading.value = true;
-                                      });
-                                      await widget.booking.cancel(
-                                          withStatus:
-                                              BusinessBookingStatus.noShow,
-                                          reason: "");
-                                      act(() {
-                                        kLoading.value = false;
-                                      });
-                                      BappNavigator.pop(context, null);
-                                    },
-                                  )
-                                : null
-                    : null,
-                body: ListView(
-                  shrinkWrap: true,
-                  padding: EdgeInsets.all(16),
-                  children: [
-                    TitledListTile(
-                      bottomTag: BusinessBooking.getButtonLabel(
-                          widget.booking.status.value),
-                      bottomTagColor:
-                          BusinessBooking.getColor(widget.booking.status.value),
-                      primaryTile: widget.isCustomerView
-                          ? ListTile(
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 16),
-                              title: Text(
-                                widget.booking.branch.name.value,
-                                style: Theme.of(context).textTheme.headline1,
-                              ),
-                              subtitle: Text(widget.booking.branch.locality),
-                            )
-                          : null,
-                      title: widget.isCustomerView ? null : "Customer",
-                      secondaryTile: widget.isCustomerView
-                          ? ListTile(
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 16),
-                              leading: ListTileFirebaseImage(
-                                ifEmpty: Initial(
-                                  forName: widget.booking.staff.name,
-                                ),
-                                storagePathOrURL:
-                                    widget.booking.staff.images.isNotEmpty
-                                        ? widget.booking.staff.images.keys
-                                            .elementAt(0)
-                                        : null,
-                              ),
-                              title: Text(
-                                "Your booking is with",
-                                style: Theme.of(context).textTheme.caption,
-                              ),
-                              subtitle: Text(
-                                widget.booking.staff.name,
-                                style: Theme.of(context).textTheme.subtitle1,
-                              ),
-                            )
-                          : FutureBuilder<BappUser>(
-                              future: cloudStore.getUserForNumber(
-                                  number: widget.booking.bookedByNumber),
-                              builder: (_, snap) {
-                                if (snap.hasData) {
-                                  return BappUserTile(
-                                    user: snap.data,
-                                  );
+    return WillPopScope(
+      onWillPop: () async {
+        if (_timer != null) {
+          _timer.cancel();
+        }
+        return true;
+      },
+      child: LoadingStackWidget(
+        child: Consumer<CloudStore>(
+          builder: (_, cloudStore, __) {
+            return Observer(
+              builder: (_) {
+                return Scaffold(
+                  appBar: AppBar(
+                    title: Text("Booking Details"),
+                  ),
+                  bottomNavigationBar: widget.booking.isActive()
+                      ? widget.isCustomerView
+                          ? BottomPrimaryButton(
+                              label: "Cancel booking",
+                              onPressed: () async {
+                                final confirm = await BappNavigator.dialog<
+                                    CancellationConfirm>(
+                                  context,
+                                  CancellationConfirmDialog(
+                                    title: "Cancel",
+                                    message: "Please specify a reason",
+                                    needReason: true,
+                                  ),
+                                );
+                                if (!confirm.confirm) {
+                                  return;
                                 }
-                                return BappUserTile();
+                                act(() {
+                                  kLoading.value = true;
+                                });
+                                await widget.booking.cancel(
+                                  withStatus:
+                                      cloudStore.getCancelTypeForUserType(),
+                                  reason: confirm.reason,
+                                );
+                                act(() {
+                                  kLoading.value = false;
+                                });
+                                BappNavigator.pop(context, null);
                               },
-                            ),
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    TitledListTile(
-                      title: "Schedule",
-                      secondaryTitle:
-                          widget.booking.fromToTiming.formatFromWithDate(),
-                      caption: widget.booking.fromToTiming.format() +
-                          ", " +
-                          widget.booking.fromToTiming.formatMinutes(),
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    TitledListTile(
-                      title: "Services",
-                      secondaryTile: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: servicesChildren,
+                            )
+                          : widget.booking.status.value ==
+                                  BusinessBookingStatus.pending
+                              ? AcceptOrRejectButton(
+                                  confirmLabel: "Confirm Booking",
+                                  rejectLabel: "Reject",
+                                  onConfirm: () async {
+                                    act(() {
+                                      kLoading.value = true;
+                                    });
+                                    await widget.booking.accept();
+                                    act(() {
+                                      kLoading.value = false;
+                                    });
+                                    BappNavigator.pop(context, null);
+                                  },
+                                  onReject: () async {
+                                    final confirm = await BappNavigator.dialog<
+                                        CancellationConfirm>(
+                                      context,
+                                      CancellationConfirmDialog(
+                                        title: "Reject",
+                                        message: "Please specify a reason",
+                                      ),
+                                    );
+                                    if (!confirm.confirm) {
+                                      return;
+                                    }
+                                    act(() {
+                                      kLoading.value = true;
+                                    });
+                                    await widget.booking.cancel(
+                                        withStatus: cloudStore
+                                            .getCancelTypeForUserType());
+                                    act(() {
+                                      kLoading.value = false;
+                                    });
+                                    BappNavigator.pop(context, null);
+                                  },
+                                )
+                              : widget.booking.status.value ==
+                                      BusinessBookingStatus.accepted
+                                  ? StartJobOrNoShowButton(
+                                      noShowLabel: "No Show",
+                                      startJobLabel: "Start Job",
+                                      onNoShow: () async {
+                                        final confirm = await BappNavigator
+                                            .dialog<CancellationConfirm>(
+                                          context,
+                                          CancellationConfirmDialog(
+                                            title: "No show",
+                                            message: "Mark this as no show?",
+                                          ),
+                                        );
+                                        if (!confirm.confirm) {
+                                          return;
+                                        }
+                                        act(() {
+                                          kLoading.value = true;
+                                        });
+                                        await widget.booking.cancel(
+                                            withStatus:
+                                                BusinessBookingStatus.noShow,
+                                            reason: "");
+                                        act(
+                                          () {
+                                            kLoading.value = false;
+                                          },
+                                        );
+                                        BappNavigator.pop(context, null);
+                                      },
+                                      onStart: canBeginJob
+                                          ? () async {
+                                              await widget.booking.startJob();
+                                              BappNavigator.pop(context, null);
+                                            }
+                                          : null,
+                                    )
+                                  : null
+                      : null,
+                  body: ListView(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.all(16),
+                    children: [
+                      TitledListTile(
+                        bottomTag: BusinessBooking.getButtonLabel(
+                            widget.booking.status.value),
+                        bottomTagColor: BusinessBooking.getColor(
+                            widget.booking.status.value),
+                        primaryTile: widget.isCustomerView
+                            ? ListTile(
+                                contentPadding:
+                                    EdgeInsets.symmetric(horizontal: 16),
+                                title: Text(
+                                  widget.booking.branch.name.value,
+                                  style: Theme.of(context).textTheme.headline1,
+                                ),
+                                subtitle: Text(widget.booking.branch.locality),
+                              )
+                            : null,
+                        title: widget.isCustomerView ? null : "Customer",
+                        secondaryTile: widget.isCustomerView
+                            ? ListTile(
+                                contentPadding:
+                                    EdgeInsets.symmetric(horizontal: 16),
+                                leading: ListTileFirebaseImage(
+                                  ifEmpty: Initial(
+                                    forName: widget.booking.staff.name,
+                                  ),
+                                  storagePathOrURL:
+                                      widget.booking.staff.images.isNotEmpty
+                                          ? widget.booking.staff.images.keys
+                                              .elementAt(0)
+                                          : null,
+                                ),
+                                title: Text(
+                                  "Your booking is with",
+                                  style: Theme.of(context).textTheme.caption,
+                                ),
+                                subtitle: Text(
+                                  widget.booking.staff.name,
+                                  style: Theme.of(context).textTheme.subtitle1,
+                                ),
+                              )
+                            : FutureBuilder<BappUser>(
+                                future: cloudStore.getUserForNumber(
+                                    number: widget.booking.bookedByNumber),
+                                builder: (_, snap) {
+                                  if (snap.hasData) {
+                                    return BappUserTile(
+                                      user: snap.data,
+                                    );
+                                  }
+                                  return BappUserTile();
+                                },
+                              ),
                       ),
-                    )
-                  ],
-                ),
-              );
-            },
-          );
-        },
+                      SizedBox(
+                        height: 20,
+                      ),
+                      TitledListTile(
+                        title: "Schedule",
+                        secondaryTitle:
+                            widget.booking.fromToTiming.formatFromWithDate(),
+                        caption: widget.booking.fromToTiming.format() +
+                            ", " +
+                            widget.booking.fromToTiming.formatMinutes(),
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      TitledListTile(
+                        title: "Services",
+                        secondaryTile: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: servicesChildren,
+                        ),
+                      )
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }

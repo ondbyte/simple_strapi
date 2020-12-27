@@ -50,7 +50,7 @@ class BusinessBooking {
     @required this.managerNumber,
     @required this.receptionistNumber,
     @required this.ownerNumber,
-    String cancelReason="",
+    String cancelReason = "",
   }) {
     this.status.value = status;
     this.cancelReason.value = cancelReason;
@@ -70,7 +70,8 @@ class BusinessBooking {
     await myDoc.update({"rating": tmp});
   }
 
-  Future<bool> cancel({@required BusinessBookingStatus withStatus,String reason=""}) {
+  Future<bool> cancel(
+      {@required BusinessBookingStatus withStatus, String reason = ""}) {
     var done = Future.value(false);
     act(() {
       status.value = withStatus;
@@ -78,6 +79,13 @@ class BusinessBooking {
       done = save();
     });
     return done;
+  }
+
+  Future<bool> startJob() async {
+    act(() {
+      status.value = BusinessBookingStatus.ongoing;
+    });
+    return save();
   }
 
   Future<bool> accept() async {
@@ -106,7 +114,7 @@ class BusinessBooking {
       "receptionistNumber": receptionistNumber,
       "managerNumber": managerNumber,
       "ownerNumber": ownerNumber,
-      "cancelReason":cancelReason.value
+      "cancelReason": cancelReason.value
     };
   }
 
@@ -140,7 +148,7 @@ class BusinessBooking {
       receptionistNumber: j["receptionistNumber"] ?? "",
       managerNumber: j["managerNumber"] ?? "",
       ownerNumber: j["ownerNumber"] ?? "",
-      cancelReason: j["cancelReason"]??"",
+      cancelReason: j["cancelReason"] ?? "",
     );
   }
 
@@ -180,7 +188,6 @@ class BusinessBooking {
         status.value == BusinessBookingStatus.accepted;
   }
 
-
   static Color getColor(BusinessBookingStatus status) {
     switch (status) {
       case BusinessBookingStatus.accepted:
@@ -216,17 +223,20 @@ class BusinessBooking {
   static String getButtonLabel(BusinessBookingStatus status) {
     switch (status) {
       case BusinessBookingStatus.accepted:
-      case BusinessBookingStatus.ongoing:
         {
           return "Confirmed";
         }
+      case BusinessBookingStatus.ongoing:
+        {
+          return "Ongoing";
+        }
       case BusinessBookingStatus.walkin:
         {
-          return "Walkin";
+          return "Walk-in";
         }
       case BusinessBookingStatus.pending:
         {
-          return "New";
+          return "Pending";
         }
       case BusinessBookingStatus.cancelledByUser:
         {
@@ -235,9 +245,12 @@ class BusinessBooking {
       case BusinessBookingStatus.cancelledByManager:
       case BusinessBookingStatus.cancelledByReceptionist:
       case BusinessBookingStatus.cancelledByStaff:
-      case BusinessBookingStatus.noShow:
         {
           return "Rejected";
+        }
+      case BusinessBookingStatus.noShow:
+        {
+          return "No show";
         }
       case BusinessBookingStatus.finished:
         {
@@ -250,8 +263,8 @@ class BusinessBooking {
 
   @override
   bool operator ==(Object other) {
-    if(other is BusinessBooking){
-      return myDoc==other.myDoc;
+    if (other is BusinessBooking) {
+      return myDoc == other.myDoc;
     }
     return false;
   }
