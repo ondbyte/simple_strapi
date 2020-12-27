@@ -1,29 +1,36 @@
 import 'package:bapp/classes/firebase_structures/bapp_fcm_message.dart';
-import 'package:bapp/classes/notification_update.dart';
-import 'package:bapp/helpers/extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mobx/mobx.dart';
 
 class UpdatesStore {
   final updates = ObservableList<BappFCMMessage>();
   final news = ObservableList<BappFCMMessage>();
-  DateTime fromDay;
+  int _page = 1;
 
   UpdatesStore();
 
   Future init() async {
-    final now = DateTime.now();
-    fromDay = DateTime(now.year, now.month, now.day, 0, 0);
-    await _getUpdates();
+    await getUpdates();
   }
 
-  Future _getUpdates({bool nextPage = false}) async {
+  Future getUpdates({bool nextPage = false}) async {
     if (nextPage) {
-      fromDay = fromDay.add(const Duration(days: 1));
+      _page++;
     }
     FirebaseFirestore.instance
         .collection("updates")
-        .where("at", isGreaterThan: fromDay.toTimeStamp(),
-    );
+        .orderBy("time", descending: true)
+        .limit(16 * _page)
+        .snapshots()
+        .listen((snaps) {
+      final _updates = <BappFCMMessage>[];
+      if (snaps.docs.isNotEmpty) {
+        snaps.docs.forEach((updateSnap) {
+          _updates.add(BappFCMMessage.fromJson(j: updateSnap.data()));
+        });
+      }
+      updates.clear();
+      updates.addAll(_updates);
+    });
   }
 }

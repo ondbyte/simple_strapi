@@ -1,5 +1,4 @@
 import 'package:bapp/classes/firebase_structures/bapp_fcm_message.dart';
-import 'package:bapp/classes/notification_update.dart';
 import 'package:bapp/config/config.dart' hide Tab;
 import 'package:bapp/stores/updates_store.dart';
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
@@ -19,7 +18,7 @@ class _UpdatesTabState extends State<UpdatesTab> {
   @override
   Widget build(BuildContext context) {
     return Consumer<UpdatesStore>(
-      builder: (_, updatesStore,__) {
+      builder: (_, updatesStore, __) {
         return Padding(
           padding: EdgeInsets.all(16),
           child: DefaultTabController(
@@ -177,10 +176,12 @@ class NotificationUpdateTileWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(6),
-      ),
+          borderRadius: BorderRadius.circular(6),
+          color: CardsColor.next(
+              uid: update.time.millisecondsSinceEpoch.toString())),
       padding: EdgeInsets.all(10),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Padding(

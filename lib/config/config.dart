@@ -1,6 +1,5 @@
 import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/classes/firebase_structures/rating.dart';
-import 'package:bapp/route_manager.dart';
 import 'package:bapp/screens/business/toolkit/manage_branches/manage_branches.dart';
 import 'package:bapp/screens/business/toolkit/manage_contact.dart';
 import 'package:bapp/screens/business/toolkit/manage_holidays/holidays.dart';
@@ -17,7 +16,6 @@ import 'package:flutter/widgets.dart';
 
 import 'config_data_types.dart';
 
-
 ///add colors of cards across the app (color will be picked up randomly most of the time)
 class CardsColor {
   static Map<String, Color> colors = {
@@ -26,12 +24,19 @@ class CardsColor {
     "orange": Color(0xffE79C2A),
     "teal": Color(0xff1BC3AD),
   };
-
+  static final _requestedColors = <String, Color>{};
   static int last = 0;
-  static Color next() {
+  static Color next({String uid = ""}) {
     last++;
     if (last == colors.length) last = 0;
-    return colors.values.elementAt(last);
+    final _color = colors.values.elementAt(last);
+    if (uid.isNotEmpty) {
+      if (_requestedColors.containsKey(uid)) {
+        return _requestedColors[uid];
+      }
+      _requestedColors.addAll({uid: _color});
+    }
+    return _color;
   }
 }
 
@@ -112,22 +117,22 @@ class HomeScreenFeaturedConfig {
         title: "New On Bapp",
         icon: FeatherIcons.package,
         ref: "",
-        cardColor: CardsColor.next()),
+        cardColor: CardsColor.next(uid: "New On Bapp")),
     Featured(
         title: "Best in \nSavings",
         icon: FeatherIcons.package,
         ref: "",
-        cardColor: CardsColor.next()),
+        cardColor: CardsColor.next(uid: "Best in \nSavings")),
     Featured(
         title: "Top \n Rated",
         icon: FeatherIcons.package,
         ref: "",
-        cardColor: CardsColor.next()),
+        cardColor: CardsColor.next(uid: "Top \n Rated")),
     Featured(
         title: "Only On Bapp",
         icon: FeatherIcons.package,
         ref: "",
-        cardColor: CardsColor.next()),
+        cardColor: CardsColor.next(uid: "Only On Bapp")),
   ];
 }
 
@@ -455,8 +460,10 @@ class RatingConfig {
   static const reviewLabel = "Would you like share a short review?";
   static const reviewHint = "Write your review here.";
 
-  static String getThankYouForTheReviewForBooking(BusinessBooking booking){
-    return "Thank you for the review of "+ booking.branch.name.value+", looking forawrd to serve you better.";
+  static String getThankYouForTheReviewForBooking(BusinessBooking booking) {
+    return "Thank you for the review of " +
+        booking.branch.name.value +
+        ", looking forawrd to serve you better.";
   }
 
   static String getFirstSentenceForRating(BookingRating rating) {

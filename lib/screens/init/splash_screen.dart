@@ -7,6 +7,7 @@ import 'package:bapp/screens/location/pick_a_place.dart';
 import 'package:bapp/screens/onboarding/onboardingscreen.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/stores/updates_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -34,6 +35,7 @@ class _BappInitScreenState extends State<BappInitScreen>
             onLogin: () async {
               if (mounted) {
                 //await FirebaseAuth.instance.signOut();
+                Provider.of<UpdatesStore>(context, listen: false).init();
                 final cloudStore =
                     Provider.of<CloudStore>(context, listen: false);
                 await Provider.of<BusinessStore>(context, listen: false).init();

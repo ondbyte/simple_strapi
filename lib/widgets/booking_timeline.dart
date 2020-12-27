@@ -59,7 +59,9 @@ class _BookingTimeLineWidgetState extends State<BookingTimeLineWidget> {
                 ),
               );
             },
-            decoration: BoxDecoration(color: CardsColor.next()),
+            decoration: BoxDecoration(
+                color: CardsColor.next(
+                    uid: list[index].bookedByNumber.toString())),
             title: "By " + list[index].bookedByNumber,
             description: "",
             start: list[index].fromToTiming.from,

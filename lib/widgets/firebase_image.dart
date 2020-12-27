@@ -22,7 +22,7 @@ class FirebaseStorageImage extends StatefulWidget {
     this.height,
     this.width,
     this.ifEmpty,
-  })  : assert((storagePathOrURL != null) || (ifEmpty!=null)),
+  })  : assert((storagePathOrURL != null) || (ifEmpty != null)),
         super(key: key);
 
   @override
@@ -166,7 +166,7 @@ class Initial extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: CardsColor.next(),
+      color: CardsColor.next(uid: forName ?? ""),
       alignment: Alignment.center,
       child: Text(
         forName?.substring(0, 2),

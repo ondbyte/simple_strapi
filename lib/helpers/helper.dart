@@ -4,7 +4,6 @@ import 'package:bapp/classes/firebase_structures/bapp_fcm_message.dart';
 import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/config/config_data_types.dart';
-import 'package:bapp/fcm.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info/device_info.dart';
@@ -189,7 +188,7 @@ PreferredSizeWidget getBappTabBar(BuildContext context, List<Widget> tabs) {
       ),
     ),
     labelColor: Theme.of(context).primaryColor,
-    unselectedLabelColor: Theme.of(context).indicatorColor,
+    //unselectedLabelColor: ,
     indicatorColor: Theme.of(context).primaryColor,
     indicatorPadding: const EdgeInsets.all(16),
     indicatorWeight: 6,

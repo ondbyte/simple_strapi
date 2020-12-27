@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 
 ///changes to the light theme should be done here
@@ -15,7 +13,7 @@ ThemeData getLightThemeData() {
     //////////////////////////////
 
     brightness: Brightness.light,
-    indicatorColor: Colors.black,
+    indicatorColor: Colors.white,
 
     backgroundColor: Colors.grey[200],
     scaffoldBackgroundColor: Colors.white,
@@ -128,7 +126,7 @@ ThemeData getLightThemeData() {
         fontFamily: 'Lato',
       ),
     ),
-   
+
     bottomAppBarTheme: const BottomAppBarTheme(
       elevation: 10,
       color: Colors.white,
@@ -326,9 +324,9 @@ ThemeData getDarkThemeData() {
         fontFamily: 'Lato',
       ),
     ),
-   
+
     bottomAppBarTheme:
-    const BottomAppBarTheme(elevation: 10, color: Colors.black),
+        const BottomAppBarTheme(elevation: 10, color: Colors.black),
     dialogTheme: DialogTheme(
       backgroundColor: Colors.grey[900],
     ),
@@ -345,8 +343,7 @@ ThemeData getDarkThemeData() {
             height: 1,
             fontWeight: FontWeight.w800,
             fontFamily: 'Lato',
-            color: Colors.white70
-        ),
+            color: Colors.white70),
       ),
       iconTheme: IconThemeData(
         color: Colors.white,

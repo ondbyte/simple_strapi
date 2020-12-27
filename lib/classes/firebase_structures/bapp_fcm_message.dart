@@ -1,8 +1,6 @@
 import 'package:bapp/config/config_data_types.dart';
-import 'package:country_pickers/utils/my_alert_dialog.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 class BappFCMMessage {
   final MessagOrUpdateType type;
@@ -33,7 +31,7 @@ class BappFCMMessage {
     this.time,
   });
 
-  static BappFCMMessage fromJson({Map<String, String> j}) {
+  static BappFCMMessage fromJson({Map<String, dynamic> j}) {
     return BappFCMMessage(
       type: EnumToString.fromString(MessagOrUpdateType.values, j["type"]),
       title: j.remove("title"),
@@ -47,9 +45,9 @@ class BappFCMMessage {
       click_action: j.remove("click_action"),
       time: () {
         final d = j.remove("time");
-        return d != null ? DateTime.parse(d) : null;
+        return d != null ? (d as Timestamp).toDate() : null;
       }(),
-      data: j,
+      data: Map.castFrom(j.remove("data")),
     );
   }
 
