@@ -188,7 +188,7 @@ PreferredSizeWidget getBappTabBar(BuildContext context, List<Widget> tabs) {
       ),
     ),
     labelColor: Theme.of(context).primaryColor,
-    //unselectedLabelColor: ,
+    unselectedLabelColor: Theme.of(context).colorScheme.onSurface,
     indicatorColor: Theme.of(context).primaryColor,
     indicatorPadding: const EdgeInsets.all(16),
     indicatorWeight: 6,
@@ -205,7 +205,7 @@ Future sendUpdatesForBooking(BusinessBooking booking) async {
     case BusinessBookingStatus.pending:
       {
         final message = BappFCMMessage(
-          type: MessagOrUpdateType.bookingUpdate,
+          type: MessageOrUpdateType.bookingUpdate,
           title: "There's a new booking",
           body:
               "at ${booking.fromToTiming.from}, includes ${booking.getServicesSeperatedBycomma()}",

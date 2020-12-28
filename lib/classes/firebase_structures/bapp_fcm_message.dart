@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 
 class BappFCMMessage {
-  final MessagOrUpdateType type;
+  final MessageOrUpdateType type;
   final String title;
   final String body;
 
@@ -14,26 +14,34 @@ class BappFCMMessage {
   final String frm;
   final String click_action;
   final BappFCMMessagePriority priority;
-  final Map<String, String> data;
+  final Map<String, dynamic> data;
   final UserType forUserType;
   final DateTime time;
+  final bool read;
+  DocumentReference myDoc;
 
   BappFCMMessage({
     this.title = "",
     this.body = "",
     this.type,
-    this.data,
+    this.data=const {},
     this.frm = "",
     this.to = "",
     this.priority = BappFCMMessagePriority.high,
     this.click_action = "BAPP_NOTIFICATION_CLICK",
     this.forUserType,
     this.time,
+    this.read = false,
+    this.myDoc
   });
 
-  static BappFCMMessage fromJson({Map<String, dynamic> j}) {
+  static BappFCMMessage fromSnap(DocumentSnapshot snap){
+    return fromJson(j:snap.data(),myDoc: snap.reference);
+  }
+
+  static BappFCMMessage fromJson({Map<String, dynamic> j,DocumentReference myDoc}) {
     return BappFCMMessage(
-      type: EnumToString.fromString(MessagOrUpdateType.values, j["type"]),
+      type: EnumToString.fromString(MessageOrUpdateType.values, j["type"]),
       title: j.remove("title"),
       body: j.remove("body"),
       frm: j.remove("frm"),
@@ -45,13 +53,35 @@ class BappFCMMessage {
       click_action: j.remove("click_action"),
       time: () {
         final d = j.remove("time");
-        return d != null ? (d as Timestamp).toDate() : null;
+        if(myDoc!=null){
+          return d != null ? (d as Timestamp).toDate() : null;
+        } else {
+          return Timestamp.fromMillisecondsSinceEpoch(int.parse(d));
+        }
       }(),
-      data: Map.castFrom(j.remove("data")),
+        read: (){
+          final d = j.remove("read");
+          if(d is String){
+            return "true"==d.trim();
+          }
+          return d as bool;
+        }(),
+      data: Map.castFrom(j),
+      myDoc: myDoc
     );
   }
 
-  Map<String, String> toMap() {
+  Map<String, dynamic> toStringMap() {
+    return _toMap<String>();
+  }
+
+  Map<String, dynamic> toMap(){
+    return _toMap<dynamic>();
+  }
+
+  Map<String,T> _toMap<T>(){
+    final isString = T is String;
+
     final m = {
       "type": EnumToString.convertToString(type),
       "title": title,
@@ -60,15 +90,25 @@ class BappFCMMessage {
       "to": to,
       "priority": EnumToString.convertToString(priority),
       "click_action": click_action,
-      "time": time.millisecondsSinceEpoch.toString(),
+      "time": isString?time.millisecondsSinceEpoch.toString():time,
+      "read":isString?read.toString():read,
     };
-    data?.forEach((key, value) {
-      m.addAll({key: value});
-    });
+    if(data!=null){
+      data.forEach((key, value) {
+        m.addAll({key: value});
+      });
+    }
     return m;
+  }
+
+  Future markRead() async {
+    final map = toMap();
+    map.update("read", (value) => true,ifAbsent: ()=>true);
+    await myDoc?.set(map);
   }
 }
 
-enum MessagOrUpdateType { reminder, bookingUpdate, bookingRating, news }
+
+enum MessageOrUpdateType { reminder, bookingUpdate, bookingRating, news }
 
 enum BappFCMMessagePriority { high }

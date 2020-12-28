@@ -42,7 +42,7 @@ class _UpdatesTabState extends State<UpdatesTab> {
                             labelStyle: Theme.of(context).textTheme.headline4,
                             labelColor: Theme.of(context).indicatorColor,
                             unselectedLabelColor:
-                                Theme.of(context).indicatorColor,
+                                Theme.of(context).colorScheme.onSurface,
                             onTap: (i) {
                               setState(
                                 () {
@@ -147,12 +147,8 @@ class _UpdatesTabState extends State<UpdatesTab> {
     updates.forEach(
       (element) {
         ws.add(
-          Dismissible(
-            key: UniqueKey(),
-            onDismissed: (d) {},
-            child: NotificationUpdateTileWidget(
-              update: element,
-            ),
+          NotificationUpdateTileWidget(
+            update: element,
           ),
         );
         ws.add(
@@ -176,9 +172,11 @@ class NotificationUpdateTileWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(6),
-          color: CardsColor.next(
-              uid: update.time.millisecondsSinceEpoch.toString())),
+        borderRadius: BorderRadius.circular(6),
+        color:
+            CardsColor.next(uid: update.myDoc.id)
+                .withOpacity(update.read?0.4:1),
+      ),
       padding: EdgeInsets.all(10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -210,28 +208,56 @@ class NotificationUpdateTileWidget extends StatelessWidget {
           ),
           Align(
             alignment: Alignment.centerRight,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(
-                  "I\'m in",
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyText1
-                      .apply(color: Theme.of(context).indicatorColor),
-                ),
-                IconButton(
-                  icon: Icon(
-                    FeatherIcons.arrowRightCircle,
-                    color: Theme.of(context).indicatorColor,
-                  ),
-                  onPressed: () {},
-                ),
-              ],
-            ),
+            child: _decideAndGetButton(context),
           )
         ],
       ),
+    );
+  }
+
+  Widget _decideAndGetButton(BuildContext context) {
+    Widget text, button;
+    switch (update.type) {
+      case MessageOrUpdateType.news:
+        {
+          text = Text(
+            "I'm in",
+            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+          );
+          button = IconButton(
+            icon: Icon(
+              FeatherIcons.arrowRightCircle,
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+            onPressed: () {},
+          );
+          break;
+        }
+      case MessageOrUpdateType.bookingUpdate:
+        {
+          text = Text(
+            update.read ? "Read" : "Mark as Read",
+            style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+          );
+          button = IconButton(
+            icon: Icon(
+              update.read ? FeatherIcons.checkCircle : FeatherIcons.circle,
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+            onPressed: () {
+              update.markRead();
+            },
+          );
+          break;
+        }
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        if (text != null) text,
+        if (button != null) button,
+      ],
     );
   }
 }

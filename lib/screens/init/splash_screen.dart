@@ -35,7 +35,6 @@ class _BappInitScreenState extends State<BappInitScreen>
             onLogin: () async {
               if (mounted) {
                 //await FirebaseAuth.instance.signOut();
-                Provider.of<UpdatesStore>(context, listen: false).init();
                 final cloudStore =
                     Provider.of<CloudStore>(context, listen: false);
                 await Provider.of<BusinessStore>(context, listen: false).init();
