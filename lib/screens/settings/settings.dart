@@ -34,7 +34,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onChanged: (b) async {
                       if (!BappFCM().isFcmInitialized) {
                         if (Platform.isIOS) {
-                          final enabled = await BappFCM().initForIOS();
+                          final enabled = await BappFCM().requestOnIOS();
                           if (!enabled) {
                             Flushbar(
                               message:

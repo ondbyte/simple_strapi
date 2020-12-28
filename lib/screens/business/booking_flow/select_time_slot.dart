@@ -58,7 +58,7 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
                           },
                           onButtonPressed: (context) async {
                             if (Platform.isIOS && !BappFCM().isFcmInitialized) {
-                              await BappFCM().initForIOS();
+                              await BappFCM().requestOnIOS();
                             } else {
                               BappNavigator.pushAndRemoveAll(
                                 context,

@@ -5,6 +5,7 @@ import 'package:bapp/helpers/helper.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:mobx/mobx.dart';
+import 'package:notification_permissions/notification_permissions.dart';
 
 import 'classes/firebase_structures/bapp_fcm_message.dart';
 import 'config/constants.dart';
@@ -49,44 +50,43 @@ class BappFCM {
 
   void init() {
     initForAndroid();
-    final _fcm = FirebaseMessaging();
-    _fcm.onTokenRefresh.listen(
-      (event) {
-        Helper.printLog("YAAAAA");
-      },
-    );
+    initForIOS();
   }
 
   void initForAndroid() {
-    if (!isFcmInitialized) {
-      if (Platform.isAndroid) {
-        _init(FirebaseMessaging());
-      }
+    if (Platform.isAndroid) {
+      _init(FirebaseMessaging());
+    }
+  }
+
+  Future requestOnIOS() async {
+    final granted = await FirebaseMessaging().requestNotificationPermissions(
+      const IosNotificationSettings(
+        sound: true,
+        badge: true,
+        alert: true,
+        provisional: false,
+      ),
+    );
+    if(granted){
+      initForIOS();
     }
   }
 
   Future<bool> initForIOS() async {
-    Helper.printLog("INIT for IOOOS");
     if (Platform.isIOS) {
       final _fcm = FirebaseMessaging();
-      final enabled = await _fcm.requestNotificationPermissions(
-        const IosNotificationSettings(
-            sound: true, badge: true, alert: true, provisional: false),
-      );
-      if (enabled) {
-        _init(_fcm);
-        _fcm.setAutoInitEnabled(true);
-        isFcmInitialized = true;
-      } else {
-        if (!isFcmInitialized) {
-          _fcm.onIosSettingsRegistered.listen(
-            (event) {
-              initForIOS();
-            },
-          );
-        }
+      if ((await NotificationPermissions.getNotificationPermissionStatus()) ==
+          PermissionStatus.unknown) {
+        return false;
       }
-      return enabled;
+      if ((await NotificationPermissions.getNotificationPermissionStatus()) ==
+          PermissionStatus.granted) {
+        _init(_fcm);
+      } else {
+        return false;
+      }
+      return true;
     }
     return false;
   }
@@ -107,6 +107,9 @@ class BappFCM {
   }
 
   void _init(FirebaseMessaging _fcm) {
+    if(isFcmInitialized){
+      return;
+    }
     _fcm.configure(
       onBackgroundMessage:
           Platform.isAndroid ? myBackgroundMessageHandler : null,

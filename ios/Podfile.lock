@@ -404,6 +404,8 @@ PODS:
     - nanopb/encode (= 1.30906.0)
   - nanopb/decode (1.30906.0)
   - nanopb/encode (1.30906.0)
+  - notification_permissions (0.4.4):
+    - Flutter
   - path_provider (0.0.1):
     - Flutter
   - "permission_handler (5.0.1+1)":
@@ -412,9 +414,9 @@ PODS:
   - Protobuf (3.13.0)
   - screen (0.0.1):
     - Flutter
-  - sqflite (0.0.2):
+  - sqflite (0.0.1):
     - Flutter
-    - FMDB (>= 2.7.5)
+    - FMDB (~> 2.7.2)
   - url_launcher (0.0.1):
     - Flutter
 
@@ -433,6 +435,7 @@ DEPENDENCIES:
   - geolocator (from `.symlinks/plugins/geolocator/ios`)
   - google_maps_flutter (from `.symlinks/plugins/google_maps_flutter/ios`)
   - multi_image_picker (from `.symlinks/plugins/multi_image_picker/ios`)
+  - notification_permissions (from `.symlinks/plugins/notification_permissions/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
   - screen (from `.symlinks/plugins/screen/ios`)
@@ -498,6 +501,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/google_maps_flutter/ios"
   multi_image_picker:
     :path: ".symlinks/plugins/multi_image_picker/ios"
+  notification_permissions:
+    :path: ".symlinks/plugins/notification_permissions/ios"
   path_provider:
     :path: ".symlinks/plugins/path_provider/ios"
   permission_handler:
@@ -549,12 +554,13 @@ SPEC CHECKSUMS:
   leveldb-library: 55d93ee664b4007aac644a782d11da33fba316f7
   multi_image_picker: c068931d08240565e0615fb01437d16984909183
   nanopb: 59317e09cf1f1a0af72f12af412d54edf52603fc
+  notification_permissions: b74860c2967c1579243a675e63cd55e0ae75cef7
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   permission_handler: eac8e15b4a1a3fba55b761d19f3f4e6b005d15b6
   PromisesObjC: 8c196f5a328c2cba3e74624585467a557dcb482f
   Protobuf: 3dac39b34a08151c6d949560efe3f86134a3f748
   screen: abd91ca7bf3426e1cc3646d27e9b2358d6bf07b0
-  sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
+  sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
 
 PODFILE CHECKSUM: fe0e1ee7f3d1f7d00b11b474b62dd62134535aea
