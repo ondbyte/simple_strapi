@@ -1,11 +1,21 @@
+import 'dart:async';
+
 import 'package:bapp/config/config.dart';
+import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/tabs/bookings_tab.dart';
 import 'package:bapp/screens/tabs/discover_tab.dart';
 import 'package:bapp/screens/tabs/favorites_tab.dart';
 import 'package:bapp/screens/tabs/updates_tab.dart';
+import 'package:bapp/stores/updates_store.dart';
+import 'package:bapp/widgets/app/bapp_navigator_widget.dart';
 import 'package:bapp/widgets/location_switch.dart';
 import 'package:bapp/widgets/app/menu.dart';
+import 'package:bapp/widgets/size_provider.dart';
+import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:provider/provider.dart';
 
 class CustomerHome extends StatefulWidget {
   @override
@@ -48,7 +58,11 @@ class _CustomerHomeState extends State<CustomerHome> {
         items: [
           ...HomeScreenTabsConfig.tabs.map(
             (e) => BottomNavigationBarItem(
-              icon: Icon(e.icon),
+              icon: e.name == "Updates"
+                  ? UpdatesIcon(
+                      child: Icon(e.icon),
+                    )
+                  : Icon(e.icon),
               label: e.name,
             ),
           ),
@@ -80,5 +94,61 @@ class _CustomerHomeState extends State<CustomerHome> {
           return SizedBox();
         }
     }
+  }
+}
+
+class UpdatesIcon extends StatefulWidget {
+  final Widget child;
+
+  const UpdatesIcon({Key key, this.child}) : super(key: key);
+  @override
+  _UpdatesIconState createState() => _UpdatesIconState();
+}
+
+class _UpdatesIconState extends State<UpdatesIcon> {
+  Size _childSize;
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        OnChildSizedWidget(
+          child: widget.child,
+          onChildSize: (s) {
+            if (mounted) {
+              setState(() {
+                _childSize = s;
+              });
+            }
+          },
+        ),
+        if (_childSize != null)
+          Observer(
+            builder: (_) {
+              final totalUpdates =
+                  Provider.of<UpdatesStore>(context, listen: false)
+                      .numberOfUnreadUpdates;
+              return totalUpdates > 0
+                  ? SizedBox.fromSize(
+                      size: _childSize,
+                      child: Align(
+                        alignment: Alignment.topRight,
+                        child: Container(
+                          width: _childSize.width / 2,
+                          height: _childSize.width / 2,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle, color: Colors.redAccent),
+                          alignment: Alignment.center,
+                          child: Text(
+                            "$totalUpdates",
+                            style: Theme.of(context).textTheme.caption.apply(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    )
+                  : SizedBox();
+            },
+          )
+      ],
+    );
   }
 }

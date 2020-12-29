@@ -48,7 +48,7 @@ class _BappProviderInitializerWidgetState extends State<BappProviderInitializerW
           create: (_) => cloudStore,
         ),
         Provider<UpdatesStore>(
-          create: (_) => UpdatesStore(),
+          create: (_) => UpdatesStore(allStore),
         ),
         Provider<BusinessStore>(
           create: (_) => businessStore,

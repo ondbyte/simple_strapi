@@ -3,7 +3,9 @@ import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/screens/business/tabs/business_bookings_tab.dart';
 import 'package:bapp/screens/business/tabs/business_dashboard_tab.dart';
 import 'package:bapp/screens/business/tabs/business_toolkit_tab.dart';
+import 'package:bapp/screens/home/customer_home.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
+import 'package:bapp/screens/tabs/updates_tab.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/business/business_branch_switch.dart';
@@ -24,9 +26,17 @@ class BusinessHome extends StatefulWidget {
 
 class _BusinessHomeState extends State<BusinessHome> {
   int _selectedPage = 0;
+  final _tabs = <Widget>[];
 
   @override
   Widget build(BuildContext context) {
+    _tabs.clear();
+    _tabs.addAll([
+      BusinessDashboardTab(),
+      BusinessBookingsTab(),
+      if (_shouldShowToolkit) BusinessToolkitTab(),
+      UpdatesTab(),
+    ]);
     return Consumer3<BusinessStore, BookingFlow, CloudStore>(
         builder: (_, businessStore, flow, cloudStore, __) {
       return InitWidget(
@@ -39,7 +49,9 @@ class _BusinessHomeState extends State<BusinessHome> {
         child: Scaffold(
           appBar: AppBar(
             automaticallyImplyLeading: false,
-            title: BusinessBranchSwitchWidget(),
+            title: _selectedPage != _tabs.length-1
+                ? BusinessBranchSwitchWidget()
+                : SizedBox(),
           ),
           endDrawer: Menu(),
           body: Consumer<BusinessStore>(
@@ -55,12 +67,7 @@ class _BusinessHomeState extends State<BusinessHome> {
                     );
                   }
                   return IndexedStack(
-                    children: [
-                      BusinessDashboardTab(),
-                      BusinessBookingsTab(),
-                      if (_shouldShowToolkit) BusinessToolkitTab(),
-                      SizedBox(),
-                    ],
+                    children: _tabs,
                     index: _selectedPage,
                   );
                 },
@@ -88,10 +95,12 @@ class _BusinessHomeState extends State<BusinessHome> {
     tabs.removeWhere((element) =>
         element.name.toLowerCase() == "toolkit" && !_shouldShowToolkit);
     return tabs
-        .map((e) => BottomNavigationBarItem(
-              icon: Icon(e.icon),
-              label: e.name,
-            ))
+        .map(
+          (e) => BottomNavigationBarItem(
+            icon: e.name=="Updates"?UpdatesIcon(child:Icon(e.icon)):Icon(e.icon),
+            label: e.name,
+          ),
+        )
         .toList();
   }
 

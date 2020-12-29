@@ -4,7 +4,7 @@ import 'package:bapp/screens/init/splash_screen.dart';
 import 'package:bapp/screens/misc/error.dart';
 import 'package:flutter/material.dart';
 
-enum AppEvents { reboot, unHandledError }
+enum AppEvents { reboot, unHandledError, totalUpdates, }
 
 class AppEventsWithExtra {
   final AppEvents event;
