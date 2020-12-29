@@ -106,7 +106,7 @@ class BappFCM {
     }
   }
 
-  void _init(FirebaseMessaging _fcm) {
+  void _init(FirebaseMessaging _fcm) async {
     if(isFcmInitialized){
       return;
     }
@@ -117,13 +117,20 @@ class BappFCM {
       onResume: onMessage,
       onMessage: onMessage,
     );
-    _fcm.onTokenRefresh.listen((event) {
-      fcmToken.value = event;
-      print("fcmToken " + fcmToken.value);
-    });
     isFcmInitialized = true;
     kNotifEnabled = true;
     print("FCM initialized for " + Platform.operatingSystem);
+    Helper.printLog("Getting FCM token");
+    onNewToken(await _fcm.getToken());
+    _fcm.onTokenRefresh.listen(onNewToken);
+  }
+
+  void onNewToken(String token){
+    if(fcmToken.value==token){
+      return;
+    }
+    fcmToken.value = token;
+    print("fcmToken " + fcmToken.value);
   }
 
   ///cached messages
