@@ -108,7 +108,7 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
                                 widget.categoryName +
                                 " in " +
                                 widget.placeName +
-                                ", We are adding more local businesses to serve you better",
+                                ", We are adding more local businesses to serve you better.",
                           );
                   },
                 ),

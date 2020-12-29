@@ -137,6 +137,7 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
       bottomSheet: _loading
           ? null
           : ListTile(
+            contentPadding: EdgeInsets.fromLTRB(20,20,20,30),
               title: Text("Create a branch"),
               trailing: Icon(
                 Icons.arrow_forward,

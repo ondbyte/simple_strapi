@@ -348,7 +348,7 @@ class BusinessBranch {
   String getOpenTodayString() {
     final timings = businessTimings.value.getTodayTimings();
     return timings.isNotEmpty
-        ? ("Open Today\n" +
+        ? ("Open Today - " +
             timings.first.from.toStringWithAmOrPm() +
             " to " +
             timings.last.to.toStringWithAmOrPm())
