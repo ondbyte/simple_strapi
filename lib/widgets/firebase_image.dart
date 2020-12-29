@@ -169,7 +169,7 @@ class Initial extends StatelessWidget {
       color: CardsColor.next(uid: forName ?? ""),
       alignment: Alignment.center,
       child: Text(
-        forName?.substring(0, 2),
+        forName.length>2?forName?.substring(0, 2):":)",
         textAlign: TextAlign.center,
         style: Theme.of(context).textTheme.subtitle1.apply(color: Colors.white),
       ),
