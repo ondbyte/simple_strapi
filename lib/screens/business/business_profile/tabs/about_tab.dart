@@ -16,6 +16,7 @@ class BusinessProfileAboutTab extends StatelessWidget {
     final latlong = flow.branch.latlong.value;
     final timingsString = flow.branch.getOpenTodayString();
     final tagString = flow.branch.tag.value;
+    final typeString = flow.branch.type.value;
 
     return SingleChildScrollView(
 
@@ -34,12 +35,12 @@ class BusinessProfileAboutTab extends StatelessWidget {
             height: 20,
           ),
           ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16,),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
             leading: const Icon(FeatherIcons.clock),
             dense: true,
             title: Text(
               timingsString,
-              style: Theme.of(context).textTheme.subtitle1,
+              style: Theme.of(context).textTheme.bodyText1,
             ),
           ),
           ListTile(
@@ -48,7 +49,16 @@ class BusinessProfileAboutTab extends StatelessWidget {
             dense: true,
             title: Text(
               tagString,
-              style: Theme.of(context).textTheme.subtitle1,
+               style: Theme.of(context).textTheme.bodyText1,
+            ),
+          ),
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            leading: const Icon(FeatherIcons.info),
+            dense: true,
+            title: Text(
+              typeString,
+              style: Theme.of(context).textTheme.bodyText1,
             ),
           ),
           ListTile(
@@ -76,7 +86,7 @@ class BusinessProfileAboutTab extends StatelessWidget {
             height: 20,
           ),
           PaddedText(
-            "About "+flow.branch.description.value,
+            flow.branch.description.value,
             style: Theme.of(context).textTheme.bodyText1,
           ),
         ],

@@ -56,6 +56,9 @@ class _ContextualMessageScreenState extends State<ContextualMessageScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                SizedBox(
+                  height: 50,
+                ),
                 SvgPicture.asset(
                   widget.svgAssetToDisplay ?? "assets/svg/messages.svg",
                   width: 256,
@@ -63,9 +66,12 @@ class _ContextualMessageScreenState extends State<ContextualMessageScreen> {
                 SizedBox(
                   height: 20,
                 ),
-                Text(
-                  "${widget.message}",
-                  textAlign: TextAlign.center,
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(
+                    "${widget.message}",
+                    textAlign: TextAlign.center,
+                  ),
                 ),
                 SizedBox(
                   height: 20,
