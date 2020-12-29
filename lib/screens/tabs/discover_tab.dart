@@ -286,7 +286,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
   Widget _getCategoriesScroller(BuildContext context) {
     return SingleChildScrollView(
       padding: EdgeInsets.only(
-        left: 10,
+        left: 16,
       ),
       scrollDirection: Axis.horizontal,
       child: Consumer2<BusinessStore, CloudStore>(
@@ -316,7 +316,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
   Widget _getCategoryBox(BusinessCategory category) {
     return RRShape(
       child: Container(
-        padding: EdgeInsets.all(12),
+        padding: EdgeInsets.all(10),
         width: 120,
         height: 80,
         decoration: BoxDecoration(
@@ -331,7 +331,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
           alignment: Alignment.bottomLeft,
           child: Text(
             category.name,
-            style: Theme.of(context).textTheme.subtitle1.apply(
+            style: Theme.of(context).textTheme.bodyText1.apply(
                   color: Theme.of(context).primaryColorLight,
                 ),
           ),

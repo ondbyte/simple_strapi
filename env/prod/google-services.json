@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "347111752310",
+    "project_id": "bapp-production",
+    "storage_bucket": "bapp-production.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:347111752310:android:ad7a5613a0e76ec2699557",
+        "android_client_info": {
+          "package_name": "com.bigmints.bapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "347111752310-5d1q0kvkpv34pnvjlm3sepa8dakgeh9k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwd498Byn1UhjjM_0W96TBQjEV8vsEOj4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "347111752310-5d1q0kvkpv34pnvjlm3sepa8dakgeh9k.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "347111752310-tkh0280494mrj413rpvuu9ifnvb2976o.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.bigmints.bapp",
+                "app_store_id": "1523997445"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
