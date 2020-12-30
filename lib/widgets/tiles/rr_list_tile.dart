@@ -8,7 +8,7 @@ class RRShape extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: borderRadius ?? BorderRadius.circular(6),
+      borderRadius: borderRadius ?? BorderRadius.all(Radius.circular(6)),
       child: child,
     );
   }
