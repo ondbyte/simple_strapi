@@ -17,7 +17,7 @@ void main() async {
   FlutterError.onError = (e) {
     FlutterError.dumpErrorToConsole(e);
   };
-  await initFirebase();
+  await initFirebase(production: true);
   runApp(App());
 }
 

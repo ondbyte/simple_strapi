@@ -152,7 +152,7 @@ class BappUser {
     );
     await myDoc.set({
       "branches":{
-        b.myDoc.value.id:b.myDoc
+        b.myDoc.value.id:b.myDoc.value
       }
     },SetOptions(merge: true));
   }
