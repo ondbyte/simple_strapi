@@ -17,8 +17,9 @@ import 'package:the_country_number_widgets/the_country_number_widgets.dart';
 
 class ThankYouForYourInterestScreen extends StatefulWidget {
   final BusinessCategory category;
+  final bool onBoard;
 
-  const ThankYouForYourInterestScreen({Key key, this.category})
+  const ThankYouForYourInterestScreen({Key key, this.category, this.onBoard = false})
       : super(key: key);
   @override
   _ThankYouForYourInterestScreenState createState() =>
@@ -53,14 +54,14 @@ class _ThankYouForYourInterestScreenState
                     sliver: SliverList(
                       delegate: SliverChildListDelegate([
                         Text(
-                          "Thank you for your interest",
+                          widget.onBoard?"Add other details":"Thank you for your interest",
                           style: Theme.of(context).textTheme.headline1,
                         ),
                         SizedBox(
                           height: 10,
                         ),
                         Text(
-                          "Please send us below information and we will on-board you as quickly as possible",
+                          widget.onBoard?"Business will be made draft on Bapp":"Please send us below information and we will on-board you as quickly as possible",
                           style: Theme.of(context).textTheme.bodyText1,
                         ),
                         SizedBox(
@@ -78,8 +79,8 @@ class _ThankYouForYourInterestScreenState
                             }
                             return null;
                           },
-                          decoration: const InputDecoration(
-                            labelText: "Name of your business",
+                          decoration: InputDecoration(
+                            labelText: "Name of ${widget.onBoard?"the":"your"} business",
                           ),
                         ),
                         const SizedBox(
@@ -92,7 +93,7 @@ class _ThankYouForYourInterestScreenState
                           },
                           validator: (s) {
                             if (s == null || s.isEmpty) {
-                              return "Select a specific gender your business serve";
+                              return "Select a specific gender ${widget.onBoard?"the":"your"} business serve";
                             }
                             return null;
                           },
@@ -116,10 +117,10 @@ class _ThankYouForYourInterestScreenState
                         ),
                         InitWidget(
                           initializer: () {
-                            _validNumber = cloudStore.theNumber;
+                            _validNumber = widget.onBoard?cloudStore.theNumber.removeNumber():cloudStore.theNumber;
                           },
                           child: TheCountryNumberInput(
-                            cloudStore.theNumber,
+                            widget.onBoard?cloudStore.theNumber.removeNumber():cloudStore.theNumber,
                             customValidator: (tn) {
                               if (tn == null) {
                                 return "Enter a valid number";
@@ -152,6 +153,8 @@ class _ThankYouForYourInterestScreenState
                             );
                           },
                           child: WheresItLocatedTileWidget(
+                            title: "Where is ${widget.onBoard?"the":"your"} business located",
+                            caption: "Pick a location",
                             onPickLocation: (p) {
                               _pickedLocation = p;
                             },
@@ -173,7 +176,7 @@ class _ThankYouForYourInterestScreenState
               BappNavigator.pushAndRemoveAll(
                 context,
                 ContextualMessageScreen(
-                  message: "Thank you, we\'ll reach you out soon",
+                  message: widget.onBoard?"Business added to draft":"Thank you, we\'ll reach you out soon",
                   init: () async {
                     final tmp =
                         await Provider.of<BusinessStore>(context, listen: false)

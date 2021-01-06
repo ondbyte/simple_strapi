@@ -36,8 +36,9 @@ class BusinessDetails {
           if (myDoc.value != null && selectedBranch.value != null) {
             try {
               myDoc.value.set(
-                  {"selectedBranch": selectedBranch.value.myDoc.value},
-                  SetOptions(merge: true));
+                {"selectedBranch": selectedBranch.value.myDoc.value},
+                SetOptions(merge: true),
+              );
             } catch (e) {
               print("Expected ERROR ; ${e.toString()}");
             }
@@ -134,7 +135,6 @@ class BusinessDetails {
     await branch.myDoc.value.delete();
     await act(() async {
       branches.value = old; //new
-
     });
   }
 

@@ -6,8 +6,9 @@ import '../route_manager.dart';
 
 class WheresItLocatedTileWidget extends StatefulWidget {
   final Function(PickedLocation) onPickLocation;
+  final String title,caption;
 
-  WheresItLocatedTileWidget({Key key, this.onPickLocation}) : super(key: key);
+  WheresItLocatedTileWidget({Key key, this.onPickLocation, this.title="", this.caption=""}) : super(key: key);
 
   @override
   _WheresItLocatedTileWidgetState createState() =>
@@ -35,11 +36,11 @@ class _WheresItLocatedTileWidgetState extends State<WheresItLocatedTileWidget> {
         color: Theme.of(context).primaryColorDark,
       ),
       title: Text(
-        "Where is your business located",
+        widget.title,
         style: Theme.of(context).textTheme.subtitle1,
       ),
       subtitle: Text(
-        _pickedLocation == null ? "Pick an Address" : _pickedLocation.address,
+        _pickedLocation == null ? widget.caption: _pickedLocation.address,
         style: Theme.of(context).textTheme.bodyText1,
         maxLines: 2,
         overflow: TextOverflow.ellipsis,

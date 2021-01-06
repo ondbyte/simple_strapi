@@ -193,12 +193,12 @@ class MenuConfig {
         showWhenAlterEgoIs: UserType.values,
       ),*/
       MenuItem(
-        name: "Refer a business",
+        name: "On-Board a Business",
         icon: FeatherIcons.disc,
-        kind: MenuItemKind.referABusiness,
-        showWhenAuthStatusIs: AuthStatus.values,
-        showWhenUserTypeIs: UserType.values,
-        showWhenAlterEgoIs: UserType.values,
+        kind: MenuItemKind.onBoardABusiness,
+        showWhenAuthStatusIs: [AuthStatus.userPresent],
+        showWhenUserTypeIs: [UserType.customer],
+        showWhenAlterEgoIs: [UserType.manager,UserType.sales,UserType.sudo],
       ),
       MenuItem(
         name: "Logout",

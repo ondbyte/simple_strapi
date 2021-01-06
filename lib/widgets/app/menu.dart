@@ -114,9 +114,9 @@ class _MenuState extends State<Menu> {
           BappNavigator.pushReplacement(context, SizedBox());
           break;
         }
-      case MenuItemKind.referABusiness:
+      case MenuItemKind.onBoardABusiness:
         {
-          BappNavigator.pushReplacement(context, ChooseYourBusinessCategoryScreen());
+          BappNavigator.pushReplacement(context, ChooseYourBusinessCategoryScreen(onBoard: true,));
           break;
         }
       case MenuItemKind.logOut:

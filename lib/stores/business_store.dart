@@ -14,6 +14,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
+import 'package:the_country_number/the_country_number.dart';
 
 import '../helpers/helper.dart';
 
@@ -54,17 +55,17 @@ abstract class _BusinessStore with Store {
   }
 
   @action
-  Future applyForBusiness({
-    GeoPoint latlong,
-    String address,
-    String businessName,
-    String contactNumber,
-    BusinessCategory category,
-    String type,
-  }) async {
+  Future applyForBusiness(
+      {GeoPoint latlong,
+      String address,
+      String businessName,
+      String contactNumber,
+      BusinessCategory category,
+      String type,
+      bool onBoard = false}) async {
     ///create the first branch
-    businessDoc =
-        _fireStore.doc("businesses/${FirebaseAuth.instance.currentUser.uid}");
+    businessDoc = _fireStore.doc(
+        "businesses/${onBoard ? contactNumber : FirebaseAuth.instance.currentUser.uid}");
 
     final ap = BusinessDetails.from(
       businessName: businessName,
@@ -72,17 +73,35 @@ abstract class _BusinessStore with Store {
       category: category,
       contactNumber: contactNumber,
       latlong: latlong,
-      uid: FirebaseAuth.instance.currentUser.uid,
-      email: FirebaseAuth.instance.currentUser.email,
+      uid: onBoard ? "" : FirebaseAuth.instance.currentUser.uid,
+      email: onBoard ? "" : FirebaseAuth.instance.currentUser.email,
       myDoc: businessDoc,
       type: type,
     );
-    await _allStore.get<CloudStore>().bappUser.addBranch(
-          business: ap,
-          branchName: businessName,
-          imagesWithFiltered: {},
-          pickedLocation: PickedLocation(latlong, address),
+
+    BappUser user;
+    if (onBoard) {
+      user = await _allStore
+          .get<CloudStore>()
+          .getUserForNumber(number: contactNumber);
+      if (isNullOrEmpty(user)) {
+        user = BappUser(
+          myDoc: BappUser.newReference(docName: contactNumber),
+          theNumber: TheCountryNumber().parseNumber(internationalNumber: contactNumber),
+          userType: UserType.customer,
+          alterEgo: UserType.customer
         );
+      }
+    } else {
+      user = _allStore.get<CloudStore>().bappUser;
+    }
+
+    user?.addBranch(
+      business: ap,
+      branchName: businessName,
+      imagesWithFiltered: {},
+      pickedLocation: PickedLocation(latlong, address),
+    );
 
     await ap.saveBusiness();
 
@@ -93,7 +112,9 @@ abstract class _BusinessStore with Store {
 
     _allStore.get<CloudStore>().bappUser.save();
 
-    business = ap;
+    if(!onBoard){
+      business = ap;
+    }
   }
 
   @action

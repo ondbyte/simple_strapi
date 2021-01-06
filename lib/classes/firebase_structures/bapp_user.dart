@@ -79,7 +79,11 @@ class BappUser {
       alterEgo: alterEgo ?? this.alterEgo.value,
       address: address ?? this.address,
       fcmToken: fcmToken ?? this.fcmToken,
-      selectedBranch: selectedBranch ?? (this.selectedBranch??(this.branches.values.isNotEmpty?this.branches.values.first:null)),
+      selectedBranch: selectedBranch ??
+          (this.selectedBranch ??
+              (this.branches.values.isNotEmpty
+                  ? this.branches.values.first
+                  : null)),
     );
   }
 
@@ -127,34 +131,37 @@ class BappUser {
     );
   }
 
-  Future removeBranch({BusinessDetails business,BusinessBranch branch}) async {
+  Future removeBranch({BusinessDetails business, BusinessBranch branch}) async {
     await business.removeBranch(branch);
     final selectedChange = {};
     if (branch.myDoc.value == selectedBranch) {
-      selectedChange.addAll({
-        "selectedBranch":business.branches.value[0].myDoc
-      });
+      selectedChange
+          .addAll({"selectedBranch": business.branches.value[0].myDoc});
       business.selectedBranch.value = business.branches.value[0];
     }
-    await myDoc.set({"branches.${branch.myDoc.value.id}":FieldValue.delete(),...selectedChange},SetOptions(merge: true));
+    await myDoc.set({
+      "branches.${branch.myDoc.value.id}": FieldValue.delete(),
+      ...selectedChange
+    }, SetOptions(merge: true));
   }
 
   Future addBranch({
-  BusinessDetails business,
+    BusinessDetails business,
     String branchName,
     PickedLocation pickedLocation,
-    Map<String,bool> imagesWithFiltered,
-}) async {
+    Map<String, bool> imagesWithFiltered,
+  }) async {
     final b = await business.addABranch(
       branchName: branchName,
       pickedLocation: pickedLocation,
       imagesWithFiltered: imagesWithFiltered,
     );
-    await myDoc.set({
-      "branches":{
-        b.myDoc.value.id:b.myDoc.value
-      }
-    },SetOptions(merge: true));
+    await myDoc.set(
+      {
+        "branches": {b.myDoc.value.id: b.myDoc.value}
+      },
+      SetOptions(merge: true),
+    );
   }
 }
 

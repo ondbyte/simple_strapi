@@ -19,7 +19,6 @@ enum MenuItemKind {
   settings,
   rateTheApp,
   helpUsImprove,
-  referABusiness,
   logOut,
   switchTosShopping,
   switchToBusiness,
