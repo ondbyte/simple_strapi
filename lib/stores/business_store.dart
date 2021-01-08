@@ -57,6 +57,7 @@ abstract class _BusinessStore with Store {
 
   @action
   Future applyForBusiness({
+    String ownerName,
     GeoPoint latlong,
     String address,
     String businessName,
@@ -100,11 +101,23 @@ abstract class _BusinessStore with Store {
       user = _allStore.get<CloudStore>().bappUser;
     }
 
-    await user.addBranch(
+    final b = await user.addBranch(
       business: ap,
       branchName: businessName,
       imagesWithFiltered: {},
       pickedLocation: PickedLocation(latlong, address),
+    );
+
+    await b.addAStaff(
+      dateOfJoining: DateTime.now(),
+      expertise: [],
+      images: {},
+      role: UserType.businessOwner,
+      name: ownerName,
+      userPhoneNumber: TheCountryNumber().parseNumber(
+        internationalNumber: ap.contactNumber.value,
+      ),
+      updateForUser: !onBoard,
     );
 
     user = user.updateWith(alterEgo: UserType.businessOwner);

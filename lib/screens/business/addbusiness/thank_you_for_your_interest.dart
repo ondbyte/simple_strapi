@@ -1,6 +1,5 @@
 import 'package:bapp/classes/firebase_structures/business_category.dart';
 import 'package:bapp/helpers/extensions.dart';
-import 'package:bapp/route_manager.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';
@@ -85,8 +84,7 @@ class _ThankYouForYourInterestScreenState
                             return null;
                           },
                           decoration: InputDecoration(
-                            labelText:
-                            "Name of owner",
+                            labelText: "Name of owner",
                           ),
                         ),
                         SizedBox(
@@ -106,7 +104,7 @@ class _ThankYouForYourInterestScreenState
                           },
                           decoration: InputDecoration(
                             labelText:
-                            "Name of ${widget.onBoard ? "the" : "your"} business",
+                                "Name of ${widget.onBoard ? "the" : "your"} business",
                           ),
                         ),
                         const SizedBox(
@@ -221,6 +219,7 @@ class _ThankYouForYourInterestScreenState
                       category: widget.category,
                       type: _genderSpecific,
                       onBoard: widget.onBoard,
+                      ownerName: _ownerName,
                     );
                     return tmp;
                   },

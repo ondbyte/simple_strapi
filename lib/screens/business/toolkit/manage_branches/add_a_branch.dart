@@ -9,6 +9,7 @@ import 'package:bapp/widgets/wheres_it_located.dart';
 import 'package:flutter/material.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:the_country_number/the_country_number.dart';
 
 class BusinessAddABranchScreen extends StatefulWidget {
   BusinessAddABranchScreen({Key key}) : super(key: key);
@@ -60,7 +61,7 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
                             height: 20,
                           ),
                           Consumer<BusinessStore>(
-                            builder: (_, businessStore,__) {
+                            builder: (_, businessStore, __) {
                               if (_controller.text.isEmpty) {
                                 _controller.text =
                                     businessStore.business.businessName.value;
@@ -137,7 +138,7 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
       bottomSheet: _loading
           ? null
           : ListTile(
-            contentPadding: EdgeInsets.fromLTRB(20,20,20,30),
+              contentPadding: EdgeInsets.fromLTRB(20, 20, 20, 30),
               title: Text("Create a branch"),
               trailing: Icon(
                 Icons.arrow_forward,
@@ -171,11 +172,21 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
                           Provider.of<CloudStore>(context, listen: false)
                               .bappUser;
 
-                      await bappUser.addBranch(
+                      final branch = await bappUser.addBranch(
                         business: business,
                         branchName: _controller.text,
                         pickedLocation: _pickedLocation,
                         imagesWithFiltered: _filteredExistingImages,
+                      );
+                      await branch.addAStaff(
+                        dateOfJoining: DateTime.now(),
+                        expertise: [],
+                        images: {},
+                        role: bappUser.userType.value,
+                        name: bappUser.name,
+                        userPhoneNumber: TheCountryNumber().parseNumber(
+                          internationalNumber: business.contactNumber.value,
+                        ),
                       );
                       BappNavigator.pop(context, null);
                     },

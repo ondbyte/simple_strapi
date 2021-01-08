@@ -145,7 +145,7 @@ class BappUser {
     }, SetOptions(merge: true));
   }
 
-  Future addBranch({
+  Future<BusinessBranch> addBranch({
     BusinessDetails business,
     String branchName,
     PickedLocation pickedLocation,
@@ -157,16 +157,7 @@ class BappUser {
       pickedLocation: pickedLocation,
       imagesWithFiltered: imagesWithFiltered,
     );
-    await b.addAStaff(
-      dateOfJoining: DateTime.now(),
-      expertise: [],
-      images: {},
-      role: UserType.businessOwner,
-      name: ownerName,
-      userPhoneNumber: TheCountryNumber().parseNumber(
-        internationalNumber: business.contactNumber.value,
-      ),
-    );
+
     await b.saveBranch();
     await myDoc.set(
       {
@@ -174,6 +165,7 @@ class BappUser {
       },
       SetOptions(merge: true),
     );
+    return b;
   }
 }
 

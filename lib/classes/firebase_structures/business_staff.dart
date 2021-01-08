@@ -71,7 +71,7 @@ class BusinessStaff {
               BappUser.newReference(docName: contactNumber.internationalNumber);
           final user = BappUser(
               myDoc: userDoc,
-              image: isNullOrEmpty(images.keys)?"":images.keys.first,
+              image: isNullOrEmpty(images.keys) ? "" : images.keys.first,
               email: "",
               theNumber: contactNumber,
               name: name,
@@ -96,8 +96,9 @@ class BusinessStaff {
   }
 
   Future save() async {
+    final map = toMap();
     await branch.myDoc.value.set({
-      "staff": {name: toMap()}
+      "staff": {name: map}
     }, SetOptions(merge: true));
   }
 
@@ -114,7 +115,7 @@ class BusinessStaff {
     final snap = _userSnap ?? (await _getUserSnap());
     if (snap.exists) {
       await snap.reference.set({
-        "branches": {branch.myDoc.value.id:branch.myDoc.value},
+        "branches": {branch.myDoc.value.id: branch.myDoc.value},
         "business": branch.business.value.myDoc.value
       }, SetOptions(merge: true));
     } else {
@@ -133,8 +134,6 @@ class BusinessStaff {
   }
 
   void _fromJson(Map<String, dynamic> j) {
-
-
     role = EnumToString.fromString(UserType.values, j["role"]);
     name = j["name"];
     dateOfJoining = (j["dateOfJoining"] as Timestamp).toDate();
@@ -144,6 +143,7 @@ class BusinessStaff {
     images = {for (var v in j["images"]) v as String: true} ?? {};
     rating = (j["rating"]).toDouble() ?? 0;
   }
+
   BusinessStaff.fromJson({@required this.branch, Map<String, dynamic> j}) {
     _fromJson(j);
   }

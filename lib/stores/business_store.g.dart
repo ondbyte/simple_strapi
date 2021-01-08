@@ -59,7 +59,8 @@ mixin _$BusinessStore on _BusinessStore, Store {
 
   @override
   Future<dynamic> applyForBusiness(
-      {GeoPoint latlong,
+      {String ownerName,
+      GeoPoint latlong,
       String address,
       String businessName,
       String contactNumber,
@@ -67,6 +68,7 @@ mixin _$BusinessStore on _BusinessStore, Store {
       String type,
       @required bool onBoard}) {
     return _$applyForBusinessAsyncAction.run(() => super.applyForBusiness(
+        ownerName: ownerName,
         latlong: latlong,
         address: address,
         businessName: businessName,

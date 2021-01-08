@@ -325,7 +325,8 @@ class BusinessBranch {
       String name,
       DateTime dateOfJoining,
       Map<String, bool> images,
-      List<String> expertise}) async {
+      List<String> expertise,
+      bool updateForUser = true}) async {
     final imgs = await uploadImagesToStorageAndReturnStringList(images);
     final s = BusinessStaff(
       contactNumber: userPhoneNumber,
@@ -337,8 +338,11 @@ class BusinessBranch {
       images: imgs,
     );
     await s.save();
-    await s.updateForUser();
+    if (updateForUser) {
+      await s.updateForUser();
+    }
     staff.add(s);
+    await saveBranch();
   }
 
   Future removeAStaff(BusinessStaff s) async {
