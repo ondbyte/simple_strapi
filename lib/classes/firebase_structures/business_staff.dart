@@ -4,6 +4,7 @@ import 'package:bapp/classes/firebase_structures/bapp_user.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/exceptions.dart';
 import 'package:bapp/helpers/extensions.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/foundation.dart';
@@ -70,7 +71,7 @@ class BusinessStaff {
               BappUser.newReference(docName: contactNumber.internationalNumber);
           final user = BappUser(
               myDoc: userDoc,
-              image: images?.keys?.first ?? "",
+              image: isNullOrEmpty(images.keys)?"":images.keys.first,
               email: "",
               theNumber: contactNumber,
               name: name,

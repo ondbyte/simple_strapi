@@ -56,14 +56,15 @@ abstract class _BusinessStore with Store {
   }
 
   @action
-  Future applyForBusiness(
-      {GeoPoint latlong,
-      String address,
-      String businessName,
-      String contactNumber,
-      BusinessCategory category,
-      String type,
-      bool onBoard = false}) async {
+  Future applyForBusiness({
+    GeoPoint latlong,
+    String address,
+    String businessName,
+    String contactNumber,
+    BusinessCategory category,
+    String type,
+    @required bool onBoard,
+  }) async {
     ///create the first branch
     businessDoc = _fireStore.doc(
         "businesses/${onBoard ? contactNumber : FirebaseAuth.instance.currentUser.uid}");
@@ -81,6 +82,7 @@ abstract class _BusinessStore with Store {
     );
 
     BappUser user;
+
     if (onBoard) {
       user = await _allStore
           .get<CloudStore>()
@@ -88,33 +90,34 @@ abstract class _BusinessStore with Store {
       if (isNullOrEmpty(user)) {
         user = BappUser(
           myDoc: BappUser.newReference(docName: contactNumber),
-          theNumber: TheCountryNumber().parseNumber(internationalNumber: contactNumber),
+          theNumber: TheCountryNumber()
+              .parseNumber(internationalNumber: contactNumber),
           userType: UserType.customer,
-          alterEgo: UserType.customer
+          alterEgo: UserType.customer,
         );
       }
     } else {
       user = _allStore.get<CloudStore>().bappUser;
     }
 
-    user?.addBranch(
+    await user.addBranch(
       business: ap,
       branchName: businessName,
       imagesWithFiltered: {},
       pickedLocation: PickedLocation(latlong, address),
     );
 
+    user = user.updateWith(alterEgo: UserType.businessOwner);
+
+    await user.save();
+
     await ap.saveBusiness();
 
-    _allStore.get<CloudStore>().bappUser = _allStore
-        .get<CloudStore>()
-        .bappUser
-        .updateWith(alterEgo: UserType.businessOwner);
-
-    _allStore.get<CloudStore>().bappUser.save();
-
-    if(!onBoard){
+    if (!onBoard) {
       business = ap;
+      _allStore.get<CloudStore>().bappUser = user;
+    } else {
+      user = null;
     }
   }
 
@@ -127,6 +130,10 @@ abstract class _BusinessStore with Store {
     }
     cloudStore.bappUser.business.snapshots().listen(
       (event) async {
+        final data = event.data();
+        if (isNullOrEmpty(data)) {
+          return;
+        }
         business = BusinessDetails.fromJson(event.data());
         final filtered = business.branches.value
             .where(

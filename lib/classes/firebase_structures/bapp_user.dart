@@ -81,7 +81,7 @@ class BappUser {
       fcmToken: fcmToken ?? this.fcmToken,
       selectedBranch: selectedBranch ??
           (this.selectedBranch ??
-              (this.branches.values.isNotEmpty
+              (!isNullOrEmpty(this.branches)
                   ? this.branches.values.first
                   : null)),
     );
@@ -149,6 +149,7 @@ class BappUser {
     BusinessDetails business,
     String branchName,
     PickedLocation pickedLocation,
+    String ownerName,
     Map<String, bool> imagesWithFiltered,
   }) async {
     final b = await business.addABranch(
@@ -156,6 +157,17 @@ class BappUser {
       pickedLocation: pickedLocation,
       imagesWithFiltered: imagesWithFiltered,
     );
+    await b.addAStaff(
+      dateOfJoining: DateTime.now(),
+      expertise: [],
+      images: {},
+      role: UserType.businessOwner,
+      name: ownerName,
+      userPhoneNumber: TheCountryNumber().parseNumber(
+        internationalNumber: business.contactNumber.value,
+      ),
+    );
+    await b.saveBranch();
     await myDoc.set(
       {
         "branches": {b.myDoc.value.id: b.myDoc.value}

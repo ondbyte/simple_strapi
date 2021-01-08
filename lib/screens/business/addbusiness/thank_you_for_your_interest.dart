@@ -19,7 +19,8 @@ class ThankYouForYourInterestScreen extends StatefulWidget {
   final BusinessCategory category;
   final bool onBoard;
 
-  const ThankYouForYourInterestScreen({Key key, this.category, this.onBoard = false})
+  const ThankYouForYourInterestScreen(
+      {Key key, this.category, this.onBoard = false})
       : super(key: key);
   @override
   _ThankYouForYourInterestScreenState createState() =>
@@ -31,7 +32,7 @@ class _ThankYouForYourInterestScreenState
   TheNumber _validNumber;
   PickedLocation _pickedLocation;
   bool _shake = false;
-  String _businessName = "";
+  String _businessName = "", _ownerName = "";
   String _genderSpecific = "";
   final _key = GlobalKey<FormState>();
 
@@ -54,15 +55,39 @@ class _ThankYouForYourInterestScreenState
                     sliver: SliverList(
                       delegate: SliverChildListDelegate([
                         Text(
-                          widget.onBoard?"Add other details":"Thank you for your interest",
+                          widget.onBoard
+                              ? "Add other details"
+                              : "Thank you for your interest",
                           style: Theme.of(context).textTheme.headline1,
                         ),
                         SizedBox(
                           height: 10,
                         ),
                         Text(
-                          widget.onBoard?"Business will be made draft on Bapp":"Please send us below information and we will on-board you as quickly as possible",
+                          widget.onBoard
+                              ? "Business will be made draft on Bapp"
+                              : "Please send us below information and we will on-board you as quickly as possible",
                           style: Theme.of(context).textTheme.bodyText1,
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        TextFormField(
+                          onChanged: (s) {
+                            setState(() {
+                              _ownerName = s;
+                            });
+                          },
+                          validator: (s) {
+                            if (s.length < 3) {
+                              return "Enter a valid name";
+                            }
+                            return null;
+                          },
+                          decoration: InputDecoration(
+                            labelText:
+                            "Name of owner",
+                          ),
                         ),
                         SizedBox(
                           height: 20,
@@ -80,7 +105,8 @@ class _ThankYouForYourInterestScreenState
                             return null;
                           },
                           decoration: InputDecoration(
-                            labelText: "Name of ${widget.onBoard?"the":"your"} business",
+                            labelText:
+                            "Name of ${widget.onBoard ? "the" : "your"} business",
                           ),
                         ),
                         const SizedBox(
@@ -93,7 +119,7 @@ class _ThankYouForYourInterestScreenState
                           },
                           validator: (s) {
                             if (s == null || s.isEmpty) {
-                              return "Select a specific gender ${widget.onBoard?"the":"your"} business serve";
+                              return "Select a specific gender ${widget.onBoard ? "the" : "your"} business serve";
                             }
                             return null;
                           },
@@ -117,10 +143,14 @@ class _ThankYouForYourInterestScreenState
                         ),
                         InitWidget(
                           initializer: () {
-                            _validNumber = widget.onBoard?cloudStore.theNumber.removeNumber():cloudStore.theNumber;
+                            _validNumber = widget.onBoard
+                                ? cloudStore.theNumber.removeNumber()
+                                : cloudStore.theNumber;
                           },
                           child: TheCountryNumberInput(
-                            widget.onBoard?cloudStore.theNumber.removeNumber():cloudStore.theNumber,
+                            widget.onBoard
+                                ? cloudStore.theNumber.removeNumber()
+                                : cloudStore.theNumber,
                             customValidator: (tn) {
                               if (tn == null) {
                                 return "Enter a valid number";
@@ -153,7 +183,8 @@ class _ThankYouForYourInterestScreenState
                             );
                           },
                           child: WheresItLocatedTileWidget(
-                            title: "Where is ${widget.onBoard?"the":"your"} business located",
+                            title:
+                                "Where is ${widget.onBoard ? "the" : "your"} business located",
                             caption: "Pick a location",
                             onPickLocation: (p) {
                               _pickedLocation = p;
@@ -176,7 +207,9 @@ class _ThankYouForYourInterestScreenState
               BappNavigator.pushAndRemoveAll(
                 context,
                 ContextualMessageScreen(
-                  message: widget.onBoard?"Business added to draft":"Thank you, we\'ll reach you out soon",
+                  message: widget.onBoard
+                      ? "Business added to draft"
+                      : "Thank you, we\'ll reach you out soon",
                   init: () async {
                     final tmp =
                         await Provider.of<BusinessStore>(context, listen: false)
@@ -187,6 +220,7 @@ class _ThankYouForYourInterestScreenState
                       contactNumber: _validNumber.internationalNumber,
                       category: widget.category,
                       type: _genderSpecific,
+                      onBoard: widget.onBoard,
                     );
                     return tmp;
                   },

@@ -142,6 +142,7 @@ class BusinessDetails {
     String branchName,
     PickedLocation pickedLocation,
     Map<String, bool> imagesWithFiltered,
+
   }) async {
     final imgs =
         await uploadImagesToStorageAndReturnStringList(imagesWithFiltered);
@@ -165,18 +166,6 @@ class BusinessDetails {
       ..businessTimings.value = BusinessTimings.empty()
       ..businessServices.value = BusinessServices.empty()
       ..type.value = type.value;
-
-    await branch.addAStaff(
-      dateOfJoining: DateTime.now(),
-      expertise: [],
-      images: {},
-      role: UserType.businessOwner,
-      name: FirebaseAuth.instance.currentUser.displayName,
-      userPhoneNumber: TheCountryNumber().parseNumber(
-        internationalNumber: FirebaseAuth.instance.currentUser.phoneNumber,
-      ),
-    );
-    await branch.saveBranch();
 
     final old = branches.value;
     act(() {

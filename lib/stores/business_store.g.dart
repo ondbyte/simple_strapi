@@ -65,7 +65,7 @@ mixin _$BusinessStore on _BusinessStore, Store {
       String contactNumber,
       BusinessCategory category,
       String type,
-      bool onBoard = false}) {
+      @required bool onBoard}) {
     return _$applyForBusinessAsyncAction.run(() => super.applyForBusiness(
         latlong: latlong,
         address: address,

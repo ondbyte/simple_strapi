@@ -36,17 +36,19 @@
 				<string>com.googleusercontent.apps</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.784979675891-d4nq40oi9b8bpt12itp3f8bh6oul51l4</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-	<key>NSCameraUsageDescription</key>
-	<string>We access camera so you can personalize your profile</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Video capture requires audio too</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We access photos so you can personalize your profile</string>
 	<key>NSAppleMusicUsageDescription</key>
 	<string>This will help the users to find playlists based on themes</string>
 	<key>NSCalendarsUsageDescription</key>
@@ -83,6 +85,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	
 </dict>
 </plist>
