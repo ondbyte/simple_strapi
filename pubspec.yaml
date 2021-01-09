@@ -91,6 +91,8 @@ dev_dependencies:
   test: ^1.15.5
   flutter_launcher_icons: ^0.8.1
   pedantic: ^1.0.0
+  dart_flavour:
+    path: /Users/apple/Desktop/source_given_to_me/Git/flavorize/dart_flavour
   
 
 
