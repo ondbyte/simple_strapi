@@ -178,7 +178,7 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
                         pickedLocation: _pickedLocation,
                         imagesWithFiltered: _filteredExistingImages,
                       );
-                      await branch.addAStaff(
+                      final staff = await branch.addAStaff(
                         dateOfJoining: DateTime.now(),
                         expertise: [],
                         images: {},
@@ -188,6 +188,9 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
                           internationalNumber: business.contactNumber.value,
                         ),
                       );
+                      await branch.saveBranch();
+                      await staff.updateForUser();
+                      await staff.save();
                       BappNavigator.pop(context, null);
                     },
             ),

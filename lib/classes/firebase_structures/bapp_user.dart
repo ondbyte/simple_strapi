@@ -157,14 +157,7 @@ class BappUser {
       pickedLocation: pickedLocation,
       imagesWithFiltered: imagesWithFiltered,
     );
-
-    await b.saveBranch();
-    await myDoc.set(
-      {
-        "branches": {b.myDoc.value.id: b.myDoc.value}
-      },
-      SetOptions(merge: true),
-    );
+    branches.addAll({b.myDoc.value.id:b.myDoc.value});
     return b;
   }
 }

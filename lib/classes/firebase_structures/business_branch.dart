@@ -319,14 +319,13 @@ class BusinessBranch {
     await myDoc.value.set(toMap());
   }
 
-  Future addAStaff(
+  Future<BusinessStaff> addAStaff(
       {UserType role,
       TheNumber userPhoneNumber,
       String name,
       DateTime dateOfJoining,
       Map<String, bool> images,
-      List<String> expertise,
-      bool updateForUser = true}) async {
+      List<String> expertise,}) async {
     final imgs = await uploadImagesToStorageAndReturnStringList(images);
     final s = BusinessStaff(
       contactNumber: userPhoneNumber,
@@ -337,12 +336,8 @@ class BusinessBranch {
       expertise: expertise,
       images: imgs,
     );
-    await s.save();
-    if (updateForUser) {
-      await s.updateForUser();
-    }
     staff.add(s);
-    await saveBranch();
+    return s;
   }
 
   Future removeAStaff(BusinessStaff s) async {

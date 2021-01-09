@@ -90,6 +90,8 @@ abstract class _BusinessStore with Store {
           .getUserForNumber(number: contactNumber);
       if (isNullOrEmpty(user)) {
         user = BappUser(
+          branches: {},
+          business: ap.myDoc.value,
           myDoc: BappUser.newReference(docName: contactNumber),
           theNumber: TheCountryNumber()
               .parseNumber(internationalNumber: contactNumber),
@@ -108,7 +110,7 @@ abstract class _BusinessStore with Store {
       pickedLocation: PickedLocation(latlong, address),
     );
 
-    await b.addAStaff(
+    final staff = await b.addAStaff(
       dateOfJoining: DateTime.now(),
       expertise: [],
       images: {},
@@ -117,14 +119,17 @@ abstract class _BusinessStore with Store {
       userPhoneNumber: TheCountryNumber().parseNumber(
         internationalNumber: ap.contactNumber.value,
       ),
-      updateForUser: !onBoard,
     );
 
     user = user.updateWith(alterEgo: UserType.businessOwner);
 
-    await user.save();
+    await b.saveBranch();
 
     await ap.saveBusiness();
+
+    await user.save();
+
+    await staff.save();
 
     if (!onBoard) {
       business = ap;

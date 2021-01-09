@@ -204,4 +204,5 @@ class BusinessDetails {
     }
     return false;
   }
+
 }

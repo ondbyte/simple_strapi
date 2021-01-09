@@ -279,7 +279,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                                   assert(
                                       _theNumber?.internationalNumber != null,
                                       "number missing");
-                                  await branch.addAStaff(
+                                  final staff = await branch.addAStaff(
                                     userPhoneNumber: _theNumber,
                                     name: _staff.name,
                                     role: _staff.role,
@@ -287,6 +287,8 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                                     images: _staff.images,
                                     expertise: _staff.expertise,
                                   );
+                                  await staff.updateForUser();
+                                  await staff.save();
                                   BappNavigator.pop(context, null);
                                   act(() {
                                     kLoading.value = false;
