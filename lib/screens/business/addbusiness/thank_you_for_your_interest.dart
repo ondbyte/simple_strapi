@@ -68,25 +68,27 @@ class _ThankYouForYourInterestScreenState
                               : "Please send us below information and we will on-board you as quickly as possible",
                           style: Theme.of(context).textTheme.bodyText1,
                         ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        TextFormField(
-                          onChanged: (s) {
-                            setState(() {
-                              _ownerName = s;
-                            });
-                          },
-                          validator: (s) {
-                            if (s.length < 3) {
-                              return "Enter a valid name";
-                            }
-                            return null;
-                          },
-                          decoration: InputDecoration(
-                            labelText: "Name of owner",
+                        if (widget.onBoard)
+                          SizedBox(
+                            height: 20,
                           ),
-                        ),
+                        if (widget.onBoard)
+                          TextFormField(
+                            onChanged: (s) {
+                              setState(() {
+                                _ownerName = s;
+                              });
+                            },
+                            validator: (s) {
+                              if (s.length < 3) {
+                                return "Enter a valid name";
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              labelText: "Name of owner",
+                            ),
+                          ),
                         SizedBox(
                           height: 20,
                         ),
@@ -209,9 +211,12 @@ class _ThankYouForYourInterestScreenState
                       ? "Business added to draft"
                       : "Thank you, we\'ll reach you out soon",
                   init: () async {
-                    final tmp =
-                        await Provider.of<BusinessStore>(context, listen: false)
-                            .applyForBusiness(
+                    final businesStore = await Provider.of<BusinessStore>(
+                        context,
+                        listen: false);
+                    final cloudStore =
+                        await Provider.of<CloudStore>(context, listen: false);
+                    final tmp = businesStore.applyForBusiness(
                       latlong: _pickedLocation.latLong,
                       address: _pickedLocation.address,
                       businessName: _businessName,
@@ -219,7 +224,9 @@ class _ThankYouForYourInterestScreenState
                       category: widget.category,
                       type: _genderSpecific,
                       onBoard: widget.onBoard,
-                      ownerName: _ownerName,
+                      ownerName: widget.onBoard
+                          ? _ownerName
+                          : cloudStore.bappUser.name,
                     );
                     return tmp;
                   },
