@@ -1,0 +1,11 @@
+{
+  "files_to_flavorize": {
+    "demo_file":"./flavors/demo.txt"
+  },
+  "flavor_one":{
+    "demo_file":"./flavors/demo_flavor_one.txt"
+  },
+  "flavor_two":{
+    "demo_file":"./flavors/demo_flavor_two.txt"
+  }
+}
