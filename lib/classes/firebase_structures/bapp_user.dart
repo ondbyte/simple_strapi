@@ -93,7 +93,7 @@ class BappUser {
       "email": email ?? "",
       "name": name ?? "",
       "image": image ?? "",
-      "business": business,
+      "business": branches.isNotEmpty?branches.values.first:business,
       "branches": branches ?? {},
       "userType": EnumToString.convertToString(userType.value),
       "alterEgo": EnumToString.convertToString(alterEgo.value),
@@ -158,7 +158,6 @@ class BappUser {
       imagesWithFiltered: imagesWithFiltered,
     );
     branches.addAll({b.myDoc.value.id: b.myDoc.value});
-    business = business;
     return b;
   }
 }

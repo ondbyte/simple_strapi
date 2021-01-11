@@ -178,6 +178,7 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
                         pickedLocation: _pickedLocation,
                         imagesWithFiltered: _filteredExistingImages,
                       );
+                      await bappUser.save();
                       final staff = await branch.addAStaff(
                         dateOfJoining: DateTime.now(),
                         expertise: [],
