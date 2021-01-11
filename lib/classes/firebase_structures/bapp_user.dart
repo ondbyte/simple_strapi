@@ -157,7 +157,8 @@ class BappUser {
       pickedLocation: pickedLocation,
       imagesWithFiltered: imagesWithFiltered,
     );
-    branches.addAll({b.myDoc.value.id:b.myDoc.value});
+    branches.addAll({b.myDoc.value.id: b.myDoc.value});
+    business = business;
     return b;
   }
 }
