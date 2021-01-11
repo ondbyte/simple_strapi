@@ -4,6 +4,7 @@ import 'package:bapp/classes/firebase_structures/bapp_fcm_message.dart';
 import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/config/config_data_types.dart';
+import 'package:bapp/config/constants.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info/device_info.dart';
@@ -217,4 +218,13 @@ Future sendUpdatesForBooking(BusinessBooking booking) async {
 
 String readableEnum(dynamic value) {
   return EnumToString.convertToString(value).split(r"(?=[A-Z])").join(" ");
+}
+
+void documentIntegrityError(e, s, data) {
+  Helper.printLog(kDocumenIntegrityError);
+  Helper.printLog("Document data/snap is");
+  Helper.printLog("$data");
+  Helper.printLog("Error and StackTrace");
+  Helper.printLog("$e");
+  Helper.printLog("$s");
 }

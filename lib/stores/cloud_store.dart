@@ -278,7 +278,7 @@ abstract class _CloudStore with Store {
               service =
                   null; //BusinessService.fromJson(entry.value["businessService"]);
             }
-            if (business != null || branch != null || service != null) {
+            if (business.valid || branch.valid || service != null) {
               favorites.add(
                 Favorite(
                   id: key,
@@ -494,26 +494,36 @@ abstract class _CloudStore with Store {
     if (forSnapShot != null) {
       final businessRef = forSnapShot["business"];
       final business = await getBusiness(reference: businessRef);
+      if (business.notValid) {
+        return NotBusinessBranch();
+      }
       final branch =
           BusinessBranch.fromSnapShot(forSnapShot, business: business);
-      branches.addAll({forSnapShot.reference: branch});
+      if (branch.valid) {
+        branches.addAll({forSnapShot.reference: branch});
+      }
       return branch;
     }
     if (branches.containsKey(reference)) {
       return branches[reference];
     }
     if (reference == null) {
-      return null;
+      return NotBusinessBranch();
     }
     final snap = await reference.get();
     if (snap.exists) {
       final businessRef = snap.data()["business"];
       final business = await getBusiness(reference: businessRef);
+      if (business.notValid) {
+        return NotBusinessBranch();
+      }
       final branch = BusinessBranch.fromSnapShot(snap, business: business);
-      branches.addAll({reference: branch});
+      if (branch.valid) {
+        branches.addAll({reference: branch});
+      }
       return branch;
     }
-    return null;
+    return NotBusinessBranch();
   }
 
   Future<BusinessDetails> getBusiness(
@@ -522,7 +532,9 @@ abstract class _CloudStore with Store {
 
     if (forData != null) {
       final business = BusinessDetails.fromJson(forData);
-      businesses.addAll({reference: business});
+      if (business.valid) {
+        businesses.addAll({reference: business});
+      }
       completer.complete(business);
     } else if (businesses.containsKey(reference)) {
       return businesses[reference];
@@ -530,7 +542,9 @@ abstract class _CloudStore with Store {
       final snap = await reference.get();
       final data = snap.data();
       final business = BusinessDetails.fromJson(data);
-      businesses.addAll({reference: business});
+      if (business.valid) {
+        businesses.addAll({reference: business});
+      }
       completer.complete(business);
     }
 
@@ -538,23 +552,26 @@ abstract class _CloudStore with Store {
   }
 
   Future<List<BusinessBranch>> getNearestFeatured() async {
-    final collec = FirebaseFirestore.instance
-        .collection("businesses");
-    var query = collec.where("assignedAddress.iso2", isEqualTo: bappUser.address.iso2);
+    final collec = FirebaseFirestore.instance.collection("businesses");
+    var query =
+        collec.where("assignedAddress.iso2", isEqualTo: bappUser.address.iso2);
     if (!isNullOrEmpty(bappUser.address.locality)) {
       query = query.where(
         "assignedAddress.locality",
         isEqualTo: bappUser.address.locality,
       );
     }
-    query = query.where("status", isEqualTo: "published")
+    query = query
+        .where("status", isEqualTo: "published")
         .where("assignedAddress.city", isEqualTo: bappUser.address.city);
     final snaps = await query.get();
     final _branches = <BusinessBranch>[];
     if (snaps.docs.isNotEmpty) {
       await Future.forEach<QueryDocumentSnapshot>(snaps.docs, (doc) async {
         final branch = await getBranch(forSnapShot: doc);
-        _branches.add(branch);
+        if (branch.valid) {
+          _branches.add(branch);
+        }
       });
     }
     return _branches;
@@ -580,7 +597,10 @@ abstract class _CloudStore with Store {
     }
     final list = <BusinessBranch>[];
     await Future.forEach<DocumentSnapshot>(snaps.docs, (snap) async {
-      list.add(await getBranch(forSnapShot: snap));
+      final branch = await getBranch(forSnapShot: snap);
+      if (branch.valid) {
+        list.add(branch);
+      }
     });
     return list;
   }
@@ -596,11 +616,15 @@ abstract class _CloudStore with Store {
                 EnumToString.fromString(FavoriteType.values, v["type"]);
             if (type == FavoriteType.business) {
               final business = await getBusiness(reference: v["business"]);
-              favorites.add(Favorite(business: business, type: type, id: k));
+              if (business.valid) {
+                favorites.add(Favorite(business: business, type: type, id: k));
+              }
             } else if (type == FavoriteType.businessBranch) {
               final branch = await getBranch(reference: v["businessBranch"]);
-              favorites
-                  .add(Favorite(businessBranch: branch, type: type, id: k));
+              if (branch.valid) {
+                favorites
+                    .add(Favorite(businessBranch: branch, type: type, id: k));
+              }
             } else if (type == FavoriteType.businessService) {
               favorites.add(Favorite(
                   businessService:

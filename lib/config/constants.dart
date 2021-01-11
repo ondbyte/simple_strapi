@@ -53,3 +53,5 @@ class BappFunctionsResponse {
 }
 
 final kBus = EventBus();
+
+const kDocumenIntegrityError = "document integrity error";

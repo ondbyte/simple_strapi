@@ -82,7 +82,7 @@ mixin _$BusinessStore on _BusinessStore, Store {
       AsyncAction('_BusinessStore.getMyBusiness');
 
   @override
-  Future<dynamic> getMyBusiness() {
+  Future<bool> getMyBusiness() {
     return _$getMyBusinessAsyncAction.run(() => super.getMyBusiness());
   }
 

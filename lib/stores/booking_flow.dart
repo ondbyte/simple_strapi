@@ -131,8 +131,10 @@ class BookingFlow {
       for (var booking in bookingSnaps.docs) {
         final cloudStore = _allStore.get<CloudStore>();
         final b = await cloudStore.getBranch(reference: booking["branch"]);
-        final bkin = BusinessBooking.fromSnapShot(snap: booking, branch: b);
-        _bookings.add(bkin);
+        if (b.valid) {
+          final bkin = BusinessBooking.fromSnapShot(snap: booking, branch: b);
+          _bookings.add(bkin);
+        }
       }
       myBookings.clear();
       myBookings.addAll(_bookings);
@@ -184,9 +186,11 @@ class BookingFlow {
               final cloudStore = _allStore.get<CloudStore>();
               final b =
                   await cloudStore.getBranch(reference: booking["branch"]);
-              bbookings.add(
-                BusinessBooking.fromSnapShot(snap: booking, branch: b),
-              );
+              if (b.valid) {
+                bbookings.add(
+                  BusinessBooking.fromSnapShot(snap: booking, branch: b),
+                );
+              }
             },
           );
           branchBookings.clear();

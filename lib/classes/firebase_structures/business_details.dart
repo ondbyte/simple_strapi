@@ -1,19 +1,17 @@
+import 'package:bapp/classes/firebase_structures/base_structure.dart';
 import 'package:bapp/classes/firebase_structures/business_holidays.dart';
 import 'package:bapp/classes/firebase_structures/business_services.dart';
 import 'package:bapp/classes/firebase_structures/business_timings.dart';
-import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
-import 'package:the_country_number/the_country_number.dart';
 
 import 'business_branch.dart';
 import 'business_category.dart';
 
-class BusinessDetails {
+class BusinessDetails with BaseStructure {
   final category = Observable<BusinessCategory>(null);
   final Observable<String> businessName = Observable<String>("");
   final Observable<String> contactNumber = Observable<String>("");
@@ -63,7 +61,7 @@ class BusinessDetails {
     );
   }
 
-  BusinessDetails.from({
+  BusinessDetails({
     String businessName = "",
     String contactNumber = "",
     String address = "",
@@ -97,7 +95,7 @@ class BusinessDetails {
     this.selectedBranch.value = BusinessBranch.fromJson(data.data());
   } */
 
-  BusinessDetails.fromJson(Map<String, dynamic> j) {
+  BusinessDetails._fromJson(Map<String, dynamic> j) {
     category.value = BusinessCategory.fromJson(j["businessCategory"]);
     businessName.value = j["businessName"] as String;
     contactNumber.value = j["contactNumber"] as String;
@@ -112,6 +110,16 @@ class BusinessDetails {
     type.value = j["type"];
 
     setupReactions();
+  }
+
+  static BusinessDetails fromJson(Map<String, dynamic> j) {
+    try {
+      final instance = BusinessDetails._fromJson(j);
+      return instance;
+    } catch (e, s) {
+      documentIntegrityError(e, s, j);
+      return NotBusinessDetails();
+    }
   }
 
   Map<String, dynamic> toMap() {
@@ -142,7 +150,6 @@ class BusinessDetails {
     String branchName,
     PickedLocation pickedLocation,
     Map<String, bool> imagesWithFiltered,
-
   }) async {
     final imgs =
         await uploadImagesToStorageAndReturnStringList(imagesWithFiltered);
@@ -204,5 +211,9 @@ class BusinessDetails {
     }
     return false;
   }
+}
 
+class NotBusinessDetails extends BusinessDetails {
+  @override
+  bool get valid => false;
 }

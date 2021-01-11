@@ -93,7 +93,7 @@ class BappUser {
       "email": email ?? "",
       "name": name ?? "",
       "image": image ?? "",
-      "business": branches.isNotEmpty?branches.values.first:business,
+      "business": business,
       "branches": branches ?? {},
       "userType": EnumToString.convertToString(userType.value),
       "alterEgo": EnumToString.convertToString(alterEgo.value),

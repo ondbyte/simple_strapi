@@ -70,7 +70,7 @@ abstract class _BusinessStore with Store {
     businessDoc = _fireStore.doc(
         "businesses/${onBoard ? contactNumber : FirebaseAuth.instance.currentUser.uid}");
 
-    final ap = BusinessDetails.from(
+    final ap = BusinessDetails(
       businessName: businessName,
       address: address,
       category: category,
@@ -110,6 +110,8 @@ abstract class _BusinessStore with Store {
       pickedLocation: PickedLocation(latlong, address),
     );
 
+    user = user.updateWith(business: businessDoc);
+
     final staff = await b.addAStaff(
       dateOfJoining: DateTime.now(),
       expertise: [],
@@ -139,8 +141,32 @@ abstract class _BusinessStore with Store {
     }
   }
 
+  Future<bool> _ownOnboardedBusiness() async {
+    final bappUser = _allStore.get<CloudStore>().bappUser;
+    final ref = FirebaseFirestore.instance
+        .collection("businesses")
+        .doc(FirebaseAuth.instance.currentUser.phoneNumber);
+    final snap = await ref.get();
+    if (snap.exists) {
+      final newRef = FirebaseFirestore.instance
+          .collection("businesses")
+          .doc(FirebaseAuth.instance.currentUser.uid);
+      final data = snap.data();
+      final branches = data["branches"];
+      await (branches.first as DocumentReference)
+          .set({"business": newRef}, SetOptions(merge: true));
+      await newRef.set(snap.data());
+      _allStore.get<CloudStore>().bappUser =
+          bappUser.updateWith(business: newRef);
+      await _allStore.get<CloudStore>().bappUser.save();
+      await ref.delete();
+      return getMyBusiness();
+    }
+    return true;
+  }
+
   @action
-  Future getMyBusiness() async {
+  Future<bool> getMyBusiness() async {
     final completer = Completer<bool>();
     final cloudStore = _allStore.get<CloudStore>();
     if (isNullOrEmpty(cloudStore.bappUser?.branches)) {
@@ -148,11 +174,20 @@ abstract class _BusinessStore with Store {
     }
     cloudStore.bappUser.business.snapshots().listen(
       (event) async {
+        if (event.id == cloudStore.bappUser.theNumber.internationalNumber) {
+          completer.cautiousComplete(_ownOnboardedBusiness());
+          return;
+        }
         final data = event.data();
         if (isNullOrEmpty(data)) {
           return;
         }
         business = BusinessDetails.fromJson(event.data());
+        if (business.notValid) {
+          business = null;
+          completer.cautiousComplete(true);
+          return;
+        }
         final filtered = business.branches.value
             .where(
               (element) => cloudStore.bappUser.branches.values

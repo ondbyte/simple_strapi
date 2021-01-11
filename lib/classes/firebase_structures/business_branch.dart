@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bapp/classes/firebase_structures/base_structure.dart';
 import 'package:bapp/helpers/exceptions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
@@ -19,7 +20,7 @@ import 'business_services.dart';
 import 'business_staff.dart';
 import 'business_timings.dart';
 
-class BusinessBranch {
+class BusinessBranch with BaseStructure {
   final myDoc = Observable<DocumentReference>(null);
 
   final images = ObservableMap<String, bool>();
@@ -191,7 +192,17 @@ class BusinessBranch {
     _pulled.cautiousComplete(true);
   }
 
-  BusinessBranch.fromSnapShot(DocumentSnapshot snap,
+  static BusinessBranch fromSnapShot(DocumentSnapshot snap,
+      {@required BusinessDetails business}) {
+    try {
+      return BusinessBranch._fromSnapShot(snap, business: business);
+    } catch (e, s) {
+      documentIntegrityError(e, s, snap);
+      return NotBusinessBranch();
+    }
+  }
+
+  BusinessBranch._fromSnapShot(DocumentSnapshot snap,
       {@required BusinessDetails business}) {
     this.business.value = business;
     myDoc.value = snap.reference;
@@ -201,7 +212,7 @@ class BusinessBranch {
   void _fromJson(Map<String, dynamic> j) {
     images.addAll(
       Map.fromEntries(
-        List.castFrom(j["images"]).map(
+        List.castFrom(j["images"] ?? []).map(
           (e) => MapEntry(e, true),
         ),
       ),
@@ -319,13 +330,14 @@ class BusinessBranch {
     await myDoc.value.set(toMap());
   }
 
-  Future<BusinessStaff> addAStaff(
-      {UserType role,
-      TheNumber userPhoneNumber,
-      String name,
-      DateTime dateOfJoining,
-      Map<String, bool> images,
-      List<String> expertise,}) async {
+  Future<BusinessStaff> addAStaff({
+    UserType role,
+    TheNumber userPhoneNumber,
+    String name,
+    DateTime dateOfJoining,
+    Map<String, bool> images,
+    List<String> expertise,
+  }) async {
     final imgs = await uploadImagesToStorageAndReturnStringList(images);
     final s = BusinessStaff(
       contactNumber: userPhoneNumber,
@@ -372,6 +384,11 @@ class BusinessBranch {
     }
     return false;
   }
+}
+
+class NotBusinessBranch extends BusinessBranch {
+  @override
+  bool get valid => false;
 }
 
 enum BusinessBranchActiveStatus {

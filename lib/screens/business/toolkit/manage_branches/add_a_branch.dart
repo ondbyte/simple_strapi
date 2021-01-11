@@ -168,7 +168,7 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
                       final business =
                           Provider.of<BusinessStore>(context, listen: false)
                               .business;
-                      final bappUser =
+                      var bappUser =
                           Provider.of<CloudStore>(context, listen: false)
                               .bappUser;
 
@@ -178,6 +178,12 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
                         pickedLocation: _pickedLocation,
                         imagesWithFiltered: _filteredExistingImages,
                       );
+
+                      bappUser =
+                          bappUser.updateWith(business: business.myDoc.value);
+
+                      Provider.of<CloudStore>(context, listen: false).bappUser =
+                          bappUser;
                       await bappUser.save();
                       final staff = await branch.addAStaff(
                         dateOfJoining: DateTime.now(),
