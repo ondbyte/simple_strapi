@@ -17,71 +17,73 @@ class _UpdatesTabState extends State<UpdatesTab> {
   int _selectedUpdateTab = 0;
   @override
   Widget build(BuildContext context) {
-    return Consumer<UpdatesStore>(
-      builder: (_, updatesStore, __) {
-        return Padding(
-          padding: EdgeInsets.all(16),
-          child: DefaultTabController(
-            length: 2,
-            child: LayoutBuilder(
-              builder: (_, cons) {
-                return Observer(
-                  builder: (_) {
-                    return Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(
-                          height: 40,
-                          child: TabBar(
-                            indicatorSize: TabBarIndicatorSize.tab,
-                            indicator: BubbleTabIndicator(
-                              indicatorHeight: 40,
-                              tabBarIndicatorSize: TabBarIndicatorSize.tab,
-                              indicatorColor: CardsColor.colors["lightGreen"],
+    return SafeArea(
+      child: Consumer<UpdatesStore>(
+        builder: (_, updatesStore, __) {
+          return Padding(
+            padding: EdgeInsets.all(16),
+            child: DefaultTabController(
+              length: 2,
+              child: LayoutBuilder(
+                builder: (_, cons) {
+                  return Observer(
+                    builder: (_) {
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            height: 40,
+                            child: TabBar(
+                              indicatorSize: TabBarIndicatorSize.tab,
+                              indicator: BubbleTabIndicator(
+                                indicatorHeight: 40,
+                                tabBarIndicatorSize: TabBarIndicatorSize.tab,
+                                indicatorColor: CardsColor.colors["lightGreen"],
+                              ),
+                              labelStyle: Theme.of(context).textTheme.headline4,
+                              labelColor: Theme.of(context).indicatorColor,
+                              unselectedLabelColor:
+                                  Theme.of(context).colorScheme.onSurface,
+                              onTap: (i) {
+                                setState(
+                                  () {
+                                    _selectedUpdateTab = i;
+                                  },
+                                );
+                              },
+                              tabs: [
+                                Tab(
+                                  text: "Updates",
+                                ),
+                                Tab(
+                                  text: "News",
+                                ),
+                              ],
                             ),
-                            labelStyle: Theme.of(context).textTheme.headline4,
-                            labelColor: Theme.of(context).indicatorColor,
-                            unselectedLabelColor:
-                                Theme.of(context).colorScheme.onSurface,
-                            onTap: (i) {
-                              setState(
-                                () {
-                                  _selectedUpdateTab = i;
-                                },
-                              );
-                            },
-                            tabs: [
-                              Tab(
-                                text: "Updates",
-                              ),
-                              Tab(
-                                text: "News",
-                              ),
-                            ],
                           ),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
-                        SizedBox(
-                          height: cons.maxHeight - 64,
-                          child: IndexedStack(
-                            index: _selectedUpdateTab,
-                            children: [
-                              _getUpdates(updatesStore.updates),
-                              _getNews(updatesStore.news),
-                            ],
+                          SizedBox(
+                            height: 20,
                           ),
-                        )
-                      ],
-                    );
-                  },
-                );
-              },
+                          SizedBox(
+                            height: cons.maxHeight - 64,
+                            child: IndexedStack(
+                              index: _selectedUpdateTab,
+                              children: [
+                                _getUpdates(updatesStore.updates),
+                                _getNews(updatesStore.news),
+                              ],
+                            ),
+                          )
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -173,9 +175,8 @@ class NotificationUpdateTileWidget extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(6),
-        color:
-            CardsColor.next(uid: update.myDoc.id)
-                .withOpacity(update.read?0.4:1),
+        color: CardsColor.next(uid: update.myDoc.id)
+            .withOpacity(update.read ? 0.4 : 1),
       ),
       padding: EdgeInsets.all(10),
       child: Column(

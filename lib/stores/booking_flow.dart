@@ -13,6 +13,7 @@ import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mobx/mobx.dart';
 import 'package:the_country_number/the_country_number.dart';
@@ -201,6 +202,28 @@ class BookingFlow {
         }
       },
     );
+  }
+
+  final ratedBookings = ObservableList<BusinessBooking>();
+  Future getRatedBookings() async {
+    final completer = Completer<bool>();
+    var q = FirebaseFirestore.instance
+        .collection("bookings")
+        .where("branch", isEqualTo: branch?.myDoc?.value)
+        .where("rating.bookingRatingPhase",
+        isNotEqualTo:EnumToString.convertToString(BookingRatingPhase.notRated)).limit(20);
+    final list = <BusinessBooking>[];
+    q.snapshots().listen((snaps) {
+      if(snaps.docs.isNotEmpty){
+        list.addAll(snaps.docs.map((e) => BusinessBooking.fromSnapShot(snap: e, branch: branch)).toList());
+        ratedBookings.clear();
+        ratedBookings.addAll(list);
+        completer.cautiousComplete(true);
+      } else {
+        completer.cautiousComplete(true);
+      }
+    });
+    return completer.future;
   }
 
   void _filterStaffAndBookings() {
@@ -473,5 +496,11 @@ class BookingFlow {
             (element.rating.bookingRatingPhase.value ==
                 BookingRatingPhase.notRated))
         .toList();
+  }
+
+  List<CompleteBookingRating> getSelectedBranchReviews(){
+    final list = <CompleteBookingRating>[];
+    list.addAll(branchBookings.map((booking) => booking.rating).toList());
+    return list;
   }
 }

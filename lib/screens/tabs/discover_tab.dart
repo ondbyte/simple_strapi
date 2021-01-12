@@ -12,6 +12,7 @@ import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/search_bar.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
+import 'package:bapp/widgets/tiles/complete_your_booking_tile.dart';
 import 'package:bapp/widgets/tiles/rr_list_tile.dart';
 import 'package:bapp/widgets/tiles/see_all_tile.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -81,6 +82,14 @@ class _DiscoverTabState extends State<DiscoverTab> {
                       height: 20,
                     ),
                     _getCategoriesScroller(context),
+                    if (CompleteYourBookingTile.shouldShow(context))
+                      const SizedBox(
+                        height: 30,
+                      ),
+                    if (CompleteYourBookingTile.shouldShow(context))
+                      CompleteYourBookingTile(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                      ),
                   ],
                 ),
               ),
@@ -321,7 +330,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
         height: 80,
         decoration: BoxDecoration(
           image: DecorationImage(
-          colorFilter: ColorFilter.mode(Colors.black54, BlendMode.multiply),
+            colorFilter: ColorFilter.mode(Colors.black54, BlendMode.multiply),
             image: CachedNetworkImageProvider(
               category.image,
             ),

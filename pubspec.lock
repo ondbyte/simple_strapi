@@ -954,6 +954,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.2.3"
+  show_up_animation:
+    dependency: "direct main"
+    description:
+      name: show_up_animation
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.4"
   simple_gesture_detector:
     dependency: transitive
     description:

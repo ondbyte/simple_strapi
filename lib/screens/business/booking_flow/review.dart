@@ -181,7 +181,7 @@ class BappRatingBar extends StatelessWidget {
       {Key key,
       this.onRatingUpdated,
       this.ignoreGesture,
-      this.unratedColor = Colors.white,
+      this.unratedColor = Colors.amber,
       this.ratedColor = Colors.amber,
       this.initialRating = 0})
       : super(key: key);
@@ -189,7 +189,7 @@ class BappRatingBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return RatingBar(
       initialRating: initialRating,
-      unratedColor: unratedColor ?? Colors.white,
+      unratedColor: unratedColor ?? Colors.grey,
       updateOnDrag: false,
       ratingWidget: RatingWidget(
         empty: Icon(

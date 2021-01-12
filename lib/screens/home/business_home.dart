@@ -47,12 +47,10 @@ class _BusinessHomeState extends State<BusinessHome> {
           flow.getBranchBookings();
         },
         child: Scaffold(
-          appBar: AppBar(
+          appBar: _selectedPage != _tabs.length-1 ? AppBar(
             automaticallyImplyLeading: false,
-            title: _selectedPage != _tabs.length-1
-                ? BusinessBranchSwitchWidget()
-                : SizedBox(),
-          ),
+            title: BusinessBranchSwitchWidget(),
+          ):null,
           endDrawer: Menu(),
           body: Consumer<BusinessStore>(
             builder: (_, businessStore, __) {

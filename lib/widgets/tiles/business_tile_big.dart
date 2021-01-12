@@ -32,6 +32,7 @@ class BusinessTileBigWidget extends StatelessWidget {
                       storagePathOrURL: branch.images.isNotEmpty
                           ? branch.images.keys.elementAt(0)
                           : null,
+                      ifEmpty: Initial(forName: branch.name.value,),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(left: 16, bottom: 8),
@@ -59,19 +60,21 @@ class BusinessTileWidget extends StatelessWidget {
   final Function onTap;
   final EdgeInsets padding;
   final TextStyle titleStyle;
+  final Function onTrailingTapped;
 
   const BusinessTileWidget(
       {Key key,
       @required this.branch,
       @required this.onTap,
       this.padding,
-      this.titleStyle, this.withImage=false})
+      this.titleStyle, this.withImage=false,
+        this.onTrailingTapped
+      })
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      
       onTap: onTap,
       dense: true,
       contentPadding: padding ?? EdgeInsets.zero,
@@ -88,21 +91,24 @@ class BusinessTileWidget extends StatelessWidget {
         ifEmpty: Initial(forName: branch.name.value,),
         storagePathOrURL: branch.images.isNotEmpty?branch.images.keys.elementAt(0):null,
       ):null,
-      trailing: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.star,
-            color: Colors.amber
-          ),
-          const SizedBox(
-            height: 2,
-          ),
-          Text(
-            branch.rating.value.toString(),
-            style: Theme.of(context).textTheme.caption,
-          )
-        ],
+      trailing: GestureDetector(
+        onTap: onTrailingTapped,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+                Icons.star,
+                color: Colors.amber
+            ),
+            const SizedBox(
+              height: 2,
+            ),
+            Text(
+              branch.rating.value.toString(),
+              style: Theme.of(context).textTheme.caption,
+            )
+          ],
+        ),
       ),
     );
   }

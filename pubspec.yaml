@@ -73,6 +73,7 @@ dependencies:
   textfield_tags:
     git:
       url: https://github.com/ondbyte/textfield_tags.git
+  show_up_animation: ^1.0.2
 
 
   # MAPS

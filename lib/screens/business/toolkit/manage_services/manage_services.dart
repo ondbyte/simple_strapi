@@ -50,15 +50,9 @@ class _BusinessProductsPricingScreenState
               [
                 Text(
                   "Services",
-                  style: Theme.of(context).textTheme.button.apply(
-                        color: Theme.of(context).indicatorColor,
-                      ),
                 ),
                 Text(
                   "Categories",
-                  style: Theme.of(context).textTheme.button.apply(
-                        color: Theme.of(context).indicatorColor,
-                      ),
                 ),
               ],
             ),

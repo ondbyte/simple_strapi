@@ -58,90 +58,92 @@ class _BusinessManageContactDetailsScreenState
               FocusScope.of(context).unfocus();
             },
             child: Padding(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  Text(
-                    "How can your customers reach you?",
-                    style: Theme.of(context).textTheme.headline1,
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  TextFormField(
-                    initialValue: _previousEmail,
-                    decoration: InputDecoration(labelText: "Email"),
-                    onChanged: (s) {
-                      _email = s;
-                    },
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  TheCountryNumberInput(
-                    _previousNumber,
-                    decoration: TheInputDecor(labelText: "PhoneNumber"),
-                    onChanged: (tn) {
-                      _enteredNumber = tn;
-                    },
-                    customValidator: (tn) {
-                      if (tn != null) {
-                        if (tn.isValidLength) {
-                          return null;
+              padding: EdgeInsets.symmetric(horizontal: 16,),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Text(
+                      "How can your customers reach you?",
+                      style: Theme.of(context).textTheme.headline1,
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    TextFormField(
+                      initialValue: _previousEmail,
+                      decoration: InputDecoration(labelText: "Email"),
+                      onChanged: (s) {
+                        _email = s;
+                      },
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    TheCountryNumberInput(
+                      _previousNumber,
+                      decoration: TheInputDecor(labelText: "PhoneNumber"),
+                      onChanged: (tn) {
+                        _enteredNumber = tn;
+                      },
+                      customValidator: (tn) {
+                        if (tn != null) {
+                          if (tn.isValidLength) {
+                            return null;
+                          }
                         }
-                      }
-                      return "Enter a valid number";
-                    },
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  TextFormField(
-                    initialValue: () {
-                      _website = businessStore
-                          .business.selectedBranch.value.website.value;
-                      return _website;
-                    }(),
-                    decoration: InputDecoration(
-                      labelText: "Website",
+                        return "Enter a valid number";
+                      },
                     ),
-                    onChanged: (s) {
-                      _website = s;
-                    },
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  TextFormField(
-                    initialValue: () {
-                      _fb = businessStore
-                          .business.selectedBranch.value.facebook.value;
-                      return _fb;
-                    }(),
-                    decoration: InputDecoration(
-                      labelText: "Facebook url",
+                    SizedBox(
+                      height: 20,
                     ),
-                    onChanged: (s) {
-                      _fb = s;
-                    },
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  TextFormField(
-                    initialValue: () {
-                      _insta = businessStore
-                          .business.selectedBranch.value.instagram.value;
-                      return _insta;
-                    }(),
-                    decoration: InputDecoration(
-                      labelText: "Instagram url",
+                    TextFormField(
+                      initialValue: () {
+                        _website = businessStore
+                            .business.selectedBranch.value.website.value;
+                        return _website;
+                      }(),
+                      decoration: InputDecoration(
+                        labelText: "Website",
+                      ),
+                      onChanged: (s) {
+                        _website = s;
+                      },
                     ),
-                    onChanged: (s) {
-                      _insta = s;
-                    },
-                  ),
-                ],
+                    SizedBox(
+                      height: 20,
+                    ),
+                    TextFormField(
+                      initialValue: () {
+                        _fb = businessStore
+                            .business.selectedBranch.value.facebook.value;
+                        return _fb;
+                      }(),
+                      decoration: InputDecoration(
+                        labelText: "Facebook url",
+                      ),
+                      onChanged: (s) {
+                        _fb = s;
+                      },
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    TextFormField(
+                      initialValue: () {
+                        _insta = businessStore
+                            .business.selectedBranch.value.instagram.value;
+                        return _insta;
+                      }(),
+                      decoration: InputDecoration(
+                        labelText: "Instagram url",
+                      ),
+                      onChanged: (s) {
+                        _insta = s;
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
