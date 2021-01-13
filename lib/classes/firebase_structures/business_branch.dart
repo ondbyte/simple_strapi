@@ -337,6 +337,7 @@ class BusinessBranch with BaseStructure {
     DateTime dateOfJoining,
     Map<String, bool> images,
     List<String> expertise,
+    bool enabled = true,
   }) async {
     final imgs = await uploadImagesToStorageAndReturnStringList(images);
     final s = BusinessStaff(
@@ -348,6 +349,7 @@ class BusinessBranch with BaseStructure {
       expertise: expertise,
       images: imgs,
     );
+    s.enabled.value = enabled;
     staff.add(s);
     return s;
   }

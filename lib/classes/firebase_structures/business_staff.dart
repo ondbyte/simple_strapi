@@ -25,6 +25,7 @@ class BusinessStaff {
   BusinessStaff receptionist;
   TheNumber contactNumber;
   double rating = 0;
+  final enabled = Observable(true);
 
   DocumentSnapshot _userSnap;
 
@@ -52,7 +53,8 @@ class BusinessStaff {
       "branch": branch.myDoc.value,
       "contactNumber": contactNumber.internationalNumber,
       "images": images.keys.toList(),
-      "rating": rating
+      "rating": rating,
+      "enabled": enabled.value,
     };
   }
 
@@ -97,9 +99,14 @@ class BusinessStaff {
 
   Future save() async {
     final map = toMap();
-    await branch.myDoc.value.set({
-      "staff": {name: map}
-    }, SetOptions(merge: true));
+    await branch.myDoc.value.set(
+      {
+        "staff": {
+          name: map,
+        }
+      },
+      SetOptions(merge: true),
+    );
   }
 
   Future delete() async {
@@ -109,6 +116,11 @@ class BusinessStaff {
         .collection("users")
         .doc(contactNumber.internationalNumber)
         .delete();
+  }
+
+  Future enable(bool enable) async {
+    enabled.value = enable;
+    await branch.myDoc.value.set({"staff": {"$name":{"enabled":enable}}},SetOptions(merge: true));
   }
 
   Future updateForUser() async {
@@ -142,6 +154,16 @@ class BusinessStaff {
         TheCountryNumber().parseNumber(internationalNumber: j["contactNumber"]);
     images = {for (var v in j["images"]) v as String: true} ?? {};
     rating = (j["rating"]).toDouble() ?? 0;
+    act((){
+      enabled.value = (){
+        final e = j["enabled"];
+        if(e==null){
+          return true;
+        } else {
+          return e;
+        }
+      }();
+    });
   }
 
   BusinessStaff.fromJson({@required this.branch, Map<String, dynamic> j}) {

@@ -76,6 +76,9 @@ class _BusinessHomeState extends State<BusinessHome> {
             type: BottomNavigationBarType.fixed,
             // selectedFontSize: 14,
             onTap: (i) {
+              if(i==1){
+                Provider.of<BookingFlow>(context,listen: false).filterStaffAndBookings();
+              }
               setState(() {
                 _selectedPage = i;
               });
@@ -95,7 +98,7 @@ class _BusinessHomeState extends State<BusinessHome> {
     return tabs
         .map(
           (e) => BottomNavigationBarItem(
-            icon: e.name=="Updates"?UpdatesIcon(child:Icon(e.icon)):Icon(e.icon),
+            icon: e.name=="Updates"?PendingUpdatesIcon(child:Icon(e.icon)):Icon(e.icon),
             label: e.name,
           ),
         )

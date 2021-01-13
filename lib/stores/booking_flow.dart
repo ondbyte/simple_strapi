@@ -197,7 +197,7 @@ class BookingFlow {
           branchBookings.clear();
           branchBookings.addAll(bbookings);
           if (branch != null) {
-            _filterStaffAndBookings();
+            filterStaffAndBookings();
           }
         }
       },
@@ -226,7 +226,7 @@ class BookingFlow {
     return completer.future;
   }
 
-  void _filterStaffAndBookings() {
+  void filterStaffAndBookings() {
     filteredStaffs.clear();
     final staffWithBookings =
         LinkedHashMap<BusinessStaff, List<BusinessBooking>>(
@@ -244,7 +244,6 @@ class BookingFlow {
     });
     staffWithBookings.forEach(
       (bs, bbs) {
-        Helper.printLog(totalDurationMinutes.value);
         filteredStaffs.add(
           FilteredBusinessStaff(
             staff: bs,
@@ -257,14 +256,14 @@ class BookingFlow {
         );
       },
     );
-    act(() {
-      professional.value ??=
-          filteredStaffs.isNotEmpty ? filteredStaffs.first : null;
-    });
     if (filteredStaffs.isNotEmpty) {
       filteredStaffs.removeWhere(
-          (element) => element.staff.role != UserType.businessStaff);
+              (element) => !element.staff.enabled.value);
     }
+    act(() {
+      professional.value =
+          filteredStaffs.isNotEmpty ? filteredStaffs.first : null;
+    });    
   }
 
   void _getHolidays() {
@@ -366,7 +365,7 @@ class BookingFlow {
               UserType.customer) {
             filteredStaffs.clear();
           } else {
-            _filterStaffAndBookings();
+            filterStaffAndBookings();
           }
         },
       ),

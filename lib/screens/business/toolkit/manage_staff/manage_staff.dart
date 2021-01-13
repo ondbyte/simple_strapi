@@ -53,12 +53,16 @@ class _BusinessManageStaffScreenState extends State<BusinessManageStaffScreen> {
                         staffs.length,
                         (index) => BusinessStaffListTile(
                           staff: staffs[index],
-                          trailing: IconButton(
-                            icon: const Icon(
-                              Icons.delete,
-                            ),
-                            onPressed: () async {
-                              await staffs[index].delete();
+                          trailing: Observer(
+                            builder: (_){
+                              return Switch(
+                                value: staffs[index].enabled.value,
+                                onChanged: (b){
+                                  act((){
+                                    staffs[index].enable(b);
+                                  });
+                                },
+                              );
                             },
                           ),
                         ),
@@ -91,7 +95,7 @@ class BusinessStaffListTile extends StatelessWidget {
       subtitle: Text(
         EnumToString.convertToString(staff.role),
       ),
-      trailing: me ? null : trailing,
+      trailing: trailing,
       leading: ListTileFirebaseImage(
         ifEmpty: Initial(forName: staff.name,),
         storagePathOrURL: staff.images.isNotEmpty

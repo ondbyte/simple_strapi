@@ -59,7 +59,7 @@ class _CustomerHomeState extends State<CustomerHome> {
           ...HomeScreenTabsConfig.tabs.map(
             (e) => BottomNavigationBarItem(
               icon: e.name == "Updates"
-                  ? UpdatesIcon(
+                  ? PendingUpdatesIcon(
                       child: Icon(e.icon),
                     )
                   : Icon(e.icon),
@@ -97,15 +97,15 @@ class _CustomerHomeState extends State<CustomerHome> {
   }
 }
 
-class UpdatesIcon extends StatefulWidget {
+class PendingUpdatesIcon extends StatefulWidget {
   final Widget child;
 
-  const UpdatesIcon({Key key, this.child}) : super(key: key);
+  const PendingUpdatesIcon({Key key, this.child}) : super(key: key);
   @override
-  _UpdatesIconState createState() => _UpdatesIconState();
+  _PendingUpdatesIconState createState() => _PendingUpdatesIconState();
 }
 
-class _UpdatesIconState extends State<UpdatesIcon> {
+class _PendingUpdatesIconState extends State<PendingUpdatesIcon> {
   Size _childSize;
   @override
   Widget build(BuildContext context) {
@@ -139,8 +139,10 @@ class _UpdatesIconState extends State<UpdatesIcon> {
                               shape: BoxShape.circle, color: Colors.redAccent),
                           alignment: Alignment.center,
                           child: Text(
-                            "$totalUpdates",
-                            style: Theme.of(context).textTheme.caption.apply(color: Colors.white),
+                            "${totalUpdates < 10 ? totalUpdates : 9}",
+                            style: Theme.of(context).textTheme.caption.apply(
+                                  color: Colors.white,
+                                ),
                           ),
                         ),
                       ),

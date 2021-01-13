@@ -68,7 +68,8 @@ abstract class _BusinessStore with Store {
   }) async {
     ///create the first branch
     businessDoc = _fireStore.doc(
-        "businesses/${onBoard ? contactNumber : FirebaseAuth.instance.currentUser.uid}");
+      "businesses/${onBoard ? contactNumber : FirebaseAuth.instance.currentUser.uid}",
+    );
 
     final ap = BusinessDetails(
       businessName: businessName,
@@ -121,6 +122,7 @@ abstract class _BusinessStore with Store {
       userPhoneNumber: TheCountryNumber().parseNumber(
         internationalNumber: ap.contactNumber.value,
       ),
+      enabled:false,
     );
 
     user = user.updateWith(alterEgo: UserType.businessOwner);
