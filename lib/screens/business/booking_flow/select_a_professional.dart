@@ -28,7 +28,8 @@ class _SelectAProfessionalScreenState extends State<SelectAProfessionalScreen> {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       act(() {
         flow.timeWindow.value = FromToTiming.today();
-        Provider.of<BookingFlow>(context,listen: false).filterStaffAndBookings();
+        Provider.of<BookingFlow>(context, listen: false)
+            .filterStaffAndBookings();
       });
     });
     super.initState();
