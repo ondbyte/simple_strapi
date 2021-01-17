@@ -2,7 +2,6 @@ import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/classes/firebase_structures/business_category.dart';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/helpers/extensions.dart';
-import 'package:bapp/route_manager.dart';
 import 'package:bapp/screens/business/addbusiness/choose_category.dart';
 import 'package:bapp/screens/business/booking_flow/review.dart';
 import 'package:bapp/screens/business/business_profile/business_profile.dart';
@@ -251,6 +250,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
   }
 
   Widget _getFeaturedScroller(context) {
+    final cloudStore = Provider.of<CloudStore>(context, listen: false);
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
@@ -259,32 +260,46 @@ class _DiscoverTabState extends State<DiscoverTab> {
             width: 16,
           ),
           ...HomeScreenFeaturedConfig.slides.map(
-            (e) => Container(
-              height: 125,
-              width: 142,
-              margin: const EdgeInsets.only(right: 20),
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                  color: e.cardColor, borderRadius: BorderRadius.circular(6)),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Icon(
-                    e.icon,
-                    color: Colors.white,
-                  ),
-                  const SizedBox(
-                    height: 6,
-                  ),
-                  Text(
-                    e.title,
-                    style: Theme.of(context).textTheme.headline3.apply(
-                          color: Colors.white,
-                        ),
-                  ),
-                ],
+            (e) => GestureDetector(
+              child: Container(
+                height: 125,
+                width: 142,
+                margin: const EdgeInsets.only(right: 20),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                    color: e.cardColor, borderRadius: BorderRadius.circular(6)),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      e.icon,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(
+                      height: 6,
+                    ),
+                    Text(
+                      e.title,
+                      style: Theme.of(context).textTheme.headline3.apply(
+                            color: Colors.white,
+                          ),
+                    ),
+                  ],
+                ),
               ),
+              onTap: () {
+                BappNavigator.push(
+                  context,
+                  BranchesResultScreen(
+                    categoryName: "",
+                    placeName: cloudStore.getAddressLabel(),
+                    title: e.title.split("\n").join(""),
+                    subTitle: "",
+                    futureBranchList: Future.value(<BusinessBranch>[]),
+                  ),
+                );
+              },
             ),
           )
         ],
@@ -322,30 +337,47 @@ class _DiscoverTabState extends State<DiscoverTab> {
     );
   }
 
-  Widget _getCategoryBox(BusinessCategory category) {
-    return RRShape(
-      child: Container(
-        padding: EdgeInsets.all(10),
-        width: 120,
-        height: 80,
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            colorFilter: ColorFilter.mode(Colors.black54, BlendMode.multiply),
-            image: CachedNetworkImageProvider(
-              category.image,
+  Widget _getCategoryBox(BusinessCategory c) {
+    final cloudStore = Provider.of<CloudStore>(context, listen: false);
+    return GestureDetector(
+      child: RRShape(
+        child: Container(
+          padding: EdgeInsets.all(10),
+          width: 120,
+          height: 80,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              colorFilter: ColorFilter.mode(Colors.black54, BlendMode.multiply),
+              image: CachedNetworkImageProvider(
+                c.image,
+              ),
+            ),
+          ),
+          child: Align(
+            alignment: Alignment.bottomLeft,
+            child: Text(
+              c.name,
+              style: Theme.of(context).textTheme.bodyText1.apply(
+                    color: Theme.of(context).primaryColorLight,
+                  ),
             ),
           ),
         ),
-        child: Align(
-          alignment: Alignment.bottomLeft,
-          child: Text(
-            category.name,
-            style: Theme.of(context).textTheme.bodyText1.apply(
-                  color: Theme.of(context).primaryColorLight,
-                ),
-          ),
-        ),
       ),
+      onTap: () {
+        BappNavigator.push(
+          context,
+          BranchesResultScreen(
+            categoryName: c.name,
+            placeName: cloudStore.getAddressLabel(),
+            title: "Top " + c.name,
+            subTitle: "In " + cloudStore.getAddressLabel(),
+            futureBranchList: cloudStore.getBranchesForCategory(
+              c,
+            ),
+          ),
+        );
+      },
     );
   }
 }
