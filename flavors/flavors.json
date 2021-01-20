@@ -2,7 +2,7 @@
   "files_to_flavorize": {
     "app_gradle":"./android/app/build.gradle",
     "key_properties": "./key.properties",
-    "key": "bapp_signing_key.key",
+    "key": "./bapp_signing_key.key",
     "google_services_android": "./android/app/google-services.json"
   },
   "dev":{
