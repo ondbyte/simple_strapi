@@ -2,19 +2,25 @@
   "files_to_flavorize": {
     "app_gradle":"./android/app/build.gradle",
     "key_properties": "./key.properties",
-    "key": "./bapp_signing_key.key",
-    "google_services_android": "./android/app/google-services.json"
+    "key": "bapp_signing_key.key",
+    "google_services_android": "./android/app/google-services.json",
+    "ios-googleService":"./ios/Runner/GoogleService-Info.plist",
+    "ios-infoPlist":"./ios/Runner/Info.plist"
   },
   "dev":{
     "app_gradle":"./flavors/dev/build.gradle",
     "key_properties": "./flavors/dev/key.properties",
     "key": "./flavors/dev/bapp_signing_key.key",
-    "google_services_android": "./flavors/dev/google-services.json"
+    "google_services_android": "./flavors/dev/google-services.json",
+    "ios-googleService":"./ios/Runner/GoogleService-Info.plist",
+    "ios-infoPlist":"./ios/Runner/Info.plist"
   },
   "production":{
     "app_gradle":"./flavors/production/build.gradle",
     "key_properties": "./flavors/production/key.properties",
-    "key": "./flavors/production/bapp_signing_key.key",
-    "google_services_android": "./flavors/production/google-services.json"
+    "key": "./flavors/production/bapp_signing_key.jks",
+    "google_services_android": "./flavors/production/google-services.json",
+    "ios-googleService":"./ios/Runner/GoogleService-Info.plist",
+    "ios-infoPlist":"./ios/Runner/Info.plist"
   }
 }

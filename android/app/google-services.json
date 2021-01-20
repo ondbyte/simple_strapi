@@ -1,46 +1,37 @@
 {
   "project_info": {
-    "project_number": "784979675891",
-    "firebase_url": "https://bapp-dev-c3849.firebaseio.com",
-    "project_id": "bapp-dev-c3849",
-    "storage_bucket": "bapp-dev-c3849.appspot.com"
+    "project_number": "347111752310",
+    "project_id": "bapp-production",
+    "storage_bucket": "bapp-production.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:784979675891:android:16a371f4377ec8a798c586",
+        "mobilesdk_app_id": "1:347111752310:android:ad7a5613a0e76ec2699557",
         "android_client_info": {
           "package_name": "com.bigmints.bapp"
         }
       },
       "oauth_client": [
         {
-          "client_id": "784979675891-6ra0d8stl3551geh69nmqsoe0e8mgip5.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.bigmints.bapp",
-            "certificate_hash": "4d329bacd6d65b1b99021c9faae8d96e0c677b8a"
-          }
-        },
-        {
-          "client_id": "784979675891-g0u179rkung57n7t50buvuu99bo4vlv6.apps.googleusercontent.com",
+          "client_id": "347111752310-5d1q0kvkpv34pnvjlm3sepa8dakgeh9k.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBoNO7duxSb2Rbc0LU98iahQzrf7ZmGJ4c"
+          "current_key": "AIzaSyDwd498Byn1UhjjM_0W96TBQjEV8vsEOj4"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "784979675891-g0u179rkung57n7t50buvuu99bo4vlv6.apps.googleusercontent.com",
+              "client_id": "347111752310-5d1q0kvkpv34pnvjlm3sepa8dakgeh9k.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "784979675891-d4nq40oi9b8bpt12itp3f8bh6oul51l4.apps.googleusercontent.com",
+              "client_id": "347111752310-tkh0280494mrj413rpvuu9ifnvb2976o.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "com.bigmints.bapp",
