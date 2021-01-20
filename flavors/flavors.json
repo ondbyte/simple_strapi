@@ -1,11 +1,20 @@
 {
   "files_to_flavorize": {
-    "demo_file":"./flavors/demo.txt"
+    "app_gradle":"./android/app/build.gradle",
+    "key_properties": "./key.properties",
+    "key": "bapp_signing_key.key",
+    "google_services_android": "./android/app/google-services.json"
   },
-  "flavor_one":{
-    "demo_file":"./flavors/demo_flavor_one.txt"
+  "dev":{
+    "app_gradle":"./flavors/dev/build.gradle",
+    "key_properties": "./flavors/dev/key.properties",
+    "key": "./flavors/dev/bapp_signing_key.key",
+    "google_services_android": "./flavors/dev/google-services.json"
   },
-  "flavor_two":{
-    "demo_file":"./flavors/demo_flavor_two.txt"
+  "production":{
+    "app_gradle":"./flavors/production/build.gradle",
+    "key_properties": "./flavors/production/key.properties",
+    "key": "./flavors/production/bapp_signing_key.key",
+    "google_services_android": "./flavors/production/google-services.json"
   }
 }
