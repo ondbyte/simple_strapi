@@ -17,8 +17,6 @@ import 'package:the_country_number/the_country_number.dart';
 import 'package:the_country_number_widgets/the_country_number_widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../route_manager.dart';
-
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -90,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
             TheCountryNumberInput(
               TheCountryNumber()
                   .parseNumber(iso2Code: cloudStore.bappUser.address.iso2),
-              onChanged: (tn){
+              onChanged: (tn) {
                 _number = tn;
                 setState(() {
                   _canVerify = _number.isValidLength;

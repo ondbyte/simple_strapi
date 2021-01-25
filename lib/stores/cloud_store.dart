@@ -5,6 +5,7 @@ import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/widgets/app/bapp_navigator_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -100,6 +101,7 @@ abstract class _CloudStore with Store {
   User get user => FirebaseAuth.instance.currentUser;
 
   var lastUid = "";
+
   void _listenForUserChange() {
     FirebaseAuth.instance.userChanges().listen((user) async {
       Helper.printLog("user change: $user");
@@ -168,6 +170,7 @@ abstract class _CloudStore with Store {
   }
 
   StreamSubscription userSubscription;
+
   Future getUserData() async {
     final completer = Completer<bool>();
     var ref =
@@ -380,11 +383,13 @@ abstract class _CloudStore with Store {
     await _auth.verifyPhoneNumber(
       phoneNumber: number.internationalNumber,
       verificationCompleted: (PhoneAuthCredential phoneAuthCredential) async {
+        Helper.printLog("auto verified OTP");
+        await _processCredential(
+            phoneAuthCredential, number.internationalNumber);
         onVerified();
-        final linked = await _link(phoneAuthCredential);
-        if (linked) _mergePreviousData();
       },
       verificationFailed: (FirebaseAuthException exception) {
+        onVerified = null;
         onFail(exception);
         Helper.printLog(exception);
       },
@@ -395,11 +400,11 @@ abstract class _CloudStore with Store {
             var otp = await onAskOTP(askAgain);
             askAgain = true;
             loadingForOTP = true;
-
             PhoneAuthCredential phoneAuthCredential =
                 PhoneAuthProvider.credential(
                     verificationId: verificationID, smsCode: otp);
-            final linked = await _link(phoneAuthCredential);
+            final linked = await _processCredential(
+                phoneAuthCredential, number.internationalNumber);
             //Helper.printLog(linked.toString());
             if (linked) {
               _mergePreviousData();
@@ -413,6 +418,16 @@ abstract class _CloudStore with Store {
       },
       codeAutoRetrievalTimeout: (String verificationId) {},
     );
+  }
+
+  Future<bool> _processCredential(
+      PhoneAuthCredential phoneAuthCredential, String number) async {
+    if (await _userNumberExists(number)) {
+      return signIn(phoneAuthCredential);
+    }
+    final linked = await _link(phoneAuthCredential);
+    if (linked) _mergePreviousData();
+    return linked;
   }
 
   Future _mergePreviousData() async {
@@ -433,6 +448,17 @@ abstract class _CloudStore with Store {
     );
     await snap.reference.delete();
     await newUser.save();
+  }
+
+  Future<bool> _userNumberExists(String number) async {
+    final fun =
+        FirebaseFunctions.instance.httpsCallable("checkUserForPhoneNumber");
+    final rep = await fun.call({"number": "$number"});
+    final data = rep.data;
+    if (data is Map) {
+      if (data.containsKey("success")) return true;
+    }
+    return false;
   }
 
   Future<bool> _link(PhoneAuthCredential phoneAuthCredential) async {

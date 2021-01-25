@@ -41,7 +41,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.bigmints.bapp"
+        applicationId "com.bigmints.bapp.dev"
         minSdkVersion 21
         targetSdkVersion 29
         versionCode flutterVersionCode.toInteger()
@@ -66,7 +66,9 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
-            signingConfig signingConfigs.debug
+        }
+        debug {
+            signingConfig signingConfigs.release
         }
     }
 }

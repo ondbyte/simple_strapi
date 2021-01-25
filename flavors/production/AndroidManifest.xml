@@ -11,7 +11,7 @@
 
     <application
         android:name=".Application"
-        android:label="bapp-dev"
+        android:label="bapp"
         android:icon="@mipmap/launcher_icon">
 
         <!-- photo picker flutter. -->
