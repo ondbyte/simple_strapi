@@ -1,12 +1,9 @@
-import 'dart:convert';
-
 import 'package:bapp/helpers/third_party_launcher.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/widgets/padded_text.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:bapp/helpers/extensions.dart';
 
 class BusinessProfileAboutTab extends StatelessWidget {
   const BusinessProfileAboutTab();
@@ -19,7 +16,6 @@ class BusinessProfileAboutTab extends StatelessWidget {
     final typeString = flow.branch.type.value;
 
     return SingleChildScrollView(
-
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -35,7 +31,8 @@ class BusinessProfileAboutTab extends StatelessWidget {
             height: 20,
           ),
           ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
             leading: const Icon(FeatherIcons.clock),
             dense: true,
             title: Text(
@@ -49,7 +46,7 @@ class BusinessProfileAboutTab extends StatelessWidget {
             dense: true,
             title: Text(
               tagString,
-               style: Theme.of(context).textTheme.bodyText1,
+              style: Theme.of(context).textTheme.bodyText1,
             ),
           ),
           ListTile(
@@ -63,13 +60,27 @@ class BusinessProfileAboutTab extends StatelessWidget {
           ),
           ListTile(
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            leading: const Icon(FeatherIcons.phone),
+            dense: true,
+            title: Text(
+              flow?.branch?.contactNumber?.value ?? "",
+              style: Theme.of(context).textTheme.bodyText1.apply(
+                    color: Theme.of(context).primaryColor,
+                  ),
+            ),
+            onTap: () {
+              LaunchApp.phone(flow.branch.contactNumber.value);
+            },
+          ),
+          ListTile(
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             leading: const Icon(FeatherIcons.mapPin),
             dense: true,
             title: Text(
               "Get Directions",
-              style: Theme.of(context).textTheme.subtitle1.apply(
-                color: Theme.of(context).primaryColor,
-              ),
+              style: Theme.of(context).textTheme.bodyText1.apply(
+                    color: Theme.of(context).primaryColor,
+                  ),
             ),
             onTap: () async {
               await LaunchApp.map(latlong.latitude, latlong.longitude);
@@ -79,7 +90,7 @@ class BusinessProfileAboutTab extends StatelessWidget {
             height: 20,
           ),
           PaddedText(
-            "About "+flow.branch.name.value,
+            "About " + flow.branch.name.value,
             style: Theme.of(context).textTheme.headline3,
           ),
           const SizedBox(

@@ -46,12 +46,17 @@ class _BappThemedAppState extends State<BappThemedApp> {
   Future _init() async {
     final dir = await getApplicationSupportDirectory();
     Hive.init(dir.path);
-    final box = await Hive.openLazyBox("brigtness.box");
+    final box = await Hive.openLazyBox("brightness.box");
     final dark =
         await box.get("dark", defaultValue: brightness == Brightness.dark);
     setState(() {
       _updateTheme(dark: dark);
     });
+  }
+
+  Future _saveTheme(bool dark) async {
+    final box = await Hive.openLazyBox("brightness.box");
+    box.put("dark", dark);
   }
 
   void _updateTheme({bool dark}) {
@@ -64,6 +69,7 @@ class _BappThemedAppState extends State<BappThemedApp> {
         brightness = Brightness.light;
       }
     }
+    _saveTheme(dark);
   }
 
   @override

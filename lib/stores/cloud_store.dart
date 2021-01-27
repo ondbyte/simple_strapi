@@ -281,7 +281,9 @@ abstract class _CloudStore with Store {
               service =
                   null; //BusinessService.fromJson(entry.value["businessService"]);
             }
-            if (business.valid || branch.valid || service != null) {
+            if ((business != null && business.valid) ||
+                (branch != null && branch.valid) ||
+                service != null) {
               favorites.add(
                 Favorite(
                   id: key,
