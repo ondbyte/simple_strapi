@@ -32,6 +32,7 @@ class BusinessBranch with BaseStructure {
   final receptionist = Observable<BusinessStaff>(null);
   final business = Observable<BusinessDetails>(null);
   final contactNumber = Observable<String>("");
+  final customContactNumber = Observable<String>("");
   final email = Observable<String>("");
   final rating = Observable<double>(0.0);
   final businessServices = Observable<BusinessServices>(null);
@@ -122,6 +123,16 @@ class BusinessBranch with BaseStructure {
         (_) => contactNumber.value,
         (_) async {
           await myDoc.value?.update({"contactNumber": contactNumber.value});
+        },
+      ),
+    );
+
+    _disposers.add(
+      reaction(
+        (_) => customContactNumber.value,
+        (_) async {
+          await myDoc.value
+              ?.update({"customContactNumber": customContactNumber.value});
         },
       ),
     );
@@ -236,6 +247,7 @@ class BusinessBranch with BaseStructure {
         ? BusinessStaff.fromJson(branch: this, j: j["receptionist"])
         : null;
     contactNumber.value = j["contactNumber"];
+    customContactNumber.value = j["customContactNumber"] ?? "";
     email.value = j["email"];
     rating.value = (j["rating"]).toDouble();
     businessServices.value =
@@ -295,6 +307,7 @@ class BusinessBranch with BaseStructure {
       "business": business.value.myDoc.value,
       "myDoc": myDoc.value,
       "contactNumber": contactNumber.value ?? "",
+      "customContactNumber": customContactNumber.value ?? "",
       "email": email.value ?? "",
       "rating": rating.value ?? 0.0,
       "businessServices": businessServices.value?.toMap() ?? {},

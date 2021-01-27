@@ -63,7 +63,9 @@ class BusinessProfileAboutTab extends StatelessWidget {
             leading: const Icon(FeatherIcons.phone),
             dense: true,
             title: Text(
-              flow?.branch?.contactNumber?.value ?? "",
+              flow.branch.customContactNumber.value.isNotEmpty
+                  ? flow.branch.customContactNumber.value
+                  : flow.branch.contactNumber.value,
               style: Theme.of(context).textTheme.bodyText1.apply(
                     color: Theme.of(context).primaryColor,
                   ),
