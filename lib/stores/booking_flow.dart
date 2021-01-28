@@ -35,6 +35,7 @@ class BookingFlow {
   final holidays = ObservableMap<DateTime, List>();
   final slot = Observable<DateTime>(null);
   final myBookings = ObservableList<BusinessBooking>();
+  final todaysSales = Observable(0.0);
 
   AllStore _allStore;
 
@@ -95,10 +96,12 @@ class BookingFlow {
   }
 
   List<BusinessBooking> getBookingsForSelectedDay(
-      ObservableList<BusinessBooking> list) {
+      ObservableList<BusinessBooking> list,
+      {DateTime day}) {
+    day ??= timeWindow.value.from;
     return list
         .where(
-          (element) => element.fromToTiming.from.isDay(timeWindow.value.from),
+          (element) => element.fromToTiming.from.isDay(day),
         )
         .toList();
   }
@@ -211,11 +214,15 @@ class BookingFlow {
         .collection("bookings")
         .where("branch", isEqualTo: branch?.myDoc?.value)
         .where("rating.bookingRatingPhase",
-        isNotEqualTo:EnumToString.convertToString(BookingRatingPhase.notRated)).limit(20);
+            isNotEqualTo:
+                EnumToString.convertToString(BookingRatingPhase.notRated))
+        .limit(20);
     final list = <BusinessBooking>[];
     q.snapshots().listen((snaps) {
-      if(snaps.docs.isNotEmpty){
-        list.addAll(snaps.docs.map((e) => BusinessBooking.fromSnapShot(snap: e, branch: branch)).toList());
+      if (snaps.docs.isNotEmpty) {
+        list.addAll(snaps.docs
+            .map((e) => BusinessBooking.fromSnapShot(snap: e, branch: branch))
+            .toList());
         ratedBookings.clear();
         ratedBookings.addAll(list);
         completer.cautiousComplete(true);
@@ -257,13 +264,12 @@ class BookingFlow {
       },
     );
     if (filteredStaffs.isNotEmpty) {
-      filteredStaffs.removeWhere(
-              (element) => !element.staff.enabled.value);
+      filteredStaffs.removeWhere((element) => !element.staff.enabled.value);
     }
     act(() {
       professional.value =
           filteredStaffs.isNotEmpty ? filteredStaffs.first : null;
-    });    
+    });
   }
 
   void _getHolidays() {
@@ -378,6 +384,24 @@ class BookingFlow {
           if (professional.value != null && timeWindow.value != null) {
             professional.value.computeForDay(timeWindow.value.from);
           }
+        },
+      ),
+    );
+
+    _disposers.add(
+      reaction(
+        (_) => branchBookings,
+        (_) async {
+          todaysSales.value = 0.0;
+          branchBookings
+              .where((element) =>
+                  element.status.value == BusinessBookingStatus.finished)
+              .toList()
+              .forEach((el) {
+            el.services.forEach((e) {
+              todaysSales.value += e.price.value;
+            });
+          });
         },
       ),
     );
@@ -497,7 +521,7 @@ class BookingFlow {
         .toList();
   }
 
-  List<CompleteBookingRating> getSelectedBranchReviews(){
+  List<CompleteBookingRating> getSelectedBranchReviews() {
     final list = <CompleteBookingRating>[];
     list.addAll(branchBookings.map((booking) => booking.rating).toList());
     return list;
