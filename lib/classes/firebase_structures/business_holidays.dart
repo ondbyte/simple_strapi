@@ -53,6 +53,14 @@ class BusinessHolidays {
     all.remove(holiday);
     await save();
   }
+
+  Map<DateTime, List> holidaysForBappCalender() {
+    final map = <DateTime, List>{};
+    all.forEach((element) {
+      map.addAll(element.holidaysForBappCalender());
+    });
+    return map;
+  }
 }
 
 class BusinesssHoliday {
@@ -86,5 +94,15 @@ class BusinesssHoliday {
       "details": details,
       "enabled": enabled.value
     };
+  }
+
+  Map<DateTime, List> holidaysForBappCalender() {
+    final map = <DateTime, List>{};
+    dates.forEach((element) {
+      map.addAll({
+        element: [type]
+      });
+    });
+    return map;
   }
 }

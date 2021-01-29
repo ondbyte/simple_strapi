@@ -82,6 +82,9 @@ class FilteredBusinessStaff {
     busyTimings.forEach((bt) {
       _buzyList.addAll([bt.from.toTimeOfDay(), bt.to.toTimeOfDay()]);
     });
+    staff.getBlockTimeForDay(selectedDay).forEach((element) {
+      _buzyList.addAll([element.from.toTimeOfDay(), element.to.toTimeOfDay()]);
+    });
     _buzyList.sort((a, b) {
       return a.compareTo(b);
     });

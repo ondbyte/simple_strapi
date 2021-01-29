@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bapp/classes/firebase_structures/bapp_user.dart';
+import 'package:bapp/classes/firebase_structures/staff_time_off.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/exceptions.dart';
 import 'package:bapp/helpers/extensions.dart';
@@ -19,6 +20,7 @@ class BusinessStaff {
   DateTime dateOfJoining;
   Map<String, bool> images = {};
   final expertise = ObservableList<String>();
+  final blockTimes = ObservableList<StaffTimeOff>();
 
   BusinessBranch branch;
   BusinessStaff manager;
@@ -42,6 +44,7 @@ class BusinessStaff {
     if (expertise != null) {
       this.expertise.addAll(expertise);
     }
+    _getBlockTimes();
   }
 
   toMap() {
@@ -56,6 +59,31 @@ class BusinessStaff {
       "rating": rating,
       "enabled": enabled.value,
     };
+  }
+
+  Future _getBlockTimes() async {
+    final completer = Completer<bool>();
+    final collec = FirebaseFirestore.instance.collection("staff_time_off");
+
+    collec
+        .where("staff", isEqualTo: contactNumber.internationalNumber)
+        .snapshots()
+        .listen((snaps) {
+      final list = <StaffTimeOff>[];
+      snaps.docs.forEach((snap) {
+        list.add(StaffTimeOff.fromSnap(snap, this));
+      });
+      blockTimes.clear();
+      blockTimes.addAll(list);
+      completer.cautiousComplete(true);
+    });
+    completer.future;
+  }
+
+  List<StaffTimeOff> getBlockTimeForDay(DateTime day) {
+    return blockTimes.isEmpty
+        ? []
+        : blockTimes.where((element) => element.from.isDay(day)).toList();
   }
 
   Future<DocumentSnapshot> _getUserSnap() async {
@@ -120,7 +148,11 @@ class BusinessStaff {
 
   Future enable(bool enable) async {
     enabled.value = enable;
-    await branch.myDoc.value.set({"staff": {"$name":{"enabled":enable}}},SetOptions(merge: true));
+    await branch.myDoc.value.set({
+      "staff": {
+        "$name": {"enabled": enable}
+      }
+    }, SetOptions(merge: true));
   }
 
   Future updateForUser() async {
@@ -154,10 +186,10 @@ class BusinessStaff {
         TheCountryNumber().parseNumber(internationalNumber: j["contactNumber"]);
     images = {for (var v in j["images"]) v as String: true} ?? {};
     rating = (j["rating"]).toDouble() ?? 0;
-    act((){
-      enabled.value = (){
+    act(() {
+      enabled.value = () {
         final e = j["enabled"];
-        if(e==null){
+        if (e == null) {
           return true;
         } else {
           return e;
@@ -168,6 +200,7 @@ class BusinessStaff {
 
   BusinessStaff.fromJson({@required this.branch, Map<String, dynamic> j}) {
     _fromJson(j);
+    _getBlockTimes();
   }
 
   @override

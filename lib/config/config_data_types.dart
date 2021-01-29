@@ -1,4 +1,5 @@
-
+import 'package:bapp/screens/business/booking_flow/services_screen.dart';
+import 'package:bapp/screens/business/tabs/business_bookings_tab.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:flutter/material.dart';
 
@@ -95,4 +96,17 @@ class BusinessExpandingTile {
 
   BusinessExpandingTile(
       {this.iconData, this.name, this.onClickRoute, this.enabled});
+}
+
+class BookingsTabAddOptionConfig {
+  final String name;
+  final Widget widgetToPush;
+
+  BookingsTabAddOptionConfig(this.name, this.widgetToPush);
+
+  static final options = [
+    ///change options to show up when add button is pressed in bookings tab of business side of the app
+    BookingsTabAddOptionConfig("Add walk-in", BusinessProfileServicesScreen()),
+    BookingsTabAddOptionConfig("Block Time", BlockTimeScreen()),
+  ];
 }
