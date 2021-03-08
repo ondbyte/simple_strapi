@@ -1,0 +1,17 @@
+
+# this requires plugin
+
+### register
+http://localhost:1337/auth/firebase/callback
+?access_token=4aUW91LyzxYGyPHNocl4BqQWwXG2
+&email=iam@iam.com
+&name=yaaad
+
+#### authenticated request
+get http://localhost:1337/users-permissions/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYwMmNhZWFlMjU1ODIwNDM5NWI5MWRjZCIsImlhdCI6MTYxMzg5Mzk3MCwiZXhwIjoxNjE2NDg1OTcwfQ.gtek4FOAuIdhwxUnIReQrrpGt2LAVIQEY2XdbKAQ79I
+
+#### authenticated request for component
+PUT http://localhost:1337/users-permissions/roles/602ce69e887bbe109c3b4fcc
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYwMmNhZWFlMjU1ODIwNDM5NWI5MWRjZCIsImlhdCI6MTYxMzU0MzYxNiwiZXhwIjoxNjE2MTM1NjE2fQ.LznOLSCHa8y2sdjomB1PgFjOHKmSAUD-SRKITdBrRUs
+
