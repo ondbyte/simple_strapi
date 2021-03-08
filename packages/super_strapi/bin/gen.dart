@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:inflection2/inflection2.dart';
-import 'package:path/path.dart' as path;
 
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
+import 'package:inflection2/inflection2.dart';
+import 'package:path/path.dart' as path;
 
 import 'helpers.dart';
 import 'types.dart';
@@ -15,16 +15,18 @@ class Gen {
   final Directory outPutDirectory;
   final bool isSchemaOnly;
   final List<File> defaultModels;
+  final bool shouldGnerateWidgets;
 
-  late final Directory apiDirectory;
-  late final componentDirectory;
-  late final extensionsDirectory;
+  Directory apiDirectory;
+  Directory componentDirectory;
+  Directory extensionsDirectory;
 
   Gen(
     this.strapiProjectDirectory,
     this.outPutDirectory,
     this.isSchemaOnly,
     this.defaultModels,
+    this.shouldGnerateWidgets,
   ) {
     apiDirectory = Directory(
       path.join(strapiProjectDirectory.path, "api"),
@@ -37,7 +39,7 @@ class Gen {
     );
   }
 
-  String? getCollectionNameFromRoutesFile(File file) {
+  String getCollectionNameFromRoutesFile(File file) {
     final splitted = path.split(file.path);
     splitted.removeLast();
     splitted.removeLast();
@@ -68,10 +70,24 @@ class Gen {
     final apiFolderFiles =
         await readFilesWithExtension(apiDirectory, extn: ".settings.json")
             .toList();
-    final extensionFolderFiles = await readFilesWithExtension(
-            extensionsDirectory,
-            extn: ".settings.json")
-        .toList();
+    final extensionFolderFiles = await () async {
+      final fs = await readFilesWithExtension(extensionsDirectory,
+              extn: ".settings.json")
+          .toList();
+      final files1 = fs.map((event) => path.basename(event.path));
+      final files2 = defaultModels.map((e) => path.basename(e.path));
+      final toAdd = [];
+      files2.forEach((element) {
+        if (!files1.contains(element)) {
+          toAdd.add(element);
+        }
+      });
+      toAdd.forEach((element) {
+        fs.add(defaultModels.firstWhere((e) => e.path.endsWith(element)));
+      });
+      return fs;
+    }();
+
     final componentsFolderFiles =
         await readFilesWithExtension(componentDirectory, extn: ".json")
             .toList();
@@ -83,35 +99,42 @@ class Gen {
     final componentJsons = await readAllFileToJson(componentsFolderFiles);
 
     final l = Library((b) {
-      b
-        ..directives.add((DirectiveBuilder()
+      b.directives.add((DirectiveBuilder()
+            ..type = DirectiveType.import
+            ..url = "package:simple_strapi/simple_strapi.dart")
+          .build());
+      b.directives.add((DirectiveBuilder()
+            ..type = DirectiveType.import
+            ..url = "dart:convert")
+          .build());
+      if (shouldGnerateWidgets) {
+        b.directives.add((DirectiveBuilder()
               ..type = DirectiveType.import
-              ..url = "package:simple_strapi/simple_strapi.dart")
+              ..url = "package:flutter/widgets.dart")
             .build());
+        b.body.add(Code(strapiBaseWidget));
+      }
       apiJsons.forEach((key, value) {
         final collectionName = getCollectionNameFromRoutesFile(key);
         final classes = generateClass(key, value, false, collectionName);
-        b
-          ..body.addAll([
-            ...classes,
-          ]);
+        b.body.addAll([
+          ...classes,
+        ]);
       });
       extnJsons.forEach((key, value) {
         final collectionName = getCollectionNameFromRoutesFile(key);
         final classes = generateClass(key, value, false, collectionName);
-        b
-          ..body.addAll([
-            ...classes,
-          ]);
+        b.body.addAll([
+          ...classes,
+        ]);
       });
       final completer = Completer<bool>();
       componentJsons.forEach((key, value) {
         final collectionName = getCollectionNameFromRoutesFile(key);
         final classes = generateClass(key, value, true, collectionName);
-        b
-          ..body.addAll([
-            ...classes,
-          ]);
+        b.body.addAll([
+          ...classes,
+        ]);
         if (key == componentJsons.keys.last) {
           completer.complete(true);
         }
@@ -120,7 +143,14 @@ class Gen {
 
     final e = DartEmitter();
     final f = DartFormatter();
-    final dart = f.format("${l.accept(e)}");
+    final dart = () {
+      try {
+        return f.format("${l.accept(e)}");
+      } catch (_) {
+        print("emitted dart code contains errors");
+        return "${l.accept(e)}";
+      }
+    }();
     final dir = Directory(path.join(
       outPutDirectory.path,
       "super_strapi",
@@ -132,13 +162,18 @@ class Gen {
   }
 
   Code generateCollectionClass(
-      String className, String classVariableName, String? collectionName) {
-    return Code(collectionClassString(className, classVariableName,
-        collectionName ?? PLURAL.convert(className)));
+      String className, String classVariableName, String collectionName) {
+    return Code(collectionClassString(
+      className,
+      classVariableName,
+      collectionName,
+      shouldGnerateWidgets,
+      className.toLowerCase() == "user",
+    ));
   }
 
   List<dynamic> generateClass(File file, Map<String, dynamic> j,
-      bool isComponent, String? collectionName) {
+      bool isComponent, String collectionName) {
     if (!j.containsKey("attributes")) {
       throw Exception("attributes missing in the strapi model");
     }
@@ -154,7 +189,7 @@ class Gen {
       (b) => {
         b
           ..name = "createdAt"
-          ..type = Reference("DateTime?")
+          ..type = Reference("DateTime")
           ..modifier = FieldModifier.final$
       },
     );
@@ -163,7 +198,7 @@ class Gen {
       (b) => {
         b
           ..name = "updatedAt"
-          ..type = Reference("DateTime?")
+          ..type = Reference("DateTime")
           ..modifier = FieldModifier.final$
       },
     );
@@ -181,7 +216,7 @@ class Gen {
       (b) => {
         b
           ..name = "id"
-          ..type = Reference("String?")
+          ..type = Reference("String")
           ..modifier = FieldModifier.final$
       },
     );
@@ -287,8 +322,9 @@ class Gen {
     final copyWithMethod = (MethodBuilder()
           ..name = "copyWIth"
           ..returns = Reference("$className")
-          ..requiredParameters.addAll(fields.map((field) => (ParameterBuilder()
+          ..optionalParameters.addAll(fields.map((field) => (ParameterBuilder()
                 ..name = field.name
+                ..named = true
                 ..type = field.type)
               .build()))
           ..body = CodeExpression(Code("$className._unsynced")).call([
@@ -302,29 +338,58 @@ class Gen {
           ]).code)
         .build();
 
+    final setNullMethod = (MethodBuilder()
+          ..name = "setNull"
+          ..returns = Reference("$className")
+          ..optionalParameters.addAll(fields.map((field) => (ParameterBuilder()
+                ..name = field.name
+                ..named = true
+                ..type = Reference("bool")
+                ..defaultTo = Code("false"))
+              .build()))
+          ..body = CodeExpression(Code("$className._unsynced")).call([
+            ...fields
+                .map((field) => CodeExpression(
+                    Code("${field.name}?null:this.${field.name}")))
+                .toList(),
+            CodeExpression(Code("this.${createdAtField.name}")),
+            CodeExpression(Code("this.${updatedAtField.name}")),
+            CodeExpression(Code("this.${idField.name}")),
+          ]).code)
+        .build();
+
     final accessFromMapExpression = (Field f, bool fromMap) {
       final type = f.type;
       if (type is CollectionListReference) {
+        if (type.className == "dynamic") {
+          return CodeExpression(
+            fromMap
+                ? Code("map[\"${f.name}\"]")
+                : Code("\"${f.name}\":${f.name}"),
+          );
+        }
         return fromMap
             ? CodeExpression(
-                Code("${type.className}s.fromIDs(map[\"${f.name}\"])"),
+                Code(
+                    "StrapiUtils.objFromListOfMap<${type.className}>(map[\"${f.name}\"],(e)=>${pluralize(type.className)}.fromIDorData(e))"),
               )
             : CodeExpression(
-                Code("\"${f.name}\":${f.name}.map((e)=>e.id)"),
+                Code("\"${f.name}\":${f.name}?.map((e)=>e.toMap())"),
               );
       }
       if (type is CollectionReference) {
         return CodeExpression(
           fromMap
-              ? Code("${type.className}.fromID(map[\"${f.name}\"])")
-              : Code("\"${f.name}\":${f.name}.id"),
+              ? Code(
+                  "StrapiUtils.objFromMap<${type.className}>(map[\"${f.name}\"],(e)=>${pluralize(type.className)}.fromIDorData(e))")
+              : Code("\"${f.name}\":${f.name}?.toMap()"),
         );
       }
       if (type is ComponentListReference) {
         return CodeExpression(
           fromMap
               ? Code(
-                  "map[\"${f.name}\"].map((e)=>${type.className}.fromMap(e)).tiList()")
+                  "StrapiUtils.objFromListOfMap<${type.className}>(map[\"${f.name}\"],(e)=>${type.className}.fromMap(e))")
               : Code(
                   "\"${f.name}\":${f.name}?.map((e)=>e.toMap())",
                 ),
@@ -333,47 +398,48 @@ class Gen {
       if (type is ComponentReference) {
         return CodeExpression(
           fromMap
-              ? Code("${type.className}.fromMap(map[\"${f.name}\"])")
+              ? Code(
+                  "StrapiUtils.objFromMap<${type.className}>(map[\"${f.name}\"],(e)=>${type.className}.fromMap(e))")
               : Code("\"${f.name}\":${f.name}?.toMap()"),
         );
       }
-      if (type.symbol == "DateTime?") {
+      if (type.symbol == "DateTime") {
         return CodeExpression(
           fromMap
               ? Code("StrapiUtils.parseDateTime(map[\"${f.name}\"])")
               : Code("\"${f.name}\":${f.name}?.toIso8601String()"),
         );
       }
-      if (type.symbol == "double?") {
+      if (type.symbol == "double") {
         return CodeExpression(
           fromMap
               ? Code("StrapiUtils.parseDouble(map[\"${f.name}\"])")
               : Code("\"${f.name}\":${f.name}"),
         );
       }
-      if (type.symbol == "int?") {
+      if (type.symbol == "int") {
         return CodeExpression(
           fromMap
               ? Code("StrapiUtils.parseInt(map[\"${f.name}\"])")
               : Code("\"${f.name}\":${f.name}"),
         );
       }
-      if (type.symbol == "bool?") {
+      if (type.symbol == "bool") {
         return CodeExpression(
           fromMap
               ? Code("StrapiUtils.parseBool(map[\"${f.name}\"])")
               : Code("\"${f.name}\":${f.name}"),
         );
       }
-      if (type.symbol == "Map<String,dynamic>?") {
+      if (type.symbol == "Map<String,dynamic>") {
         return CodeExpression(
           fromMap
               ? Code("jsonDecode(map[\"${f.name}\"])")
-              : Code("\"${f.name}\":jsonEncode(${f.name}"),
+              : Code("\"${f.name}\":jsonEncode(${f.name})"),
         );
       }
       return fromMap
-          ? CodeExpression(Code("map[\"f.name\"]"))
+          ? CodeExpression(Code("map[\"${f.name}\"]"))
           : CodeExpression(Code("\"${f.name}\":${f.name}"));
     };
 
@@ -382,7 +448,12 @@ class Gen {
           ..returns = Reference("Map<String,dynamic>")
           ..lambda = true
           ..body = Code(
-            "{${fields.map((field) => accessFromMapExpression(field, false).code.toString()).join(",")}}",
+            "{${[
+              ...fields,
+              if (!isComponent) createdAtField,
+              if (!isComponent) updatedAtField,
+              if (!isComponent) idField,
+            ].map((field) => accessFromMapExpression(field, false).code.toString()).join(",")}}",
           ))
         .build();
 
@@ -418,6 +489,14 @@ class Gen {
           ]).code)
         .build();
 
+    final toStringMethod = (MethodBuilder()
+          ..name = "toString"
+          ..returns = Reference("String")
+          ..lambda = true
+          ..annotations.addAll([CodeExpression(Code("override"))])
+          ..body = Code("toMap().toString()"))
+        .build();
+
     classBuilder
       ..name = className
       ..fields.addAll([
@@ -436,9 +515,11 @@ class Gen {
       ..methods.addAll([
         if (!isComponent) getSyncedMethod,
         if (!isComponent) copyWithMethod,
+        if (!isComponent) setNullMethod,
         toMapMethod,
         if (!isComponent) fromSyncedMapMethod,
         fromMapMethod,
+        toStringMethod
       ]);
     return [
       classBuilder.build(),

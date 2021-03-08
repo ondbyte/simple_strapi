@@ -24,6 +24,7 @@ dependencies:
   provider: ^4.3.2+2
   flutter_mobx: ^1.1.0+2
   event_bus: ^1.1.1
+  get: ^3.25.6
 
   #DEVICE
   permission_handler: ^5.0.1+1
@@ -37,9 +38,11 @@ dependencies:
   package_info: ^0.4.3+2
 
 
-  #GIT
+  #own
   the_country_number_widgets: 0.9.0
   the_country_number: 0.9.0
+  simple_strapi:
+    path: ./packages/simple_strapi
 
   #ICONS
   feather_icons_flutter: ^4.7.4
@@ -97,6 +100,8 @@ dev_dependencies:
   taste:
     git:
       url: https://github.com/ondbyte/taste.git
+  super_strapi:
+    path: ./packages/super_strapi
 flutter_icons:
   android: "launcher_icon"
   ios: true

@@ -29,9 +29,7 @@ class _BappInitScreenState extends State<BappInitScreen>
     return InitWidget(
       initializer: () async {
         if (mounted) {
-          ///init authentication store / load user
-          BappFCM().init();
-          await Provider.of<CloudStore>(context, listen: false).init(
+          /*await Provider.of<CloudStore>(context, listen: false).init(
             onLogin: () async {
               if (mounted) {
                 //await FirebaseAuth.instance.signOut();
@@ -62,7 +60,7 @@ class _BappInitScreenState extends State<BappInitScreen>
               return;
             },
           );
-          //await context.read<FeedbackStore>().init();
+          //await context.read<FeedbackStore>().init();*/
         }
       },
 

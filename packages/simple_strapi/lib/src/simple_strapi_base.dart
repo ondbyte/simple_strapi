@@ -2,27 +2,52 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-class StrapiCollection {
-  static void _failedResponse(String log, StrapiResponse response) {
+class StrapiResponseException implements Exception {
+  final String log;
+  final StrapiResponse response;
+
+  StrapiResponseException(this.log, this.response) {
     print(
       log,
     );
     print("strapi response was");
     print(response);
   }
+}
 
-  static Future<List<Map<String, dynamic>>> findMultiple(
-      {required String collection, int limit = 16}) async {
-    final path = collection;
-    final response = await Strapi.i.request(
-      path,
-    );
+class StrapiCollection {
+  static Future<dynamic> customEndpoint({
+    required String collection,
+    required String endPoint,
+    int? limit,
+    StrapiQuery? query,
+  }) async {
+    final path = collection + "/" + endPoint;
+    query = query != null ? (query) : StrapiQuery();
+    query.enableLimit(limit);
+    final response =
+        await Strapi.i.request(path, queryString: query.queryString);
     if (response.failed) {
-      _failedResponse(
+      throw StrapiResponseException(
         "failed to get multiple objects from collection $collection",
         response,
       );
-      return [];
+    }
+    return response.body;
+  }
+
+  static Future<List<Map<String, dynamic>>> findMultiple(
+      {required String collection, int? limit, StrapiQuery? query}) async {
+    final path = collection;
+    query = query != null ? (query) : StrapiQuery();
+    query.enableLimit(limit);
+    final response =
+        await Strapi.i.request(path, queryString: query.queryString);
+    if (response.failed) {
+      throw StrapiResponseException(
+        "failed to get multiple objects from collection $collection",
+        response,
+      );
     }
     return response.body;
   }
@@ -34,11 +59,10 @@ class StrapiCollection {
       path,
     );
     if (response.failed) {
-      _failedResponse(
+      throw StrapiResponseException(
         "failed to get single object from collection $collection",
         response,
       );
-      return {};
     }
     return response.body.first;
   }
@@ -55,11 +79,10 @@ class StrapiCollection {
     );
 
     if (response.failed) {
-      _failedResponse(
+      throw StrapiResponseException(
         "failed to create object at collection $collection",
         response,
       );
-      return {};
     }
     return response.body.first;
   }
@@ -72,11 +95,10 @@ class StrapiCollection {
     final path = collection + "/" + id;
     final response = await Strapi.i.request(path, method: "PUT", body: data);
     if (response.failed) {
-      _failedResponse(
+      throw StrapiResponseException(
         "failed to update single object with id $id at collection $collection",
         response,
       );
-      return {};
     }
     return response.body.first;
   }
@@ -87,8 +109,8 @@ class StrapiCollection {
       path,
     );
     if (response.failed) {
-      _failedResponse("failed to count at collection $collection", response);
-      return 0;
+      throw StrapiResponseException(
+          "failed to count at collection $collection", response);
     }
     return response.count;
   }
@@ -103,11 +125,10 @@ class StrapiCollection {
       method: "DELETE",
     );
     if (response.failed) {
-      _failedResponse(
+      throw StrapiResponseException(
         "failed to delete at collection $collection for id :$id",
         response,
       );
-      return {};
     }
     return response.body.isNotEmpty ? response.body.first : {};
   }
@@ -122,7 +143,7 @@ class StrapiCollection {
 ///Strapi instance is what you need to do authentication with strapi server and get a jwt token,
 ///it is also easier to make authenticated request using [request] method
 class Strapi {
-  static final host = "localhost:1337";
+  String host = "localhost:1337";
 
   ///should the requests use 'https' or not defaults to false
   bool shouldUseHttps = false;
@@ -134,6 +155,9 @@ class Strapi {
   static Strapi get instance => _instance;
 
   static Strapi get i => _instance;
+
+  ///output the error to console if any
+  bool verbose = false;
 
   Strapi._private();
 
@@ -184,11 +208,15 @@ class Strapi {
     return response;
   }
 
-  Uri _strapiUri(String unencodedPath, {Map<String, String>? params}) {
+  ///constructs https or http url from path, params and [StrapiQuery]
+  Uri _strapiUri(String unencodedPath,
+      {Map<String, String>? params, String? queryString}) {
     if (shouldUseHttps) {
-      return Uri.https(host, unencodedPath, params);
+      final https = Uri.https(host, unencodedPath, params);
+      return https.replace(query: queryString);
     }
-    return Uri.http(host, unencodedPath, params);
+    final http = Uri.http(host, unencodedPath, params);
+    return http.replace(query: queryString);
   }
 
   ///an authentcated strapi request making towards the endpionts of your strapi server,
@@ -208,11 +236,15 @@ class Strapi {
     Map<String, dynamic>? body,
     String method = "GET",
     Map<String, String>? params,
-    int maxTimeOutInMillis = 5000,
+    String? queryString,
+    int maxTimeOutInMillis = 15000,
   }) async {
     try {
       var closed = false;
-      final uri = _strapiUri(path, params: params);
+      final uri = _strapiUri(path, params: params, queryString: queryString);
+      if (verbose) {
+        sPrint(uri);
+      }
       final request = await _client.openUrl(
         method,
         uri,
@@ -227,7 +259,11 @@ class Strapi {
       Future.delayed(
         Duration(milliseconds: maxTimeOutInMillis),
         () => {
-          if (!closed) {request.abort()}
+          if (!closed)
+            {
+              request.abort(TimeoutException(
+                  "reaching strapi server timed out, current timeout is $maxTimeOutInMillis millis"))
+            }
         },
       );
       final response = await request.close();
@@ -238,6 +274,10 @@ class Strapi {
       late final responseJson;
       try {
         responseJson = jsonDecode(responseBodyString);
+        if (verbose) {
+          sPrint("raw response is");
+          sPrint(JsonEncoder.withIndent("  ").convert(responseJson));
+        }
       } on FormatException catch (e) {
         return StrapiResponse(
           body: [],
@@ -270,21 +310,33 @@ class Strapi {
             count: responseJson,
             url: uri);
       } else if (responseJson is List &&
+          responseJson.isNotEmpty &&
           responseJson.first is Map<String, dynamic>) {
         return StrapiResponse(
-            statusCode: response.statusCode,
-            body: responseJson.map((e) => (e as Map<String, dynamic>)).toList(),
-            error: "",
-            errorMessage: "",
-            failed: failed,
-            count: responseJson.length,
-            url: uri);
+          statusCode: response.statusCode,
+          body: responseJson.map((e) => (e as Map<String, dynamic>)).toList(),
+          error: "",
+          errorMessage: "",
+          failed: failed,
+          count: responseJson.length,
+          url: uri,
+        );
       } else {
-        throw Exception(
-          "response can either be a List or map but it is a ${responseJson.runtimeType}, make sure strapi is responding with json",
+        return StrapiResponse(
+          body: [],
+          count: 0,
+          error: "empty-response",
+          errorMessage: "",
+          failed: true,
+          statusCode: response.statusCode,
+          url: uri,
         );
       }
-    } on HttpException catch (e) {
+    } on HttpException catch (e, s) {
+      if (verbose) {
+        print(e);
+        print(s);
+      }
       return StrapiResponse(
         body: [],
         count: 0,
@@ -296,6 +348,12 @@ class Strapi {
       );
     }
   }
+
+  ///everytime a new object is recieved from server it is added to this stream
+  final _objectsStramController =
+      StreamController<Map<String, dynamic>>.broadcast();
+  Stream<Map<String, dynamic>> get objectsStram =>
+      _objectsStramController.stream;
 }
 
 class StrapiResponse {
@@ -324,6 +382,9 @@ class StrapiResponse {
 
 class StrapiUtils {
   static double? parseDouble(source) {
+    if (source == null) {
+      return null;
+    }
     if (source is double) {
       return source;
     }
@@ -331,6 +392,9 @@ class StrapiUtils {
   }
 
   static int? parseInt(source) {
+    if (source == null) {
+      return null;
+    }
     if (source is int) {
       return source;
     }
@@ -338,6 +402,9 @@ class StrapiUtils {
   }
 
   static DateTime? parseDateTime(source) {
+    if (source == null) {
+      return null;
+    }
     if (source is DateTime) {
       return source;
     }
@@ -345,13 +412,67 @@ class StrapiUtils {
   }
 
   static bool parseBool(source) {
+    if (source == null) {
+      return false;
+    }
     if (source is bool) {
       return source;
     }
     return source == "true";
   }
+
+  static List<T> objFromListOfMap<T>(
+      dynamic data, T Function(dynamic) forEach) {
+    final list = <T>[];
+    if (data is List && data.isNotEmpty) {
+      data.forEach((e) {
+        list.add(forEach(e));
+      });
+    }
+    return list;
+  }
+
+  static T? objFromMap<T>(dynamic data, T Function(dynamic) returner) {
+    if (data is Map && data.isNotEmpty) {
+      return returner(data);
+    }
+    return null;
+  }
 }
 
 void sPrint(d) {
   print("[Strapi] " + d.toString());
+}
+
+String _operation(StrapiQueryOperation operation) {
+  switch (operation) {
+    case StrapiQueryOperation.equalTo:
+      {
+        return "_eq";
+      }
+    case StrapiQueryOperation.includesInAnArray:
+      {
+        return "_in";
+      }
+  }
+}
+
+enum StrapiQueryOperation { equalTo, includesInAnArray }
+
+class StrapiQuery {
+  final _queries = <String>[];
+
+  String? get queryString => _queries.isEmpty ? null : _queries.join("&");
+
+  void where(String field, StrapiQueryOperation operation, value) {
+    _queries.add(field + _operation(operation) + "=" + value);
+  }
+
+  void enableLimit(int? limit) {
+    if (limit is int) {
+      if (!_queries.any((e) => e.startsWith("_limit="))) {
+        _queries.add("_limit=$limit");
+      }
+    }
+  }
 }

@@ -39,7 +39,7 @@ class Helper {
   }
 
   static void printLog(d) {
-    print("[BAPP]" + d.toString());
+    print("[BAPP] ${d.toString()}");
   }
 
   static dynamic alternateLatLong(dynamic ll) {

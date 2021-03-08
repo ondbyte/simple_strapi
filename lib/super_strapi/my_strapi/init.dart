@@ -6,5 +6,6 @@ class StrapiInit {
   StrapiInit._i() {
     Strapi.i.host = "api.thebapp.app";
     Strapi.i.shouldUseHttps = true;
+    Strapi.i.verbose = true;
   }
 }

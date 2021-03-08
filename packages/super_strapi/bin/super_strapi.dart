@@ -15,12 +15,19 @@ void main(List<String> arguments) async {
       help:
           "required, strapi project folder to generate the schema/dart classes",
     );
+    argvParser.addFlag(
+      "generate-flutter-widgets",
+      abbr: "w",
+      defaultsTo: false,
+      help:
+          "defaults to false, if set to true observer widgets for collection objects will be generated",
+    );
     argvParser.addOption(
       "output-folder",
       abbr: "o",
-      defaultsTo: Directory.current.path,
+      defaultsTo: join(Directory.current.path, "lib"),
       help:
-          "mostly the lib folder of a flutter/dart project to output the generated super_strapi.dart, example of the output <given lib folder>/super_strapi/super_starpi.dart",
+          "mostly the lib folder of a flutter/dart project to output the generated super_strapi.dart, example of the output <given lib folder>/lib/super_strapi/super_starpi.dart",
     );
     argvParser.addFlag(
       "only-schema",
@@ -43,53 +50,54 @@ void main(List<String> arguments) async {
     final outPutPath = argvResults["output-folder"];
     final isSchemaOnly = argvResults["only-schema"];
     final shouldGetLatestModel = argvResults["get-latest-models"];
+    final shouldGenerateWidgets = argvResults["generate-flutter-widgets"];
 
     if (strapiProjectPath != null && outPutPath != null) {
       final strapiProjectDirectory = Directory(strapiProjectPath);
       final outPutDirectory = Directory(outPutPath);
       checkStrapiProjectRoot(strapiProjectDirectory);
       checkOutPutFolder(outPutDirectory);
-      final defaultModels = await getLatestDefaultModels(shouldGetLatestModel);
+      final defaultModels = await _getLatestDefaultModels(shouldGetLatestModel);
+      //print(defaultModels);
 
-      final gen = Gen(
-        strapiProjectDirectory,
-        outPutDirectory,
-        isSchemaOnly,
-        defaultModels,
-      );
+      final gen = Gen(strapiProjectDirectory, outPutDirectory, isSchemaOnly,
+          defaultModels, shouldGenerateWidgets);
 
       await gen.generate();
     } else {
       throw FormatException();
     }
   } on FormatException catch (e) {
-    print("use fallowing arguments\n");
+    print("use fallowing arguments with super_strapi\n");
 
     print(argvParser.usage);
   }
 }
 
-final defaultModelsURL =
-    "https://raw.githubusercontent.com/strapi/strapi/master/packages/strapi-plugin-users-permissions/models/";
+final defaultModelsURL = [
+  "https://raw.githubusercontent.com/strapi/strapi/master/packages/strapi-plugin-users-permissions/models/",
+  "https://raw.githubusercontent.com/strapi/strapi/master/packages/strapi-plugin-upload/models/"
+];
 
 final defaultModelNames = <String>[
-  "Permission.settings.json",
-  "Role.settings.json",
-  "User.settings.json",
+  "https://raw.githubusercontent.com/strapi/strapi/master/packages/strapi-plugin-users-permissions/models/Permission.settings.json",
+  "https://raw.githubusercontent.com/strapi/strapi/master/packages/strapi-plugin-users-permissions/models/Role.settings.json",
+  "https://raw.githubusercontent.com/strapi/strapi/master/packages/strapi-plugin-users-permissions/models/User.settings.json",
+  "https://raw.githubusercontent.com/strapi/strapi/master/packages/strapi-plugin-upload/models/File.settings.json",
 ];
 
 final tmpDirectory = join(Directory.systemTemp.path);
 
-Future<List<File>> getLatestDefaultModels(bool shouldGet) async {
+Future<List<File>> _getLatestDefaultModels(bool shouldGet) async {
   final h = HttpClient();
   final fileList = <File>[];
   for (final fileName in defaultModelNames) {
     final file = shouldGet
-        ? Uri.parse(defaultModelsURL + fileName)
-        : File(join(tmpDirectory, fileName));
+        ? Uri.parse(fileName)
+        : File(join(tmpDirectory, basename(Uri.parse(fileName).path)));
     if (file is File) {
       if (!await file.exists()) {
-        return getLatestDefaultModels(true);
+        return _getLatestDefaultModels(true);
       } else {
         fileList.add(file);
       }
@@ -98,9 +106,9 @@ Future<List<File>> getLatestDefaultModels(bool shouldGet) async {
       final response = await request.close();
       if (response.statusCode == 200) {
         final data = await response.transform(utf8.decoder).toList();
-        final newFile = File(join(tmpDirectory, fileName));
+        final newFile =
+            File(join(tmpDirectory, basename(Uri.parse(fileName).path)));
         await newFile.writeAsString(data.join("\n"));
-        print(data);
         fileList.add(newFile);
       }
     }

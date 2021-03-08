@@ -1,6 +1,11 @@
-import 'package:code_builder/code_builder.dart';
-
 String toClassName(String s) {
+  if (s.toLowerCase() == "file") {
+    return "StrapiFile";
+  }
+  if (s.toLowerCase() == "*") {
+    return "dynamic";
+  }
+
   final l = s.split("-");
   if (l.length > 1) {
     s = "";
