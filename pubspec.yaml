@@ -55,6 +55,7 @@ dependencies:
   uuid: ^2.2.2
   pdf: ^1.11.2
   image: ^2.1.19
+  async: 2.5.0-nullsafety.3
 
   #UI
   animated_text_kit: ^2.2.0

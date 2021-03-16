@@ -206,35 +206,51 @@ class <CollectionClassName> {
   }
 
   static Future<className> findOne(String id) async {
-    final mapResponse = await StrapiCollection.findOne(
+    try{
+      final mapResponse = await StrapiCollection.findOne(
       collection: collectionName,
       id: id,
     );
     if (mapResponse.isNotEmpty) {
       return className.fromSyncedMap(mapResponse);
     }
+    }catch (e,s){
+      sPrint(e);
+      sPrint(s);
+    }
   }
 
-  static Future<List<className>> findMultiple({int limit = 16,StrapiQuery query}) async {
-    final list =
-        await StrapiCollection.findMultiple(collection: collectionName,limit:limit,query:query);
+  static Future<List<className>> findMultiple({int limit = 16}) async {
+    try{
+      final list =
+        await StrapiCollection.findMultiple(collection: collectionName,limit:limit,);
     if (list.isNotEmpty) {
       return list.map((map) => className.fromSyncedMap(map)).toList();
+    }
+    }catch (e,s){
+      sPrint(e);
+      sPrint(s);
     }
   }
 
   static Future<className> create(className classVariableName) async {
-    final map = await StrapiCollection.create(
+    try{
+      final map = await StrapiCollection.create(
       collection: collectionName,
       data: classVariableName.toMap(),
     );
     if (map.isNotEmpty) {
       return className.fromSyncedMap(map);
     }
+    }catch (e,s){
+      sPrint(e);
+      sPrint(s);
+    }
   }
 
   static Future<className> update(className classVariableName) async {
-    final id = classVariableName.id;
+    try{
+      final id = classVariableName.id;
     if (id is String) {
       final map = await StrapiCollection.update(
         collection: collectionName,
@@ -247,14 +263,26 @@ class <CollectionClassName> {
     } else {
       sPrint("id is null while updating");
     }
+      }
+      catch (e,s){
+      sPrint(e);
+      sPrint(s);
+    }
   }
 
   static Future<int> count() async {
-    return await StrapiCollection.count(collectionName);
+    try{
+      return await StrapiCollection.count(collectionName);
+    }catch (e,s){
+      sPrint(e);
+      sPrint(s);
+    }
+      return 0;
   }
 
   static Future<className> delete(className classVariableName) async {
-    final id = classVariableName.id;
+    try{
+      final id = classVariableName.id;
     if (id is String) {
       final map =
           await StrapiCollection.delete(collection: collectionName, id: id);
@@ -264,24 +292,14 @@ class <CollectionClassName> {
     } else {
       sPrint("id is null while deleting");
     }
+    }catch (e,s){
+      sPrint(e);
+      sPrint(s);
+    }
   }  
-  static List<className> fromListOfIDOrData(List idsOrData) {
-    if(idsOrData is! List) {
-      return [];
-    }
-    if (idsOrData.isEmpty) {
-      return [];
-    }
-    if (idsOrData.first is String) {
-      return idsOrData.map((e) => className.fromID(e)).toList();
-    }
-    if (idsOrData.first is Map) {
-      return idsOrData.map((e) => className.fromSyncedMap(e)).toList();
-    }
-    return [];
-  }
+  
 
-  static className fromIDorData(idOrData) {
+  static className _fromIDorData(idOrData) {
     if (idOrData is String) {
       return className.fromID(idOrData);
     }
@@ -291,19 +309,32 @@ class <CollectionClassName> {
     return null;
   }
 
-  static Future<List<className>> getForListOfIDs(List<String> ids) async {
-    if(ids!=null&&ids.isEmpty){
-      throw Exception("list of ids cannot be empty or null");
+  static Future<List<className>> executeQuery(StrapiCollectionQuery query,{int maxTimeOutInMillis = 15000}) async {
+    final queryString = query.query(collectionName:collectionName,);
+    try{
+      final response = await Strapi.i.graphRequest(queryString,maxTimeOutInMillis:maxTimeOutInMillis);
+      if(response.body.isNotEmpty){
+        final object = response.body.first;
+        if(object is Map&&object.containsKey("data")){
+          final data = object["data"];
+          if(data is Map&&data.containsKey(collectionName)){
+            final myList = data[collectionName];
+            if(myList is List){
+              return myList.map((e)=>_fromIDorData(e)).toList();
+            } else if(myList is Map&&myList.containsKey("id")){
+              return [_fromIDorData(myList)];
+            }
+          }
+        }
+      }
+    }catch (e,s){
+      sPrint(e);
+      sPrint(s);
     }
-    final query = StrapiQuery();
-    ids.forEach((id) {
-      query.where("id", StrapiQueryOperation.includesInAnArray, id);
-    });
-    final list = await StrapiCollection.findMultiple(collection: collectionName,query: query);
-    if (list.isNotEmpty) {
-      return list.map((map) => className.fromSyncedMap(map)).toList();
-    }
+    return [];
   }
+
+  
 
   <userMe>
 
@@ -313,7 +344,8 @@ class <CollectionClassName> {
   if (isUserCollection) {
     userMeString = '''
   static Future<className> me() async {
-    if(Strapi.i.strapiToken.isEmpty){
+    try{
+      if(Strapi.i.strapiToken.isEmpty){
       throw Exception("cannot get users/me endpoint without token, please authenticate first");
     }
     final response = await StrapiCollection.customEndpoint(
@@ -324,8 +356,10 @@ class <CollectionClassName> {
       return className.fromSyncedMap(response);
     } else if (response is List && response.isNotEmpty) {
       return User.fromSyncedMap(response.first);
-    } else {
-      throw Exception("wrong response from users/me endpoint");
+    }
+    } catch (e,s){
+      sPrint(e);
+      sPrint(s);
     }
   }''';
   }

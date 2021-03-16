@@ -15,7 +15,6 @@ import 'package:bapp/widgets/size_provider.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:provider/provider.dart';
 
 class CustomerHome extends StatefulWidget {
   @override
@@ -124,9 +123,7 @@ class _PendingUpdatesIconState extends State<PendingUpdatesIcon> {
         if (_childSize != null)
           Observer(
             builder: (_) {
-              final totalUpdates =
-                  Provider.of<UpdatesStore>(context, listen: false)
-                      .numberOfUnreadUpdates;
+              final totalUpdates = 2;
               return totalUpdates > 0
                   ? SizedBox.fromSize(
                       size: _childSize,

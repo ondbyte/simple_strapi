@@ -19,7 +19,7 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
   int _expandedPanel = -1;
   @override
   Widget build(BuildContext context) {
-    Helper.printLog("build");
+    Helper.bPrint("build");
     return SafeArea(
       child: Consumer<BusinessStore>(
         builder: (_, businessStore, __) {

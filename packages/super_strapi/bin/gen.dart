@@ -43,8 +43,11 @@ class Gen {
     final splitted = path.split(file.path);
     splitted.removeLast();
     splitted.removeLast();
-    final configFile =
-        File(path.joinAll([...splitted, "config", "routes.json"]));
+    final configFile = File(
+      path.joinAll(
+        [...splitted, "config", "routes.json"],
+      ),
+    );
     if (configFile.existsSync()) {
       final data = configFile.readAsStringSync();
       final j = jsonDecode(data);
@@ -172,8 +175,12 @@ class Gen {
     ));
   }
 
-  List<dynamic> generateClass(File file, Map<String, dynamic> j,
-      bool isComponent, String collectionName) {
+  List<dynamic> generateClass(
+    File file,
+    Map<String, dynamic> j,
+    bool isComponent,
+    String collectionName,
+  ) {
     if (!j.containsKey("attributes")) {
       throw Exception("attributes missing in the strapi model");
     }
@@ -219,6 +226,14 @@ class Gen {
           ..type = Reference("String")
           ..modifier = FieldModifier.final$
       },
+    );
+
+    final collectionNameField = Field(
+      (b) => b
+        ..name = "collectionName"
+        ..static = true
+        ..modifier = FieldModifier.final$
+        ..assignment = Code("\"$collectionName\""),
     );
 
     final params = <Parameter>[];
@@ -319,6 +334,24 @@ class Gen {
           ..body = Code("_synced"))
         .build();
 
+    final getFieldsMethod = (MethodBuilder()
+          ..name = "fields"
+          ..lambda = true
+          ..static = true
+          ..type = MethodType.getter
+          ..returns = Reference("_${className}Fields")
+          ..body = Code("_${className}Fields.i"))
+        .build();
+
+    final getStructureMethod = (MethodBuilder()
+          ..name = "fields"
+          ..lambda = true
+          ..static = true
+          ..type = MethodType.getter
+          ..returns = Reference("_${className}Fields")
+          ..body = Code("_${className}Fields.i"))
+        .build();
+
     final copyWithMethod = (MethodBuilder()
           ..name = "copyWIth"
           ..returns = Reference("$className")
@@ -371,7 +404,7 @@ class Gen {
         return fromMap
             ? CodeExpression(
                 Code(
-                    "StrapiUtils.objFromListOfMap<${type.className}>(map[\"${f.name}\"],(e)=>${pluralize(type.className)}.fromIDorData(e))"),
+                    "StrapiUtils.objFromListOfMap<${type.className}>(map[\"${f.name}\"],(e)=>${pluralize(type.className)}._fromIDorData(e))"),
               )
             : CodeExpression(
                 Code("\"${f.name}\":${f.name}?.map((e)=>e.toMap())"),
@@ -381,7 +414,7 @@ class Gen {
         return CodeExpression(
           fromMap
               ? Code(
-                  "StrapiUtils.objFromMap<${type.className}>(map[\"${f.name}\"],(e)=>${pluralize(type.className)}.fromIDorData(e))")
+                  "StrapiUtils.objFromMap<${type.className}>(map[\"${f.name}\"],(e)=>${pluralize(type.className)}._fromIDorData(e))")
               : Code("\"${f.name}\":${f.name}?.toMap()"),
         );
       }
@@ -494,7 +527,8 @@ class Gen {
           ..returns = Reference("String")
           ..lambda = true
           ..annotations.addAll([CodeExpression(Code("override"))])
-          ..body = Code("toMap().toString()"))
+          ..body = Code(
+              '''"${isComponent ? "[Strapi Component Type $className]: " : "[Strapi Collection Type $className]"}\\n"+toMap().toString()'''))
         .build();
 
     classBuilder
@@ -505,6 +539,7 @@ class Gen {
         if (!isComponent) createdAtField,
         if (!isComponent) updatedAtField,
         if (!isComponent) idField,
+        if (!isComponent) collectionNameField
       ])
       ..constructors.addAll([
         if (!isComponent) constructorFromID,
@@ -516,16 +551,86 @@ class Gen {
         if (!isComponent) getSyncedMethod,
         if (!isComponent) copyWithMethod,
         if (!isComponent) setNullMethod,
+        getFieldsMethod,
         toMapMethod,
         if (!isComponent) fromSyncedMapMethod,
         fromMapMethod,
         toStringMethod
       ]);
+
     return [
       classBuilder.build(),
       if (!isComponent)
         generateCollectionClass(className, camelClassName, collectionName),
+      generateFieldsClass(
+        className,
+        camelClassName,
+        collectionName,
+        [
+          ...fields,
+          if (!isComponent) createdAtField,
+          if (!isComponent) updatedAtField,
+          if (!isComponent) idField,
+        ],
+      ),
     ];
+  }
+
+  Class generateFieldsClass(String className, String camelClassName,
+      collectionName, List<Field> fields) {
+    final b = ClassBuilder();
+    b
+      ..name = "_${className}Fields"
+      ..fields.add(Field((fb) {
+        fb
+          ..name = "i"
+          ..type = Reference("_${className}Fields")
+          ..assignment = Code("_${className}Fields._i()")
+          ..static = true
+          ..modifier = FieldModifier.final$;
+      }))
+      ..constructors.add(Constructor((cb) {
+        cb..name = "_i";
+      }))
+      ..methods.add(Method((b) {
+        b
+          ..name = "call"
+          ..body = Code("return [${fields.map((e) => e.name).join(",")}];")
+          ..returns = Reference("List<StrapiField>");
+      }))
+      ..fields.addAll(fields.map((e) {
+        final ref = e.type;
+        if (ref is CollectionListReference) {
+          final fb = FieldBuilder();
+          fb
+            ..name = e.name
+            ..modifier = FieldModifier.final$
+            ..assignment = Code("StrapiCollectionField(\"${e.name}\")");
+          return fb.build();
+        } else if (ref is CollectionReference) {
+          final fb = FieldBuilder();
+          fb
+            ..name = e.name
+            ..modifier = FieldModifier.final$
+            ..assignment = Code("StrapiModelField(\"${e.name}\")");
+          return fb.build();
+        } else if (ref is ComponentListReference || ref is ComponentReference) {
+          final fb = FieldBuilder();
+          fb
+            ..name = e.name
+            ..modifier = FieldModifier.final$
+            ..assignment = Code("StrapiComponentField(\"${e.name}\")");
+          return fb.build();
+        } else {
+          final fb = FieldBuilder();
+          fb
+            ..name = e.name
+            ..modifier = FieldModifier.final$
+            ..assignment = Code("StrapiLeafField(\"${e.name}\")");
+          return fb.build();
+        }
+      }));
+    return b.build();
   }
 
   Future<Map<File, Map<String, dynamic>>> readAllFileToJson(

@@ -4,7 +4,11 @@ import 'package:bapp/screens/init/splash_screen.dart';
 import 'package:bapp/screens/misc/error.dart';
 import 'package:flutter/material.dart';
 
-enum AppEvents { reboot, unHandledError, totalUpdates, }
+enum AppEvents {
+  reboot,
+  unHandledError,
+  totalUpdates,
+}
 
 class AppEventsWithExtra {
   final AppEvents event;
@@ -24,25 +28,26 @@ class BappNavigator extends StatefulWidget {
   _BappNavigatorState createState() => _BappNavigatorState();
 
   static Future<T> push<T>(BuildContext context, Widget routeWidget) {
+    bPrint("pushing screen ${routeWidget.runtimeType}");
     final state = context.findAncestorStateOfType<_BappNavigatorState>();
-    return state._navKey.currentState
-        .push<T>(_pageRoute<T>(routeWidget));
+    return state._navKey.currentState.push<T>(_pageRoute<T>(routeWidget));
   }
 
   static Future<T> pushAndRemoveAll<T>(
       BuildContext context, Widget routeWidget) {
+    bPrint("pushing screen ${routeWidget.runtimeType}");
     final state = context.findAncestorStateOfType<_BappNavigatorState>();
-    return state._navKey.currentState.pushAndRemoveUntil<T>(
-        _pageRoute<T>(routeWidget), (route) => false);
+    return state._navKey.currentState
+        .pushAndRemoveUntil<T>(_pageRoute<T>(routeWidget), (route) => false);
   }
 
   static Future<T> pushReplacement<T, TO>(
       BuildContext context, Widget routeWidget,
       {TO result}) {
+    bPrint("pushing screen ${routeWidget.runtimeType}");
     final state = context.findAncestorStateOfType<_BappNavigatorState>();
     state._navKey.currentState.pop(result);
-    return state._navKey.currentState
-        .push<T>(_pageRoute<T>(routeWidget));
+    return state._navKey.currentState.push<T>(_pageRoute<T>(routeWidget));
   }
 
   static void pop<T>(BuildContext context, T result) {
@@ -51,18 +56,17 @@ class BappNavigator extends StatefulWidget {
   }
 
   static Future<T> dialog<T>(BuildContext context, Widget dialog) {
+    bPrint("pushing dialog ");
     return showDialog<T>(
-      context: context,
-      useRootNavigator: false,
-      builder: (_){
-        return dialog;
-      }
-    );
+        context: context,
+        useRootNavigator: false,
+        builder: (_) {
+          return dialog;
+        });
   }
 
-  static Route<T> _pageRoute<T>(Widget routeWidget,
-      {bool isDialog = false}) {
-    Helper.printLog(isDialog);
+  static Route<T> _pageRoute<T>(Widget routeWidget, {bool isDialog = false}) {
+    Helper.bPrint(isDialog);
     return PageRouteBuilder(
       fullscreenDialog: isDialog,
       barrierColor: Colors.transparent,
@@ -91,7 +95,7 @@ class _BappNavigatorState extends State<BappNavigator> {
       child: Navigator(
         key: _key,
         onPopPage: (r, res) {
-          Helper.printLog("pop");
+          Helper.bPrint("pop");
           return r.didPop(res);
         },
         onGenerateRoute: (s) {
@@ -144,7 +148,7 @@ class _BappNavigatorState extends State<BappNavigator> {
         switch (event.event) {
           case AppEvents.unHandledError:
             {
-              Helper.printLog("ERROR Showing error screen");
+              Helper.bPrint("ERROR Showing error screen");
               BappNavigator.pushAndRemoveAll(
                 _key.currentContext,
                 NoInternet(),

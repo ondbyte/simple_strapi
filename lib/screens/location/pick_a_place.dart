@@ -1,12 +1,14 @@
 import 'package:bapp/classes/firebase_structures/bapp_user.dart';
-import 'package:bapp/classes/location.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/screens/home/bapp.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
+import 'package:bapp/super_strapi/my_strapi/localityX.dart';
+import 'package:bapp/super_strapi/my_strapi/userX.dart';
+import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:bapp/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:provider/provider.dart';
 
 class PickAPlaceScreen extends StatelessWidget {
   final Country country;
@@ -24,73 +26,68 @@ class PickAPlaceScreen extends StatelessWidget {
   }
 
   Widget _showCountries(BuildContext context) {
-    return Consumer<CloudStore>(
-      builder: (_, cloudStore, __) {
-        return Observer(
-          builder: (context) {
-            return Scaffold(
-              appBar: AppBar(
-                automaticallyImplyLeading: true,
-                title: Text(
-                  "Pick a Country",
-                  style: Theme.of(context).textTheme.headline1,
-                ),
-              ),
-              body: cloudStore.countries != null
-                  ? ListView(
-                      children: <Widget>[
-                        ...cloudStore.countries.map(
-                          (e) => ListTile(
-                            title: Text(e.thePhoneNumber.country.englishName),
-                            trailing: Icon(Icons.arrow_forward_ios),
-                            onTap: () async {
-                              //cloudStore.getLocationsInCountry(e);
-                              BappNavigator.push(
-                                context,
-                                PickAPlaceScreen(
-                                  country: e,
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    )
-                  : LoadingWidget(),
-            );
-          },
+    return FutureBuilder<List<Country>>(
+      future: LocalityX.i.getCountries(),
+      builder: (_, snap) {
+        return Scaffold(
+          appBar: AppBar(
+            automaticallyImplyLeading: true,
+            title: Text(
+              "Pick a Country",
+              style: Theme.of(context).textTheme.headline1,
+            ),
+          ),
+          body: snap.hasData
+              ? ListView(
+                  children: <Widget>[
+                    ...snap.data.map(
+                      (e) => ListTile(
+                        title: Text(e.name),
+                        trailing: Icon(Icons.arrow_forward_ios),
+                        onTap: () async {
+                          //cloudStore.getLocationsInCountry(e);
+                          BappNavigator.push(
+                            context,
+                            PickAPlaceScreen(
+                              country: e,
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                )
+              : LoadingWidget(),
         );
       },
     );
   }
 
   Widget _showLocations(BuildContext context) {
-    return Consumer<CloudStore>(
-      builder: (context, cloudStore, __) {
-        return Scaffold(
-          appBar: AppBar(
-            automaticallyImplyLeading: true,
-            title: Text(
-              "Pick a City",
-              style: Theme.of(context).textTheme.headline1,
-            ),
-          ),
-          body: Builder(
-            builder: (_) {
-              final cities = country.cities;
-              return ListView(
-                children: List.generate(
-                  cities.length,
-                  (index) => _getSubLocationWidget(
-                    context,
-                    cities[index],
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: true,
+        title: Text(
+          "Pick a City",
+          style: Theme.of(context).textTheme.headline1,
+        ),
+      ),
+      body: FutureBuilder<List<City>>(
+        future: LocalityX.i.getCitiesOfCountry(country),
+        builder: (_, snap) {
+          return snap.hasData
+              ? ListView(
+                  children: List.generate(
+                    snap.data.length,
+                    (index) => _getSubLocationWidget(
+                      context,
+                      snap.data[index],
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        );
-      },
+                )
+              : LoadingWidget();
+        },
+      ),
     );
   }
 
@@ -104,16 +101,12 @@ class PickAPlaceScreen extends StatelessWidget {
                   "All of ${city.name}",
                   style: Theme.of(context).textTheme.subtitle1,
                 ),
-                onTap: () {
-                  final cloudStore =
-                      Provider.of<CloudStore>(context, listen: false);
-                  cloudStore.bappUser = cloudStore.bappUser.updateWith(
-                    address: Address(
-                      city: city.name,
-                      iso2: country.iso2,
-                    ),
-                  );
-                  cloudStore.bappUser.save();
+                onTap: () async {
+                  if (UserX.i.userPresent) {
+                    await Users.update(UserX.i.user().copyWIth(city: city));
+                  } else {
+                    await DefaultDataX.i.setLocalityOrCity(null, city);
+                  }
                   BappNavigator.pushAndRemoveAll(context, Bapp());
                 },
               ),
@@ -123,14 +116,15 @@ class PickAPlaceScreen extends StatelessWidget {
                   trailing: Icon(Icons.arrow_forward_ios),
                   title: Text(city.localities[index].name,
                       style: Theme.of(context).textTheme.subtitle2),
-                  onTap: () {
-                    final cloudStore = context.read<CloudStore>();
-                    cloudStore.bappUser = cloudStore.bappUser.updateWith(
-                        address: Address(
-                            iso2: country.iso2,
-                            city: city.name,
-                            locality: city.localities[index].name));
-                    cloudStore.bappUser.save();
+                  onTap: () async {
+                    if (UserX.i.userPresent) {
+                      await Users.update(UserX.i
+                          .user()
+                          .copyWIth(locality: city.localities[index]));
+                    } else {
+                      await DefaultDataX.i
+                          .setLocalityOrCity(city.localities[index], null);
+                    }
                     BappNavigator.pushAndRemoveAll(context, Bapp());
                   },
                 ),

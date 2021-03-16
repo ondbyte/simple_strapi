@@ -14,7 +14,6 @@ class OnChildSizedWidget extends StatefulWidget {
 }
 
 class _OnChildSizedWidgetState extends State<OnChildSizedWidget> {
-
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -35,7 +34,8 @@ class RenderAfterChildWidget extends StatefulWidget {
   final Widget Function(Size) onChildRendered;
   final Widget child;
 
-  const RenderAfterChildWidget({Key key, this.onChildRendered, this.child}) : super(key: key);
+  const RenderAfterChildWidget({Key key, this.onChildRendered, this.child})
+      : super(key: key);
   @override
   _RenderAfterChildWidgetState createState() => _RenderAfterChildWidgetState();
 }
@@ -51,13 +51,12 @@ class _RenderAfterChildWidgetState extends State<RenderAfterChildWidget> {
           _upperChild,
         ],
       ),
-      onChildSize: (s){
+      onChildSize: (s) {
         setState(() {
-          Helper.printLog("setting upper child");
+          Helper.bPrint("setting upper child");
           _upperChild = widget.onChildRendered(s);
         });
       },
     );
   }
 }
-

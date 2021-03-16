@@ -12,6 +12,7 @@ import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart' hide Action;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Action;
 import 'package:geocoder/geocoder.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -38,7 +39,7 @@ class Helper {
     }
   }
 
-  static void printLog(d) {
+  static void bPrint(d) {
     print("[BAPP] ${d.toString()}");
   }
 
@@ -77,6 +78,8 @@ class Helper {
 T getStore<T>(BuildContext context) {
   return Provider.of<T>(context, listen: false);
 }
+
+bool isNotNullOrEmpty(dynamic variable) => !isNullOrEmpty(variable);
 
 bool isNullOrEmpty(dynamic variable) {
   if (variable == null) {
@@ -131,7 +134,7 @@ Future<Map<String, bool>> uploadImagesToStorageAndReturnStringList(
       try {
         await f.ref().child(entry.key).delete();
       } catch (e, s) {
-        Helper.printLog("Unable to delete file on storage");
+        Helper.bPrint("Unable to delete file on storage");
         print(e);
         print(s);
       }
@@ -221,10 +224,24 @@ String readableEnum(dynamic value) {
 }
 
 void documentIntegrityError(e, s, data) {
-  Helper.printLog(kDocumenIntegrityError);
-  Helper.printLog("Document data/snap is");
-  Helper.printLog("$data");
-  Helper.printLog("Error and StackTrace");
-  Helper.printLog("$e");
-  Helper.printLog("$s");
+  Helper.bPrint(kDocumenIntegrityError);
+  Helper.bPrint("Document data/snap is");
+  Helper.bPrint("$data");
+  Helper.bPrint("Error and StackTrace");
+  Helper.bPrint("$e");
+  Helper.bPrint("$s");
+}
+
+void bPrint(d) {
+  print("[BAPP] ${d.toString()}");
+}
+
+bool get isMobile => (Platform.isAndroid || Platform.isIOS);
+
+bool get isWeb => kIsWeb;
+
+class BappImpossibleException implements Exception {
+  final String message;
+
+  BappImpossibleException(this.message);
 }

@@ -1,11 +1,15 @@
 import 'package:simple_strapi/simple_strapi.dart';
 
-class StrapiInit {
-  static final i = StrapiInit._i();
+class StrapiSettings {
+  static final i = StrapiSettings._i();
 
-  StrapiInit._i() {
+  StrapiSettings._i();
+
+  Future init() async {
     Strapi.i.host = "api.thebapp.app";
     Strapi.i.shouldUseHttps = true;
     Strapi.i.verbose = true;
+    sPrint(
+        "${Strapi.i.host} as host, using ${Strapi.i.shouldUseHttps ? "HTTPS" : "HTTP"} ${Strapi.i.verbose ? ", and is being verbose" : ""}");
   }
 }

@@ -2,17 +2,28 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:simple_strapi/simple_strapi.dart';
+
+part 'simple_strapi_graph_query.dart';
+
 class StrapiResponseException implements Exception {
   final String log;
   final StrapiResponse response;
 
-  StrapiResponseException(this.log, this.response) {
-    print(
-      log,
-    );
-    print("strapi response was");
-    print(response);
+  StrapiResponseException(this.log, this.response);
+
+  @override
+  String toString() {
+    return "$log\n$response";
   }
+}
+
+class StrapiGraphCollection {
+  static _find({
+    required String collectionName,
+    required int limit,
+    required int start,
+  }) async {}
 }
 
 class StrapiCollection {
@@ -20,29 +31,26 @@ class StrapiCollection {
     required String collection,
     required String endPoint,
     int? limit,
-    StrapiQuery? query,
   }) async {
     final path = collection + "/" + endPoint;
-    query = query != null ? (query) : StrapiQuery();
-    query.enableLimit(limit);
-    final response =
-        await Strapi.i.request(path, queryString: query.queryString);
+    final response = await Strapi.i.request(
+      path,
+    );
     if (response.failed) {
       throw StrapiResponseException(
-        "failed to get multiple objects from collection $collection",
+        "failed to get from custom endpoint $path",
         response,
       );
     }
     return response.body;
   }
 
-  static Future<List<Map<String, dynamic>>> findMultiple(
-      {required String collection, int? limit, StrapiQuery? query}) async {
-    final path = collection;
-    query = query != null ? (query) : StrapiQuery();
-    query.enableLimit(limit);
-    final response =
-        await Strapi.i.request(path, queryString: query.queryString);
+  static Future<List<Map<String, dynamic>>> findMultiple({
+    required String collection,
+    int? limit,
+  }) async {
+    final response = await Strapi.i
+        .request(collection, params: {if (limit is int) "_limit": "$limit"});
     if (response.failed) {
       throw StrapiResponseException(
         "failed to get multiple objects from collection $collection",
@@ -219,6 +227,24 @@ class Strapi {
     return http.replace(query: queryString);
   }
 
+  Future<StrapiResponse> graphRequest(String queryString,
+      {int maxTimeOutInMillis = 15000}) async {
+    if (verbose) {
+      sPrint("strapi query string: \n$queryString");
+    }
+    final response = await request(
+      "/graphql",
+      method: "POST",
+      body: {"query": "{$queryString}"},
+      maxTimeOutInMillis: maxTimeOutInMillis,
+    );
+    if (response.failed) {
+      throw StrapiResponseException(
+          "Graph request failed for collection ", response);
+    }
+    return response;
+  }
+
   ///an authentcated strapi request making towards the endpionts of your strapi server,
   ///in every request you make a authorization token is inserted automatically if the [strapiToken] is present
   ///otherwise the request will be plain unauthenticated request,
@@ -388,7 +414,7 @@ class StrapiUtils {
     if (source is double) {
       return source;
     }
-    return double.tryParse(source);
+    return double.tryParse("$source");
   }
 
   static int? parseInt(source) {
@@ -442,37 +468,4 @@ class StrapiUtils {
 
 void sPrint(d) {
   print("[Strapi] " + d.toString());
-}
-
-String _operation(StrapiQueryOperation operation) {
-  switch (operation) {
-    case StrapiQueryOperation.equalTo:
-      {
-        return "_eq";
-      }
-    case StrapiQueryOperation.includesInAnArray:
-      {
-        return "_in";
-      }
-  }
-}
-
-enum StrapiQueryOperation { equalTo, includesInAnArray }
-
-class StrapiQuery {
-  final _queries = <String>[];
-
-  String? get queryString => _queries.isEmpty ? null : _queries.join("&");
-
-  void where(String field, StrapiQueryOperation operation, value) {
-    _queries.add(field + _operation(operation) + "=" + value);
-  }
-
-  void enableLimit(int? limit) {
-    if (limit is int) {
-      if (!_queries.any((e) => e.startsWith("_limit="))) {
-        _queries.add("_limit=$limit");
-      }
-    }
-  }
 }

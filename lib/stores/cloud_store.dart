@@ -104,7 +104,7 @@ abstract class _CloudStore with Store {
 
   void _listenForUserChange() {
     FirebaseAuth.instance.userChanges().listen((user) async {
-      Helper.printLog("user change: $user");
+      Helper.bPrint("user change: $user");
       if (user != null) {
         if (lastUid != user.uid || lastUid.isEmpty) {
           lastUid = user.uid;
@@ -182,7 +182,7 @@ abstract class _CloudStore with Store {
       final tmp = BappUser(
         myDoc: ref,
       );
-      Helper.printLog("the user document doesnt exists/ new user");
+      Helper.bPrint("the user document doesnt exists/ new user");
       await tmp.save();
       ref = tmp.myDoc;
       completer.cautiousComplete(true);
@@ -385,7 +385,7 @@ abstract class _CloudStore with Store {
     await _auth.verifyPhoneNumber(
       phoneNumber: number.internationalNumber,
       verificationCompleted: (PhoneAuthCredential phoneAuthCredential) async {
-        Helper.printLog("auto verified OTP");
+        Helper.bPrint("auto verified OTP");
         await _processCredential(
             phoneAuthCredential, number.internationalNumber);
         onVerified();
@@ -393,7 +393,7 @@ abstract class _CloudStore with Store {
       verificationFailed: (FirebaseAuthException exception) {
         onVerified = null;
         onFail(exception);
-        Helper.printLog(exception);
+        Helper.bPrint(exception);
       },
       codeSent: (String verificationID, int resendToken) async {
         var askAgain = false;

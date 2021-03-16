@@ -43,7 +43,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
           widget.booking.fromToTiming.from.isAfter(now);
       if (shouldWaitToStartJob) {
         final difference = widget.booking.fromToTiming.from.difference(now);
-        Helper.printLog(difference);
+        Helper.bPrint(difference);
         _timer = Timer(difference, () {
           if (mounted) {
             setState(() {

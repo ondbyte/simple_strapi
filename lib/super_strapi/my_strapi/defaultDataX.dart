@@ -1,10 +1,13 @@
 import 'dart:io';
 
+import 'package:bapp/helpers/helper.dart';
 import 'package:device_info/device_info.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/state_manager.dart';
 import 'package:hive/hive.dart';
-import 'package:simple_strapi/simple_strapi.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:simple_strapi/simple_strapi.dart'
+    hide DefaultData, Locality, City;
 
 import '../super_strapi.dart';
 
@@ -13,13 +16,17 @@ class DefaultDataX {
 
   DefaultDataX._x();
 
-  DefaultData _defaultData;
+  DefaultData defaultData;
 
   LazyBox hiveBox;
 
+  bool isFirstTimeOnDevice = true;
+
   Future<DefaultData> init() async {
-    Hive.init(Directory.current.path);
-    print(Directory.current.path);
+    final path = (isMobile)
+        ? (await getApplicationSupportDirectory()).path
+        : Directory.current.path;
+    Hive.init(path);
     hiveBox = await Hive.openLazyBox("default_data");
     final info = DeviceInfoPlugin();
     final id = Platform.isLinux
@@ -28,7 +35,7 @@ class DefaultDataX {
             ? (await info.androidInfo).androidId
             : (await info.iosInfo).identifierForVendor);
 
-    _defaultData = await () async {
+    defaultData = await () async {
       final data = Map.castFrom<dynamic, dynamic, String, dynamic>(
           await hiveBox.get(id));
       if (data is Map<String, dynamic>) {
@@ -40,27 +47,38 @@ class DefaultDataX {
         }
       }
       return (await _getDefaultDataFromServer(id)) ??
-          (await DefaultDatas.create(DefaultData.fresh(null, id)));
+          (await DefaultDatas.create(DefaultData.fresh(null, id, null)));
     }();
-    if (_defaultData != null && _defaultData.synced) {
-      hiveBox.put("$id", _defaultData?.toMap());
+    if (defaultData != null && defaultData.synced) {
+      hiveBox.put("$id", defaultData?.toMap());
     }
-    return _defaultData;
+    await _doOtherStorageStuffs();
+    return defaultData;
+  }
+
+  Future _doOtherStorageStuffs() async {
+    isFirstTimeOnDevice =
+        await getValue("isFirstTimeOnDevice", defaultValue: true);
+    if (isFirstTimeOnDevice) {
+      await saveValue("isFirstTimeOnDevice", false);
+    }
   }
 
   Future<DefaultData> _getDefaultDataFromServer(String id) async {
-    final multiple = await DefaultDatas.findMultiple(
-      query: StrapiQuery()
-        ..where("deviceId", StrapiQueryOperation.equalTo, "$id"),
+    final multiple = await StrapiCollectionQuery(
+      collectionName: DefaultDatas.collectionName,
+      limit: 1,
+      requiredFields: DefaultData.fields(),
     );
-    if (multiple != null && multiple.isNotEmpty) {
-      return multiple.first;
-    }
   }
 
-  Future setLocality(Locality locality) async {
-    _defaultData =
-        await DefaultDatas.update(_defaultData.copyWIth(locality: locality));
+  Future setLocalityOrCity(Locality locality, City city) async {
+    defaultData = await DefaultDatas.update(
+      defaultData.copyWIth(
+        locality: locality,
+        city: city,
+      ),
+    );
   }
 
   Future saveValue(String key, value) async {

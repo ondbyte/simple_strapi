@@ -8,9 +8,16 @@ import 'package:bapp/screens/onboarding/onboardingscreen.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/stores/updates_store.dart';
+import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
+import 'package:bapp/super_strapi/my_strapi/firebaseX.dart';
+import 'package:bapp/super_strapi/my_strapi/init.dart';
+import 'package:bapp/super_strapi/my_strapi/userX.dart';
+import 'package:bapp/super_strapi/super_strapi.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 import '../../fcm.dart';
@@ -29,6 +36,20 @@ class _BappInitScreenState extends State<BappInitScreen>
     return InitWidget(
       initializer: () async {
         if (mounted) {
+          await FirebaseX.i.init();
+          await StrapiSettings.i.init();
+          await DefaultDataX.i.init();
+          await UserX.i.init();
+          if (mounted) {
+            if (DefaultDataX.i.defaultData is DefaultData &&
+                isNotNullOrEmpty(DefaultDataX.i.defaultData.locality)) {
+              BappNavigator.pushAndRemoveAll(context, Bapp());
+            } else if (DefaultDataX.i.isFirstTimeOnDevice) {
+              BappNavigator.pushAndRemoveAll(context, OnBoardingScreen());
+            } else {
+              BappNavigator.pushAndRemoveAll(context, PickAPlaceScreen());
+            }
+          }
           /*await Provider.of<CloudStore>(context, listen: false).init(
             onLogin: () async {
               if (mounted) {

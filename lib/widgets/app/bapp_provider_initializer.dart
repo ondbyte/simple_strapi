@@ -1,5 +1,3 @@
-
-
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/all_store.dart';
@@ -17,17 +15,20 @@ class BappProviderInitializerWidget extends StatefulWidget {
 
   const BappProviderInitializerWidget({Key key, this.child}) : super(key: key);
   @override
-  _BappProviderInitializerWidgetState createState() => _BappProviderInitializerWidgetState();
+  _BappProviderInitializerWidgetState createState() =>
+      _BappProviderInitializerWidgetState();
 }
 
-class _BappProviderInitializerWidgetState extends State<BappProviderInitializerWidget> {
+class _BappProviderInitializerWidgetState
+    extends State<BappProviderInitializerWidget> {
   Widget _widget;
   @override
   Widget build(BuildContext context) {
     ///we will run this build method only once! for a state
-    if(_widget!=null){
+    if (_widget != null) {
       return _widget;
     }
+    /*
     final allStore = AllStore();
     allStore.set<EventBus>(kBus);
     final cloudStore = CloudStore()..setAllStore(allStore);
@@ -35,26 +36,11 @@ class _BappProviderInitializerWidgetState extends State<BappProviderInitializerW
     final businessStore = BusinessStore()..setAllStore(allStore);
     allStore.set<BusinessStore>(businessStore);
     final flow = BookingFlow(allStore);
-    allStore.set<BookingFlow>(flow);
+    allStore.set<BookingFlow>(flow);*/
     _widget = MultiProvider(
       providers: [
         Provider<EventBus>(
           create: (_) => kBus,
-        ),
-        Provider<AllStore>(
-          create: (_) => allStore,
-        ),
-        Provider<CloudStore>(
-          create: (_) => cloudStore,
-        ),
-        Provider<UpdatesStore>(
-          create: (_) => UpdatesStore(allStore),
-        ),
-        Provider<BusinessStore>(
-          create: (_) => businessStore,
-        ),
-        Provider<BookingFlow>(
-          create: (_) => flow,
         ),
       ],
       builder: (context, w) {

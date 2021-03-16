@@ -99,10 +99,10 @@ class BappFCM {
         bappMessage = BappFCMMessage.fromJson(j: Map.castFrom(message["data"]));
         _deliverToListener(bappMessage);
       } catch (e) {
-        Helper.printLog(e.toString());
+        Helper.bPrint(e.toString());
       }
     } else {
-      Helper.printLog("no data on message");
+      Helper.bPrint("no data on message");
     }
   }
 
@@ -120,7 +120,7 @@ class BappFCM {
     isFcmInitialized = true;
     kNotifEnabled = true;
     print("FCM initialized for " + Platform.operatingSystem);
-    Helper.printLog("Getting FCM token");
+    Helper.bPrint("Getting FCM token");
     onNewToken(await _fcm.getToken());
     _fcm.onTokenRefresh.listen(onNewToken);
   }

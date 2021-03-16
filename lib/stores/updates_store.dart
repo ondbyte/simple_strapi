@@ -40,7 +40,7 @@ class UpdatesStore {
   Future getUpdates({bool nextPage = false}) async {
     final number = FirebaseAuth.instance?.currentUser?.phoneNumber ?? "";
     if (number.isEmpty) {
-      Helper.printLog("Number is empty, aborting getUpdates @ updateStore");
+      Helper.bPrint("Number is empty, aborting getUpdates @ updateStore");
       return;
     }
     if (nextPage) {
@@ -67,7 +67,7 @@ class UpdatesStore {
     );
   }
 
-  int get numberOfUnreadUpdates{
-    return updates.where((element) => !element.read).length??0;
+  int get numberOfUnreadUpdates {
+    return updates.where((element) => !element.read).length ?? 0;
   }
 }

@@ -8,6 +8,7 @@ import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/screens/tabs/updates_tab.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/widgets/business/business_branch_switch.dart';
 import 'package:bapp/widgets/app/menu.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +18,7 @@ import 'package:provider/provider.dart';
 import '../../stores/business_store.dart';
 
 class BusinessHome extends StatefulWidget {
-  final UserType forRole;
+  final UserRole forRole;
 
   const BusinessHome({Key key, this.forRole}) : super(key: key);
   @override
@@ -47,10 +48,12 @@ class _BusinessHomeState extends State<BusinessHome> {
           flow.getBranchBookings();
         },
         child: Scaffold(
-          appBar: _selectedPage != _tabs.length-1 ? AppBar(
-            automaticallyImplyLeading: false,
-            title: BusinessBranchSwitchWidget(),
-          ):null,
+          appBar: _selectedPage != _tabs.length - 1
+              ? AppBar(
+                  automaticallyImplyLeading: false,
+                  title: BusinessBranchSwitchWidget(),
+                )
+              : null,
           endDrawer: Menu(),
           body: Consumer<BusinessStore>(
             builder: (_, businessStore, __) {
@@ -76,8 +79,9 @@ class _BusinessHomeState extends State<BusinessHome> {
             type: BottomNavigationBarType.fixed,
             // selectedFontSize: 14,
             onTap: (i) {
-              if(i==1){
-                Provider.of<BookingFlow>(context,listen: false).filterStaffAndBookings();
+              if (i == 1) {
+                Provider.of<BookingFlow>(context, listen: false)
+                    .filterStaffAndBookings();
               }
               setState(() {
                 _selectedPage = i;
@@ -98,7 +102,9 @@ class _BusinessHomeState extends State<BusinessHome> {
     return tabs
         .map(
           (e) => BottomNavigationBarItem(
-            icon: e.name=="Updates"?PendingUpdatesIcon(child:Icon(e.icon)):Icon(e.icon),
+            icon: e.name == "Updates"
+                ? PendingUpdatesIcon(child: Icon(e.icon))
+                : Icon(e.icon),
             label: e.name,
           ),
         )
@@ -106,6 +112,5 @@ class _BusinessHomeState extends State<BusinessHome> {
   }
 
   bool get _shouldShowToolkit =>
-      widget.forRole == UserType.businessOwner ||
-      widget.forRole == UserType.businessManager;
+      widget.forRole == UserRole.partner || widget.forRole == UserRole.manager;
 }

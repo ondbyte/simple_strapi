@@ -120,7 +120,7 @@ class BookingFlow {
   Future getMyBookings() async {
     final completer = Completer<bool>();
     if (FirebaseAuth.instance.currentUser.phoneNumber == null) {
-      Helper.printLog("no number to get bookings");
+      Helper.bPrint("no number to get bookings");
       return false;
     }
     FirebaseFirestore.instance
@@ -144,10 +144,10 @@ class BookingFlow {
       myBookings.addAll(_bookings);
       completer.cautiousComplete(true);
     }, onDone: () {
-      Helper.printLog("Listening for my bookings stopped");
+      Helper.bPrint("Listening for my bookings stopped");
       completer.cautiousComplete(false);
     }, onError: (e, s) {
-      Helper.printLog("error while Listening for my bookings");
+      Helper.bPrint("error while Listening for my bookings");
       completer.cautiousComplete(false);
     });
     return completer.future;

@@ -1,4 +1,3 @@
-
 import 'package:bapp/classes/firebase_structures/rating.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/booking_flow/review.dart';
@@ -11,19 +10,24 @@ class ViewableRating extends StatelessWidget {
   final String name;
   final Function onTap;
 
-  ViewableRating({this.showReview = true, this.rating, this.onTap, this.name, this.padding});
+  ViewableRating(
+      {this.showReview = true,
+      this.rating,
+      this.onTap,
+      this.name,
+      this.padding});
 
   @override
   Widget build(BuildContext context) {
     final overallRating = rating.get(BookingRatingType.overAll);
     if (overallRating == null) {
-      Helper.printLog("no overall rating found");
+      Helper.bPrint("no overall rating found");
       return SizedBox();
     }
     return GestureDetector(
       onTap: onTap,
       child: Padding(
-        padding: padding??EdgeInsets.zero,
+        padding: padding ?? EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
