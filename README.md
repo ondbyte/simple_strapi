@@ -1,6 +1,6 @@
 # bapp
 
-A new Flutter project.
+null safety is added, still needs "--no-sound-null-safety" flag to run as most of the packages doesnt support null safety yet
 
 ## taste  - bapps very own dead simple flavor management
 add any files that needs to be flavorized to the `files_to_flavorize` of flavors.json inside flavors folder
