@@ -280,7 +280,9 @@ class Strapi {
       }
       request.headers.contentType = ContentType.json;
       if (body != null) {
-        request.write(jsonEncode(body));
+        request.write(
+          jsonEncode(body),
+        );
       }
       Future.delayed(
         Duration(milliseconds: maxTimeOutInMillis),

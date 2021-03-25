@@ -18,9 +18,8 @@ class AppEventsWithExtra {
 }
 
 class BappNavigator extends StatefulWidget {
-  const BappNavigator({
-    Key? key,
-  }) : super(key: key);
+  final Widget rootScreen;
+  const BappNavigator({Key? key, required this.rootScreen}) : super(key: key);
   @override
   _BappNavigatorState createState() => _BappNavigatorState();
 
@@ -89,20 +88,6 @@ class _BappNavigatorState extends State<BappNavigator> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      child: Navigator(
-        key: _key,
-        onPopPage: (r, res) {
-          Helper.bPrint("pop");
-          return r.didPop(res);
-        },
-        onGenerateRoute: (s) {
-          return MaterialPageRoute(
-            builder: (_) {
-              return BappInitScreen();
-            },
-          );
-        },
-      ),
       onWillPop: () async {
         if (_navKey.currentState?.canPop() ?? false) {
           _navKey.currentState?.pop();
@@ -111,6 +96,20 @@ class _BappNavigatorState extends State<BappNavigator> {
           return true;
         }
       },
+      child: Navigator(
+        key: _key,
+        onPopPage: (r, res) {
+          Helper.bPrint("pop");
+          return r.didPop(res);
+        },
+        onGenerateRoute: (settings) {
+          return MaterialPageRoute(
+            builder: (_) {
+              return widget.rootScreen;
+            },
+          );
+        },
+      ),
     );
   }
 

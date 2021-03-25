@@ -1,4 +1,5 @@
 import 'package:bapp/config/theme_config.dart';
+import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
@@ -47,14 +48,13 @@ class _BappThemedAppState extends State<BappThemedApp> {
   }
 
   Future _init() async {
-    final dir = await getApplicationSupportDirectory();
-    Hive.init(dir.path);
-    final box = await Hive.openLazyBox("brightness.box");
-    final dark =
-        await box.get("dark", defaultValue: brightness == Brightness.dark);
-    setState(() {
-      _updateTheme(dark: dark);
-    });
+    final dark = await DefaultDataX.i
+        .getValue("dark", defaultValue: brightness == Brightness.dark);
+    if (dark is bool) {
+      setState(() {
+        _updateTheme(dark: dark);
+      });
+    }
   }
 
   Future _saveTheme(bool dark) async {

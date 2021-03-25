@@ -440,7 +440,7 @@ class Gen {
                     "StrapiUtils.objFromListOfMap<${type.className}>(map[\"${f.name}\"],(e)=>${pluralize(type.className)}._fromIDorData(e))"),
               )
             : CodeExpression(
-                Code("\"${f.name}\":${f.name}?.map((e)=>e.toMap())"),
+                Code("\"${f.name}\":${f.name}?.map((e)=>e.toMap()).toList()"),
               );
       }
       if (type is CollectionReference) {
@@ -457,7 +457,7 @@ class Gen {
               ? Code(
                   "StrapiUtils.objFromListOfMap<${type.className}>(map[\"${f.name}\"],(e)=>${type.className}.fromMap(e))")
               : Code(
-                  "\"${f.name}\":${f.name}?.map((e)=>e.toMap())",
+                  "\"${f.name}\":${f.name}?.map((e)=>e.toMap()).toList()",
                 ),
         );
       }
@@ -469,35 +469,35 @@ class Gen {
               : Code("\"${f.name}\":${f.name}?.toMap()"),
         );
       }
-      if (type.symbol == "DateTime") {
+      if (type.symbol == "DateTime?") {
         return CodeExpression(
           fromMap
               ? Code("StrapiUtils.parseDateTime(map[\"${f.name}\"])")
               : Code("\"${f.name}\":${f.name}?.toIso8601String()"),
         );
       }
-      if (type.symbol == "double") {
+      if (type.symbol == "double?") {
         return CodeExpression(
           fromMap
               ? Code("StrapiUtils.parseDouble(map[\"${f.name}\"])")
               : Code("\"${f.name}\":${f.name}"),
         );
       }
-      if (type.symbol == "int") {
+      if (type.symbol == "int?") {
         return CodeExpression(
           fromMap
               ? Code("StrapiUtils.parseInt(map[\"${f.name}\"])")
               : Code("\"${f.name}\":${f.name}"),
         );
       }
-      if (type.symbol == "bool") {
+      if (type.symbol == "bool?") {
         return CodeExpression(
           fromMap
               ? Code("StrapiUtils.parseBool(map[\"${f.name}\"])")
               : Code("\"${f.name}\":${f.name}"),
         );
       }
-      if (type.symbol == "Map<String,dynamic>") {
+      if (type.symbol == "Map<String,dynamic>?") {
         return CodeExpression(
           fromMap
               ? Code("jsonDecode(map[\"${f.name}\"])")

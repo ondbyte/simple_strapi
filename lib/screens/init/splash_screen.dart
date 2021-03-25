@@ -23,7 +23,7 @@ import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 import '../../fcm.dart';
 
-class BappInitScreen extends StatefulWidget {
+/* class BappInitScreen extends StatefulWidget {
   @override
   _BappInitScreenState createState() => _BappInitScreenState();
 }
@@ -37,10 +37,6 @@ class _BappInitScreenState extends State<BappInitScreen>
     return InitWidget(
       initializer: () async {
         if (mounted) {
-          await FirebaseX.i.init();
-          await StrapiSettings.i.init();
-          await DefaultDataX.i.init();
-          await UserX.i.init();
           if (mounted) {
             if (DefaultDataX.i.defaultData is DefaultData &&
                 isNotNullOrEmpty(
@@ -95,7 +91,7 @@ class _BappInitScreenState extends State<BappInitScreen>
 
   @override
   bool get wantKeepAlive => !killState;
-}
+} */
 
 class Splash extends StatelessWidget {
   @override

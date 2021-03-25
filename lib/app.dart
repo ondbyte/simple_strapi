@@ -1,19 +1,50 @@
+import 'package:bapp/screens/home/bapp.dart';
+import 'package:bapp/screens/init/initiating_widget.dart';
+import 'package:bapp/screens/init/splash_screen.dart';
+import 'package:bapp/screens/onboarding/onboardingscreen.dart';
 import 'package:bapp/widgets/app/bapp_navigator_widget.dart';
 import 'package:bapp/widgets/app/bapp_provider_initializer.dart';
 import 'package:bapp/widgets/app/bapp_themed_app.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:package_info/package_info.dart';
 
 import 'config/constants.dart';
+import 'super_strapi/my_strapi/defaultDataX.dart';
+import 'super_strapi/my_strapi/firebaseX.dart';
+import 'super_strapi/my_strapi/init.dart';
+import 'super_strapi/my_strapi/userX.dart';
 
-class App extends StatelessWidget {
+class App extends StatefulWidget {
+  App({Key? key}) : super(key: key);
+
+  @override
+  _AppState createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+  final firstScreen = Rx<Widget>(SizedBox());
   @override
   Widget build(BuildContext context) {
     return BappReboot(
-      child: BappProviderInitializerWidget(
-        child: BappThemedApp(
+      child: BappThemedApp(
+        child: InitWidget(
+          initializer: () async {
+            final fbUser = await FirebaseX.i.init();
+            await StrapiSettings.i.init();
+            final defaultData = await DefaultDataX.i.init();
+            final user = await UserX.i.init();
+            if (DefaultDataX.i.isFirstTimeOnDevice) {
+              firstScreen(BappNavigator(rootScreen: OnBoardingScreen()));
+            } else {
+              firstScreen(BappNavigator(rootScreen: Bapp()));
+            }
+          },
+          showWhileInit: Splash(),
           child: PackageInfoCheck(
-            child: BappNavigator(),
+            child: Obx(
+              () => firstScreen() ?? SizedBox(),
+            ),
           ),
         ),
       ),

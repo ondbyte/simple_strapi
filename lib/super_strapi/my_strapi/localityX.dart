@@ -35,10 +35,6 @@ class LocalityX extends X {
           collectionName: City.collectionName,
           requiredFields: City.fields(),
         )
-          ..whereField(
-              field: City.fields.createdAt,
-              query: StrapiFieldQuery.greaterThan,
-              value: DateTime.now().subtract(Duration(days: 1)))
           ..whereModelField(
             field: City.fields.country,
             query: StrapiModelQuery(

@@ -5,12 +5,14 @@ import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
+import 'package:bapp/super_strapi/my_strapi/firebaseX.dart';
+import 'package:bapp/super_strapi/my_strapi/init.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/widgets/loading.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 
 import 'business_home.dart';
 import 'customer_home.dart';
@@ -23,36 +25,34 @@ class Bapp extends StatefulWidget {
 class _BappState extends State<Bapp> {
   @override
   Widget build(BuildContext context) {
-    return InitWidget(
-      initializer: () async {},
-      child: Stack(
-        children: [
-          Observer(
-            builder: (_) {
-              final role = EnumToString.fromString(
-                UserRole.values,
-                UserX.i.user()?.role?.name ?? "",
-              );
-              switch (role) {
-                case UserRole.customer:
-                case UserRole.public:
-                  return CustomerHome();
-                case UserRole.partner:
-                case UserRole.manager:
-                case UserRole.facilitator:
-                case UserRole.staff:
-                  return BusinessHome(
-                    forRole: role,
-                  );
-                default:
-                  return Container(
-                    color: Colors.red,
-                  );
-              }
-            },
-          ),
-        ],
-      ),
+    return Stack(
+      children: [
+        Builder(
+          builder: (_) {
+            final role = EnumToString.fromString(
+                  UserRole.values,
+                  UserX.i.user()?.role?.name ?? "",
+                ) ??
+                UserRole.public;
+            switch (role) {
+              case UserRole.customer:
+              case UserRole.public:
+                return CustomerHome();
+              case UserRole.partner:
+              case UserRole.manager:
+              case UserRole.facilitator:
+              case UserRole.staff:
+                return BusinessHome(
+                  forRole: role,
+                );
+              default:
+                return Container(
+                  color: Colors.blue,
+                );
+            }
+          },
+        ),
+      ],
     );
   }
 }
@@ -81,9 +81,6 @@ class _BappFCMMesssageLayerWidgetState
               showDialog(
                 context: context,
                 builder: (_) {
-                  if (bappMessage == null) {
-                    return SizedBox();
-                  }
                   return AlertDialog(
                     title: Text("inform yadu"),
                     content: Column(

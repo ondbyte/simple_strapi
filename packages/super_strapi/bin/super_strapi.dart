@@ -150,7 +150,7 @@ Future<bool> _validatePubspec(Directory directory) async {
   }
   final yamlString = await pubspec.readAsString();
   final parsed = loadYaml(yamlString);
-  final enabled = parsed.customFields?["super_strapi"]?["enabled"] ?? false;
+  final enabled = parsed?["super_strapi"]?["enabled"] ?? false;
   return enabled;
 }
 

@@ -18,7 +18,7 @@ class DefaultDataX {
 
   Rx<DefaultData> defaultData = Rx<DefaultData>();
 
-  late final LazyBox hiveBox;
+  LazyBox? _hiveBox;
 
   bool isFirstTimeOnDevice = true;
 
@@ -27,7 +27,7 @@ class DefaultDataX {
         ? (await getApplicationSupportDirectory()).path
         : Directory.current.path;
     Hive.init(path);
-    hiveBox = await Hive.openLazyBox("default_data");
+    _hiveBox = await Hive.openLazyBox("default_data");
     final info = DeviceInfoPlugin();
     final id = Platform.isLinux
         ? "xyz"
@@ -37,7 +37,7 @@ class DefaultDataX {
 
     defaultData.value = await () async {
       final data = Map.castFrom<dynamic, dynamic, String, dynamic>(
-          await hiveBox.get(id));
+          await _hiveBox?.get(id));
       if (data is Map<String, dynamic>) {
         try {
           print(data);
@@ -50,7 +50,7 @@ class DefaultDataX {
           (await DefaultDatas.create(DefaultData.fresh(deviceId: id)));
     }();
     if (defaultData != null && (defaultData()?.synced ?? false)) {
-      hiveBox.put("$id", defaultData()?.toMap() ?? {});
+      _hiveBox?.put("$id", defaultData()?.toMap() ?? {});
     }
     await _doOtherStorageStuffs();
     return defaultData.value;
@@ -58,9 +58,9 @@ class DefaultDataX {
 
   Future _doOtherStorageStuffs() async {
     isFirstTimeOnDevice =
-        await getValue("isFirstTimeOnDevice", defaultValue: true);
+        await getValue(DefaultDataKeys.isFirstTimeOnDevice, defaultValue: true);
     if (isFirstTimeOnDevice) {
-      await saveValue("isFirstTimeOnDevice", false);
+      await saveValue(DefaultDataKeys.isFirstTimeOnDevice, false);
     }
   }
 
@@ -83,20 +83,33 @@ class DefaultDataX {
   }
 
   Future saveValue(String key, value) async {
-    await hiveBox.put(key, value);
+    if (_hiveBox is! LazyBox) {
+      await wait50();
+      return saveValue(key, value);
+    }
+    await _hiveBox?.put(key, value);
   }
 
   Future getValue(String key, {defaultValue}) async {
-    return await hiveBox.get(key, defaultValue: defaultValue);
+    if (_hiveBox is! LazyBox) {
+      await wait50();
+      return getValue(key, defaultValue: defaultData);
+    }
+    return await _hiveBox?.get(key, defaultValue: defaultValue);
   }
 
   Future delete(String key, {defaultValue}) async {
-    final value = await hiveBox.get(key, defaultValue: defaultValue);
-    await hiveBox.delete(key);
+    final value = await _hiveBox?.get(key, defaultValue: defaultValue);
+    await _hiveBox?.delete(key);
     return value;
+  }
+
+  Future wait50() async {
+    await Future.delayed(Duration(milliseconds: 50));
   }
 }
 
 class DefaultDataKeys {
   static String get lastBooking => "lastBooking";
+  static String get isFirstTimeOnDevice => "isFirstTimeOnDevice6";
 }

@@ -10,7 +10,6 @@
     <uses-permission android:name="android.permission.CAMERA" />
 
     <application
-        android:name=".MainActivity"
         android:label="bapp-dev"
         android:icon="@mipmap/launcher_icon">
 

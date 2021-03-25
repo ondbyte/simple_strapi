@@ -42,50 +42,47 @@ class _BusinessHomeState extends State<BusinessHome> {
       UpdatesTab(),
     ]);
     return Builder(builder: (_) {
-      return InitWidget(
-        initializer: () async {},
-        child: Scaffold(
-          appBar: _selectedPage != _tabs.length - 1
-              ? AppBar(
-                  automaticallyImplyLeading: false,
-                  title: BusinessBranchSwitchWidget(),
-                )
-              : null,
-          endDrawer: Menu(),
-          body: Builder(
-            builder: (_) {
-              return FutureBuilder(
-                future: DefaultDataX.i.getValue("selectedBusiness"),
-                builder: (_, snap) {
-                  final id = snap.data ?? "";
-                  final business = UserX.i
-                      .user()
-                      ?.partner
-                      ?.businesses
-                      ?.firstWhere((element) => element.id == id);
-                  if (business is! Business) {
-                    return Center(
-                      child: Text(
-                        "No business is selected",
-                        textAlign: TextAlign.center,
-                      ),
-                    );
-                  }
-                  return IndexedStack(
-                    children: _tabs,
-                    index: _selectedPage,
+      return Scaffold(
+        appBar: _selectedPage != _tabs.length - 1
+            ? AppBar(
+                automaticallyImplyLeading: false,
+                title: BusinessBranchSwitchWidget(),
+              )
+            : null,
+        endDrawer: Menu(),
+        body: Builder(
+          builder: (_) {
+            return FutureBuilder(
+              future: DefaultDataX.i.getValue("selectedBusiness"),
+              builder: (_, snap) {
+                final id = snap.data ?? "";
+                final business = UserX.i
+                    .user()
+                    ?.partner
+                    ?.businesses
+                    ?.firstWhere((element) => element.id == id);
+                if (business is! Business) {
+                  return Center(
+                    child: Text(
+                      "No business is selected",
+                      textAlign: TextAlign.center,
+                    ),
                   );
-                },
-              );
-            },
-          ),
-          bottomNavigationBar: BottomNavigationBar(
-            type: BottomNavigationBarType.fixed,
-            // selectedFontSize: 14,
-            onTap: (i) {},
-            currentIndex: _selectedPage,
-            items: [..._filterBottomNavigations()],
-          ),
+                }
+                return IndexedStack(
+                  children: _tabs,
+                  index: _selectedPage,
+                );
+              },
+            );
+          },
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          // selectedFontSize: 14,
+          onTap: (i) {},
+          currentIndex: _selectedPage,
+          items: [..._filterBottomNavigations()],
         ),
       );
     });
