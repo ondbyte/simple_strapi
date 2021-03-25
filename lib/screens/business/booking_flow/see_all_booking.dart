@@ -1,24 +1,26 @@
 import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/helpers/extensions.dart';
+import 'package:bapp/super_strapi/my_strapi/x.dart';
 import 'package:bapp/widgets/tiles/customer_booking_tile.dart';
 import 'package:bapp/widgets/tiles/see_all_tile.dart';
 import 'package:flutter/material.dart';
 
 import 'booking_details.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BookingsSeeAllTile extends StatelessWidget {
   final String title;
-  final EdgeInsets padding, titlePadding, childPadding;
-  final List<BusinessBooking> bookings;
+  final EdgeInsets? padding, titlePadding, childPadding;
+  final List<Booking> bookings;
 
-  const BookingsSeeAllTile(
-      {Key key,
-        this.bookings,
-        this.title = "",
-        this.padding,
-        this.titlePadding,
-        this.childPadding})
-      : super(key: key);
+  const BookingsSeeAllTile({
+    Key? key,
+    this.bookings = const [],
+    required this.title,
+    this.padding,
+    this.titlePadding,
+    this.childPadding,
+  }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     if (bookings.isEmpty) {
@@ -26,6 +28,7 @@ class BookingsSeeAllTile extends StatelessWidget {
     }
     return SeeAllListTile(
       title: title,
+      seeAllLabel: "See All",
       onSeeAll: () {
         BappNavigator.push(
           context,
@@ -58,9 +61,9 @@ class BookingsSeeAllTile extends StatelessWidget {
 }
 
 class AllBookingsScreen extends StatefulWidget {
-  final List<BusinessBooking> bookings;
+  final List<Booking> bookings;
 
-  const AllBookingsScreen({Key key, this.bookings}) : super(key: key);
+  const AllBookingsScreen({Key? key, required this.bookings}) : super(key: key);
   @override
   _AllBookingsScreenState createState() => _AllBookingsScreenState();
 }

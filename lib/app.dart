@@ -24,7 +24,7 @@ class App extends StatelessWidget {
 class BappReboot extends StatefulWidget {
   final Widget child;
 
-  const BappReboot({Key key, this.child}) : super(key: key);
+  const BappReboot({Key? key, required this.child}) : super(key: key);
   @override
   _BappRebootState createState() => _BappRebootState();
 }
@@ -60,7 +60,7 @@ class _BappRebootState extends State<BappReboot> {
 class PackageInfoCheck extends StatefulWidget {
   final Widget child;
 
-  const PackageInfoCheck({Key key, this.child}) : super(key: key);
+  const PackageInfoCheck({Key? key, required this.child}) : super(key: key);
   @override
   _PackageInfoCheckState createState() => _PackageInfoCheckState();
 }

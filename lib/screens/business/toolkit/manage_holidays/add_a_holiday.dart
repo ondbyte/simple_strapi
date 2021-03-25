@@ -45,15 +45,18 @@ class _BusinessAddAHolidayScreenState extends State<BusinessAddAHolidayScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SizedBox();
+    /* return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: true,
         title: Text("Add Holiday"),
       ),
       bottomNavigationBar: BottomPrimaryButton(
+        title: "",
+        subTitle: "",
         label: "Add",
         onPressed: () async {
-          if (_key.currentState.validate()) {
+          if (_key.currentState?.validate()??false) {
             final businessStore =
                 Provider.of<BusinessStore>(context, listen: false);
             if (businessStore
@@ -161,7 +164,7 @@ class _BusinessAddAHolidayScreenState extends State<BusinessAddAHolidayScreen> {
                               _name = s;
                             },
                             validator: (s) {
-                              if (s.isEmpty) {
+                              if (s?.isEmpty??false) {
                                 return "Add a name for the holiday";
                               }
                               return null;
@@ -191,7 +194,7 @@ class _BusinessAddAHolidayScreenState extends State<BusinessAddAHolidayScreen> {
                               ),
                             ],
                             onChanged: (v) {
-                              _type = v;
+                              _type = v??"";
                             },
                           ),
                           SizedBox(
@@ -207,7 +210,7 @@ class _BusinessAddAHolidayScreenState extends State<BusinessAddAHolidayScreen> {
                               _details = s;
                             },
                             validator: (s) {
-                              if (s.length < 5) {
+                              if ((s?.length??0) < 5) {
                                 return "Enter valid detail";
                               }
                               return null;
@@ -227,5 +230,6 @@ class _BusinessAddAHolidayScreenState extends State<BusinessAddAHolidayScreen> {
         ),
       ),
     );
+   */
   }
 }

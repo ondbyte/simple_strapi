@@ -4,15 +4,19 @@ import 'package:bapp/screens/business/addbusiness/thank_you_for_your_interest.da
 import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/super_strapi/my_strapi/businessX.dart';
+import 'package:bapp/super_strapi/my_strapi/categoryX.dart';
+import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/widgets/choose_category.dart';
 import 'package:bapp/widgets/login_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class ChooseYourBusinessCategoryScreen extends StatefulWidget {
   final onBoard;
-  const ChooseYourBusinessCategoryScreen({Key key, this.onBoard = false})
+  const ChooseYourBusinessCategoryScreen({Key? key, this.onBoard = false})
       : super(key: key);
 
   @override
@@ -26,19 +30,21 @@ class _ChooseYourBusinessCategoryScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: Consumer<CloudStore>(
-        builder: (_, cloudStore, __) {
-          return Observer(
+      body: Builder(
+        builder: (_) {
+          return Builder(
             builder: (_) {
-              return cloudStore.status == AuthStatus.userPresent
+              return UserX.i.userPresent
                   ? Padding(
                       padding: EdgeInsets.all(16),
-                      child: Consumer<BusinessStore>(
-                        builder: (_, businessStore, __) {
-                          businessStore.getCategories();
+                      child: FutureBuilder<List<BusinessCategory>>(
+                        future: CategoryX.i.getAllCategories(),
+                        builder: (_, snap) {
                           return Observer(
                             builder: (_) {
-                              return businessStore.business == null
+                              final data = snap.data ?? [];
+
+                              return BusinessX.i.businesses.isEmpty
                                   ? SingleChildScrollView(
                                       child: Column(
                                         mainAxisAlignment:
@@ -68,15 +74,13 @@ class _ChooseYourBusinessCategoryScreenState
                                             height: 20,
                                           ),
                                           ChooseCategoryListTilesWidget(
-                                            elements: businessStore.categories
-                                                .toList(),
+                                            elements: data,
                                             onCategorySelected: (c) {
                                               BappNavigator.pushReplacement(
                                                 context,
                                                 ThankYouForYourInterestScreen(
-                                                  category: c,
-                                                  onBoard:widget.onBoard
-                                                ),
+                                                    category: c,
+                                                    onBoard: widget.onBoard),
                                               );
                                             },
                                           )
@@ -105,9 +109,7 @@ class _ChooseYourBusinessCategoryScreenState
     return ContextualMessageScreen(
       message: "You already have a business on Bapp",
       buttonText: "Switch to Business",
-      onButtonPressed: (context) async {
-        Provider.of<CloudStore>(context, listen: false).switchUserType(context);
-      },
+      onButtonPressed: (context) async {},
     );
   }
 }

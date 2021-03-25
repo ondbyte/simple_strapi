@@ -7,26 +7,20 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
 class CompleteYourBookingTile extends StatelessWidget {
-  final EdgeInsets padding;
+  final EdgeInsets? padding;
 
-  const CompleteYourBookingTile({Key key, this.padding}) : super(key: key);
+  const CompleteYourBookingTile({Key? key, this.padding}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Observer(
       builder: (_) {
-        final flow = Provider.of<BookingFlow>(context, listen: false);
-        if (flow.services.isEmpty) {
-          return SizedBox();
-        }
+        return SizedBox();
         return Padding(
           padding: padding ?? EdgeInsets.zero,
           child: RRShape(
             child: ListTile(
-              onTap: () {
-                BappNavigator.push(context, BusinessProfileScreen());
-              },
               title: Text("Complete your booking at"),
-              subtitle: Text(flow.branch?.name?.value ?? ""),
+              subtitle: Text(""),
               tileColor: Theme.of(context).backgroundColor,
               trailing: Icon(Icons.arrow_forward),
             ),
@@ -34,13 +28,5 @@ class CompleteYourBookingTile extends StatelessWidget {
         );
       },
     );
-  }
-
-  static bool shouldShow(BuildContext context) {
-    final flow = Provider.of<BookingFlow>(context, listen: false);
-    if (flow.services.isNotEmpty) {
-      return true;
-    }
-    return false;
   }
 }

@@ -12,18 +12,18 @@ import 'types.dart';
 
 class Gen {
   final Directory strapiProjectDirectory;
-  final Directory outPutDirectory;
+  final File outPutFile;
   final bool isSchemaOnly;
   final List<File> defaultModels;
   final bool shouldGnerateWidgets;
 
-  Directory apiDirectory;
-  Directory componentDirectory;
-  Directory extensionsDirectory;
+  late final Directory apiDirectory;
+  late final Directory componentDirectory;
+  late final Directory extensionsDirectory;
 
   Gen(
     this.strapiProjectDirectory,
-    this.outPutDirectory,
+    this.outPutFile,
     this.isSchemaOnly,
     this.defaultModels,
     this.shouldGnerateWidgets,
@@ -39,7 +39,7 @@ class Gen {
     );
   }
 
-  String getCollectionNameFromRoutesFile(File file) {
+  String? getCollectionNameFromRoutesFile(File file) {
     final splitted = path.split(file.path);
     splitted.removeLast();
     splitted.removeLast();
@@ -119,7 +119,12 @@ class Gen {
       }
       apiJsons.forEach((key, value) {
         final collectionName = getCollectionNameFromRoutesFile(key);
-        final classes = generateClass(key, value, false, collectionName);
+        final classes = generateClass(
+          key,
+          value,
+          false,
+          collectionName,
+        );
         b.body.addAll([
           ...classes,
         ]);
@@ -154,18 +159,11 @@ class Gen {
         return "${l.accept(e)}";
       }
     }();
-    final dir = Directory(path.join(
-      outPutDirectory.path,
-      "super_strapi",
-    ));
-    if (!await dir.exists()) {
-      await dir.create(recursive: true);
-    }
-    await File(path.join(dir.path, "super_strapi.dart")).writeAsString(dart);
+    await outPutFile.writeAsString(dart);
   }
 
   Code generateCollectionClass(
-      String className, String classVariableName, String collectionName) {
+      String className, String classVariableName, String? collectionName) {
     return Code(collectionClassString(
       className,
       classVariableName,
@@ -179,7 +177,7 @@ class Gen {
     File file,
     Map<String, dynamic> j,
     bool isComponent,
-    String collectionName,
+    String? collectionName,
   ) {
     if (!j.containsKey("attributes")) {
       throw Exception("attributes missing in the strapi model");
@@ -188,15 +186,33 @@ class Gen {
         path.basenameWithoutExtension(path.basenameWithoutExtension(file.path));
 
     final className = toClassName(_name);
-    final camelClassName = toCamelClassName(className);
 
-    final fields = getFieldsFromStrapiAttributes(j["attributes"]);
+    final collectionClassName = () {
+      final ccn = toClassName(pluralize(className));
+      if (ccn.toLowerCase() == className.toLowerCase()) {
+        return ccn + "s";
+      }
+      return ccn;
+    }();
+    final camelClassName = toCamelClassName(className);
+    final enumClasses = <Enum>[];
+    final ifEnumerator = (String name, List<dynamic> enumerators) {
+      enumClasses.add(Enum((b) {
+        b
+          ..name = name
+          ..values.addAll(enumerators.map((e) => EnumValue((evb) {
+                evb..name = e;
+              })));
+      }));
+    };
+
+    final fields = getFieldsFromStrapiAttributes(j["attributes"], ifEnumerator);
 
     final createdAtField = Field(
       (b) => {
         b
           ..name = "createdAt"
-          ..type = Reference("DateTime")
+          ..type = Reference("DateTime?")
           ..modifier = FieldModifier.final$
       },
     );
@@ -205,7 +221,7 @@ class Gen {
       (b) => {
         b
           ..name = "updatedAt"
-          ..type = Reference("DateTime")
+          ..type = Reference("DateTime?")
           ..modifier = FieldModifier.final$
       },
     );
@@ -223,7 +239,7 @@ class Gen {
       (b) => {
         b
           ..name = "id"
-          ..type = Reference("String")
+          ..type = Reference("String?")
           ..modifier = FieldModifier.final$
       },
     );
@@ -244,6 +260,17 @@ class Gen {
           .build());
     }
 
+    final namedParams = <Parameter>[];
+    for (final field in fields) {
+      namedParams.add(
+        (ParameterBuilder()
+              ..name = field.name
+              ..named = true
+              ..toThis = true)
+            .build(),
+      );
+    }
+
     final classBuilder = ClassBuilder();
 
     final constructorFromID = (ConstructorBuilder()
@@ -260,10 +287,16 @@ class Gen {
           ]))
         .build();
 
+    final constructorDefault = (ConstructorBuilder()
+          ..optionalParameters.addAll([
+            ...namedParams,
+          ]))
+        .build();
+
     final constructorFresh = (ConstructorBuilder()
           ..name = "fresh"
-          ..requiredParameters.addAll([
-            ...params,
+          ..optionalParameters.addAll([
+            ...namedParams,
           ])
           ..initializers.addAll([
             Code("_synced = false"),
@@ -343,13 +376,13 @@ class Gen {
           ..body = Code("_${className}Fields.i"))
         .build();
 
-    final getStructureMethod = (MethodBuilder()
-          ..name = "fields"
-          ..lambda = true
-          ..static = true
-          ..type = MethodType.getter
-          ..returns = Reference("_${className}Fields")
-          ..body = Code("_${className}Fields.i"))
+    final syncMethod = (MethodBuilder()
+          ..name = "sync"
+          ..returns = Reference("Future<$className>")
+          ..modifier = MethodModifier.async
+          ..body = CodeExpression(Code(
+                  "if(!synced){return this;}\nfinal _id = this.id;\nif(_id is! String){return this;}\nfinal response = await $collectionClassName.findOne(_id);\nif(response is $className){ return response;} else { return this;}"))
+              .code)
         .build();
 
     final copyWithMethod = (MethodBuilder()
@@ -496,7 +529,7 @@ class Gen {
           ..returns = Reference(className)
           ..requiredParameters.add((ParameterBuilder()
                 ..name = "map"
-                ..type = Reference("Map<String,dynamic>"))
+                ..type = Reference("Map<dynamic,dynamic>"))
               .build())
           ..body = CodeExpression(Code("$className._synced")).call([
             ...fields.map((field) => accessFromMapExpression(field, true)),
@@ -509,7 +542,7 @@ class Gen {
     final fromMapMethod = (MethodBuilder()
           ..name = "fromMap"
           ..static = true
-          ..returns = Reference(className)
+          ..returns = Reference(className + "?")
           ..requiredParameters.add((ParameterBuilder()
                 ..name = "map"
                 ..type = Reference("Map<String,dynamic>"))
@@ -546,19 +579,22 @@ class Gen {
         if (!isComponent) constructorFresh,
         if (!isComponent) constructor_synced,
         constructor_unsynced,
+        if (isComponent) constructorDefault,
       ])
       ..methods.addAll([
         if (!isComponent) getSyncedMethod,
         if (!isComponent) copyWithMethod,
         if (!isComponent) setNullMethod,
-        getFieldsMethod,
-        toMapMethod,
         if (!isComponent) fromSyncedMapMethod,
         fromMapMethod,
+        toMapMethod,
+        if (!isComponent) syncMethod,
+        getFieldsMethod,
         toStringMethod
       ]);
 
     return [
+      ...enumClasses,
       classBuilder.build(),
       if (!isComponent)
         generateCollectionClass(className, camelClassName, collectionName),

@@ -7,7 +7,11 @@ class ColoredTileBox extends StatefulWidget {
   final double heightWidth;
   final String title, subTitle;
 
-  const ColoredTileBox({Key key, this.heightWidth, this.title, this.subTitle})
+  const ColoredTileBox(
+      {Key? key,
+      this.heightWidth = 80,
+      required this.title,
+      required this.subTitle})
       : super(key: key);
   @override
   _ColoredTileBoxState createState() => _ColoredTileBoxState();
@@ -33,14 +37,14 @@ class _ColoredTileBoxState extends State<ColoredTileBox> {
                 style: Theme.of(context)
                     .textTheme
                     .bodyText1
-                    .apply(color: Theme.of(context).colorScheme.onPrimary),
+                    ?.apply(color: Theme.of(context).colorScheme.onPrimary),
               ),
               Text(
                 widget.subTitle,
                 style: Theme.of(context)
                     .textTheme
                     .headline2
-                    .apply(color: Theme.of(context).colorScheme.onPrimary),
+                    ?.apply(color: Theme.of(context).colorScheme.onPrimary),
               ),
             ],
           ),

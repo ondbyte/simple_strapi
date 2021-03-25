@@ -6,26 +6,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class ContextualMessageScreen extends StatefulWidget {
-  final Function init;
+  final Function? init;
   final String message;
   final String buttonText;
-  final Function(BuildContext) onButtonPressed;
-  final String svgAssetToDisplay;
-  final String secondarybuttonText;
-  final Function(BuildContext) secondaryButtonPressed;
+  final Function(BuildContext)? onButtonPressed;
+  final String? svgAssetToDisplay;
+  final String? secondarybuttonText;
+  final Function(BuildContext)? secondaryButtonPressed;
   final bool interactive;
 
-  const ContextualMessageScreen(
-      {Key key,
-      this.init,
-      this.message,
-      this.buttonText = "Back to Home",
-      this.onButtonPressed,
-      this.svgAssetToDisplay,
-      this.secondarybuttonText,
-      this.secondaryButtonPressed,
-      this.interactive = true})
-      : super(key: key);
+  const ContextualMessageScreen({
+    Key? key,
+    this.init,
+    required this.message,
+    this.buttonText = "Back to Home",
+    this.onButtonPressed,
+    this.svgAssetToDisplay,
+    this.secondarybuttonText,
+    this.secondaryButtonPressed,
+    this.interactive = true,
+  }) : super(key: key);
   @override
   _ContextualMessageScreenState createState() =>
       _ContextualMessageScreenState();
@@ -42,7 +42,7 @@ class _ContextualMessageScreenState extends State<ContextualMessageScreen> {
         child: InitWidget(
           initializer: () async {
             if (widget.init != null && !_inited) {
-              await widget.init();
+              await widget.init?.call();
             }
             _inited = true;
           },
@@ -82,7 +82,7 @@ class _ContextualMessageScreenState extends State<ContextualMessageScreen> {
                         ? null
                         : () {
                             if (widget.onButtonPressed != null) {
-                              widget.onButtonPressed(context);
+                              widget.onButtonPressed?.call(context);
                             } else {
                               BappNavigator.pushAndRemoveAll(context, Bapp());
                             }
@@ -95,10 +95,10 @@ class _ContextualMessageScreenState extends State<ContextualMessageScreen> {
                         ? null
                         : () {
                             if (widget.secondaryButtonPressed != null) {
-                              widget.secondaryButtonPressed(context);
+                              widget.secondaryButtonPressed?.call(context);
                             }
                           },
-                    child: Text(widget.secondarybuttonText),
+                    child: Text(widget.secondarybuttonText ?? ""),
                   ),
               ],
             ),

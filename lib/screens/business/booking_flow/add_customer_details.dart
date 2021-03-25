@@ -16,7 +16,7 @@ import 'package:the_country_number/the_country_number.dart';
 import 'package:the_country_number_widgets/the_country_number_widgets.dart';
 
 class AddCustomerDetails extends StatelessWidget {
-  final _theNumber = Observable<TheNumber>(null);
+  final _theNumber = Observable<TheNumber?>(null);
   final _key = GlobalKey<FormState>();
   String _email = "",
       _name = "",
@@ -26,8 +26,8 @@ class AddCustomerDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final flow = Provider.of<BookingFlow>(context);
-    return Consumer2<BusinessStore, CloudStore>(
+    return SizedBox();
+    /* return Consumer2<BusinessStore, CloudStore>(
         builder: (_, businessStore, cloudStore, __) {
       return Scaffold(
         appBar: AppBar(
@@ -105,5 +105,6 @@ class AddCustomerDetails extends StatelessWidget {
         ),
       );
     });
+   */
   }
 }

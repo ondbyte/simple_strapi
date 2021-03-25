@@ -21,7 +21,7 @@ import 'package:table_calendar/table_calendar.dart';
 class SelectTimeSlotScreen extends StatefulWidget {
   final Function onSelect;
 
-  const SelectTimeSlotScreen({Key key, this.onSelect}) : super(key: key);
+  const SelectTimeSlotScreen({Key? key,required this.onSelect}) : super(key: key);
   @override
   _SelectTimeSlotScreenState createState() => _SelectTimeSlotScreenState();
 }
@@ -31,7 +31,8 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
   var _controller = CalendarController();
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SizedBox();
+    /* return Scaffold(
       appBar: AppBar(
         title: Text("Select Timeslot"),
       ),
@@ -139,9 +140,10 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
         ),
       ),
     );
+   */
   }
 
-  int _getInitialIndexForPeriodOfTheDay() {
+/*   int _getInitialIndexForPeriodOfTheDay() {
     final now = DateTime.now().toTimeOfDay();
     if (now.isAM()) {
       return 0;
@@ -173,9 +175,9 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
     );
   }
 
-  BookingFlow get flow => Provider.of<BookingFlow>(context, listen: false);
+  BookingFlow get flow => Provider.of<BookingFlow>(context, listen: false); */
 }
-
+/* 
 class TimeSlotsWidget extends StatefulWidget {
   final ObservableList<FromToTiming> fromToTimings;
 
@@ -272,3 +274,4 @@ class _TimeSlotState extends State<TimeSlot> {
     );
   }
 }
+ */

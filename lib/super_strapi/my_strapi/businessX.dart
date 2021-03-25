@@ -2,7 +2,10 @@ import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/super_strapi/my_strapi/partnerX.dart';
 import 'package:bapp/super_strapi/my_strapi/x.dart';
 import 'package:bapp/super_strapi/super_strapi.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/state_manager.dart';
+import 'package:simple_strapi/simple_strapi.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BusinessX extends X {
   static final i = BusinessX._x();
@@ -11,42 +14,61 @@ class BusinessX extends X {
   final businesses = <Business>[].obs;
 
   Future<List<Business>> init() async {
-    ever(PartnerX.i.partner, (partner) async {
-      if (partner != null) {
-        businesses.clear();
-        businesses.addAll(
-            await _getPartnerBusinessesFromServer(partner, force: true));
-      } else {
-        businesses.clear();
-      }
-    });
-    if (PartnerX.i.partner.value != null) {
-      businesses.clear();
-      businesses.addAll(await _getPartnerBusinessesFromServer(
-          PartnerX.i.partner.value,
-          force: true));
+    final partner = PartnerX.i.partner();
+    if (partner is Partner) {
+      await getPartnerBusinessesFromServer(
+        partner,
+        force: true,
+      );
     }
     return businesses;
   }
 
-  Future<List<Business>> _getPartnerBusinessesFromServer(Partner partner,
-      {bool force = false}) async {
-    return memoize(
+  Future<List<Business>> getPartnerBusinessesFromServer(
+    Partner partner, {
+    bool force = false,
+    Rx? observe,
+  }) async {
+    final all = await memoize(
       "_getPartnerBusinessesFromServer",
       () async {
-        final ids = partner.businesses.map((e) => e.id) ?? [];
+        final ids = partner.businesses?.map((e) => e.id) ?? [];
         if (isNullOrEmpty(ids)) {
           bPrint("partner doesnt have businesses");
-          return [];
+          return <Business>[];
         }
-        return [];
+        return <Business>[];
       },
-      force,
+      force: force,
+      runWhenChanged: observe,
     );
+    businesses.clear();
+    businesses.addAll(all);
+    return businesses;
   }
 
-  Future<List<Business>> getNearestBusinesses() async {
-    return [];
+  Future<List<Business>> getNearestBusinesses({
+    BusinessCategory? forCategory,
+  }) async {
+    final q = StrapiCollectionQuery(
+      collectionName: Business.collectionName,
+      requiredFields: Business.fields(),
+    );
+    if (forCategory is BusinessCategory) {
+      q
+        ..whereModelField(
+          field: Business.fields.business_category,
+          query: StrapiModelQuery(
+            requiredFields: BusinessCategory.fields(),
+          )..whereField(
+              field: BusinessCategory.fields.name,
+              query: StrapiFieldQuery.equalTo,
+              value: forCategory.name,
+            ),
+        );
+    }
+    final found = await Businesses.executeQuery(q);
+    return found;
   }
 
   @override

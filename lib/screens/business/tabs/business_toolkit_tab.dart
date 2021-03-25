@@ -4,10 +4,13 @@ import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/toolkit/submit_for_verification.dart';
 import 'package:bapp/stores/business_store.dart';
+import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
+import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 class BusinessToolkitTab extends StatefulWidget {
@@ -19,8 +22,8 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
   int _expandedPanel = -1;
   @override
   Widget build(BuildContext context) {
-    Helper.bPrint("build");
-    return SafeArea(
+    return SizedBox();
+    /* return SafeArea(
       child: Consumer<BusinessStore>(
         builder: (_, businessStore, __) {
           return CustomScrollView(
@@ -42,10 +45,12 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
         },
       ),
     );
+   */
   }
 
   Widget _getExpansionTiles(BuildContext context) {
-    return SliverPadding(
+    return SizedBox();
+    /* return SliverPadding(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
       sliver: SliverList(
         delegate: SliverChildListDelegate(
@@ -134,15 +139,17 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
         ),
       ),
     );
+   */
   }
 
   _getTile({
-    BuildContext context,
-    String name,
-    Widget icon,
-    Function onClick,
+    required BuildContext context,
+    required String name,
+    required Widget icon,
+    required Function onClick,
   }) {
-    return SizedBox(
+    return SizedBox();
+    /* return SizedBox(
       child: FlatButton(
         onPressed: onClick,
         padding: EdgeInsets.zero,
@@ -168,26 +175,38 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
         ),
       ),
     );
+   */
   }
 
   _getBranchTile(BuildContext context) {
-    return Consumer<BusinessStore>(
-      builder: (_, businessStore, __) {
-        return Observer(
-          builder: (_) {
+    return SizedBox();
+    /* return FutureBuilder<String>(
+      future: DefaultDataX.i.getValue(
+        "selectedBusiness",
+        defaultValue: UserX.i.user().partner.businesses.first.id,
+      ),
+      builder: (_, snap) {
+        return Obx(
+          () {
             return BusinessTileWidget(
               withImage: true,
-              branch: businessStore.business.selectedBranch.value,
+              branch: UserX.i
+                  .user()
+                  ?.partner
+                  ?.businesses
+                  ?.firstWhere((element) => element.id == snap.data),
               onTap: () {},
             );
           },
         );
       },
     );
+  */
   }
 
   _getSubmitForVerificationButton(BuildContext context) {
-    return Consumer<BusinessStore>(
+    return SizedBox();
+    /* return Consumer<BusinessStore>(
       builder: (_, businessStore, ___) {
         return Observer(
           builder: (_) {
@@ -234,5 +253,6 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
         );
       },
     );
+   */
   }
 }

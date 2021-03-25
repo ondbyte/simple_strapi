@@ -12,7 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:the_country_number/the_country_number.dart';
 
 class BusinessAddABranchScreen extends StatefulWidget {
-  BusinessAddABranchScreen({Key key}) : super(key: key);
+  BusinessAddABranchScreen({Key? key}) : super(key: key);
 
   @override
   _BusinessAddABranchScreenState createState() =>
@@ -20,11 +20,10 @@ class BusinessAddABranchScreen extends StatefulWidget {
 }
 
 class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
-  PickedLocation _pickedLocation;
+  PickedLocation? _pickedLocation;
   Map<String, bool> _filteredExistingImages = {};
   bool _doShakePlace = false;
   bool _doShakePhotos = false;
-  final _pickedImages = <Asset>[];
   final _controller = TextEditingController();
   bool _loading = false;
 
@@ -36,7 +35,8 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SizedBox();
+    /* return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: true,
       ),
@@ -72,7 +72,7 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
                                 autovalidateMode:
                                     AutovalidateMode.onUserInteraction,
                                 validator: (s) {
-                                  if (s.length < 3) {
+                                  if ((s?.length ?? 0) < 3) {
                                     return "Enter a valid branch name";
                                   }
                                   return null;
@@ -185,22 +185,23 @@ class _BusinessAddABranchScreenState extends State<BusinessAddABranchScreen> {
                       Provider.of<CloudStore>(context, listen: false).bappUser =
                           bappUser;
                       await bappUser.save();
-                      final staff = await branch.addAStaff(
+                      final staff = await branch?.addAStaff(
                         dateOfJoining: DateTime.now(),
                         expertise: [],
                         images: {},
                         role: bappUser.userType.value,
-                        name: bappUser.name,
+                        name: bappUser.name ?? "",
                         userPhoneNumber: TheCountryNumber().parseNumber(
                           internationalNumber: business.contactNumber.value,
                         ),
                       );
-                      await branch.saveBranch();
-                      await staff.updateForUser();
-                      await staff.save();
+                      await branch?.saveBranch();
+                      await staff?.updateForUser();
+                      await staff?.save();
                       BappNavigator.pop(context, null);
                     },
             ),
     );
+   */
   }
 }

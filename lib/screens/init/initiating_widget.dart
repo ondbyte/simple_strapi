@@ -4,9 +4,14 @@ import 'package:flutter/widgets.dart';
 class InitWidget extends StatefulWidget {
   final Function initializer;
   final Widget child;
-  final Function onInitComplete;
+  final Function? onInitComplete;
 
-  const InitWidget({Key key, this.initializer,this.child,this.onInitComplete}) : super(key: key);
+  const InitWidget(
+      {Key? key,
+      required this.initializer,
+      required this.child,
+      this.onInitComplete})
+      : super(key: key);
 
   @override
   _InitWidgetState createState() => _InitWidgetState();
@@ -16,18 +21,15 @@ class _InitWidgetState extends State<InitWidget> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) async {
       await widget.initializer();
-      if(widget.onInitComplete!=null){
-        widget.onInitComplete();
-      }
+      widget.onInitComplete?.call();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    assert(widget.child!=null);
+    assert(widget.child != null);
     return widget.child;
   }
 }
-

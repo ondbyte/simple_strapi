@@ -1,4 +1,4 @@
-import 'package:bapp/classes/firebase_structures/business_holidays.dart';
+/* import 'package:bapp/classes/firebase_structures/business_holidays.dart';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
@@ -21,7 +21,8 @@ class _BusinessManageHolidaysScreenState
     extends State<BusinessManageHolidaysScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SizedBox();
+    /* return Scaffold(
       floatingActionButton: FloatingActionButton(
         child: Icon(
           Icons.add,
@@ -90,6 +91,7 @@ class _BusinessManageHolidaysScreenState
         },
       ),
     );
+   */
   }
 }
 
@@ -97,7 +99,8 @@ class HolidayWidget extends StatefulWidget {
   final BusinesssHoliday holiday;
   final Function(bool) onSwitch;
 
-  const HolidayWidget({Key key, this.holiday, this.onSwitch}) : super(key: key);
+  const HolidayWidget({Key? key, required this.holiday, required this.onSwitch})
+      : super(key: key);
 
   _HolidayWidgetState createState() => _HolidayWidgetState();
 }
@@ -110,11 +113,11 @@ class _HolidayWidgetState extends State<HolidayWidget> {
     return Observer(
       builder: (_) {
         return ListTile(
-          title: Text(widget.holiday.name),
+          title: Text(widget.holiday.name ?? ""),
           subtitle: Text(
-            f.format(widget.holiday.dates.first) +
+            f.format(widget.holiday.dates?.first) +
                 " to " +
-                f2.format(widget.holiday.dates.last),
+                f2.format(widget.holiday.dates?.last),
           ),
           trailing: Switch(
             value: widget.holiday.enabled.value,
@@ -125,3 +128,4 @@ class _HolidayWidgetState extends State<HolidayWidget> {
     );
   }
 }
+ */

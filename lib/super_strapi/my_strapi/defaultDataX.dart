@@ -9,20 +9,20 @@ import 'package:path_provider/path_provider.dart';
 import 'package:simple_strapi/simple_strapi.dart'
     hide DefaultData, Locality, City;
 
-import '../super_strapi.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class DefaultDataX {
   static final i = DefaultDataX._x();
 
   DefaultDataX._x();
 
-  DefaultData defaultData;
+  Rx<DefaultData> defaultData = Rx<DefaultData>();
 
-  LazyBox hiveBox;
+  late final LazyBox hiveBox;
 
   bool isFirstTimeOnDevice = true;
 
-  Future<DefaultData> init() async {
+  Future<DefaultData?> init() async {
     final path = (isMobile)
         ? (await getApplicationSupportDirectory()).path
         : Directory.current.path;
@@ -35,7 +35,7 @@ class DefaultDataX {
             ? (await info.androidInfo).androidId
             : (await info.iosInfo).identifierForVendor);
 
-    defaultData = await () async {
+    defaultData.value = await () async {
       final data = Map.castFrom<dynamic, dynamic, String, dynamic>(
           await hiveBox.get(id));
       if (data is Map<String, dynamic>) {
@@ -47,13 +47,13 @@ class DefaultDataX {
         }
       }
       return (await _getDefaultDataFromServer(id)) ??
-          (await DefaultDatas.create(DefaultData.fresh(null, id, null)));
+          (await DefaultDatas.create(DefaultData.fresh(deviceId: id)));
     }();
-    if (defaultData != null && defaultData.synced) {
-      hiveBox.put("$id", defaultData?.toMap());
+    if (defaultData != null && (defaultData()?.synced ?? false)) {
+      hiveBox.put("$id", defaultData()?.toMap() ?? {});
     }
     await _doOtherStorageStuffs();
-    return defaultData;
+    return defaultData.value;
   }
 
   Future _doOtherStorageStuffs() async {
@@ -64,7 +64,7 @@ class DefaultDataX {
     }
   }
 
-  Future<DefaultData> _getDefaultDataFromServer(String id) async {
+  Future<DefaultData?> _getDefaultDataFromServer(String id) async {
     final multiple = await StrapiCollectionQuery(
       collectionName: DefaultDatas.collectionName,
       limit: 1,
@@ -72,13 +72,14 @@ class DefaultDataX {
     );
   }
 
-  Future setLocalityOrCity(Locality locality, City city) async {
-    defaultData = await DefaultDatas.update(
-      defaultData.copyWIth(
-        locality: locality,
-        city: city,
-      ),
+  Future setLocalityOrCity({Locality? locality, City? city}) async {
+    final updated = defaultData()?.copyWIth(
+      locality: locality,
+      city: city,
     );
+    if (updated is DefaultData) {
+      defaultData.value = await DefaultDatas.update(updated);
+    }
   }
 
   Future saveValue(String key, value) async {
@@ -88,4 +89,14 @@ class DefaultDataX {
   Future getValue(String key, {defaultValue}) async {
     return await hiveBox.get(key, defaultValue: defaultValue);
   }
+
+  Future delete(String key, {defaultValue}) async {
+    final value = await hiveBox.get(key, defaultValue: defaultValue);
+    await hiveBox.delete(key);
+    return value;
+  }
+}
+
+class DefaultDataKeys {
+  static String get lastBooking => "lastBooking";
 }

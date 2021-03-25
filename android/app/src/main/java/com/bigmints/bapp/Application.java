@@ -1,4 +1,4 @@
-package com.bigmints.bapp;
+/* package com.bigmints.bapp;
 
 import io.flutter.app.FlutterApplication;
 import io.flutter.plugin.common.PluginRegistry;
@@ -11,12 +11,8 @@ public class Application extends FlutterApplication implements PluginRegistrantC
   @Override
   public void onCreate() {
     super.onCreate();
-    FlutterFirebaseMessagingService.setPluginRegistrant(this);
   }
 
   @Override
-  public void registerWith(PluginRegistry registry) {
-    //GeneratedPluginRegistrant.registerWith(registry);
-    FirebaseMessagingPlugin.registerWith(registry.registrarFor("io.flutter.plugins.firebasemessaging.FirebaseMessagingPlugin"));
-  }
-}
+  public void registerWith(PluginRegistry registry) { }
+} */

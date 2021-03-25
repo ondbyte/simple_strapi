@@ -1,5 +1,6 @@
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/screens/business/booking_flow/booking_details.dart';
+import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/widgets/bapp_calendar.dart';
 import 'package:bapp/widgets/login_widget.dart';
 import 'package:bapp/widgets/tiles/customer_booking_tile.dart';
@@ -30,13 +31,15 @@ class _BookingsTabState extends State<BookingsTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CloudStore>(
-      builder: (_, cloudStore, __) {
+    return Builder(
+      builder: (
+        _,
+      ) {
         return OrientationBuilder(
           builder: (_, o) {
             return Observer(
               builder: (_) {
-                return cloudStore.status == AuthStatus.anonymousUser
+                return UserX.i.userPresent
                     ? AskToLoginWidget(
                         loginReason: LoginConfig.bookingTabLoginReason.primary,
                         secondaryReason:
@@ -85,7 +88,7 @@ class _BookingsTabState extends State<BookingsTab> {
     return SafeArea(
       child: Observer(
         builder: (_) {
-          final list = flow.getBookingsForSelectedDay(flow.myBookings);
+          final list = [];
           if (list.isEmpty) {
             return const SizedBox(
               child: Center(
@@ -117,7 +120,7 @@ class _BookingsTabState extends State<BookingsTab> {
     );
   }
 
-  double _calenderHeight;
+  double? _calenderHeight;
   Widget _getCalender() {
     return SliverAppBar(
       elevation: 0,
@@ -131,21 +134,13 @@ class _BookingsTabState extends State<BookingsTab> {
       flexibleSpace: BappRowCalender(
         onChildRendered: (s) {
           setState(() {
-            _calenderHeight = s.height;
+            _calenderHeight = (s?.height);
           });
         },
-        bookings: flow.myBookingsAsCalendarEvents(),
         initialDate: DateTime.now(),
-        holidays: flow.holidays,
         controller: _calendarController,
-        onDayChanged: (day, _, __) {
-          act(() {
-            flow.timeWindow.value = FromToTiming.forDay(day);
-          });
-        },
+        onDayChanged: (day, _, __) {},
       ),
     );
   }
-
-  BookingFlow get flow => Provider.of<BookingFlow>(context, listen: false);
 }

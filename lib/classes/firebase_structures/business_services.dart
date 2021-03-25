@@ -1,4 +1,4 @@
-import 'package:bapp/classes/firebase_structures/business_branch.dart';
+/* import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -188,3 +188,4 @@ class BusinessServiceCategory {
   @override
   int get hashCode => categoryName.value.hashCode;
 }
+ */

@@ -5,12 +5,15 @@ import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/location/search_a_place.dart';
 import 'package:bapp/stores/cloud_store.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:bapp/super_strapi/my_strapi/userX.dart';
+import 'package:bapp/super_strapi/super_strapi.dart';
+
 import 'package:flutter/material.dart';
-import 'package:geocoder/geocoder.dart';
+import 'package:geocoder/geocoder.dart' as g;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
 import 'package:provider/provider.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class PickAPlaceLocationScreen extends StatefulWidget {
   @override
@@ -19,8 +22,9 @@ class PickAPlaceLocationScreen extends StatefulWidget {
 }
 
 class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
-  PickedLocation _pickedLocation;
-  final Completer<GoogleMapController> _controller = Completer<GoogleMapController>();
+  PickedLocation? _pickedLocation;
+  final Completer<GoogleMapController> _controller =
+      Completer<GoogleMapController>();
   bool _loading = false;
   final GooglePlace _googlePlace = GooglePlace(kMapsKey);
 
@@ -32,7 +36,6 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
         leading: IconButton(
           icon: Icon(Icons.close),
           onPressed: () {
-
             BappNavigator.pop(context, null);
           },
         ),
@@ -48,20 +51,20 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
                         _loading = !_loading;
                       },
                     );
-                    final point = Coordinates(
-                      _pickedLocation.latLong.latitude,
-                      _pickedLocation.latLong.longitude,
+                    final point = g.Coordinates(
+                      _pickedLocation?.latLong?.latitude,
+                      _pickedLocation?.latLong?.longitude,
                     );
 
                     ///print(point);
-                    final adr = await Geocoder.google(kMapsKey)
+                    final adr = await g.Geocoder.google(kMapsKey)
                         .findAddressesFromCoordinates(
                       point,
                     );
                     _pickedLocation = PickedLocation(
-                      GeoPoint(
-                        _pickedLocation.latLong.latitude,
-                        _pickedLocation.latLong.longitude,
+                      Coordinates(
+                        latitude: _pickedLocation?.latLong?.latitude,
+                        longitude: _pickedLocation?.latLong?.longitude,
                       ),
                       Helper.stringifyAddresse(
                         adr[0],
@@ -81,15 +84,9 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
       body: Stack(
         alignment: Alignment.topCenter,
         children: [
-          Consumer<CloudStore>(
-            builder: (_, cloudStore,__) {
-              if (cloudStore.bappUser.address.locality == null &&
-                  cloudStore.bappUser.address.city == null) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              final latLong = cloudStore.getLatLongForAddress(cloudStore.bappUser.address);
+          Builder(
+            builder: (_) {
+              final latLong = UserX.i.user()?.locality?.coordinates;
               return GoogleMap(
                 myLocationButtonEnabled: false,
                 buildingsEnabled: true,
@@ -97,8 +94,8 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
                 initialCameraPosition: CameraPosition(
                   zoom: 18,
                   target: LatLng(
-                    latLong.latitude,
-                    latLong.longitude,
+                    latLong?.latitude ?? 0,
+                    latLong?.longitude ?? 0,
                   ),
                 ),
                 zoomControlsEnabled: true,
@@ -111,7 +108,10 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
                 },
                 onCameraMove: (cp) {
                   _pickedLocation = PickedLocation(
-                      GeoPoint(cp.target.latitude, cp.target.longitude), "");
+                      Coordinates(
+                          latitude: cp.target.latitude,
+                          longitude: cp.target.longitude),
+                      "");
                 },
               );
             },
@@ -145,8 +145,8 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
 }
 
 class PickedLocation {
-  final GeoPoint latLong;
-  final String address;
+  final Coordinates? latLong;
+  final String? address;
 
   PickedLocation(this.latLong, this.address);
 }

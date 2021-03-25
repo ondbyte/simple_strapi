@@ -18,44 +18,41 @@ class AppEventsWithExtra {
 }
 
 class BappNavigator extends StatefulWidget {
-  final Widget child;
-
   const BappNavigator({
-    Key key,
-    this.child,
+    Key? key,
   }) : super(key: key);
   @override
   _BappNavigatorState createState() => _BappNavigatorState();
 
-  static Future<T> push<T>(BuildContext context, Widget routeWidget) {
+  static Future<T?> push<T>(BuildContext context, Widget routeWidget) async {
     bPrint("pushing screen ${routeWidget.runtimeType}");
     final state = context.findAncestorStateOfType<_BappNavigatorState>();
-    return state._navKey.currentState.push<T>(_pageRoute<T>(routeWidget));
+    return state?._navKey.currentState?.push<T>(_pageRoute<T>(routeWidget));
   }
 
-  static Future<T> pushAndRemoveAll<T>(
-      BuildContext context, Widget routeWidget) {
+  static Future<T?> pushAndRemoveAll<T>(
+      BuildContext context, Widget routeWidget) async {
     bPrint("pushing screen ${routeWidget.runtimeType}");
     final state = context.findAncestorStateOfType<_BappNavigatorState>();
-    return state._navKey.currentState
-        .pushAndRemoveUntil<T>(_pageRoute<T>(routeWidget), (route) => false);
+    return state?._navKey.currentState
+        ?.pushAndRemoveUntil<T>(_pageRoute<T>(routeWidget), (route) => false);
   }
 
-  static Future<T> pushReplacement<T, TO>(
+  static Future<T?>? pushReplacement<T, TO>(
       BuildContext context, Widget routeWidget,
-      {TO result}) {
+      {TO? result}) async {
     bPrint("pushing screen ${routeWidget.runtimeType}");
     final state = context.findAncestorStateOfType<_BappNavigatorState>();
-    state._navKey.currentState.pop(result);
-    return state._navKey.currentState.push<T>(_pageRoute<T>(routeWidget));
+    state?._navKey.currentState?.pop(result);
+    return state?._navKey.currentState?.push<T>(_pageRoute<T>(routeWidget));
   }
 
   static void pop<T>(BuildContext context, T result) {
     final state = context.findAncestorStateOfType<_BappNavigatorState>();
-    return state._navKey.currentState.pop(result);
+    return state?._navKey.currentState?.pop(result);
   }
 
-  static Future<T> dialog<T>(BuildContext context, Widget dialog) {
+  static Future<T?> dialog<T>(BuildContext context, Widget dialog) {
     bPrint("pushing dialog ");
     return showDialog<T>(
         context: context,
@@ -107,8 +104,8 @@ class _BappNavigatorState extends State<BappNavigator> {
         },
       ),
       onWillPop: () async {
-        if (_navKey.currentState.canPop()) {
-          _navKey.currentState.pop();
+        if (_navKey.currentState?.canPop() ?? false) {
+          _navKey.currentState?.pop();
           return false;
         } else {
           return true;
@@ -117,22 +114,26 @@ class _BappNavigatorState extends State<BappNavigator> {
     );
   }
 
-  Future<bool> _askToQuit(BuildContext context) {
+  Future<bool?> _askToQuit(BuildContext context) async {
+    final context = _navKey.currentContext;
+    if (context is! BuildContext) {
+      return false;
+    }
     return showDialog(
-      context: _navKey.currentContext,
+      context: context,
       builder: (context) {
         return AlertDialog(
           content: Text("Close app and exit?"),
           actions: [
             FlatButton(
               onPressed: () {
-                _navKey.currentState.pop(true);
+                _navKey.currentState?.pop(true);
               },
               child: Text("Yes"),
             ),
             FlatButton(
               onPressed: () {
-                _navKey.currentState.pop(false);
+                _navKey.currentState?.pop(false);
               },
               child: Text("No"),
             ),
@@ -150,7 +151,7 @@ class _BappNavigatorState extends State<BappNavigator> {
             {
               Helper.bPrint("ERROR Showing error screen");
               BappNavigator.pushAndRemoveAll(
-                _key.currentContext,
+                _key.currentContext ?? context,
                 NoInternet(),
               );
               break;

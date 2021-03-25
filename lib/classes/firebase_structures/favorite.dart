@@ -1,4 +1,4 @@
-import 'package:enum_to_string/enum_to_string.dart';
+/* import 'package:enum_to_string/enum_to_string.dart';
 
 import 'business_branch.dart';
 import 'business_details.dart';
@@ -59,3 +59,4 @@ enum FavoriteType {
   businessBranch,
   businessService,
 }
+ */

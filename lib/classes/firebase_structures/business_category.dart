@@ -1,4 +1,4 @@
-class BusinessCategory {
+/* class BusinessCategory {
   final String name;
   final String image;
   final bool enabled;
@@ -17,3 +17,4 @@ class BusinessCategory {
     };
   }
 }
+ */

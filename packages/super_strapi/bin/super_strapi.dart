@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:path/path.dart';
 
+import 'package:yaml/yaml.dart';
+
 import 'gen.dart';
 
 void main(List<String> arguments) async {
@@ -15,19 +17,10 @@ void main(List<String> arguments) async {
       help:
           "required, strapi project folder to generate the schema/dart classes",
     );
-    argvParser.addFlag(
-      "generate-flutter-widgets",
-      abbr: "w",
-      defaultsTo: false,
-      help:
-          "defaults to false, if set to true observer widgets for collection objects will be generated",
-    );
     argvParser.addOption(
       "output-folder",
       abbr: "o",
-      defaultsTo: join(Directory.current.path, "lib"),
-      help:
-          "mostly the lib folder of a flutter/dart project to output the generated super_strapi.dart, example of the output <given lib folder>/lib/super_strapi/super_starpi.dart",
+      help: "required, to output the generated super_strapi project folder",
     );
     argvParser.addFlag(
       "only-schema",
@@ -48,20 +41,26 @@ void main(List<String> arguments) async {
 
     final strapiProjectPath = argvResults["strapi-project-path"];
     final outPutPath = argvResults["output-folder"];
+    if (outPutPath == null) {
+      throw FormatException();
+    }
     final isSchemaOnly = argvResults["only-schema"];
     final shouldGetLatestModel = argvResults["get-latest-models"];
-    final shouldGenerateWidgets = argvResults["generate-flutter-widgets"];
 
     if (strapiProjectPath != null && outPutPath != null) {
       final strapiProjectDirectory = Directory(strapiProjectPath);
-      final outPutDirectory = Directory(outPutPath);
+      final outPutFile = await setupOutPutDirectory(Directory(outPutPath));
       checkStrapiProjectRoot(strapiProjectDirectory);
-      checkOutPutFolder(outPutDirectory);
       final defaultModels = await _getLatestDefaultModels(shouldGetLatestModel);
       //print(defaultModels);
 
-      final gen = Gen(strapiProjectDirectory, outPutDirectory, isSchemaOnly,
-          defaultModels, shouldGenerateWidgets);
+      final gen = Gen(
+        strapiProjectDirectory,
+        outPutFile,
+        isSchemaOnly,
+        defaultModels,
+        false,
+      );
 
       await gen.generate();
     } else {
@@ -116,13 +115,6 @@ Future<List<File>> _getLatestDefaultModels(bool shouldGet) async {
   return fileList;
 }
 
-void checkOutPutFolder(Directory directory) {
-  if (!directory.existsSync()) {
-    print("provided path doesnt exist ${directory.path}");
-    exit(0);
-  }
-}
-
 void checkStrapiProjectRoot(Directory directory) {
   if (!directory.existsSync()) {
     print("provided path doesnt exist ${directory.path}");
@@ -131,4 +123,58 @@ void checkStrapiProjectRoot(Directory directory) {
     print("provided project is not a node/strapi project ${directory.path}");
     exit(0);
   }
+}
+
+Future<File> setupOutPutDirectory(Directory directory) async {
+  if (await _validatePubspec(directory)) {
+    return File(
+      join(directory.path, "super_strapi_generated", "lib",
+          "super_strapi_generated.dart"),
+    );
+  } else {
+    throw Exception(
+        "unable to validate out-put directory @ ${directory.absolute.path}");
+  }
+}
+
+Future<bool> _validatePubspec(Directory directory) async {
+  final pubspec =
+      File(join(directory.path, "super_strapi_generated", "pubspec.yaml"));
+  var projectExists = await pubspec.exists();
+  if (!projectExists) {
+    projectExists = await _makeProject(directory);
+  }
+  if (!projectExists) {
+    print("problem creating a dart project");
+    exit(0);
+  }
+  final yamlString = await pubspec.readAsString();
+  final parsed = loadYaml(yamlString);
+  final enabled = parsed.customFields?["super_strapi"]?["enabled"] ?? false;
+  return enabled;
+}
+
+Future<bool> _makeProject(Directory directory) async {
+  print("generating a dart project @ ${directory.path}");
+  final process = await Process.run(
+    "dart",
+    ["create", "-t", "package-simple", "super_strapi_generated"],
+    workingDirectory: directory.path,
+  );
+
+  final pubspecFile = File(join(
+    directory.path,
+    "super_strapi_generated",
+    "pubspec.yaml",
+  ));
+  if (await pubspecFile.exists()) {
+    final yamlString = await pubspecFile.readAsString();
+    final yaml = loadYaml(yamlString);
+    yaml["super_strapi"] = {"enabled": true};
+    yaml["dependencies"]["simple_strapi"] = "any";
+
+    await pubspecFile.writeAsString(yaml.toYamlString());
+    return true;
+  }
+  return false;
 }

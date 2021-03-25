@@ -23,10 +23,10 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  TheNumber _number;
+  TheNumber? _number;
   bool _canVerify = false, _canVerifyotp = false;
   bool _askOTP = false;
-  List<Completer<String>> _otpFutureCompleters = [];
+  List<Completer<String>>? _otpFutureCompleters = [];
 
   @override
   void dispose() {
@@ -36,7 +36,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<CloudStore>(
+    return SizedBox();
+    /* return Consumer<CloudStore>(
       builder: (_, cloudStore, __) {
         return Scaffold(
           appBar: AppBar(
@@ -60,9 +61,10 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       },
     );
+   */
   }
 
-  Widget _getNumberWidget(CloudStore cloudStore) {
+/*   Widget _getNumberWidget(CloudStore cloudStore) {
     return Padding(
       padding: EdgeInsets.all(16),
       child: Center(
@@ -269,5 +271,5 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-  }
+  } */
 }

@@ -13,7 +13,8 @@ import 'package:provider/provider.dart';
 class BappProviderInitializerWidget extends StatefulWidget {
   final Widget child;
 
-  const BappProviderInitializerWidget({Key key, this.child}) : super(key: key);
+  const BappProviderInitializerWidget({Key? key, required this.child})
+      : super(key: key);
   @override
   _BappProviderInitializerWidgetState createState() =>
       _BappProviderInitializerWidgetState();
@@ -21,12 +22,12 @@ class BappProviderInitializerWidget extends StatefulWidget {
 
 class _BappProviderInitializerWidgetState
     extends State<BappProviderInitializerWidget> {
-  Widget _widget;
+  Widget? _widget;
   @override
   Widget build(BuildContext context) {
     ///we will run this build method only once! for a state
     if (_widget != null) {
-      return _widget;
+      return _widget ?? SizedBox();
     }
     /*
     final allStore = AllStore();
@@ -47,6 +48,6 @@ class _BappProviderInitializerWidgetState
         return widget.child;
       },
     );
-    return _widget;
+    return _widget ?? SizedBox();
   }
 }

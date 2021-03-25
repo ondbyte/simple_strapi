@@ -3,19 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 
 class RemovableImageWidget extends StatelessWidget {
-  final Asset asset;
+  final Asset? asset;
   final String storageUrlOrPath;
   final BoxFit fit;
-  final Function onRemove;
+  final Function()? onRemove;
   final isThumbNail;
-  const RemovableImageWidget(
-      {Key key,
-      this.asset,
-      this.fit = BoxFit.cover,
-      this.onRemove,
-      this.isThumbNail = true,
-      @required this.storageUrlOrPath})
-      : super(key: key);
+  const RemovableImageWidget({
+    Key? key,
+    this.asset,
+    this.fit = BoxFit.cover,
+    required this.onRemove,
+    this.isThumbNail = true,
+    required this.storageUrlOrPath,
+  }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Stack(

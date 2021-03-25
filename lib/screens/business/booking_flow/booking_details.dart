@@ -2,34 +2,42 @@ import 'dart:async';
 
 import 'package:bapp/classes/firebase_structures/bapp_user.dart';
 import 'package:bapp/classes/firebase_structures/business_booking.dart';
+import 'package:bapp/classes/firebase_structures/business_timings.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/booking_flow/cancellation_confirmation.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/super_strapi/my_strapi/bookingX.dart';
+import 'package:bapp/super_strapi/my_strapi/userX.dart';
+import 'package:bapp/super_strapi/my_strapi/x.dart';
 import 'package:bapp/widgets/firebase_image.dart';
 import 'package:bapp/widgets/loading_stack.dart';
 import 'package:bapp/widgets/padded_text.dart';
 import 'package:bapp/widgets/tiles/bapp_user_tile.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fba;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BookingDetailsScreen extends StatefulWidget {
-  final BusinessBooking booking;
+  final Booking booking;
   final bool isCustomerView;
 
-  const BookingDetailsScreen(
-      {Key key, this.booking, this.isCustomerView = true})
-      : super(key: key);
+  const BookingDetailsScreen({
+    Key? key,
+    required this.booking,
+    this.isCustomerView = true,
+  }) : super(key: key);
   @override
   _BookingDetailsScreenState createState() => _BookingDetailsScreenState();
 }
 
 class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
   var canBeginJob = false;
-  Timer _timer;
+  Timer? _timer;
   @override
   void initState() {
     _decideCanBeginJob();
@@ -37,12 +45,13 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
   }
 
   void _decideCanBeginJob() {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
       final now = DateTime.now();
       final shouldWaitToStartJob =
-          widget.booking.fromToTiming.from.isAfter(now);
+          widget.booking.bookingStartTime?.isAfter(now) ?? false;
       if (shouldWaitToStartJob) {
-        final difference = widget.booking.fromToTiming.from.difference(now);
+        final difference =
+            widget.booking.bookingEndTime?.difference(now) ?? Duration.zero;
         Helper.bPrint(difference);
         _timer = Timer(difference, () {
           if (mounted) {
@@ -61,19 +70,19 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final map = widget.booking.getServiceNamesWithDuration();
+    final map = widget.booking.products ?? [];
     final servicesChildren = <Widget>[];
     map.forEach(
-      (key, value) {
+      (item) {
         servicesChildren.add(
           PaddedText(
-            key,
+            item.nameOverride ?? "",
             style: Theme.of(context).textTheme.subtitle1,
           ),
         );
         servicesChildren.add(
           PaddedText(
-            value,
+            item.duration?.toString() ?? "0",
             style: Theme.of(context).textTheme.caption,
           ),
         );
@@ -82,20 +91,20 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
     return WillPopScope(
       onWillPop: () async {
         if (_timer != null) {
-          _timer.cancel();
+          _timer?.cancel();
         }
         return true;
       },
       child: LoadingStackWidget(
-        child: Consumer<CloudStore>(
-          builder: (_, cloudStore, __) {
-            return Observer(
+        child: Builder(
+          builder: (_) {
+            return Builder(
               builder: (_) {
                 return Scaffold(
                   appBar: AppBar(
                     title: Text("Booking Details"),
                   ),
-                  bottomNavigationBar: widget.booking.isActive()
+                  bottomNavigationBar: BookingX.i.isActive(widget.booking)
                       ? widget.isCustomerView
                           ? BottomPrimaryButton(
                               label: "Cancel booking",
@@ -109,36 +118,23 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                     needReason: true,
                                   ),
                                 );
+                                if (confirm is! CancellationConfirm) {
+                                  return;
+                                }
                                 if (!confirm.confirm) {
                                   return;
                                 }
-                                act(() {
-                                  kLoading.value = true;
-                                });
-                                await widget.booking.cancel(
-                                  withStatus:
-                                      cloudStore.getCancelTypeForUserType(),
-                                  reason: confirm.reason,
-                                );
-                                act(() {
-                                  kLoading.value = false;
-                                });
+                                await BookingX.i.cancel(widget.booking);
                                 BappNavigator.pop(context, null);
                               },
                             )
-                          : widget.booking.status.value ==
-                                  BusinessBookingStatus.pending
+                          : widget.booking.bookingStatus ==
+                                  BookingStatus.pendingApproval
                               ? AcceptOrRejectButton(
                                   confirmLabel: "Confirm Booking",
                                   rejectLabel: "Reject",
                                   onConfirm: () async {
-                                    act(() {
-                                      kLoading.value = true;
-                                    });
-                                    await widget.booking.accept();
-                                    act(() {
-                                      kLoading.value = false;
-                                    });
+                                    await BookingX.i.accept(widget.booking);
                                     BappNavigator.pop(context, null);
                                   },
                                   onReject: () async {
@@ -150,23 +146,18 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                         message: "Please specify a reason",
                                       ),
                                     );
+                                    if (confirm is! CancellationConfirm) {
+                                      return;
+                                    }
                                     if (!confirm.confirm) {
                                       return;
                                     }
-                                    act(() {
-                                      kLoading.value = true;
-                                    });
-                                    await widget.booking.cancel(
-                                        withStatus: cloudStore
-                                            .getCancelTypeForUserType());
-                                    act(() {
-                                      kLoading.value = false;
-                                    });
+                                    await BookingX.i.cancel(widget.booking);
                                     BappNavigator.pop(context, null);
                                   },
                                 )
-                              : widget.booking.status.value ==
-                                      BusinessBookingStatus.accepted
+                              : widget.booking.bookingStatus ==
+                                      BookingStatus.accepted
                                   ? StartJobOrNoShowButton(
                                       noShowLabel: "No Show",
                                       startJobLabel: "Start Job",
@@ -179,26 +170,24 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                             message: "Mark this as no show?",
                                           ),
                                         );
+                                        if (confirm is! CancellationConfirm) {
+                                          return;
+                                        }
                                         if (!confirm.confirm) {
                                           return;
                                         }
                                         act(() {
                                           kLoading.value = true;
                                         });
-                                        await widget.booking.cancel(
-                                            withStatus:
-                                                BusinessBookingStatus.noShow,
-                                            reason: "");
-                                        act(
-                                          () {
-                                            kLoading.value = false;
-                                          },
-                                        );
+                                        await BookingX.i.cancel(widget.booking,
+                                            status: BookingStatus.noShow);
                                         BappNavigator.pop(context, null);
                                       },
                                       onStart: canBeginJob
                                           ? () async {
-                                              await widget.booking.startJob();
+                                              await BookingX.i.startJob(
+                                                widget.booking,
+                                              );
                                               BappNavigator.pop(context, null);
                                             }
                                           : null,
@@ -210,19 +199,22 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                     padding: EdgeInsets.all(16),
                     children: [
                       TitledListTile(
-                        bottomTag: BusinessBooking.getButtonLabel(
-                            widget.booking.status.value),
-                        bottomTagColor: BusinessBooking.getColor(
-                            widget.booking.status.value),
+                        bottomTag: "inform yadu",
+                        bottomTagColor: Colors.green,
                         primaryTile: widget.isCustomerView
                             ? ListTile(
                                 contentPadding:
                                     EdgeInsets.symmetric(horizontal: 16),
                                 title: Text(
-                                  widget.booking.branch.name.value,
+                                  widget.booking.business?.name ??
+                                      "no business name inform yadu",
                                   style: Theme.of(context).textTheme.headline1,
                                 ),
-                                subtitle: Text(widget.booking.branch.locality),
+                                subtitle: Text(
+                                  widget.booking.business?.address?.locality
+                                          ?.name ??
+                                      "no locality inform yadu",
+                                ),
                               )
                             : null,
                         title: widget.isCustomerView ? null : "Customer",
@@ -232,46 +224,54 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                     EdgeInsets.symmetric(horizontal: 16),
                                 leading: ListTileFirebaseImage(
                                   ifEmpty: Initial(
-                                    forName: widget.booking.staff.name,
+                                    forName:
+                                        widget.booking.employee?.name ?? "zz",
                                   ),
                                   storagePathOrURL:
-                                      widget.booking.staff.images.isNotEmpty
-                                          ? widget.booking.staff.images.keys
-                                              .elementAt(0)
-                                          : null,
+                                      widget.booking.employee?.image?.first.url,
                                 ),
                                 title: Text(
                                   "Your booking is with",
                                   style: Theme.of(context).textTheme.caption,
                                 ),
                                 subtitle: Text(
-                                  widget.booking.staff.name,
+                                  widget.booking.employee?.name ??
+                                      "no name, inform yadu",
                                   style: Theme.of(context).textTheme.subtitle1,
                                 ),
                               )
-                            : FutureBuilder<BappUser>(
-                                future: cloudStore.getUserForNumber(
-                                    number: widget.booking.bookedByNumber),
+                            : FutureBuilder<User?>(
+                                future: UserX.i
+                                    .getOtherUser(widget.booking.bookedByUser),
                                 builder: (_, snap) {
-                                  if (snap.hasData) {
+                                  final user = snap.data;
+                                  if (user is User) {
                                     return BappUserTile(
-                                      user: snap.data,
+                                      user: user,
                                     );
                                   }
-                                  return BappUserTile();
+                                  return SizedBox();
                                 },
                               ),
                       ),
                       SizedBox(
                         height: 20,
                       ),
-                      TitledListTile(
-                        title: "Schedule",
-                        secondaryTitle:
-                            widget.booking.fromToTiming.formatFromWithDate(),
-                        caption: widget.booking.fromToTiming.format() +
-                            ", " +
-                            widget.booking.fromToTiming.formatMinutes(),
+                      Builder(
+                        builder: (_) {
+                          final from = widget.booking.bookingStartTime;
+                          final to = widget.booking.bookingEndTime;
+                          if (from is! DateTime && to is! DateTime) {
+                            return SizedBox();
+                          }
+                          return TitledListTile(
+                            title: "Schedule",
+                            secondaryTitle: "inform yadu",
+                            caption: (from?.toIso8601String() ?? "") +
+                                ", " +
+                                (to?.toIso8601String() ?? ""),
+                          );
+                        },
                       ),
                       SizedBox(
                         height: 20,
@@ -297,15 +297,15 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
 }
 
 class TitledListTile extends StatelessWidget {
-  final String title, secondaryTitle, caption;
-  final EdgeInsets contentPadding;
-  final BorderRadius borderRadius;
-  final Widget primaryTile, secondaryTile;
-  final String bottomTag;
-  final Color bottomTagColor;
+  final String? title, secondaryTitle, caption;
+  final EdgeInsets? contentPadding;
+  final BorderRadius? borderRadius;
+  final Widget? primaryTile, secondaryTile;
+  final String? bottomTag;
+  final Color? bottomTagColor;
 
   const TitledListTile(
-      {Key key,
+      {Key? key,
       this.title,
       this.secondaryTitle,
       this.caption,
@@ -331,24 +331,24 @@ class TitledListTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (primaryTile != null) primaryTile,
+          if (primaryTile != null) primaryTile as Widget,
           if (title != null)
             PaddedText(
-              title,
+              title as String,
               style: Theme.of(context).textTheme.headline6,
             ),
           if (title != null) SizedBox(height: 20),
           if (secondaryTitle != null)
             PaddedText(
-              secondaryTitle,
+              secondaryTitle as String,
               style: Theme.of(context).textTheme.subtitle1,
             ),
           if (caption != null)
             PaddedText(
-              caption,
+              caption as String,
               style: Theme.of(context).textTheme.caption,
             ),
-          if (secondaryTile != null) secondaryTile,
+          if (secondaryTile != null) secondaryTile as Widget,
           if (bottomTag != null)
             Divider(
               color: Theme.of(context).dividerColor,
@@ -369,10 +369,11 @@ class TitledListTile extends StatelessWidget {
                   SizedBox(
                     width: 8,
                   ),
-                  Text(
-                    bottomTag,
-                    style: TextStyle(color: bottomTagColor),
-                  ),
+                  if (bottomTag is String)
+                    Text(
+                      bottomTag as String,
+                      style: TextStyle(color: bottomTagColor),
+                    ),
                 ],
               ),
             ),
@@ -383,20 +384,20 @@ class TitledListTile extends StatelessWidget {
 }
 
 class StartJobOrNoShowButton extends StatelessWidget {
-  final Function onStart, onNoShow;
+  final Function()? onStart, onNoShow;
   final String startJobLabel, noShowLabel;
-  final Color backGroundColor;
-  final EdgeInsets padding;
+  final Color? backGroundColor;
+  final EdgeInsets? padding;
 
-  const StartJobOrNoShowButton(
-      {Key key,
-      this.onStart,
-      this.onNoShow,
-      this.startJobLabel,
-      this.noShowLabel,
-      this.backGroundColor,
-      this.padding})
-      : super(key: key);
+  const StartJobOrNoShowButton({
+    Key? key,
+    this.onStart,
+    this.onNoShow,
+    required this.startJobLabel,
+    required this.noShowLabel,
+    this.backGroundColor,
+    this.padding,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -432,17 +433,17 @@ class StartJobOrNoShowButton extends StatelessWidget {
 }
 
 class AcceptOrRejectButton extends StatelessWidget {
-  final Function onConfirm, onReject;
+  final Function()? onConfirm, onReject;
   final String confirmLabel, rejectLabel;
-  final Color backGroundColor;
-  final EdgeInsets padding;
+  final Color? backGroundColor;
+  final EdgeInsets? padding;
 
   const AcceptOrRejectButton(
-      {Key key,
+      {Key? key,
       this.onConfirm,
       this.onReject,
-      this.confirmLabel,
-      this.rejectLabel,
+      required this.confirmLabel,
+      required this.rejectLabel,
       this.backGroundColor,
       this.padding})
       : super(key: key);

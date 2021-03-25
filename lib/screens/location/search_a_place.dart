@@ -1,16 +1,19 @@
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:flutter/material.dart';
 import 'package:google_place/google_place.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class SearchAPlaceScreen extends StatefulWidget {
   final GooglePlace googlePlace;
   final Function(PickedLocation) onSelected;
 
-  const SearchAPlaceScreen(
-      {Key key, @required this.googlePlace, this.onSelected})
-      : super(key: key);
+  const SearchAPlaceScreen({
+    Key? key,
+    required this.googlePlace,
+    required this.onSelected,
+  }) : super(key: key);
 
   @override
   _SearchAPlaceScreenState createState() => _SearchAPlaceScreenState();
@@ -75,7 +78,7 @@ class _SearchAPlaceScreenState extends State<SearchAPlaceScreen> {
                   },
                 );
               },
-              title: Text(predictions[index].description),
+              title: Text(predictions[index].description ?? "inform yadu"),
               trailing: Icon(Icons.location_on),
             ),
           ),
@@ -85,21 +88,28 @@ class _SearchAPlaceScreenState extends State<SearchAPlaceScreen> {
   }
 
   _callOnSelectedWithDeets(AutocompletePrediction p) async {
-    final tmp = await widget.googlePlace.details.get(p.placeId);
-    widget.onSelected(
-      PickedLocation(
-        GeoPoint(
-            tmp.result.geometry.location.lat, tmp.result.geometry.location.lng),
-        tmp.result.formattedAddress,
-      ),
-    );
+    final id = p.placeId;
+    if (id is String) {
+      final tmp = await widget.googlePlace.details.get(id);
+      if (tmp is DetailsResponse) {
+        widget.onSelected(
+          PickedLocation(
+            Coordinates(
+              latitude: tmp.result?.geometry?.location?.lat,
+              longitude: tmp.result?.geometry?.location?.lng,
+            ),
+            tmp.result?.formattedAddress,
+          ),
+        );
+      }
+    }
   }
 
   Future _search(s) async {
     final result = await widget.googlePlace.autocomplete.get(s);
     if (result != null && result.predictions != null && mounted) {
       setState(() {
-        predictions = result.predictions;
+        predictions = result.predictions ?? [];
       });
     }
   }

@@ -25,7 +25,7 @@ import '../../../../widgets/shake_widget.dart';
 import '../../../../widgets/tiles/add_image_sliver.dart';
 
 class BusinessAddAStaffScreen extends StatefulWidget {
-  BusinessAddAStaffScreen({Key key}) : super(key: key);
+  BusinessAddAStaffScreen({Key? key}) : super(key: key);
 
   @override
   _BusinessAddAStaffScreenState createState() =>
@@ -34,25 +34,25 @@ class BusinessAddAStaffScreen extends StatefulWidget {
 
 class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
   final _key = GlobalKey<FormState>();
-  final _staff = BusinessStaff(dateOfJoining: DateTime.now());
+  final _staff = null;
   var selected = -1;
   final _doShakeImage = Observable(false);
   String authorizedUid = "";
   bool _numberValidated = false;
-  TheNumber _theNumber;
-
+  late TheNumber _theNumber;
 
   @override
   void initState() {
     super.initState();
-    act((){
+    act(() {
       kLoading.value = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return LoadingStackWidget(
+    return SizedBox();
+    /* return LoadingStackWidget(
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: true,
@@ -121,7 +121,9 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                                 return null;
                               },
                               onChanged: (s) {
-                                _staff.role = s;
+                                if (s is UserType) {
+                                  _staff.role = s;
+                                }
                               },
                             ),
                             const SizedBox(
@@ -152,7 +154,6 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                                 );
                               },
                             ),
-                            
                             const SizedBox(
                               height: 20,
                             ),
@@ -163,11 +164,11 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                                 _staff.name = s;
                               },
                               validator: (s) {
-                                if (s.isEmpty) {
+                                if (s?.isEmpty ?? false) {
                                   return "Enter a name";
                                 }
                                 if (businessStore.business.selectedBranch.value
-                                    .anyStaffHasName(s)) {
+                                    .anyStaffHasName(s ?? "")) {
                                   return "Staff exists";
                                 }
                                 return null;
@@ -192,7 +193,9 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                             Consumer<BusinessStore>(
                               builder: (_, businessStore, __) {
                                 return TextFieldTags(
-                                  textFieldStyler: TextFieldStyler(hintText: "Add Skills / Specialization", ),
+                                  textFieldStyler: TextFieldStyler(
+                                    hintText: "Add Skills / Specialization",
+                                  ),
                                   onTag: (s) {
                                     _staff.expertise.add(s);
                                   },
@@ -247,7 +250,7 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
                               "Add",
                               onPressed: () async {
                                 FocusScope.of(context).unfocus();
-                                if (_key.currentState.validate()) {
+                                if (_key.currentState?.validate() ?? false) {
                                   if (_staff.images.isEmpty) {
                                     act(() {
                                       _doShakeImage.value = true;
@@ -308,5 +311,6 @@ class _BusinessAddAStaffScreenState extends State<BusinessAddAStaffScreen> {
         ),
       ),
     );
+   */
   }
 }

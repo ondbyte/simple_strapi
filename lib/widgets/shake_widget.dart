@@ -7,14 +7,16 @@ class ShakeWidget extends StatelessWidget {
   final Widget child;
   final Curve curve;
   final bool doShake;
-  final Function onShakeDone;
+  final Function()? onShakeDone;
 
   const ShakeWidget({
-    Key key,
+    Key? key,
     this.duration = const Duration(milliseconds: 500),
     this.deltaX = 20,
     this.curve = Curves.bounceOut,
-    this.child, this.doShake = false, this.onShakeDone,
+    required this.child,
+    this.doShake = false,
+    required this.onShakeDone,
   }) : super(key: key);
 
   /// convert 0-1 to 0-1-0
@@ -23,16 +25,18 @@ class ShakeWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return doShake? TweenAnimationBuilder<double>(
-      key: key,
-      tween: Tween(begin: 0.0, end: 1.0),
-      duration: duration,
-      onEnd: onShakeDone,
-      builder: (context, animation, child) => Transform.translate(
-        offset: Offset(deltaX * shake(animation), 0),
-        child: child,
-      ),
-      child: child,
-    ): child;
+    return doShake
+        ? TweenAnimationBuilder<double>(
+            key: key,
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: duration,
+            onEnd: onShakeDone,
+            builder: (context, animation, child) => Transform.translate(
+              offset: Offset(deltaX * shake(animation), 0),
+              child: child,
+            ),
+            child: child,
+          )
+        : child;
   }
 }

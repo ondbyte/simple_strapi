@@ -30,7 +30,9 @@ class _BappState extends State<Bapp> {
           Observer(
             builder: (_) {
               final role = EnumToString.fromString(
-                  UserRole.values, UserX.i.user().role.name);
+                UserRole.values,
+                UserX.i.user()?.role?.name ?? "",
+              );
               switch (role) {
                 case UserRole.customer:
                 case UserRole.public:
@@ -56,9 +58,9 @@ class _BappState extends State<Bapp> {
 }
 
 class BappFCMMesssageLayerWidget extends StatefulWidget {
-  final BappFCMMessage latestMessage;
+  final BappFCMMessage? latestMessage;
 
-  const BappFCMMesssageLayerWidget({Key key, this.latestMessage})
+  const BappFCMMesssageLayerWidget({Key? key, this.latestMessage})
       : super(key: key);
   @override
   _BappFCMMesssageLayerWidgetState createState() =>
@@ -67,11 +69,11 @@ class BappFCMMesssageLayerWidget extends StatefulWidget {
 
 class _BappFCMMesssageLayerWidgetState
     extends State<BappFCMMesssageLayerWidget> {
-  BappFCMMessage _latestMessage;
+  BappFCMMessage? _latestMessage;
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
       BappFCM().listenForBappMessages(
         (bappMessage) {
           setState(
@@ -83,11 +85,11 @@ class _BappFCMMesssageLayerWidgetState
                     return SizedBox();
                   }
                   return AlertDialog(
-                    title: Text(bappMessage.title),
+                    title: Text("inform yadu"),
                     content: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(bappMessage.body),
+                        Text("inform yadu"),
                         SizedBox(
                           height: 20,
                         )
@@ -109,11 +111,11 @@ class _BappFCMMesssageLayerWidgetState
       return SizedBox();
     }
     return AlertDialog(
-      title: Text(_latestMessage.title),
+      title: Text("inform yadu"),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(_latestMessage.body),
+          Text("inform yadu"),
           SizedBox(
             height: 20,
           )

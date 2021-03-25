@@ -7,7 +7,7 @@ import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 
 class BusinessStoreNameAddress extends StatefulWidget {
-  BusinessStoreNameAddress({Key key}) : super(key: key);
+  BusinessStoreNameAddress({Key? key}) : super(key: key);
 
   @override
   _BusinessStoreNameAddressState createState() =>
@@ -25,9 +25,11 @@ class _BusinessStoreNameAddressState extends State<BusinessStoreNameAddress> {
       bottomNavigationBar: Observer(
         builder: (_) {
           return BottomPrimaryButton(
+            title: "",
+            subTitle: "",
             label: "Update",
             onPressed: !_updatable.value
-                ? null
+                ? () async {}
                 : () async {
                     act(() {
                       _updatable.value = false;
@@ -36,12 +38,6 @@ class _BusinessStoreNameAddressState extends State<BusinessStoreNameAddress> {
                       if (_storeAddress != _beforeAddress) {
                         await act(
                           () {
-                            Provider.of<BusinessStore>(context, listen: false)
-                                .business
-                                .selectedBranch
-                                .value
-                                .address
-                                .value = _storeAddress;
                           },
                         );
                       }
@@ -50,12 +46,6 @@ class _BusinessStoreNameAddressState extends State<BusinessStoreNameAddress> {
                       if (_storeName != _beforeName) {
                         await act(
                           () {
-                            Provider.of<BusinessStore>(context, listen: false)
-                                .business
-                                .selectedBranch
-                                .value
-                                .name
-                                .value = _storeName;
                           },
                         );
                       }
@@ -85,10 +75,8 @@ class _BusinessStoreNameAddressState extends State<BusinessStoreNameAddress> {
                     SizedBox(
                       height: 20,
                     ),
-                    Consumer<BusinessStore>(
-                      builder: (_, businessStore, __) {
-                        _beforeName = businessStore
-                            .business.selectedBranch.value.name.value;
+                    Builder(
+                      builder: (_,) {
                         return TextFormField(
                           maxLength: 32,
                           maxLengthEnforced: true,
@@ -108,10 +96,8 @@ class _BusinessStoreNameAddressState extends State<BusinessStoreNameAddress> {
                     SizedBox(
                       height: 20,
                     ),
-                    Consumer<BusinessStore>(
-                      builder: (_, businessStore, __) {
-                        _beforeAddress = businessStore
-                            .business.selectedBranch.value.address.value;
+                   Builder(
+                      builder: (_) {
                         return TextFormField(
                           maxLength: 256,
                           maxLengthEnforced: true,

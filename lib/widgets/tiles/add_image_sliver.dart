@@ -6,22 +6,22 @@ import 'package:flutter_absolute_path/flutter_absolute_path.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 
 class AddImageTileWidget extends StatefulWidget {
-  final Function(Map<String, bool>) onImagesSelected;
+  final Function(Map<String, bool>)? onImagesSelected;
   final Map<String, bool> existingImages;
   final String title;
   final String subTitle;
   final int maxImage;
-  final EdgeInsets padding;
+  final EdgeInsets? padding;
 
-  AddImageTileWidget(
-      {Key key,
-      this.onImagesSelected,
-      this.existingImages = const {},
-      this.title,
-      this.subTitle,
-      this.maxImage,
-      this.padding})
-      : super(key: key);
+  AddImageTileWidget({
+    Key? key,
+    this.onImagesSelected,
+    this.existingImages = const {},
+    required this.title,
+    required this.subTitle,
+    required this.maxImage,
+    this.padding,
+  }) : super(key: key);
 
   @override
   _AddImageTileWidgetState createState() => _AddImageTileWidgetState();
@@ -74,14 +74,14 @@ class _AddImageTileWidgetState extends State<AddImageTileWidget> {
               ).show(context);
               return;
             }
-            await Future.forEach(picked, (element) async {
+            await Future.forEach<Asset>(picked, (element) async {
               final absPath =
                   await FlutterAbsolutePath.getAbsolutePath(element.identifier);
               //print(absPath);
               _existingImages.nonRemovables.add("local" + absPath);
             });
             setState(() {});
-            widget.onImagesSelected(_getFinal());
+            widget.onImagesSelected?.call(_getFinal());
           },
         ),
         SizedBox(
@@ -136,7 +136,8 @@ class _AddImageTileWidgetState extends State<AddImageTileWidget> {
                                                 _existingImages
                                                     .nonRemovables[index]);
                                           }
-                                          widget.onImagesSelected(_getFinal());
+                                          widget.onImagesSelected
+                                              ?.call(_getFinal());
                                         });
                                       },
                                     ),

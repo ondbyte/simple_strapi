@@ -13,7 +13,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
 class BusinessManageBranchesScreen extends StatefulWidget {
-  BusinessManageBranchesScreen({Key key}) : super(key: key);
+  BusinessManageBranchesScreen({Key? key}) : super(key: key);
 
   @override
   _BusinessManageBranchesScreenState createState() =>
@@ -24,7 +24,8 @@ class _BusinessManageBranchesScreenState
     extends State<BusinessManageBranchesScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SizedBox();
+    /* return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           final branches = Provider.of<BusinessStore>(context, listen: false)
@@ -52,8 +53,8 @@ class _BusinessManageBranchesScreenState
         automaticallyImplyLeading: true,
         title: Text("Manage Branches"),
       ),
-      body: Consumer2<BusinessStore,CloudStore>(
-        builder: (_, businessStore,cloudStore, __) {
+      body: Consumer2<BusinessStore, CloudStore>(
+        builder: (_, businessStore, cloudStore, __) {
           return Observer(
             builder: (_) {
               final branches = businessStore.business.branches.value;
@@ -62,7 +63,9 @@ class _BusinessManageBranchesScreenState
                 itemBuilder: (_, i) {
                   return ListTile(
                     leading: ListTileFirebaseImage(
-                      ifEmpty: Initial(forName: branches[i].name.value,),
+                      ifEmpty: Initial(
+                        forName: branches[i].name.value,
+                      ),
                       storagePathOrURL: branches[i].images.isNotEmpty
                           ? branches[i].images.keys.elementAt(0)
                           : null,
@@ -104,9 +107,11 @@ class _BusinessManageBranchesScreenState
                                 duration: Duration(seconds: 4),
                               ).show(context);
                             } else {
-                              cloudStore.bappUser.removeBranch(business: businessStore.business,branch: branches[i]);
-                              await businessStore.business
-                                  .removeBranch(branches[i],
+                              cloudStore.bappUser.removeBranch(
+                                  business: businessStore.business,
+                                  branch: branches[i]);
+                              await businessStore.business.removeBranch(
+                                branches[i],
                               );
                             }
                           }
@@ -119,5 +124,6 @@ class _BusinessManageBranchesScreenState
         },
       ),
     );
+   */
   }
 }

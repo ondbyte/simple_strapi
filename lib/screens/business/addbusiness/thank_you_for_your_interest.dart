@@ -1,10 +1,10 @@
-import 'package:bapp/classes/firebase_structures/business_category.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/widgets/shake_widget.dart';
 import 'package:bapp/widgets/wheres_it_located.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,13 +13,14 @@ import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:the_country_number/the_country_number.dart';
 import 'package:the_country_number_widgets/the_country_number_widgets.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class ThankYouForYourInterestScreen extends StatefulWidget {
   final BusinessCategory category;
   final bool onBoard;
 
   const ThankYouForYourInterestScreen(
-      {Key key, this.category, this.onBoard = false})
+      {Key? key, required this.category, this.onBoard = false})
       : super(key: key);
   @override
   _ThankYouForYourInterestScreenState createState() =>
@@ -28,8 +29,8 @@ class ThankYouForYourInterestScreen extends StatefulWidget {
 
 class _ThankYouForYourInterestScreenState
     extends State<ThankYouForYourInterestScreen> {
-  TheNumber _validNumber;
-  PickedLocation _pickedLocation;
+  TheNumber? _validNumber;
+  PickedLocation? _pickedLocation;
   bool _shake = false;
   String _businessName = "", _ownerName = "";
   String _genderSpecific = "";
@@ -43,8 +44,8 @@ class _ThankYouForYourInterestScreenState
         onTap: () {
           FocusScope.of(context).unfocus();
         },
-        child: Consumer<CloudStore>(
-          builder: (_, cloudStore, __) {
+        child: Builder(
+          builder: (_) {
             return Form(
               key: _key,
               child: CustomScrollView(
@@ -80,7 +81,7 @@ class _ThankYouForYourInterestScreenState
                               });
                             },
                             validator: (s) {
-                              if (s.length < 3) {
+                              if ((s?.length ?? 0) < 3) {
                                 return "Enter a valid name";
                               }
                               return null;
@@ -99,7 +100,7 @@ class _ThankYouForYourInterestScreenState
                             });
                           },
                           validator: (s) {
-                            if (s.length < 3) {
+                            if ((s?.length ?? 0) < 3) {
                               return "Enter a valid business name";
                             }
                             return null;
@@ -115,7 +116,7 @@ class _ThankYouForYourInterestScreenState
                         DropdownButtonFormField<String>(
                           decoration: InputDecoration(labelText: "Type"),
                           onChanged: (s) {
-                            _genderSpecific = s;
+                            _genderSpecific = s ?? "";
                           },
                           validator: (s) {
                             if (s == null || s.isEmpty) {
@@ -142,15 +143,11 @@ class _ThankYouForYourInterestScreenState
                           height: 20,
                         ),
                         InitWidget(
-                          initializer: () {
-                            _validNumber = widget.onBoard
-                                ? cloudStore.theNumber.removeNumber()
-                                : cloudStore.theNumber;
-                          },
+                          initializer: () {},
                           child: TheCountryNumberInput(
-                            widget.onBoard
-                                ? cloudStore.theNumber.removeNumber()
-                                : cloudStore.theNumber,
+                            TheCountryNumber().parseNumber(
+                              internationalNumber: UserX.i.user()?.username,
+                            ),
                             customValidator: (tn) {
                               if (tn == null) {
                                 return "Enter a valid number";
@@ -162,7 +159,7 @@ class _ThankYouForYourInterestScreenState
                             },
                             onChanged: (tn) {
                               _validNumber = tn;
-                              if (_validNumber.isValidLength) {
+                              if (_validNumber?.isValidLength ?? false) {
                                 setState(
                                   () {},
                                 );
@@ -202,7 +199,7 @@ class _ThankYouForYourInterestScreenState
       ),
       bottomSheet: MaterialButton(
         onPressed: () {
-          if (_key.currentState.validate()) {
+          if (_key.currentState?.validate() ?? false) {
             if (_pickedLocation != null) {
               BappNavigator.pushAndRemoveAll(
                 context,
@@ -210,26 +207,7 @@ class _ThankYouForYourInterestScreenState
                   message: widget.onBoard
                       ? "Business added to draft"
                       : "Thank you, we\'ll reach you out soon",
-                  init: () async {
-                    final businesStore = await Provider.of<BusinessStore>(
-                        context,
-                        listen: false);
-                    final cloudStore =
-                        await Provider.of<CloudStore>(context, listen: false);
-                    final tmp = businesStore.applyForBusiness(
-                      latlong: _pickedLocation.latLong,
-                      address: _pickedLocation.address,
-                      businessName: _businessName,
-                      contactNumber: _validNumber.internationalNumber,
-                      category: widget.category,
-                      type: _genderSpecific,
-                      onBoard: widget.onBoard,
-                      ownerName: widget.onBoard
-                          ? _ownerName
-                          : cloudStore.bappUser.name,
-                    );
-                    return tmp;
-                  },
+                  init: () async {},
                 ),
               );
             } else {

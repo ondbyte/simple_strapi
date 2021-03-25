@@ -448,17 +448,20 @@ class StrapiUtils {
   }
 
   static List<T> objFromListOfMap<T>(
-      dynamic data, T Function(dynamic) forEach) {
+      dynamic data, T? Function(dynamic) forEach) {
     final list = <T>[];
     if (data is List && data.isNotEmpty) {
       data.forEach((e) {
-        list.add(forEach(e));
+        final o = forEach(e);
+        if (o is T) {
+          list.add(o);
+        }
       });
     }
     return list;
   }
 
-  static T? objFromMap<T>(dynamic data, T Function(dynamic) returner) {
+  static T? objFromMap<T>(dynamic data, T? Function(dynamic) returner) {
     if (data is Map && data.isNotEmpty) {
       return returner(data);
     }

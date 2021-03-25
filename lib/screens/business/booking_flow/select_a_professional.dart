@@ -14,9 +14,10 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:provider/provider.dart';
 
 class SelectAProfessionalScreen extends StatefulWidget {
-  final Function(FilteredBusinessStaff) onSelected;
+  final Function(dynamic)? onSelected;
 
-  const SelectAProfessionalScreen({Key key, this.onSelected}) : super(key: key);
+  const SelectAProfessionalScreen({Key? key, required this.onSelected})
+      : super(key: key);
   @override
   _SelectAProfessionalScreenState createState() =>
       _SelectAProfessionalScreenState();
@@ -25,19 +26,13 @@ class SelectAProfessionalScreen extends StatefulWidget {
 class _SelectAProfessionalScreenState extends State<SelectAProfessionalScreen> {
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      act(() {
-        flow.timeWindow.value = FromToTiming.today();
-        Provider.of<BookingFlow>(context, listen: false)
-            .filterStaffAndBookings();
-      });
-    });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SizedBox();
+    /* return Scaffold(
       appBar: AppBar(
         title: const Text("Select A Professional"),
         automaticallyImplyLeading: true,
@@ -66,9 +61,10 @@ class _SelectAProfessionalScreenState extends State<SelectAProfessionalScreen> {
         ],
       ),
     );
+   */
   }
 
-  Widget _getProffessionalsTiles() {
+/*   Widget _getProffessionalsTiles() {
     return Observer(builder: (_) {
       final list = <Widget>[];
       flow.filteredStaffs.forEach(
@@ -125,5 +121,5 @@ class _SelectAProfessionalScreenState extends State<SelectAProfessionalScreen> {
     });
   }
 
-  BookingFlow get flow => Provider.of<BookingFlow>(context, listen: false);
+  BookingFlow get flow => Provider.of<BookingFlow>(context, listen: false); */
 }

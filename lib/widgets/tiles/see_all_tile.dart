@@ -4,20 +4,20 @@ import 'package:flutter/material.dart';
 
 class SeeAllListTile extends StatelessWidget {
   final String title, subTitle, seeAllLabel;
-  final Function onSeeAll;
-  final EdgeInsets padding, titlePadding, childPadding;
+  final Function()? onSeeAll;
+  final EdgeInsets? padding, titlePadding, childPadding;
   final int itemCount;
-  final Widget Function(BuildContext, int) itemBuilder;
+  final Widget Function(BuildContext, int)? itemBuilder;
 
   const SeeAllListTile({
-    Key key,
+    Key? key,
     this.title = '',
     this.subTitle = '',
-    this.seeAllLabel,
+    required this.seeAllLabel,
     this.onSeeAll,
     this.padding,
     this.itemBuilder,
-    this.itemCount,
+    this.itemCount = 0,
     this.titlePadding,
     this.childPadding,
   }) : super(key: key);
@@ -35,7 +35,7 @@ class SeeAllListTile extends StatelessWidget {
               width: cons.maxWidth - (itemCount > 1 ? 48 : 0),
               child: Padding(
                 padding: (childPadding ?? EdgeInsets.zero),
-                child: itemBuilder(context, i),
+                child: itemBuilder?.call(context, i),
               ),
             ),
           );
@@ -45,15 +45,14 @@ class SeeAllListTile extends StatelessWidget {
           children: [
             ListTile(
               contentPadding: titlePadding ??
-                  const EdgeInsets.only(
-                      left: 16, right: 16, top: 8, bottom: 0),
+                  const EdgeInsets.only(left: 16, right: 16, top: 8, bottom: 0),
               title: Text(title, style: Theme.of(context).textTheme.headline6),
               trailing: GestureDetector(
+                onTap: onSeeAll,
                 child: Text(
-                  seeAllLabel ?? "See all",
+                  seeAllLabel,
                   style: TextStyle(color: Theme.of(context).primaryColor),
                 ),
-                onTap: onSeeAll,
               ),
             ),
             SingleChildScrollView(

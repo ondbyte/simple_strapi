@@ -3,7 +3,7 @@ import 'package:inflection2/inflection2.dart';
 
 import 'helpers.dart';
 
-Reference getDartTypeFromStrapiType(
+Reference? getDartTypeFromStrapiType(
     {String name = "",
     String strapiType = "",
     String component = "",
@@ -16,35 +16,40 @@ Reference getDartTypeFromStrapiType(
     case "time":
       {
         return Reference(
-          "DateTime",
+          "DateTime?",
         );
       }
     case "decimal":
     case "float":
       {
-        return Reference("double");
+        return Reference("double?");
       }
     case "integer":
     case "biginteger":
       {
-        return Reference("int");
+        return Reference("int?");
       }
     case "string":
     case "richtext":
+    case "text":
       {
-        return Reference("String");
+        return Reference("String?");
       }
     case "boolean":
       {
-        return Reference("bool");
+        return Reference("bool?");
       }
     case "email":
       {
-        return Reference("String");
+        return Reference("String?");
       }
     case "json":
       {
-        return Reference("Map<String,dynamic>");
+        return Reference("Map<String,dynamic>?");
+      }
+    case "enumeration":
+      {
+        return Reference("${toClassName(name)}?");
       }
     case "component":
       {
@@ -53,9 +58,9 @@ Reference getDartTypeFromStrapiType(
         }
         final className = toClassName(component);
         if (componentRepeatable) {
-          return ComponentListReference("List<$className>", className);
+          return ComponentListReference("List<$className>?", className);
         } else {
-          return ComponentReference("$className", className);
+          return ComponentReference("$className?", className);
         }
         return null;
       }
@@ -63,10 +68,10 @@ Reference getDartTypeFromStrapiType(
       {
         if (model.isNotEmpty) {
           final className = toClassName(model);
-          return CollectionReference(className + "", className);
+          return CollectionReference(className + "?", className);
         } else if (collection.isNotEmpty) {
           final className = toClassName(collection);
-          return CollectionListReference("List<$className>", className);
+          return CollectionListReference("List<$className>?", className);
         } else {
           throw Exception("model and collection both cannot be empty");
         }
@@ -111,28 +116,36 @@ class ComponentReference extends Reference {
   ) : super(symbol);
 }
 
-List<Field> getFieldsFromStrapiAttributes(Map<String, dynamic> attributes) {
+List<Field> getFieldsFromStrapiAttributes(Map<String, dynamic> attributes,
+    Function(String, List<dynamic>) ifEnumerator) {
   final returnable = <Field>[];
   attributes.forEach(
     (name, value) {
       final type = getDartTypeFromStrapiType(
-          name: name,
-          strapiType: value["type"] ?? "",
-          component: (value["component"] != null)
-              ? (value["component"] ?? "").split(".").last
-              : "",
-          model: value["model"] ?? "",
-          collection: value["collection"] ?? "",
-          componentRepeatable: value["repeatable"]);
+        name: name,
+        strapiType: value["type"] ?? "",
+        component: (value["component"] != null)
+            ? (value["component"] ?? "").split(".").last
+            : "",
+        model: value["model"] ?? "",
+        collection: value["collection"] ?? "",
+        componentRepeatable: value["repeatable"],
+      );
       if (type is Reference) {
-        returnable.add(
-          Field(
-            (b) => b
-              ..name = name
-              ..type = type
-              ..modifier = FieldModifier.final$,
-          ),
-        );
+        final enums = value["enum"];
+        if (enums != null) {
+          ifEnumerator(type.symbol.replaceAll("?", ""), enums);
+        }
+        if (type is Reference) {
+          returnable.add(
+            Field(
+              (b) => b
+                ..name = name
+                ..type = type
+                ..modifier = FieldModifier.final$,
+            ),
+          );
+        }
       }
     },
   );
@@ -142,23 +155,23 @@ List<Field> getFieldsFromStrapiAttributes(Map<String, dynamic> attributes) {
 extension FieldExt on Field {
   Code accessFromMap() {
     switch (type.symbol) {
-      case "DateTime":
+      case "DateTime?":
         {
           return Code("DateTime.tryParse2(map[\"$name\"])");
         }
-      case "double":
+      case "double?":
         {
           return Code("double.tryParse2(map[\"$name\"])");
         }
-      case "int":
+      case "int?":
         {
           return Code("int.tryParse2(map[\"$name\"])");
         }
-      case "String":
+      case "String?":
         {
           return Code("map[\"$name\"]");
         }
-      case "Map<String,dynamic>":
+      case "Map<String,dynamic>?":
         {
           return Code("map[\"$name\"]");
         }
@@ -182,7 +195,7 @@ extension FieldExt on Field {
 
 final collectionClassString =
     // ignore: top_level_function_literal_block
-    (String className, String classVariableName, String collectionName,
+    (String className, String classVariableName, String? collectionName,
         bool buildWidgets, bool isUserCollection) {
   final collectionClassName = () {
     final ccn = toClassName(pluralize(className));
@@ -198,14 +211,14 @@ final collectionClassString =
 class <CollectionClassName> {
   static const collectionName = "<collectionName>";
 
-  static List<className> fromIDs(List<String> ids) {
+  static List<className?> fromIDs(List<String> ids) {
     if (ids.isEmpty) {
       return [];
     }
     return ids.map((id) => className.fromID(id)).toList();
   }
 
-  static Future<className> findOne(String id) async {
+  static Future<className?> findOne(String id) async {
     try{
       final mapResponse = await StrapiCollection.findOne(
       collection: collectionName,
@@ -231,9 +244,10 @@ class <CollectionClassName> {
       sPrint(e);
       sPrint(s);
     }
+    return [];
   }
 
-  static Future<className> create(className classVariableName) async {
+  static Future<className?> create(className classVariableName) async {
     try{
       final map = await StrapiCollection.create(
       collection: collectionName,
@@ -248,7 +262,7 @@ class <CollectionClassName> {
     }
   }
 
-  static Future<className> update(className classVariableName) async {
+  static Future<className?> update(className classVariableName) async {
     try{
       final id = classVariableName.id;
     if (id is String) {
@@ -280,7 +294,7 @@ class <CollectionClassName> {
       return 0;
   }
 
-  static Future<className> delete(className classVariableName) async {
+  static Future<className?> delete(className classVariableName) async {
     try{
       final id = classVariableName.id;
     if (id is String) {
@@ -299,7 +313,7 @@ class <CollectionClassName> {
   }  
   
 
-  static className _fromIDorData(idOrData) {
+  static className? _fromIDorData(idOrData) {
     if (idOrData is String) {
       return className.fromID(idOrData);
     }
@@ -320,9 +334,19 @@ class <CollectionClassName> {
           if(data is Map&&data.containsKey(collectionName)){
             final myList = data[collectionName];
             if(myList is List){
-              return myList.map((e)=>_fromIDorData(e)).toList();
+              final list = <className>[];
+              myList.forEach((e){
+                final o = _fromIDorData(e);
+                if(o is className){
+                  list.add(o);
+                }
+              });
+              return list;
             } else if(myList is Map&&myList.containsKey("id")){
-              return [_fromIDorData(myList)];
+              final o = _fromIDorData(myList);
+              if(o is className){
+                return [o];
+              }
             }
           }
         }
@@ -343,7 +367,7 @@ class <CollectionClassName> {
   var userMeString = "";
   if (isUserCollection) {
     userMeString = '''
-  static Future<className> me() async {
+  static Future<className?> me() async {
     try{
       if(Strapi.i.strapiToken.isEmpty){
       throw Exception("cannot get users/me endpoint without token, please authenticate first");

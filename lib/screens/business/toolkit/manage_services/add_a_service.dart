@@ -9,11 +9,13 @@ import 'package:bapp/widgets/tiles/add_image_sliver.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BusinessAddAServiceScreen extends StatefulWidget {
-  final BusinessService service;
+  final CatalogueItem service;
 
-  const BusinessAddAServiceScreen({Key key, this.service}) : super(key: key);
+  const BusinessAddAServiceScreen({Key? key, required this.service})
+      : super(key: key);
 
   @override
   _BusinessAddAServiceScreenState createState() =>
@@ -22,26 +24,28 @@ class BusinessAddAServiceScreen extends StatefulWidget {
 
 class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
   final _key = GlobalKey<FormState>();
-  BusinessService _service;
+  late CatalogueItem _service;
   @override
   void initState() {
-    _service = widget.service ?? BusinessService.empty();
+    _service = widget.service;
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return LoadingStackWidget(
+    return SizedBox();
+    /* return LoadingStackWidget(
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: true,
           title: const Text("Add a service"),
         ),
         bottomNavigationBar: BottomPrimaryButton(
+          subTitle: "",title: "",
           onPressed: () async {
             final businessStore =
                 Provider.of<BusinessStore>(context, listen: false);
-            if (_key.currentState.validate()) {
+            if (_key.currentState?.validate()??false) {
               act(() {
                 kLoading.value = true;
               });
@@ -126,7 +130,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                               decoration: const InputDecoration(
                                   labelText: "Name of the product"),
                               validator: (s) {
-                                if (s.isEmpty) {
+                                if (s?.isEmpty??false) {
                                   return "Please enter the name of the product";
                                 }
                                 return null;
@@ -148,7 +152,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                                 Expanded(
                                   child: TextFormField(
                                     initialValue:
-                                        "" + _service?.price.value.toString(),
+                                        "" + _service.price.value.toString(),
                                     decoration: InputDecoration(
                                       labelText: "Price",
                                       suffix: Text(cloudStore
@@ -156,7 +160,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                                     ),
                                     keyboardType: TextInputType.number,
                                     validator: (s) {
-                                      final number = double.tryParse(s);
+                                      final number = double.tryParse(s??"");
                                       if (number == null) {
                                         return "Please enter the correct price of the product";
                                       }
@@ -179,7 +183,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                                 Expanded(
                                   child: TextFormField(
                                     initialValue: "" +
-                                        _service?.duration.value.inMinutes
+                                        _service.duration.value.inMinutes
                                             .toString(),
                                     decoration: const InputDecoration(
                                       labelText: "Duration",
@@ -187,10 +191,10 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                                     ),
                                     keyboardType: TextInputType.number,
                                     validator: (s) {
-                                      if (s.contains(".")) {
+                                      if (s?.contains(".")??false) {
                                         return "Please enter valid duration";
                                       }
-                                      final number = int.tryParse(s);
+                                      final number = int.tryParse(s??"");
                                       if (number == null) {
                                         return "Please enter valid duration";
                                       }
@@ -224,7 +228,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                               ),
                               keyboardType: TextInputType.text,
                               validator: (s) {
-                                if (s.length < 10) {
+                                if ((s?.length??0) < 10) {
                                   return "Please enter valid description";
                                 }
                                 return null;
@@ -238,7 +242,7 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
                               },
                               onFieldSubmitted: (_) {
                                 FocusScope.of(context).unfocus();
-                                _key.currentState.validate();
+                                _key.currentState?.validate();
                               },
                             ),
                             const SizedBox(
@@ -267,18 +271,19 @@ class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
         ),
       ),
     );
+   */
   }
 }
 
 class BottomPrimaryButton extends StatefulWidget {
-  final Function onPressed;
-  final String label, title, subTitle;
-  final EdgeInsets padding;
+  final Future Function()? onPressed;
+  final String? label, title, subTitle;
+  final EdgeInsets? padding;
 
   const BottomPrimaryButton({
-    Key key,
+    Key? key,
     this.onPressed,
-    this.label,
+    required this.label,
     this.title,
     this.subTitle,
     this.padding,
@@ -308,19 +313,25 @@ class _BottomPrimaryButtonState extends State<BottomPrimaryButton> {
                     ListTile(
                       dense: true,
                       contentPadding: EdgeInsets.all(0),
-                      title: Text(
-                        widget.title,
-                        style: Theme.of(context).textTheme.subtitle1,
-                      ),
-                      subtitle: Text(
-                        widget.subTitle,
-                        style: Theme.of(context).textTheme.bodyText2,
-                      ),
+                      title: (widget.title is String)
+                          ? Text(
+                              widget.title as String,
+                              style: Theme.of(context).textTheme.subtitle1,
+                            )
+                          : SizedBox(),
+                      subtitle: (widget.subTitle is String)
+                          ? Text(
+                              widget.subTitle as String,
+                              style: Theme.of(context).textTheme.subtitle1,
+                            )
+                          : SizedBox(),
                     ),
-                  PrimaryButton(
-                    widget.label,
-                    onPressed: widget.onPressed,
-                  ),
+                  (widget.label is String)
+                      ? PrimaryButton(
+                          widget.label as String,
+                          onPressed: widget.onPressed,
+                        )
+                      : SizedBox(),
                   SizedBox(height: 30)
                 ],
               ),

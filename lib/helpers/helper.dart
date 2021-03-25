@@ -1,27 +1,26 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui';
 
-import 'package:bapp/classes/firebase_structures/bapp_fcm_message.dart';
-import 'package:bapp/classes/firebase_structures/business_booking.dart';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/stores/cloud_store.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info/device_info.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart' hide Action;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Action;
-import 'package:geocoder/geocoder.dart';
+import 'package:geocoder/geocoder.dart' as g;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image/image.dart';
 import 'package:mobx/mobx.dart' show Action;
 import 'package:provider/provider.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class Helper {
-  static stringifyAddresse(Address adr) {
+  static stringifyAddresse(g.Address adr) {
     return '''${adr.subLocality ?? ""}\n${adr.locality ?? ""}\n${adr.addressLine ?? ""}\n${adr.adminArea ?? ""}\n${adr.postalCode ?? ""}'''
         .split("\n")
         .join(", ");
@@ -29,14 +28,18 @@ class Helper {
 
   static Future<bool> isTablet() async {
     if (Platform.isIOS) {
-      DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+      final deviceInfo = DeviceInfoPlugin();
       IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
 
       return iosInfo.model.toLowerCase() == "ipad";
     } else {
-      final data = MediaQueryData.fromWindow(WidgetsBinding.instance.window);
-      return data.size.shortestSide < 600 ? false : true;
+      final window = WidgetsBinding.instance?.window;
+      if (window is SingletonFlutterWindow) {
+        final data = MediaQueryData.fromWindow(window);
+        return data.size.shortestSide < 600 ? false : true;
+      }
     }
+    return false;
   }
 
   static void bPrint(d) {
@@ -44,16 +47,19 @@ class Helper {
   }
 
   static dynamic alternateLatLong(dynamic ll) {
-    if (ll is GeoPoint) {
-      return LatLng(ll.latitude, ll.longitude);
+    if (ll is Coordinates) {
+      return LatLng(ll.latitude ?? 0, ll.longitude ?? 0);
     }
     if (ll is LatLng) {
-      return GeoPoint(ll.latitude, ll.longitude);
+      return Coordinates(
+        latitude: ll.latitude,
+        longitude: ll.longitude,
+      );
     }
   }
 
-  static List<List<MenuItem>> filterMenuItems(
-      UserType userType, UserType alterEgo, AuthStatus authStatus) {
+  /*static List<List<MenuItem>>? filterMenuItems(
+       UserType userType, UserType alterEgo, AuthStatus authStatus) {
     final ls = <List<MenuItem>>[];
     MenuConfig.menuItems.forEach(
       (element) {
@@ -73,6 +79,7 @@ class Helper {
     return ls;
     //print(ls);
   }
+ */
 }
 
 T getStore<T>(BuildContext context) {
@@ -114,6 +121,7 @@ String removeNewLines(String s) {
   return s.split("\n").join(", ");
 }
 
+/* 
 Future<Map<String, bool>> uploadImagesToStorageAndReturnStringList(
     Map<String, bool> imagesWithFiltered,
     {String path = ""}) async {
@@ -145,7 +153,7 @@ Future<Map<String, bool>> uploadImagesToStorageAndReturnStringList(
         if (thumbedData.width > 849) {
           thumbedData = copyResize(thumbedData, width: 800);
         }
-        final bytes = encodePng(thumbedData);
+        final bytes = Uint8List.fromList(encodePng(thumbedData));
         final task = folder
             .child(nameFromPath(entry.key, extension: ".png"))
             .putData(bytes);
@@ -158,7 +166,7 @@ Future<Map<String, bool>> uploadImagesToStorageAndReturnStringList(
   });
   return storagePaths;
 }
-
+ */
 String removeLocalFromPath(String path) {
   return path.replaceFirst("local", "");
 }
@@ -166,8 +174,8 @@ String removeLocalFromPath(String path) {
 String nameFromPath(String path, {String extension = ""}) {
   return path.split("/").last + "";
 }
-
-Future uploadBusinessBranchApprovalPDF({File fileToUpload}) async {
+/* 
+Future uploadBusinessBranchApprovalPDF({File? fileToUpload}) async {
   final f = FirebaseStorage.instance;
   final a = FirebaseAuth.instance;
 
@@ -180,7 +188,7 @@ Future uploadBusinessBranchApprovalPDF({File fileToUpload}) async {
   final task = file.putFile(fileToUpload);
   await task;
   print("File Uploaded");
-}
+} */
 
 PreferredSizeWidget getBappTabBar(BuildContext context, List<Widget> tabs) {
   return TabBar(
@@ -202,20 +210,12 @@ PreferredSizeWidget getBappTabBar(BuildContext context, List<Widget> tabs) {
   );
 }
 
-Future sendUpdatesForBooking(BusinessBooking booking) async {
-  final status = booking.status.value;
+Future sendUpdatesForBooking(Booking booking) async {
+  final status = booking.bookingStatus;
 
   switch (status) {
-    case BusinessBookingStatus.pending:
-      {
-        final message = BappFCMMessage(
-          type: MessageOrUpdateType.bookingUpdate,
-          title: "There's a new booking",
-          body:
-              "at ${booking.fromToTiming.from}, includes ${booking.getServicesSeperatedBycomma()}",
-          to: "",
-        );
-      }
+    case BookingStatus.pendingApproval:
+      {}
   }
 }
 

@@ -23,7 +23,8 @@ class _CreateYourProfileScreenState extends State<CreateYourProfileScreen> {
   bool _loading = false;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SizedBox();
+    /* return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: true,
       ),
@@ -222,5 +223,6 @@ class _CreateYourProfileScreenState extends State<CreateYourProfileScreen> {
         ),
       ),
     );
+   */
   }
 }

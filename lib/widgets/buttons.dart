@@ -2,16 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class PrimaryButton extends StatefulWidget {
-  final Function onPressed;
+  final Function()? onPressed;
   final String data;
   final bool hide;
   final bool fullWidth;
 
   const PrimaryButton(this.data,
-      {Key key,
-      @required this.onPressed,
-      this.hide = false,
-      this.fullWidth = true})
+      {Key? key, this.onPressed, this.hide = false, this.fullWidth = true})
       : super(key: key);
   @override
   _PrimaryButtonState createState() => _PrimaryButtonState();
@@ -34,7 +31,7 @@ class _PrimaryButtonState extends State<PrimaryButton> {
               style: Theme.of(context)
                   .textTheme
                   .subtitle1
-                  .apply(color: Colors.white),
+                  ?.apply(color: Colors.white),
             ),
           )
         : SizedBox();

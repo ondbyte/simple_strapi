@@ -1,4 +1,4 @@
-import 'package:bapp/classes/firebase_structures/business_details.dart';
+/* import 'package:bapp/classes/firebase_structures/business_details.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
@@ -11,17 +11,17 @@ import '../../config/config_data_types.dart';
 import 'business_branch.dart';
 
 class BappUser {
-  final DocumentReference myDoc;
-  final String name, email;
-  final TheNumber theNumber;
-  final DocumentReference business;
-  final Map<String, DocumentReference> branches;
-  final String image;
+  final DocumentReference? myDoc;
+  final String? name, email;
+  final TheNumber? theNumber;
+  final DocumentReference? business;
+  final Map<String, DocumentReference>? branches;
+  final String? image;
   final userType = Observable<UserType>(UserType.customer),
       alterEgo = Observable<UserType>(UserType.customer);
-  final Address address;
-  final String fcmToken;
-  final DocumentReference selectedBranch;
+  final Address? address;
+  final String? fcmToken;
+  final DocumentReference? selectedBranch;
 
   BappUser(
       {this.business,
@@ -31,8 +31,8 @@ class BappUser {
       this.name,
       this.email,
       this.image,
-      UserType userType,
-      UserType alterEgo,
+      UserType? userType,
+      UserType? alterEgo,
       this.address,
       this.fcmToken = "",
       this.selectedBranch}) {
@@ -46,27 +46,27 @@ class BappUser {
   }
 
   Future save() async {
-    await myDoc.set(toMap(), SetOptions(merge: true));
+    await myDoc?.set(toMap(), SetOptions(merge: true));
   }
 
   Future delete() async {
-    await myDoc.delete();
+    await myDoc?.delete();
   }
 
   BappUser updateWith(
-      {String name,
-      TheNumber theNumber,
-      String email,
-      String image,
+      {String? name,
+      TheNumber? theNumber,
+      String? email,
+      String? image,
       bool forceChange = false,
-      DocumentReference business,
-      Map<String, DocumentReference> branches,
-      UserType userType,
-      UserType alterEgo,
-      DocumentReference myDoc,
-      Address address,
-      String fcmToken,
-      DocumentReference selectedBranch}) {
+      DocumentReference? business,
+      Map<String, DocumentReference>? branches,
+      UserType? userType,
+      UserType? alterEgo,
+      DocumentReference? myDoc,
+      Address? address,
+      String? fcmToken,
+      DocumentReference? selectedBranch}) {
     return BappUser(
       myDoc: myDoc ?? this.myDoc,
       name: name ?? this.name,
@@ -82,7 +82,7 @@ class BappUser {
       selectedBranch: selectedBranch ??
           (this.selectedBranch ??
               (!isNullOrEmpty(this.branches)
-                  ? this.branches.values.first
+                  ? this.branches?.values.first
                   : null)),
     );
   }
@@ -103,67 +103,75 @@ class BappUser {
     };
   }
 
-  static BappUser fromSnapShot({DocumentSnapshot snap}) {
-    final j = snap.data();
+  static BappUser fromSnapShot({DocumentSnapshot? snap}) {
+    final j = snap?.data();
     return BappUser(
-      myDoc: snap.reference,
-      theNumber: !isNullOrEmpty(j["contactNumber"])
+      myDoc: snap?.reference,
+      theNumber: !isNullOrEmpty(j?["contactNumber"])
           ? TheCountryNumber().parseNumber(
-              internationalNumber: j["contactNumber"],
+              internationalNumber: j?["contactNumber"],
             )
           : null,
-      name: j["name"],
-      email: j["email"],
-      image: j['image'],
-      business: j["business"],
-      branches: (j["branches"] as Map)?.map(
-            (key, value) => MapEntry(
-              key as String,
-              value as DocumentReference,
-            ),
-          ) ??
-          {},
-      userType: EnumToString.fromString(UserType.values, j["userType"]),
-      alterEgo: EnumToString.fromString(UserType.values, j["alterEgo"]),
-      address: Address.fromJson(j["myAddress"] ?? {}),
-      fcmToken: j["fcmToken"],
-      selectedBranch: j["selectedBranch"],
+      name: j?["name"],
+      email: j?["email"],
+      image: j?['image'],
+      business: j?["business"],
+      branches: (j?["branches"] as Map).map(
+        (key, value) => MapEntry(
+          key as String,
+          value as DocumentReference,
+        ),
+      ),
+      userType: EnumToString.fromString(UserType.values, j?["userType"]),
+      alterEgo: EnumToString.fromString(UserType.values, j?["alterEgo"]),
+      address: Address.fromJson(j?["myAddress"] ?? {}),
+      fcmToken: j?["fcmToken"],
+      selectedBranch: j?["selectedBranch"],
     );
   }
 
-  Future removeBranch({BusinessDetails business, BusinessBranch branch}) async {
-    await business.removeBranch(branch);
+  Future removeBranch(
+      {BusinessDetails? business, BusinessBranch? branch}) async {
+    await business?.removeBranch(branch);
     final selectedChange = {};
-    if (branch.myDoc.value == selectedBranch) {
+    if (branch?.myDoc.value == selectedBranch) {
       selectedChange
-          .addAll({"selectedBranch": business.branches.value[0].myDoc});
-      business.selectedBranch.value = business.branches.value[0];
+          .addAll({"selectedBranch": business?.branches.value[0].myDoc});
+      business?.selectedBranch.value = business.branches.value[0];
     }
-    await myDoc.set({
-      "branches.${branch.myDoc.value.id}": FieldValue.delete(),
+    await myDoc?.set({
+      "branches.${branch?.myDoc.value.id}": FieldValue.delete(),
       ...selectedChange
     }, SetOptions(merge: true));
   }
 
-  Future<BusinessBranch> addBranch({
-    BusinessDetails business,
-    String branchName,
-    PickedLocation pickedLocation,
-    String ownerName,
-    Map<String, bool> imagesWithFiltered,
+  Future<BusinessBranch?> addBranch({
+    BusinessDetails? business,
+    String? branchName,
+    PickedLocation? pickedLocation,
+    String? ownerName,
+    Map<String, bool>? imagesWithFiltered,
   }) async {
-    final b = await business.addABranch(
+    final b = await business?.addABranch(
       branchName: branchName,
       pickedLocation: pickedLocation,
       imagesWithFiltered: imagesWithFiltered,
     );
-    branches.addAll({b.myDoc.value.id: b.myDoc.value});
+    final id = b?.myDoc.value.id;
+    final dr = b?.myDoc.value;
+    if (id is String && dr is DocumentReference) {
+      branches?.addAll(
+        {
+          id: dr,
+        },
+      );
+    }
     return b;
   }
 }
 
 class Address {
-  final String iso2, city, locality;
+  final String? iso2, city, locality;
 
   Address({this.iso2, this.city, this.locality});
 
@@ -183,3 +191,4 @@ class Address {
     };
   }
 }
+ */

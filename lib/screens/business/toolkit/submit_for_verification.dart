@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/config/constants.dart';
@@ -19,7 +20,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class BusinessSubmitBranchForVerificationScreen extends StatefulWidget {
-  BusinessSubmitBranchForVerificationScreen({Key key}) : super(key: key);
+  BusinessSubmitBranchForVerificationScreen({Key? key}) : super(key: key);
 
   @override
   _BusinessSubmitBranchForVerificationScreenState createState() =>
@@ -36,10 +37,10 @@ class _BusinessSubmitBranchForVerificationScreenState
         appBar: AppBar(
           automaticallyImplyLeading: true,
         ),
-        body: Consumer<BusinessStore>(
-          builder: (_, businessStore, __) {
+        body: Builder(
+          builder: (_) {
             return LoadingStackWidget(
-              child: isNotShowable(businessStore)
+              child: isNotShowable()
                   ? ContextualMessageScreen(
                       buttonText: "Go back",
                       init: () {},
@@ -56,11 +57,13 @@ class _BusinessSubmitBranchForVerificationScreenState
                             [
                               PaddedText(
                                 "Ready to recieve bookings?",
-                                style: Theme.of(context).textTheme.headline1,
+                                style: Theme.of(context).textTheme.headline1 ??
+                                    TextStyle(),
                               ),
                               PaddedText(
                                 "We verify business before customers could see them, Send us below documents.",
-                                style: Theme.of(context).textTheme.bodyText1,
+                                style: Theme.of(context).textTheme.bodyText1 ??
+                                    TextStyle(),
                               ),
                               Divider(),
                               AddImageTileWidget(
@@ -104,7 +107,8 @@ class _BusinessSubmitBranchForVerificationScreenState
                               Divider(),
                               PaddedText(
                                 "By clicking submit, you are agreeing to our terms of service and privacy policy.",
-                                style: Theme.of(context).textTheme.caption,
+                                style: Theme.of(context).textTheme.caption ??
+                                    TextStyle(),
                               ),
                               SizedBox(
                                 height: 20,
@@ -131,13 +135,8 @@ class _BusinessSubmitBranchForVerificationScreenState
         ));
   }
 
-  bool isNotShowable(BusinessStore businessStore) {
-    return businessStore.business.selectedBranch.value.status.value ==
-            BusinessBranchActiveStatus.documentVerification ||
-        businessStore.business.selectedBranch.value.status.value ==
-            BusinessBranchActiveStatus.published ||
-        businessStore.business.selectedBranch.value.status.value ==
-            BusinessBranchActiveStatus.unPublished;
+  bool isNotShowable() {
+    return false;
   }
 
   _apply() async {
@@ -145,9 +144,6 @@ class _BusinessSubmitBranchForVerificationScreenState
       kLoading.value = true;
     });
     final pdf = pw.Document();
-    final business =
-        Provider.of<BusinessStore>(context, listen: false).business;
-    final branch = business.selectedBranch.value;
 
     pdf.addPage(
       pw.Page(
@@ -158,7 +154,7 @@ class _BusinessSubmitBranchForVerificationScreenState
               mainAxisAlignment: pw.MainAxisAlignment.center,
               children: [
                 pw.Text(
-                  "business name: " + business.businessName.value,
+                  "business name: " "na",
                   style: pw.TextStyle(
                     fontSize: 22,
                     color: PdfColors.black,
@@ -166,7 +162,7 @@ class _BusinessSubmitBranchForVerificationScreenState
                 ),
                 pw.Divider(),
                 pw.Text(
-                  "business main address :" + business.address.value,
+                  "business main address :" "na",
                   style: pw.TextStyle(
                     fontSize: 18,
                     color: PdfColors.black,
@@ -174,7 +170,7 @@ class _BusinessSubmitBranchForVerificationScreenState
                 ),
                 pw.Divider(),
                 pw.Text(
-                  "branch name :" + branch.name.value,
+                  "branch name :" + "na",
                   style: pw.TextStyle(
                     fontSize: 20,
                     color: PdfColors.black,
@@ -182,7 +178,7 @@ class _BusinessSubmitBranchForVerificationScreenState
                 ),
                 pw.Divider(),
                 pw.Text(
-                  "branch address :" + branch.address.value,
+                  "branch address :" + "na",
                   style: pw.TextStyle(
                     fontSize: 18,
                     color: PdfColors.black,
@@ -190,7 +186,7 @@ class _BusinessSubmitBranchForVerificationScreenState
                 ),
                 pw.Divider(),
                 pw.Text(
-                  "business contact :" + business.contactNumber.value,
+                  "business contact :" + "na",
                   style: pw.TextStyle(
                     fontSize: 20,
                     color: PdfColors.black,
@@ -198,7 +194,7 @@ class _BusinessSubmitBranchForVerificationScreenState
                 ),
                 pw.Divider(),
                 pw.Text(
-                  "business email :" + business.email.value,
+                  "business email :" + "na",
                   style: pw.TextStyle(
                     fontSize: 20,
                     color: PdfColors.black,
@@ -206,7 +202,7 @@ class _BusinessSubmitBranchForVerificationScreenState
                 ),
                 pw.Divider(),
                 pw.Text(
-                  "branch contact :" + branch.contactNumber.value,
+                  "branch contact :" + "na",
                   style: pw.TextStyle(
                     fontSize: 20,
                     color: PdfColors.black,
@@ -214,7 +210,7 @@ class _BusinessSubmitBranchForVerificationScreenState
                 ),
                 pw.Divider(),
                 pw.Text(
-                  "branch email :" + branch.email.value,
+                  "branch email :" + "na",
                   style: pw.TextStyle(
                     fontSize: 20,
                     color: PdfColors.black,
@@ -229,12 +225,12 @@ class _BusinessSubmitBranchForVerificationScreenState
 
     final pdfImages = <PdfImage>[];
 
-    await Future.forEach(_businessDocs.keys, (key) async {
+    await Future.forEach<String>(_businessDocs.keys, (key) async {
       final bytes = await File(removeLocalFromPath(key)).readAsBytes();
       pdfImages.add(PdfImage.file(pdf.document, bytes: bytes));
     });
 
-    await Future.forEach(_ownerDoc.keys, (key) async {
+    await Future.forEach<String>(_ownerDoc.keys, (key) async {
       final bytes = await File(removeLocalFromPath(key)).readAsBytes();
       pdfImages.add(PdfImage.file(pdf.document, bytes: bytes));
     });
@@ -246,7 +242,7 @@ class _BusinessSubmitBranchForVerificationScreenState
             pageFormat: PdfPageFormat.a4,
             build: (pw.Context context) {
               return pw.Center(
-                child: pw.Image(element),
+                child: pw.SizedBox(),
               );
             },
           ),
@@ -257,25 +253,20 @@ class _BusinessSubmitBranchForVerificationScreenState
     final path = await getTemporaryDirectory();
     final fileName = DateTime.now().toIso8601String() + ".pdf";
 
-    final theFileToUpload = await File(path.absolute.path + "/" + fileName)
-        .writeAsBytes(pdf.save());
+    final ints = await pdf.save();
+    if (ints is Uint8List) {
+      final theFileToUpload =
+          await File(path.absolute.path + "/" + fileName).writeAsBytes(ints);
 
-    await uploadBusinessBranchApprovalPDF(fileToUpload: theFileToUpload);
+      //await uploadBusinessBranchApprovalPDF(fileToUpload: theFileToUpload);
+    }
 
     BappNavigator.pushReplacement(
         context,
         ContextualMessageScreen(
           init: () {
             act(
-              () {
-                final business =
-                    Provider.of<BusinessStore>(context, listen: false).business;
-                final branch = business.branches.value.firstWhere((element) =>
-                    business.selectedBranch.value.myDoc == element.myDoc);
-                branch.status.value =
-                    BusinessBranchActiveStatus.documentVerification;
-                business.selectedBranch.value = branch;
-              },
+              () {},
             );
           },
           message:

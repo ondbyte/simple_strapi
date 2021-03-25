@@ -8,7 +8,7 @@ var kLoading = Observable(false);
 class LoadingStackWidget extends StatefulWidget {
   final Widget child;
 
-  const LoadingStackWidget({Key key, this.child}) : super(key: key);
+  const LoadingStackWidget({Key? key, required this.child}) : super(key: key);
 
   @override
   _LoadingStackWidgetState createState() => _LoadingStackWidgetState();

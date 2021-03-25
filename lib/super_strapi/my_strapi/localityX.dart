@@ -1,11 +1,14 @@
 import 'dart:io';
 
+import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x.dart';
 import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:device_info/device_info.dart';
+import 'package:get/get.dart';
 import 'package:simple_strapi/simple_strapi.dart'
     hide DefaultData, Locality, City, Country;
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class LocalityX extends X {
   static final i = LocalityX._x();
@@ -13,10 +16,14 @@ class LocalityX extends X {
   LocalityX._x();
 
   Future<List<Country>> getCountries({bool force = false}) async {
-    return memoize("getCountries", () async {
-      final countries = await Countries.findMultiple();
-      return countries;
-    }, force);
+    return memoize(
+      "getCountries",
+      () async {
+        final countries = await Countries.findMultiple();
+        return countries;
+      },
+      force: force,
+    );
   }
 
   Future<List<City>> getCitiesOfCountry(Country country,
@@ -54,7 +61,7 @@ class LocalityX extends X {
             Cities.executeQuery(query); //await Cities.getForListOfIDs(ids);
         return cities;
       },
-      force,
+      force: force,
     );
   }
 

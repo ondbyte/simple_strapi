@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+/* import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:mobx/mobx.dart';
 
@@ -8,9 +8,9 @@ class BusinessHolidays {
   final BusinessDetails business;
   final all = ObservableList<BusinesssHoliday>();
 
-  BusinessHolidays.empty({@required this.business});
+  BusinessHolidays.empty({required this.business});
 
-  BusinessHolidays.fromJsonList(List<dynamic> l, {@required this.business}) {
+  BusinessHolidays.fromJsonList(List<dynamic> l, {required this.business}) {
     l.forEach((element) {
       all.add(BusinesssHoliday.fromJson(element));
     });
@@ -25,10 +25,10 @@ class BusinessHolidays {
   }
 
   Future addHoliday(
-      {String name,
-      String type,
-      String details,
-      List<DateTime> fromToDate}) async {
+      {String? name,
+      String? type,
+      String? details,
+      List<DateTime>? fromToDate}) async {
     final holiday = BusinesssHoliday(
       dates: fromToDate,
       name: name,
@@ -64,10 +64,10 @@ class BusinessHolidays {
 }
 
 class BusinesssHoliday {
-  final List<DateTime> dates;
-  final String name;
-  final String type;
-  final String details;
+  final List<DateTime>? dates;
+  final String? name;
+  final String? type;
+  final String? details;
   final enabled = Observable(false);
 
   BusinesssHoliday({
@@ -88,7 +88,7 @@ class BusinesssHoliday {
 
   toMap() {
     return {
-      "dates": dates.map((e) => Timestamp.fromDate(e)).toList(),
+      "dates": dates?.map((e) => Timestamp.fromDate(e)).toList(),
       "name": name,
       "type": type,
       "details": details,
@@ -98,7 +98,7 @@ class BusinesssHoliday {
 
   Map<DateTime, List> holidaysForBappCalender() {
     final map = <DateTime, List>{};
-    dates.forEach((element) {
+    dates?.forEach((element) {
       map.addAll({
         element: [type]
       });
@@ -106,3 +106,4 @@ class BusinesssHoliday {
     return map;
   }
 }
+ */

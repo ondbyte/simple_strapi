@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:async/async.dart';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/helpers/helper.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -13,14 +13,14 @@ class FirebaseStorageImage extends StatefulWidget {
   final BoxFit fit;
   final double height;
   final double width;
-  final Widget ifEmpty;
+  final Widget? ifEmpty;
 
   const FirebaseStorageImage({
-    Key key,
-    @required this.storagePathOrURL,
+    Key? key,
+    required this.storagePathOrURL,
     this.fit = BoxFit.cover,
-    this.height,
-    this.width,
+    this.height = 0,
+    this.width = 0,
     this.ifEmpty,
   })  : assert((storagePathOrURL != null) || (ifEmpty != null)),
         super(key: key);
@@ -30,7 +30,7 @@ class FirebaseStorageImage extends StatefulWidget {
 }
 
 class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
-  final _memoizer = AsyncMemoizer<Uint8List>();
+  final _memoizer = AsyncMemoizer<Uint8List?>();
 
   @override
   void initState() {
@@ -52,7 +52,8 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
             .file
             .readAsBytes();
       } else {
-        final i = FirebaseStorage.instance;
+        return null;
+        /* final i = FirebaseStorage.instance;
         final data = await i
             .ref()
             .child(
@@ -61,7 +62,7 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
             .getData(1024 * 1024 * 2);
         final newFile =
             await DefaultCacheManager().putFile(widget.storagePathOrURL, data);
-        return newFile.readAsBytes();
+        return newFile.readAsBytes(); */
       }
     });
   }
@@ -72,20 +73,21 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
       builder: (_, cons) {
         if (isNullOrEmpty(widget.storagePathOrURL)) {
           return SizedBox(
-            width: widget.width ?? cons.maxWidth,
-            height: widget.height ?? cons.maxHeight,
+            width: widget.width,
+            height: widget.height,
             child: widget.ifEmpty,
           );
         }
-        return FutureBuilder<Uint8List>(
+        return FutureBuilder<Uint8List?>(
           future: _memoizer.future,
           builder: (_, snap) {
+            final data = snap.data ?? Uint8List(0);
             if (snap.hasData) {
               return Image.memory(
-                snap.data,
-                fit: widget.fit ?? BoxFit.cover,
-                width: widget.width ?? cons.maxWidth,
-                height: widget.height ?? cons.maxHeight,
+                data,
+                fit: widget.fit,
+                width: widget.width,
+                height: widget.height,
               );
             }
             return SizedBox(
@@ -113,10 +115,10 @@ class _FirebaseStorageImageState extends State<FirebaseStorageImage> {
 }
 
 class ListTileFirebaseImage extends StatelessWidget {
-  final String storagePathOrURL;
-  final Widget ifEmpty;
+  final String? storagePathOrURL;
+  final Widget? ifEmpty;
 
-  const ListTileFirebaseImage({Key key, this.storagePathOrURL, this.ifEmpty})
+  const ListTileFirebaseImage({Key? key, this.storagePathOrURL, this.ifEmpty})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -125,22 +127,23 @@ class ListTileFirebaseImage extends StatelessWidget {
       width: 48,
       storagePathOrURL: storagePathOrURL,
       ifEmpty: ifEmpty,
+      fit: BoxFit.contain,
     );
   }
 }
 
 class RRFirebaseStorageImage extends StatelessWidget {
-  final String storagePathOrURL;
+  final String? storagePathOrURL;
   final double width, height;
   final BoxFit fit;
-  final Widget ifEmpty;
+  final Widget? ifEmpty;
 
   const RRFirebaseStorageImage({
-    Key key,
+    Key? key,
     this.storagePathOrURL,
-    this.width,
-    this.height,
-    this.fit,
+    this.width = 0,
+    this.height = 0,
+    required this.fit,
     this.ifEmpty,
   }) : super(key: key);
 
@@ -151,7 +154,7 @@ class RRFirebaseStorageImage extends StatelessWidget {
       child: FirebaseStorageImage(
         width: width,
         height: height,
-        storagePathOrURL: storagePathOrURL,
+        storagePathOrURL: storagePathOrURL ?? "",
         fit: fit,
         ifEmpty: ifEmpty,
       ),
@@ -162,16 +165,17 @@ class RRFirebaseStorageImage extends StatelessWidget {
 class Initial extends StatelessWidget {
   final String forName;
 
-  const Initial({Key key, this.forName}) : super(key: key);
+  const Initial({Key? key, required this.forName}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: CardsColor.next(uid: forName ?? ""),
+      color: CardsColor.next(uid: forName),
       alignment: Alignment.center,
       child: Text(
-        forName.length>2?forName?.substring(0, 2):":)",
+        ((forName.length) > 2 ? forName.substring(0, 2) : ":)"),
         textAlign: TextAlign.center,
-        style: Theme.of(context).textTheme.subtitle1.apply(color: Colors.white),
+        style:
+            Theme.of(context).textTheme.subtitle1?.apply(color: Colors.white),
       ),
     );
   }

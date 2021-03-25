@@ -24,7 +24,8 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer3<CloudStore, BusinessStore, BookingFlow>(
+    return SizedBox();
+    /* return Consumer3<CloudStore, BusinessStore, BookingFlow>(
       builder: (_, cloudStore, businessStore, flow, __) {
         return SafeArea(
           child: CustomScrollView(
@@ -176,18 +177,16 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
         );
       },
     );
+  */
   }
 
   bool _shouldShowHighlights() {
-    final cloudStore = Provider.of<CloudStore>(context, listen: false);
-    return (cloudStore.bappUser.userType.value == UserType.businessOwner ||
-        cloudStore.bappUser.userType.value == UserType.businessManager ||
-        cloudStore.bappUser.userType.value == UserType.businessReceptionist ||
-        cloudStore.bappUser.userType.value == UserType.sudo);
+    return false;
   }
 
   Widget _getBusinessHighlights() {
-    return Consumer2<BusinessStore, BookingFlow>(
+    return SizedBox();
+    /* return Consumer2<BusinessStore, BookingFlow>(
       builder: (_, businessStore, flow, __) {
         return SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -240,5 +239,5 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
         );
       },
     );
-  }
+   */}
 }

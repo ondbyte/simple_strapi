@@ -1,4 +1,4 @@
-import 'package:bapp/classes/firebase_structures/business_staff.dart';
+/* import 'package:bapp/classes/firebase_structures/business_staff.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
@@ -56,3 +56,4 @@ class StaffTimeOff {
     await myDoc.delete();
   }
 }
+ */

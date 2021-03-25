@@ -1,22 +1,24 @@
+import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../classes/firebase_structures/business_booking.dart';
 import '../../stores/cloud_store.dart';
 import '../size_provider.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BookingTile extends StatefulWidget {
-  final BorderRadius borderRadius;
-  final BusinessBooking booking;
-  final EdgeInsets padding;
-  final EdgeInsets margin;
-  final Function onTap;
+  final BorderRadius? borderRadius;
+  final Booking booking;
+  final EdgeInsets? padding;
+  final EdgeInsets? margin;
+  final Function()? onTap;
   final bool isCustomerView;
 
   const BookingTile(
-      {Key key,
+      {Key? key,
       this.borderRadius,
-      this.booking,
+      required this.booking,
       this.padding,
       this.margin,
       this.onTap,
@@ -30,11 +32,7 @@ class BookingTile extends StatefulWidget {
 class _BookingTileState extends State<BookingTile> {
   @override
   Widget build(BuildContext context) {
-    final color = BusinessBooking.getColor(widget.booking.status.value);
-    final currency = Provider.of<CloudStore>(context, listen: false)
-        .theNumber
-        .country
-        .currency;
+    final color = Colors.greenAccent;
     return GestureDetector(
       onTap: widget.onTap,
       child: Padding(
@@ -56,13 +54,15 @@ class _BookingTileState extends State<BookingTile> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.booking.fromToTiming.format(),
+                    widget.booking.bookingStartTime?.toIso8601String() ?? "",
                     style: Theme.of(context).textTheme.bodyText1,
                   ),
                   Text(
                     widget.isCustomerView
-                        ? widget.booking.branch.name.value
-                        : widget.booking.bookedByName,
+                        ? widget.booking.business?.name ??
+                            "no business name, inform yadu"
+                        : widget.booking.bookedByUser?.name ??
+                            "no user name, inform yadu",
                     style: Theme.of(context).textTheme.subtitle1,
                   ),
                 ],
@@ -72,15 +72,14 @@ class _BookingTileState extends State<BookingTile> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.booking.getServicesSeperatedBycomma(),
+                    widget.booking.products
+                            ?.map((e) => e.nameOverride)
+                            .join(", ") ??
+                        "no products",
                     style: Theme.of(context).textTheme.bodyText1,
                   ),
                   Text(
-                    widget.booking.fromToTiming.inMinutes().toString() +
-                        " Minutes, " +
-                        currency +
-                        " " +
-                        widget.booking.totalCost().toString(),
+                    "0 Minutes, " + "CUR" + " " + "total",
                     style: Theme.of(context).textTheme.overline,
                   )
                 ],
@@ -107,13 +106,11 @@ class _BookingTileState extends State<BookingTile> {
                         ),
                       ),
                       Text(
-                        BusinessBooking.getButtonLabel(
-                          widget.booking.status.value,
-                        ),
+                        "inform yadu",
                         style: Theme.of(context)
                             .textTheme
                             .subtitle1
-                            .apply(color: color),
+                            ?.apply(color: color),
                       )
                     ],
                   ),

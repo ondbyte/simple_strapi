@@ -12,7 +12,7 @@ import 'package:provider/provider.dart';
 import 'manage_services/add_a_service.dart';
 
 class BusinessManageMediaScreen extends StatefulWidget {
-  BusinessManageMediaScreen({Key key}) : super(key: key);
+  BusinessManageMediaScreen({Key? key}) : super(key: key);
 
   @override
   _BusinessManageMediaScreenState createState() =>
@@ -34,9 +34,11 @@ class _BusinessManageMediaScreenState extends State<BusinessManageMediaScreen> {
           builder: (_) {
             final b = !_changed.value;
             return BottomPrimaryButton(
+              title: "",
+              subTitle: "",
               label: "Update",
               onPressed: b
-                  ? null
+                  ? () async {}
                   : () async {
                       if (_images.isEmpty) {
                         BappNavigator.pop(context, null);
@@ -49,11 +51,6 @@ class _BusinessManageMediaScreenState extends State<BusinessManageMediaScreen> {
                         message: "Updating images..",
                         duration: const Duration(seconds: 2),
                       ).show(context);
-                      await Provider.of<BusinessStore>(context, listen: false)
-                          .business
-                          .selectedBranch
-                          .value
-                          .updateImages(imgs: _images);
                       BappNavigator.pop(context, null);
                       act(() {
                         kLoading.value = false;
@@ -64,13 +61,12 @@ class _BusinessManageMediaScreenState extends State<BusinessManageMediaScreen> {
         ),
         body: Padding(
           padding: EdgeInsets.zero,
-          child: Consumer<BusinessStore>(
-            builder: (_, businessStore, __) {
+          child: Builder(
+            builder: (_) {
               return Observer(
                 builder: (_) {
                   return AddImageTileWidget(
-                    existingImages:
-                        businessStore.business.selectedBranch.value.images,
+                    existingImages:{},
                     maxImage: 6,
                     title: "Add Images",
                     subTitle: "Add upto 6 Images that show off your business",

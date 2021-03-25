@@ -1,3 +1,4 @@
+import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/widgets/app/bapp_navigator_widget.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:event_bus/event_bus.dart';
@@ -28,11 +29,13 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer<CloudStore>(
-        builder: (_, cloudStore, __) {
+      body: Builder(
+        builder: (
+          _,
+        ) {
           return Observer(
             builder: (context) {
-              return cloudStore.status == AuthStatus.unsure
+              return UserX.i.userNotPresent
                   ? LoadingWidget()
                   : Padding(
                       padding: EdgeInsets.all(16),
@@ -140,10 +143,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
         PrimaryButton(
           "Get Started",
           hide: index != OnBoardingConfig.slides.length - 1,
-          onPressed: () async {
-            ///first time so sign in anonymously
-            await context.read<CloudStore>().signInAnonymous();
-          },
+          onPressed: () async {},
         )
       ],
     );

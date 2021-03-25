@@ -1,15 +1,17 @@
 import 'package:bapp/classes/firebase_structures/bapp_user.dart';
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:bapp/widgets/firebase_image.dart';
 import 'package:flutter/material.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BappUserTile extends StatefulWidget {
-  final BappUser user;
-  final Widget trailing;
+  final User user;
+  final Widget? trailing;
 
   const BappUserTile({
-    Key key,
-    this.user,
+    Key? key,
+    required this.user,
     this.trailing,
   }) : super(key: key);
   @override
@@ -17,7 +19,7 @@ class BappUserTile extends StatefulWidget {
 }
 
 class _BappUserTileState extends State<BappUserTile> {
-  BappUser _user;
+  User? _user;
   @override
   void initState() {
     super.initState();
@@ -33,10 +35,11 @@ class _BappUserTileState extends State<BappUserTile> {
     }
     return ListTile(
       title: Text(widget.user.name ?? "no name"),
-      subtitle: Text(widget.user.theNumber.internationalNumber ?? "no number"),
+      subtitle: Text(widget.user.username ?? "no number"),
       leading: ListTileFirebaseImage(
-        ifEmpty: Initial(forName: widget.user.name,),
-        storagePathOrURL: widget.user.image,
+        ifEmpty: Initial(
+          forName: widget.user.name ?? "ZZ",
+        ),
       ),
       trailing: widget.trailing,
     );

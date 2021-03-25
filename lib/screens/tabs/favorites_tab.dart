@@ -4,11 +4,13 @@ import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/screens/business/business_profile/business_profile.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/super_strapi/my_strapi/userX.dart';
+import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:bapp/widgets/login_widget.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class FavoritesTab extends StatefulWidget {
   @override
@@ -18,13 +20,11 @@ class FavoritesTab extends StatefulWidget {
 class _FavoritesTabState extends State<FavoritesTab> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<CloudStore>(builder: (_, cloudStore, __) {
-      return Observer(
-        builder: (_) {
-          final favBranches = cloudStore.favorites
-              .where((element) => element.type == FavoriteType.businessBranch)
-              .toList();
-          return cloudStore.status == AuthStatus.anonymousUser
+    return Builder(builder: (_) {
+      return Obx(
+        () {
+          final favBranches = UserX.i.user()?.favourites ?? [];
+          return UserX.i.userNotPresent
               ? AskToLoginWidget(
                   loginReason: LoginConfig.favoritesTabLoginReason.primary,
                   secondaryReason:
@@ -41,31 +41,49 @@ class _FavoritesTabState extends State<FavoritesTab> {
                             itemCount: favBranches.length,
                             itemBuilder: (_, i) {
                               return Dismissible(
-                                key: Key(favBranches[i]
-                                    .businessBranch
-                                    .myDoc
-                                    .value
-                                    .path),
-                                child: BusinessTileWidget(
-                                  titleStyle:
-                                      Theme.of(context).textTheme.subtitle1,
-                                  withImage: true,
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 0),
-                                  branch: favBranches[i].businessBranch,
-                                  onTap: () async {
-                                    flow.branch = favBranches[i].businessBranch;
-                                    BappNavigator.push(
-                                      context,
-                                      BusinessProfileScreen(),
-                                    );
-                                  },
+                                key: Key(
+                                  favBranches[i].business?.id ?? "",
                                 ),
-                                onDismissed: (d) {
-                                  Provider.of<CloudStore>(context,
-                                          listen: false)
-                                      .addOrRemoveFavorite(favBranches[i]);
+                                onDismissed: (d) async {
+                                  final user = UserX.i.user();
+                                  user?.favourites?.remove(d);
+                                  UserX.i.user(user);
+                                  if (user is User) {
+                                    final updated = await Users.update(user);
+                                    if (updated is User) {
+                                      UserX.i.user(updated);
+                                    }
+                                  }
                                 },
+                                child: Builder(builder: (_) {
+                                  final business = favBranches[i].business;
+                                  return (business is Business)
+                                      ? BusinessTileWidget(
+                                          titleStyle: Theme.of(context)
+                                                  .textTheme
+                                                  .subtitle1 ??
+                                              TextStyle(),
+                                          withImage: true,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 0,
+                                          ),
+                                          branch: business,
+                                          onTap: () async {
+                                            final business =
+                                                favBranches[i].business;
+                                            if (business is Business) {
+                                              BappNavigator.push(
+                                                context,
+                                                BusinessProfileScreen(
+                                                  business: business,
+                                                ),
+                                              );
+                                            }
+                                          },
+                                        )
+                                      : SizedBox();
+                                }),
                               );
                             },
                           ),
@@ -78,6 +96,4 @@ class _FavoritesTabState extends State<FavoritesTab> {
       );
     });
   }
-
-  BookingFlow get flow => Provider.of<BookingFlow>(context, listen: false);
 }

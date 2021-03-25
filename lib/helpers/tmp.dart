@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:pdf/svg.dart';
+
 import 'package:the_country_number/the_country_number.dart';
 import 'package:the_country_number_widgets/the_country_number_widgets.dart';
 
@@ -13,7 +13,9 @@ class Tmp extends StatelessWidget {
         body: SafeArea(
           child: Column(
             children: [
-              SizedBox(height: 128,),
+              SizedBox(
+                height: 128,
+              ),
               Spacer(),
               CommentBox(
                 image: Image.asset(
@@ -22,10 +24,10 @@ class Tmp extends StatelessWidget {
                   width: 64,
                 ),
                 controller: TextEditingController(),
-                onImageRemoved: (){
+                onImageRemoved: () {
                   //on image removed
                 },
-                onSend: (){
+                onSend: () {
                   //on send button pressed
                 },
               ),
@@ -37,21 +39,27 @@ class Tmp extends StatelessWidget {
   }
 }
 
-
 class CommentBox extends StatefulWidget {
   final Widget image;
   final TextEditingController controller;
-  final BorderRadius inputRadius;
-  final Function onSend,onImageRemoved;
+  final BorderRadius? inputRadius;
+  final Function()? onSend, onImageRemoved;
 
-  const CommentBox({Key key, this.image, this.controller, this.inputRadius, this.onSend , this.onImageRemoved }) : super(key: key);
+  const CommentBox(
+      {Key? key,
+      required this.image,
+      required this.controller,
+      this.inputRadius,
+      this.onSend,
+      this.onImageRemoved})
+      : super(key: key);
 
   @override
   _CommentBoxState createState() => _CommentBoxState();
 }
 
 class _CommentBoxState extends State<CommentBox> {
-  Widget image;
+  Widget? image;
 
   @override
   void initState() {
@@ -75,20 +83,24 @@ class _CommentBoxState extends State<CommentBox> {
             context,
             _imageView(context),
           ),
-        if(widget.controller!=null) TextFormField(
-          controller: widget.controller,
-          decoration: InputDecoration(
-            suffixIcon: IconButton(
-              icon: Icon(Icons.send,color: Theme.of(context).primaryColor,),
-              onPressed: widget.onSend,
-            ),
-            filled: true,
-            border: OutlineInputBorder(
-              borderSide: BorderSide.none,
-              borderRadius: widget.inputRadius ?? BorderRadius.circular(32),
+        if (widget.controller != null)
+          TextFormField(
+            controller: widget.controller,
+            decoration: InputDecoration(
+              suffixIcon: IconButton(
+                icon: Icon(
+                  Icons.send,
+                  color: Theme.of(context).primaryColor,
+                ),
+                onPressed: widget.onSend,
+              ),
+              filled: true,
+              border: OutlineInputBorder(
+                borderSide: BorderSide.none,
+                borderRadius: widget.inputRadius ?? BorderRadius.circular(32),
+              ),
             ),
           ),
-        ),
       ],
     );
   }
@@ -103,7 +115,7 @@ class _CommentBoxState extends State<CommentBox> {
           onPressed: () {
             setState(() {
               image = null;
-              widget.onImageRemoved();
+              widget.onImageRemoved?.call();
             });
           },
         )

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:enum_to_string/enum_to_string.dart';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:mobx/mobx.dart';
 import 'package:notification_permissions/notification_permissions.dart';
@@ -25,7 +26,7 @@ Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) async {
 class BappFCM {
   static final BappFCM _bappFCM = BappFCM._once();
   final fcmToken = Observable("");
-  Function(BappFCMMessage) _bappMessagesListener;
+  late Function(BappFCMMessage) _bappMessagesListener;
 
   factory BappFCM() {
     return _bappFCM;
@@ -55,27 +56,25 @@ class BappFCM {
 
   void initForAndroid() {
     if (Platform.isAndroid) {
-      _init(FirebaseMessaging());
+      _init(FirebaseMessaging.instance);
     }
   }
 
   Future requestOnIOS() async {
-    final granted = await FirebaseMessaging().requestNotificationPermissions(
-      const IosNotificationSettings(
-        sound: true,
-        badge: true,
-        alert: true,
-        provisional: false,
-      ),
+    final granted = await FirebaseMessaging.instance.requestPermission(
+      sound: true,
+      badge: true,
+      alert: true,
+      provisional: false,
     );
-    if(granted){
+    if (granted.authorizationStatus == AuthorizationStatus.authorized) {
       initForIOS();
     }
   }
 
   Future<bool> initForIOS() async {
     if (Platform.isIOS) {
-      final _fcm = FirebaseMessaging();
+      final _fcm = FirebaseMessaging.instance;
       if ((await NotificationPermissions.getNotificationPermissionStatus()) ==
           PermissionStatus.unknown) {
         return false;
@@ -95,10 +94,7 @@ class BappFCM {
     if (message.containsKey("data")) {
       print(message["data"]);
       var bappMessage;
-      try {
-        bappMessage = BappFCMMessage.fromJson(j: Map.castFrom(message["data"]));
-        _deliverToListener(bappMessage);
-      } catch (e) {
+      try {} catch (e) {
         Helper.bPrint(e.toString());
       }
     } else {
@@ -107,26 +103,26 @@ class BappFCM {
   }
 
   void _init(FirebaseMessaging _fcm) async {
-    if(isFcmInitialized){
+    if (isFcmInitialized) {
       return;
     }
-    _fcm.configure(
+    /* _fcm.configure(
       onBackgroundMessage:
           Platform.isAndroid ? myBackgroundMessageHandler : null,
       onLaunch: onMessage,
       onResume: onMessage,
       onMessage: onMessage,
-    );
+    ); */
     isFcmInitialized = true;
     kNotifEnabled = true;
     print("FCM initialized for " + Platform.operatingSystem);
     Helper.bPrint("Getting FCM token");
-    onNewToken(await _fcm.getToken());
+
     _fcm.onTokenRefresh.listen(onNewToken);
   }
 
-  void onNewToken(String token){
-    if(fcmToken.value==token){
+  void onNewToken(String token) {
+    if (fcmToken.value == token) {
       return;
     }
     fcmToken.value = token;
@@ -135,7 +131,7 @@ class BappFCM {
 
   ///cached messages
   List<BappFCMMessage> messageCache = [];
-  void _deliverToListener([BappFCMMessage bappMessage]) {
+  void _deliverToListener(BappFCMMessage bappMessage) {
     ///as this is a singleton class, while this class is instantiated, the apps widget tree might not be built
     ///so wait and cache the FCM until there is a listener available
     if (_bappMessagesListener == null) {

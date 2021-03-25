@@ -1,9 +1,10 @@
-import 'package:bapp/classes/firebase_structures/rating.dart';
+/* import 'package:bapp/classes/firebase_structures/rating.dart';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +24,7 @@ class BusinessBooking {
   final String bookedByNumber;
   final status = Observable<BusinessBookingStatus>(null);
   final UserType bookingUserType;
-  final DateTime remindTime;
+  final DateTime? remindTime;
   final String bookedByName;
   final CompleteBookingRating rating;
   final String staffNumber;
@@ -35,21 +36,21 @@ class BusinessBooking {
   final DocumentReference myDoc;
 
   BusinessBooking({
-    @required this.myDoc,
-    @required this.bookingUserType,
-    @required BusinessBookingStatus status,
-    @required this.bookedByNumber,
-    @required this.staff,
-    @required this.branch,
-    @required this.fromToTiming,
-    @required this.services,
-    @required this.remindTime,
-    @required this.bookedByName,
-    @required this.rating,
-    @required this.staffNumber,
-    @required this.managerNumber,
-    @required this.receptionistNumber,
-    @required this.ownerNumber,
+    required this.myDoc,
+    required this.bookingUserType,
+    required BusinessBookingStatus status,
+    required this.bookedByNumber,
+    required this.staff,
+    required this.branch,
+    required this.fromToTiming,
+    required this.services,
+    required this.remindTime,
+    required this.bookedByName,
+    required this.rating,
+    required this.staffNumber,
+    required this.managerNumber,
+    required this.receptionistNumber,
+    required this.ownerNumber,
     String cancelReason = "",
   }) {
     this.status.value = status;
@@ -71,7 +72,7 @@ class BusinessBooking {
   }
 
   Future<bool> cancel(
-      {@required BusinessBookingStatus withStatus, String reason = ""}) {
+      {required BusinessBookingStatus withStatus, String reason = ""}) {
     var done = Future.value(false);
     act(() {
       status.value = withStatus;
@@ -102,7 +103,7 @@ class BusinessBooking {
       "staff": staff.name,
       "from": fromToTiming.from.toTimeStamp(),
       "to": fromToTiming.to.toTimeStamp(),
-      "remindTime": remindTime.toTimeStamp(),
+      "remindTime": remindTime?.toTimeStamp(),
       "services": services.map((e) => e.toMap()).toList(),
       "branch": branch.myDoc.value,
       "bookedByNumber": bookedByNumber,
@@ -119,7 +120,7 @@ class BusinessBooking {
   }
 
   static BusinessBooking fromSnapShot(
-      {@required DocumentSnapshot snap, @required BusinessBranch branch}) {
+      {required DocumentSnapshot snap, required BusinessBranch branch}) {
     final j = snap.data();
     return BusinessBooking(
       myDoc: snap.reference,
@@ -141,7 +142,7 @@ class BusinessBooking {
         UserType.values,
         j["bookingUserType"],
       ),
-      remindTime: (j["remindTime"] as Timestamp)?.toDate(),
+      remindTime: (j?["remindTime"] as Timestamp)?.toDate(),
       bookedByName: j["bookedByName"] ?? "",
       rating: CompleteBookingRating.fromJson(j["rating"] ?? {}),
       staffNumber: j["staffNumber"] ?? "",
@@ -188,71 +189,71 @@ class BusinessBooking {
         status.value == BusinessBookingStatus.accepted;
   }
 
-  static Color getColor(BusinessBookingStatus status) {
+  static Color getColor(BookingStatus? status) {
     switch (status) {
-      case BusinessBookingStatus.accepted:
-      case BusinessBookingStatus.ongoing:
+      case BookingStatus.accepted:
+      case BookingStatus.ongoing:
         {
-          return CardsColor.colors["teal"];
+          return CardsColor.colors["teal"] ?? Colors.teal;
         }
-      case BusinessBookingStatus.walkin:
-      case BusinessBookingStatus.pending:
+      case BookingStatus.walkin:
+      case BookingStatus.pendingApproval:
         {
-          return CardsColor.colors["purple"];
+          return CardsColor.colors["purple"] ?? Colors.purple;
         }
-      case BusinessBookingStatus.cancelledByUser:
+      case BookingStatus.cancelledByUser:
         {
-          return CardsColor.colors["orange"];
+          return CardsColor.colors["orange"] ?? Colors.orange;
         }
-      case BusinessBookingStatus.cancelledByManager:
-      case BusinessBookingStatus.cancelledByReceptionist:
-      case BusinessBookingStatus.cancelledByStaff:
-      case BusinessBookingStatus.noShow:
+      case BookingStatus.cancelledByManager:
+      case BookingStatus.cancelledByReceptionist:
+      case BookingStatus.cancelledByStaff:
+      case BookingStatus.noShow:
         {
           return Colors.redAccent;
         }
-      case BusinessBookingStatus.finished:
+      case BookingStatus.finished:
         {
-          return Colors.grey[400];
+          return Colors.grey.shade400;
         }
       default:
-        return Colors.grey[300];
+        return Colors.grey.shade300;
     }
   }
 
-  static String getButtonLabel(BusinessBookingStatus status) {
+  static String getButtonLabel(BookingStatus? status) {
     switch (status) {
-      case BusinessBookingStatus.accepted:
+      case BookingStatus.accepted:
         {
           return "Confirmed";
         }
-      case BusinessBookingStatus.ongoing:
+      case BookingStatus.ongoing:
         {
           return "Ongoing";
         }
-      case BusinessBookingStatus.walkin:
+      case BookingStatus.walkin:
         {
           return "Walk-in";
         }
-      case BusinessBookingStatus.pending:
+      case BookingStatus.pendingApproval:
         {
           return "Pending";
         }
-      case BusinessBookingStatus.cancelledByUser:
+      case BookingStatus.cancelledByUser:
         {
           return "Cancelled";
         }
-      case BusinessBookingStatus.cancelledByManager:
-      case BusinessBookingStatus.cancelledByReceptionist:
-      case BusinessBookingStatus.cancelledByStaff:
+      case BookingStatus.cancelledByManager:
+      case BookingStatus.cancelledByReceptionist:
+      case BookingStatus.cancelledByStaff:
         {
           return "Rejected";
         }
-      case BusinessBookingStatus.noShow:
+      case BookingStatus.noShow:
         {
           return "No show";
         }
-      case BusinessBookingStatus.finished:
+      case BookingStatus.finished:
         {
           return "Completed";
         }
@@ -283,3 +284,4 @@ enum BusinessBookingStatus {
   finished,
   noShow
 }
+ */

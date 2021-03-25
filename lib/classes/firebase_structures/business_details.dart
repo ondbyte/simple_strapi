@@ -1,4 +1,4 @@
-import 'package:bapp/classes/firebase_structures/base_structure.dart';
+/* import 'package:bapp/classes/firebase_structures/base_structure.dart';
 import 'package:bapp/classes/firebase_structures/business_holidays.dart';
 import 'package:bapp/classes/firebase_structures/business_services.dart';
 import 'package:bapp/classes/firebase_structures/business_timings.dart';
@@ -19,7 +19,7 @@ class BusinessDetails with BaseStructure {
   final Observable<GeoPoint> latlong = Observable<GeoPoint>(null);
   final Observable<String> uid = Observable<String>("");
   final branches = Observable<List<BusinessBranch>>([]);
-  final selectedBranch = Observable<BusinessBranch>(null);
+  final selectedBranch = Observable<BusinessBranch?>(null);
   final email = Observable<String>("");
   final myDoc = Observable<DocumentReference>(null);
   final type = Observable("");
@@ -65,15 +65,15 @@ class BusinessDetails with BaseStructure {
     String businessName = "",
     String contactNumber = "",
     String address = "",
-    GeoPoint latlong,
+    GeoPoint? latlong,
     String uid = "",
-    BusinessCategory category,
-    List<BusinessBranch> branches,
-    DocumentReference selectedBranchDoc,
-    BusinessBranch selectedBranch,
+    BusinessCategory? category,
+    List<BusinessBranch>? branches,
+    DocumentReference? selectedBranchDoc,
+    BusinessBranch? selectedBranch,
     String email = "",
-    DocumentReference myDoc,
-    String type,
+    DocumentReference? myDoc,
+    String? type,
   }) {
     this.category.value = category;
     this.businessName.value = businessName;
@@ -137,30 +137,30 @@ class BusinessDetails with BaseStructure {
     };
   }
 
-  Future removeBranch(BusinessBranch branch) async {
+  Future removeBranch(BusinessBranch? branch) async {
     final old = branches.value;
     old.remove(branch);
-    await branch.myDoc.value.delete();
+    await branch?.myDoc.value.delete();
     await act(() async {
       branches.value = old; //new
     });
   }
 
   Future<BusinessBranch> addABranch({
-    String branchName,
-    PickedLocation pickedLocation,
-    Map<String, bool> imagesWithFiltered,
+    String? branchName,
+    PickedLocation? pickedLocation,
+    Map<String, bool>? imagesWithFiltered,
   }) async {
-    final imgs =
-        await uploadImagesToStorageAndReturnStringList(imagesWithFiltered);
+    final imgs = await uploadImagesToStorageAndReturnStringList(
+        imagesWithFiltered ?? {});
 
     final branch = BusinessBranch(
       business: this,
     )
       ..manager.value = null
       ..receptionist.value = null
-      ..latlong.value = pickedLocation.latLong
-      ..address.value = pickedLocation.address
+      ..latlong.value = pickedLocation?.latLong
+      ..address.value = pickedLocation?.address
       ..name.value = branchName
       ..images.addAll(imgs)
       ..contactNumber.value = contactNumber.value
@@ -217,3 +217,4 @@ class NotBusinessDetails extends BusinessDetails {
   @override
   bool get valid => false;
 }
+ */

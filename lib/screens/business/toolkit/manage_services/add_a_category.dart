@@ -20,12 +20,13 @@ class _BusinessAddServiceCategoryScreenState
   String _description = "";
   Map<String, bool> _image = {};
   final _key = GlobalKey<FormState>();
-  
+
   @override
   Widget build(BuildContext context) {
-    return LoadingStackWidget(
+    return SizedBox();
+    /* return LoadingStackWidget(
       child: Consumer<BusinessStore>(
-        builder: (_,businessStore,__){
+        builder: (_, businessStore, __) {
           return Scaffold(
             appBar: AppBar(
               automaticallyImplyLeading: true,
@@ -33,15 +34,16 @@ class _BusinessAddServiceCategoryScreenState
               actions: [FlatButton(onPressed: () {}, child: Text(""))],
             ),
             bottomNavigationBar: BottomPrimaryButton(
+              title: "",
+              subTitle: "",
               label: "Add",
               onPressed: () async {
-                if(!_key.currentState.validate()){
+                if (!(_key.currentState?.validate() ?? false)) {
                   return;
                 }
                 _name = _name.trim();
                 _description = _description.trim();
-                final business =
-                    businessStore.business;
+                final business = businessStore.business;
                 if (business
                     .selectedBranch.value.businessServices.value.allCategories
                     .any((c) => c.categoryName.value == _name)) {
@@ -69,7 +71,7 @@ class _BusinessAddServiceCategoryScreenState
               },
             ),
             body: GestureDetector(
-              onTap: (){
+              onTap: () {
                 FocusScope.of(context).unfocus();
               },
               child: CustomScrollView(
@@ -84,19 +86,22 @@ class _BusinessAddServiceCategoryScreenState
                             child: Column(
                               children: [
                                 TextFormField(
-                                  decoration:
-                                  InputDecoration(labelText: "Category name"),
+                                  decoration: InputDecoration(
+                                      labelText: "Category name"),
                                   onChanged: (s) {
                                     _name = s;
                                   },
                                   validator: (s) {
-                                    if (s.isEmpty) {
+                                    if (s?.isEmpty ?? false) {
                                       return "Enter a valid name";
                                     }
-                                    if(businessStore.business.selectedBranch.value.businessServices.value.anyServiceOrCategoryExistsWithName(s)){
+                                    if (businessStore.business.selectedBranch
+                                        .value.businessServices.value
+                                        .anyServiceOrCategoryExistsWithName(
+                                            s ?? "")) {
                                       return "Named service or category exists";
                                     }
-                                      return null;
+                                    return null;
                                   },
                                 ),
                                 SizedBox(
@@ -104,12 +109,12 @@ class _BusinessAddServiceCategoryScreenState
                                 ),
                                 TextFormField(
                                   decoration:
-                                  InputDecoration(labelText: "Description"),
+                                      InputDecoration(labelText: "Description"),
                                   onChanged: (s) {
                                     _description = s;
                                   },
                                   validator: (s) {
-                                    if (s.isEmpty) {
+                                    if (s?.isEmpty ?? false) {
                                       return "Enter a valid description";
                                     }
                                     return null;
@@ -143,5 +148,6 @@ class _BusinessAddServiceCategoryScreenState
         },
       ),
     );
+  */
   }
 }

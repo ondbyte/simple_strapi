@@ -19,6 +19,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 import '../../fcm.dart';
 
@@ -42,7 +43,9 @@ class _BappInitScreenState extends State<BappInitScreen>
           await UserX.i.init();
           if (mounted) {
             if (DefaultDataX.i.defaultData is DefaultData &&
-                isNotNullOrEmpty(DefaultDataX.i.defaultData.locality)) {
+                isNotNullOrEmpty(
+                  DefaultDataX.i.defaultData()?.locality,
+                )) {
               BappNavigator.pushAndRemoveAll(context, Bapp());
             } else if (DefaultDataX.i.isFirstTimeOnDevice) {
               BappNavigator.pushAndRemoveAll(context, OnBoardingScreen());

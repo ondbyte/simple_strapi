@@ -9,25 +9,28 @@ class BappThemedApp extends StatefulWidget {
   final Widget child;
 
   const BappThemedApp({
-    Key key,
-    this.child,
+    Key? key,
+    required this.child,
   }) : super(key: key);
   @override
   _BappThemedAppState createState() => _BappThemedAppState();
 
   static bool isDarkTheme(BuildContext context) {
-    return context.findAncestorStateOfType<_BappThemedAppState>()._isDarkTheme;
+    return context
+            .findAncestorStateOfType<_BappThemedAppState>()
+            ?._isDarkTheme ??
+        false;
   }
 
   static void switchTheme(BuildContext context) {
     return context
         .findAncestorStateOfType<_BappThemedAppState>()
-        ._switchTheme();
+        ?._switchTheme();
   }
 }
 
 class _BappThemedAppState extends State<BappThemedApp> {
-  Brightness brightness;
+  Brightness? brightness;
 
   bool get _isDarkTheme => brightness == Brightness.dark;
 
@@ -59,7 +62,7 @@ class _BappThemedAppState extends State<BappThemedApp> {
     box.put("dark", dark);
   }
 
-  void _updateTheme({bool dark}) {
+  void _updateTheme({required bool dark}) {
     if (dark) {
       if (brightness != Brightness.dark) {
         brightness = Brightness.dark;

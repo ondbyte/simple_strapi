@@ -12,9 +12,10 @@ import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BusinessManageStaffScreen extends StatefulWidget {
-  BusinessManageStaffScreen({Key key}) : super(key: key);
+  BusinessManageStaffScreen({Key? key}) : super(key: key);
 
   @override
   _BusinessManageStaffScreenState createState() =>
@@ -22,7 +23,6 @@ class BusinessManageStaffScreen extends StatefulWidget {
 }
 
 class _BusinessManageStaffScreenState extends State<BusinessManageStaffScreen> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,10 +40,10 @@ class _BusinessManageStaffScreenState extends State<BusinessManageStaffScreen> {
           BappNavigator.push(context, BusinessAddAStaffScreen());
         },
       ),
-      body: Consumer<BusinessStore>(
-        builder: (_, businessStore, __) {
+      body: Builder(
+        builder: (_) {
           return Observer(builder: (_) {
-            final staffs = businessStore.business.selectedBranch.value.staff;
+            final staffs = [];
             return CustomScrollView(
               slivers: [
                 SliverList(
@@ -54,11 +54,11 @@ class _BusinessManageStaffScreenState extends State<BusinessManageStaffScreen> {
                         (index) => BusinessStaffListTile(
                           staff: staffs[index],
                           trailing: Observer(
-                            builder: (_){
+                            builder: (_) {
                               return Switch(
                                 value: staffs[index].enabled.value,
-                                onChanged: (b){
-                                  act((){
+                                onChanged: (b) {
+                                  act(() {
                                     staffs[index].enable(b);
                                   });
                                 },
@@ -80,27 +80,28 @@ class _BusinessManageStaffScreenState extends State<BusinessManageStaffScreen> {
 }
 
 class BusinessStaffListTile extends StatelessWidget {
-  final BusinessStaff staff;
+  final Employee staff;
   final Widget trailing;
 
-  const BusinessStaffListTile({Key key, this.staff, this.trailing})
+  const BusinessStaffListTile(
+      {Key? key, required this.staff, required this.trailing})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
-    final myNumber = Provider.of<CloudStore>(context, listen: false).theNumber;
-    final me =
-        staff.contactNumber.internationalNumber == myNumber.internationalNumber;
+    final me = true;
     return ListTile(
-      title: Text(me ? "Me" : staff.name),
+      title: Text(
+        me ? "Me" : staff.name ?? "",
+      ),
       subtitle: Text(
-        EnumToString.convertToString(staff.role),
+        "role name",
       ),
       trailing: trailing,
       leading: ListTileFirebaseImage(
-        ifEmpty: Initial(forName: staff.name,),
-        storagePathOrURL: staff.images.isNotEmpty
-            ? staff.images.keys.elementAt(0)
-            : null,
+        ifEmpty: Initial(
+          forName: staff.name ?? "zz",
+        ),
+        storagePathOrURL: null,
       ),
     );
   }

@@ -3,24 +3,26 @@ import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/screens/business/business_profile/business_profile.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/stores/booking_flow.dart';
+import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BranchesResultScreen extends StatefulWidget {
-  final Future<List<BusinessBranch>> futureBranchList;
+  final Future<List<Business>> futureBranchList;
   final String title, subTitle, placeName, categoryName, categoryImage;
 
-  const BranchesResultScreen(
-      {Key key,
-      this.futureBranchList,
-      this.title,
-      this.subTitle,
-      this.placeName,
-      this.categoryName,
-      this.categoryImage})
-      : super(key: key);
+  const BranchesResultScreen({
+    Key? key,
+    required this.futureBranchList,
+    required this.title,
+    required this.subTitle,
+    required this.placeName,
+    required this.categoryName,
+    required this.categoryImage,
+  }) : super(key: key);
   @override
   _BranchesResultScreenState createState() => _BranchesResultScreenState();
 }
@@ -54,7 +56,7 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
                   children: [
                     Text(
                       "${widget.title}",
-                      style: Theme.of(context).textTheme.headline1.apply(
+                      style: Theme.of(context).textTheme.headline1?.apply(
                             color: Colors.white,
                           ),
                     ),
@@ -63,7 +65,7 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
                       style: Theme.of(context)
                           .textTheme
                           .bodyText1
-                          .apply(color: Colors.white),
+                          ?.apply(color: Colors.white),
                     ),
                     const SizedBox(
                       height: 30,
@@ -76,30 +78,32 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
           SliverList(
             delegate: SliverChildListDelegate(
               [
-                FutureBuilder<List<BusinessBranch>>(
+                FutureBuilder<List<Business>>(
                   future: widget.futureBranchList,
                   builder: (_, snap) {
                     if (!snap.hasData) {
                       return const LinearProgressIndicator();
                     }
-                    return snap.data.isNotEmpty
+                    final data = snap.data ?? [];
+                    return data.isNotEmpty
                         ? ListView.builder(
                             padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
                             shrinkWrap: true,
-                            itemCount: snap.data.length,
+                            itemCount: data.length,
                             itemBuilder: (_, i) {
                               return BusinessTileWidget(
                                 titleStyle:
-                                    Theme.of(context).textTheme.subtitle1,
+                                    Theme.of(context).textTheme.subtitle1 ??
+                                        TextStyle(),
                                 withImage: true,
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 16, vertical: 0),
-                                branch: snap.data[i],
+                                branch: data[i],
                                 onTap: () async {
-                                  flow.branch = snap.data[i];
+                                  //flow.branch = snap.data[i];
                                   BappNavigator.push(
                                     context,
-                                    BusinessProfileScreen(),
+                                    BusinessProfileScreen(business: data[i]),
                                   );
                                 },
                               );
@@ -125,6 +129,4 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
       ),
     );
   }
-
-  BookingFlow get flow => Provider.of<BookingFlow>(context, listen: false);
 }

@@ -7,7 +7,8 @@ import 'package:flutter/material.dart';
 class SearchBarWidget extends StatelessWidget {
   final List<String> possibilities;
 
-  const SearchBarWidget({Key key, this.possibilities}) : super(key: key);
+  const SearchBarWidget({Key? key, required this.possibilities})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -35,12 +36,14 @@ class SearchBarWidget extends StatelessWidget {
                         repeatForever:
                             true, //this will ignore [totalRepeatCount]
                         text: possibilities,
-                        textStyle: Theme.of(context).textTheme.subtitle1.apply(
-                            color: Theme.of(context)
-                                .textTheme
-                                .subtitle1
-                                .color
-                                .withOpacity(0.6)),
+                        textStyle: Theme.of(context).textTheme.subtitle1?.apply(
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .subtitle1
+                                      ?.color
+                                      ?.withOpacity(0.6),
+                                ) ??
+                            TextStyle(),
                         pause: const Duration(milliseconds: 500),
                         displayFullTextOnTap: true,
                       ),

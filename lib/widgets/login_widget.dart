@@ -8,7 +8,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 class AskToLoginWidget extends StatelessWidget {
   final String loginReason, secondaryReason;
 
-  const AskToLoginWidget({Key key, this.loginReason, this.secondaryReason})
+  const AskToLoginWidget(
+      {Key? key, required this.loginReason, required this.secondaryReason})
       : super(key: key);
 
   @override
@@ -16,7 +17,7 @@ class AskToLoginWidget extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.all(16),
       child: OrientationBuilder(
-        builder: (_,o){
+        builder: (_, o) {
           return SizedBox(
             width: double.maxFinite,
             child: Column(
@@ -25,7 +26,7 @@ class AskToLoginWidget extends StatelessWidget {
               children: [
                 SvgPicture.asset(
                   "assets/svg/login.svg",
-                  height: o==Orientation.landscape? 32:128,
+                  height: o == Orientation.landscape ? 32 : 128,
                 ),
                 SizedBox(
                   height: 20,
@@ -48,7 +49,8 @@ class AskToLoginWidget extends StatelessWidget {
                   height: 20,
                   width: 20,
                 ),
-                PrimaryButton("Sign In or Sign Up",
+                PrimaryButton(
+                  "Sign In or Sign Up",
                   fullWidth: false,
                   onPressed: () {
                     BappNavigator.push(context, LoginScreen());

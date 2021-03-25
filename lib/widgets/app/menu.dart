@@ -1,4 +1,6 @@
+import 'package:bapp/config/config.dart';
 import 'package:bapp/config/config_data_types.dart';
+import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/authentication/create_profile.dart';
@@ -6,9 +8,11 @@ import 'package:bapp/screens/authentication/login_screen.dart';
 import 'package:bapp/screens/business/addbusiness/choose_category.dart';
 import 'package:bapp/screens/settings/settings.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/widgets/tiles/theme_switcher.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -38,22 +42,18 @@ class _MenuState extends State<Menu> {
             )
           ],
         ),
-        body: Consumer<CloudStore>(
-          builder: (_, cloudStore, __) {
+        body: Builder(
+          builder: (
+            _,
+          ) {
             return Observer(
               builder: (_) {
-                final bappUser = cloudStore.bappUser;
-                final items = Helper.filterMenuItems(
-                  bappUser.userType.value,
-                  bappUser.alterEgo.value,
-                  cloudStore.status,
-                );
                 return ListView(
                   children: [
                     const SizedBox(
                       height: 20,
                     ),
-                    ..._getMenuItems(context, items),
+                    ..._getMenuItems(context, []),
                     ThemeSwitcherTile(),
                   ],
                 );
@@ -116,15 +116,18 @@ class _MenuState extends State<Menu> {
         }
       case MenuItemKind.onBoardABusiness:
         {
-          BappNavigator.pushReplacement(context, ChooseYourBusinessCategoryScreen(onBoard: true,));
+          BappNavigator.pushReplacement(
+              context,
+              ChooseYourBusinessCategoryScreen(
+                onBoard: true,
+              ));
           break;
         }
       case MenuItemKind.logOut:
         {
           () async {
-            await Provider.of<CloudStore>(context, listen: false).signOut();
-            Provider.of<EventBus>(context, listen: false)
-                .fire(AppEvents.reboot);
+            await FirebaseAuth.instance.signOut();
+            kBus.fire(AppEvents.reboot);
           }();
           break;
         }
@@ -135,32 +138,22 @@ class _MenuState extends State<Menu> {
         }
       case MenuItemKind.switchTosShopping:
         {
-          Provider.of<CloudStore>(context, listen: false)
-              .switchUserType(context);
           break;
         }
       case MenuItemKind.switchToBusiness:
         {
-          Provider.of<CloudStore>(context, listen: false)
-              .switchUserType(context);
           break;
         }
       case MenuItemKind.switchToSales:
         {
-          Provider.of<CloudStore>(context, listen: false)
-              .switchUserType(context);
           break;
         }
       case MenuItemKind.switchToManager:
         {
-          Provider.of<CloudStore>(context, listen: false)
-              .switchUserType(context);
           break;
         }
       case MenuItemKind.switchToSudoUser:
         {
-          Provider.of<CloudStore>(context, listen: false)
-              .switchUserType(context);
           break;
         }
     }

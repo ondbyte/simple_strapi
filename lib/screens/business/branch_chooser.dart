@@ -3,6 +3,8 @@ import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
+import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Action;
@@ -11,7 +13,7 @@ import "package:provider/provider.dart";
 
 class BranchChooserScreen extends StatelessWidget {
   const BranchChooserScreen({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -21,11 +23,13 @@ class BranchChooserScreen extends StatelessWidget {
         title: Text("Choose your Branch"),
         centerTitle: false,
       ),
-      body: Consumer2<BusinessStore,CloudStore>(
-        builder: (_, businessStore,cloudStore, __) {
+      body: Builder(
+        builder: (
+          _,
+        ) {
           return Observer(
             builder: (context) {
-              final branches = businessStore.business.branches.value;
+              final branches = UserX.i.user()?.partner?.businesses ?? [];
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: ListView.builder(
@@ -35,16 +39,10 @@ class BranchChooserScreen extends StatelessWidget {
                     return BusinessTileWidget(
                         withImage: true,
                         branch: branches[i],
-                        onTap: () {
-                          act(
-                            () {
-                              //businessStore.business.branches.value.removeWhere((element) => element.myDoc.value==branches[i].myDoc.value)
-                              final neww = branches[i];
-                              businessStore.business.selectedBranch.value =
-                                  neww;
-                              cloudStore.bappUser = cloudStore.bappUser.updateWith(selectedBranch: neww.myDoc.value);
-                              cloudStore.bappUser.save();
-                            },
+                        onTap: () async {
+                          await DefaultDataX.i.saveValue(
+                            "selectedBusiness",
+                            branches[i].id,
                           );
                           BappNavigator.pop(context, null);
                         });

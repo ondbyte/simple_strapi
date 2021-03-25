@@ -13,6 +13,7 @@ import 'package:bapp/stores/cloud_store.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart' hide Tab;
 import 'package:flutter/widgets.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 import 'config_data_types.dart';
 
@@ -32,7 +33,7 @@ class CardsColor {
     final _color = colors.values.elementAt(last);
     if (uid.isNotEmpty) {
       if (_requestedColors.containsKey(uid)) {
-        return _requestedColors[uid];
+        return _requestedColors[uid] ?? Colors.white;
       }
       _requestedColors.addAll({uid: _color});
     }
@@ -150,7 +151,7 @@ class LoginConfig {
 }
 
 ///the dynamic menu items, can be set to be visible/hidden depending on the [AuthStatus] and can be specific to [UserType]
-class MenuConfig {
+/* class MenuConfig {
   static final String title = "Menu";
   static final IconData closeIcon = FeatherIcons.xCircle;
   static final List<List<MenuItem>> menuItems = [
@@ -282,7 +283,7 @@ class MenuConfig {
     ],
   ];
 }
-
+ */
 class BusinessExpandingPanelConfigs {
   static final List<BusinessExpandingPanelConfig> cfgs = [
     BusinessExpandingPanelConfig(
@@ -427,7 +428,7 @@ class BusinessExpandingPanelConfigs {
           onClickRoute: BusinessManageContactDetailsScreen(),
           enabled: true,
         ),
-        BusinessExpandingTile(
+        /* BusinessExpandingTile(
           name: "Business Hours",
           iconData: FeatherIcons.alertOctagon,
           onClickRoute: BusinessManageWorkingHoursScreen(),
@@ -438,7 +439,7 @@ class BusinessExpandingPanelConfigs {
           iconData: FeatherIcons.alertOctagon,
           onClickRoute: BusinessManageHolidaysScreen(),
           enabled: true,
-        ),
+        ), */
         BusinessExpandingTile(
           name: "Manage Branches",
           iconData: FeatherIcons.alertOctagon,
@@ -455,19 +456,19 @@ class BusinessExpandingPanelConfigs {
     ),
   ];
 }
-
+/* 
 class RatingConfig {
   static const reviewLabel = "Would you like share a short review?";
   static const reviewHint = "Write your review here.";
 
-  static String getThankYouForTheReviewForBooking(BusinessBooking booking) {
+  static String getThankYouForTheReviewForBooking(Booking booking) {
     return "Thank you for the review of " +
         booking.branch.name.value +
         ", looking forawrd to serve you better.";
   }
 
-  static String getFirstSentenceForRating(BookingRating rating) {
-    switch (rating.type) {
+  static String getFirstSentenceForRating(Review rating) {
+    switch (rating) {
       case BookingRatingType.overAll:
         {
           return "How was your overall experience at";
@@ -498,3 +499,4 @@ class RatingConfig {
     }
   }
 }
+ */

@@ -1,4 +1,4 @@
-import 'dart:async';
+/* import 'dart:async';
 
 import 'package:bapp/classes/firebase_structures/bapp_user.dart';
 import 'package:bapp/classes/firebase_structures/staff_time_off.dart';
@@ -215,3 +215,4 @@ class BusinessStaff {
   @override
   int get hashCode => (this.name + this.branch.myDoc.value.path).hashCode;
 }
+ */

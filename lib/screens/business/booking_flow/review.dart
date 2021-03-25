@@ -6,30 +6,33 @@ import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/screens/home/bapp.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';
+import 'package:bapp/super_strapi/my_strapi/x.dart';
 import 'package:bapp/widgets/loading_stack.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:google_place/google_place.dart' hide Review;
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class RateTheBookingScreen extends StatefulWidget {
-  final BusinessBooking booking;
+  final Review booking;
 
-  const RateTheBookingScreen({Key key, this.booking}) : super(key: key);
+  const RateTheBookingScreen({Key? key, required this.booking})
+      : super(key: key);
   @override
   _RateTheBookingScreenState createState() => _RateTheBookingScreenState();
 }
 
 class _RateTheBookingScreenState extends State<RateTheBookingScreen> {
-  BusinessBooking booking;
+  Booking? booking;
   @override
   void initState() {
-    booking = widget.booking;
     super.initState();
     /*WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       act(() {
         kLoading.value = true;
       });
 
-      *//*widget.booking.myDoc.snapshots().listen((snap) async {
+      */ /*widget.booking.myDoc.snapshots().listen((snap) async {
         if(mounted){
           setState(() {
             booking = BusinessBooking.fromSnapShot(
@@ -39,13 +42,14 @@ class _RateTheBookingScreenState extends State<RateTheBookingScreen> {
             });
           });
         }
-      });*//*
+      });*/ /*
     });*/
   }
 
   @override
   Widget build(BuildContext context) {
-    if (booking == null) {
+    return SizedBox();
+    /* if (booking == null) {
       return SizedBox();
     }
     return WillPopScope(
@@ -125,21 +129,22 @@ class _RateTheBookingScreenState extends State<RateTheBookingScreen> {
             ),
           ),
         ));
+   */
   }
 }
 
 class RatingTile extends StatelessWidget {
-  final String firstSentence, secondSentence;
-  final BookingRating rating;
-  final Function(BookingRating) onRatingUpdated;
+  final String? firstSentence, secondSentence;
+  final Review rating;
+  final Function(Review)? onRatingUpdated;
 
-  const RatingTile(
-      {Key key,
-      this.firstSentence,
-      this.secondSentence,
-      this.rating,
-      this.onRatingUpdated})
-      : super(key: key);
+  const RatingTile({
+    Key? key,
+    this.firstSentence,
+    this.secondSentence,
+    required this.rating,
+    this.onRatingUpdated,
+  }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -147,22 +152,25 @@ class RatingTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            firstSentence,
-            style: Theme.of(context).textTheme.bodyText1,
-          ),
-          Text(
-            secondSentence,
-            style: Theme.of(context).textTheme.subtitle1,
-          ),
+          if (firstSentence is String)
+            Text(
+              firstSentence as String,
+              style: Theme.of(context).textTheme.bodyText1,
+            ),
+          if (secondSentence is String)
+            Text(
+              secondSentence as String,
+              style: Theme.of(context).textTheme.subtitle1,
+            ),
           const SizedBox(
             height: 20,
           ),
           BappRatingBar(
-            initialRating: rating.stars,
+            ignoreGesture: false,
+            initialRating: rating.rating ?? 0,
             unratedColor: Theme.of(context).indicatorColor,
             onRatingUpdated: (r) {
-              onRatingUpdated(rating.update(stars: r));
+              onRatingUpdated?.call(rating.copyWIth(rating: r));
             },
           ),
         ],
@@ -172,15 +180,15 @@ class RatingTile extends StatelessWidget {
 }
 
 class BappRatingBar extends StatelessWidget {
-  final Function(double) onRatingUpdated;
+  final void Function(double) onRatingUpdated;
   final bool ignoreGesture;
   final Color unratedColor, ratedColor;
   final double initialRating;
 
   const BappRatingBar(
-      {Key key,
-      this.onRatingUpdated,
-      this.ignoreGesture,
+      {Key? key,
+      required this.onRatingUpdated,
+      required this.ignoreGesture,
       this.unratedColor = Colors.amber,
       this.ratedColor = Colors.amber,
       this.initialRating = 0})
@@ -189,7 +197,7 @@ class BappRatingBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return RatingBar(
       initialRating: initialRating,
-      unratedColor: unratedColor ?? Colors.grey,
+      unratedColor: unratedColor,
       updateOnDrag: false,
       ratingWidget: RatingWidget(
         empty: Icon(
@@ -211,12 +219,12 @@ class BappRatingBar extends StatelessWidget {
 }
 
 class HowWasYourExperienceTile extends StatelessWidget {
-  final BusinessBooking booking;
-  final BorderRadius borderRadius;
-  final EdgeInsets padding;
+  final Booking booking;
+  final BorderRadius? borderRadius;
+  final EdgeInsets? padding;
 
   const HowWasYourExperienceTile(
-      {Key key, this.booking, this.borderRadius, this.padding})
+      {Key? key, required this.booking, this.borderRadius, this.padding})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -234,28 +242,27 @@ class HowWasYourExperienceTile extends StatelessWidget {
               style: Theme.of(context)
                   .textTheme
                   .bodyText1
-                  .apply(color: Colors.white),
+                  ?.apply(color: Colors.white),
             ),
             Text(
-              booking.branch.name.value,
+              booking.business?.name ?? "no business name inform yadu",
               style: Theme.of(context)
                   .textTheme
                   .subtitle1
-                  .apply(color: Colors.white),
+                  ?.apply(color: Colors.white),
             ),
             BappRatingBar(
               onRatingUpdated: (r) {
-                final previousRating =
-                    booking.rating.all[BookingRatingType.overAll];
-                booking.rating.update(
-                  previousRating.update(stars: r),
-                );
-                BappNavigator.push(
-                  context,
-                  RateTheBookingScreen(
-                    booking: booking,
-                  ),
-                );
+                final newReview = booking.review?.copyWIth(rating: r);
+                if (newReview is Review) {
+                  Reviews.update(newReview);
+                  BappNavigator.push(
+                    context,
+                    RateTheBookingScreen(
+                      booking: newReview,
+                    ),
+                  );
+                }
               },
               ignoreGesture: false,
             )

@@ -1,11 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+/* import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mobx/mobx.dart';
 import 'package:the_country_number/the_country_number.dart';
 
 class Locality {
-  final String name;
-  final GeoPoint latLong;
-  final bool enabled;
+  final String? name;
+  final GeoPoint? latLong;
+  final bool? enabled;
 
   Locality({this.name, this.latLong, this.enabled});
 
@@ -31,7 +31,7 @@ class Locality {
 }
 
 class City {
-  final String name;
+  final String? name;
   final bool enabled;
   final ObservableList<Locality> localities;
 
@@ -102,3 +102,4 @@ class MyAddress{
   }
 }
 
+ */

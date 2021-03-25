@@ -1,4 +1,4 @@
-import 'package:bapp/helpers/helper.dart';
+/* import 'package:bapp/helpers/helper.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:mobx/mobx.dart';
@@ -98,3 +98,4 @@ class BookingRating {
 }
 
 enum BookingRatingType { overAll, staff, facilities }
+ */

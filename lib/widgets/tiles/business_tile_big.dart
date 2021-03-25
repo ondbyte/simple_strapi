@@ -1,16 +1,17 @@
-import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:bapp/super_strapi/super_strapi.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 import '../firebase_image.dart';
 
 class BusinessTileBigWidget extends StatelessWidget {
-  final BusinessBranch branch;
+  final Business? branch;
   final Widget tag;
-  final Function onTap;
+  final Function()? onTap;
 
   const BusinessTileBigWidget(
-      {Key key, this.branch, @required this.tag, this.onTap})
+      {Key? key, this.branch, required this.tag, this.onTap})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -29,10 +30,14 @@ class BusinessTileBigWidget extends StatelessWidget {
                   alignment: Alignment.bottomLeft,
                   children: [
                     RRFirebaseStorageImage(
-                      storagePathOrURL: branch.images.isNotEmpty
-                          ? branch.images.keys.elementAt(0)
-                          : null,
-                      ifEmpty: Initial(forName: branch.name.value,),
+                      fit: BoxFit.contain,
+                      storagePathOrURL:
+                          branch?.partner?.logo?.isNotEmpty ?? false
+                              ? branch?.partner?.logo?.first.url
+                              : null,
+                      ifEmpty: Initial(
+                        forName: branch?.name ?? "zz",
+                      ),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(left: 16, bottom: 8),
@@ -42,11 +47,12 @@ class BusinessTileBigWidget extends StatelessWidget {
                 ),
               ),
             ),
-            BusinessTileWidget(
-              branch: branch,
-              onTap: () {},
-              padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
-            ),
+            if (branch is Business)
+              BusinessTileWidget(
+                branch: branch as Business,
+                onTap: () {},
+                padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
+              ),
           ],
         ),
       );
@@ -56,20 +62,20 @@ class BusinessTileBigWidget extends StatelessWidget {
 
 class BusinessTileWidget extends StatelessWidget {
   final bool withImage;
-  final BusinessBranch branch;
-  final Function onTap;
-  final EdgeInsets padding;
-  final TextStyle titleStyle;
-  final Function onTrailingTapped;
+  final Business branch;
+  final Function()? onTap;
+  final EdgeInsets? padding;
+  final TextStyle? titleStyle;
+  final Function()? onTrailingTapped;
 
   const BusinessTileWidget(
-      {Key key,
-      @required this.branch,
-      @required this.onTap,
+      {Key? key,
+      required this.branch,
+      required this.onTap,
       this.padding,
-      this.titleStyle, this.withImage=false,
-        this.onTrailingTapped
-      })
+      this.titleStyle,
+      this.withImage = false,
+      this.onTrailingTapped})
       : super(key: key);
 
   @override
@@ -79,32 +85,35 @@ class BusinessTileWidget extends StatelessWidget {
       dense: true,
       contentPadding: padding ?? EdgeInsets.zero,
       title: Text(
-        branch.name.value,
+        branch.name ?? "",
         style: titleStyle,
         maxLines: 1,
       ),
       subtitle: Text(
-        branch.address.value,
+        branch.address?.address ?? "",
         maxLines: 1,
       ),
-      leading: withImage? ListTileFirebaseImage(
-        ifEmpty: Initial(forName: branch.name.value,),
-        storagePathOrURL: branch.images.isNotEmpty?branch.images.keys.elementAt(0):null,
-      ):null,
+      leading: withImage
+          ? ListTileFirebaseImage(
+              ifEmpty: Initial(
+                forName: branch.name ?? "",
+              ),
+              storagePathOrURL: branch.partner?.logo?.isNotEmpty ?? false
+                  ? branch.partner?.logo?.first.url
+                  : null,
+            )
+          : null,
       trailing: GestureDetector(
         onTap: onTrailingTapped,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-                Icons.star,
-                color: Colors.amber
-            ),
+            Icon(Icons.star, color: Colors.amber),
             const SizedBox(
               height: 2,
             ),
             Text(
-              branch.rating.value.toString(),
+              (branch.starRating ?? 0).toString(),
               style: Theme.of(context).textTheme.caption,
             )
           ],

@@ -5,18 +5,18 @@ import 'package:table_calendar/table_calendar.dart';
 class BappRowCalender extends StatefulWidget {
   final Map<DateTime, List> holidays;
   final Map<DateTime, List> bookings;
-  final Function(DateTime, List, List) onDayChanged;
+  final Function(DateTime, List, List)? onDayChanged;
   final CalendarController controller;
   final DateTime initialDate;
-  final Function(Size) onChildRendered;
+  final Function(Size?)? onChildRendered;
 
   const BappRowCalender(
-      {Key key,
-      this.holidays,
-      this.bookings,
+      {Key? key,
+      this.holidays = const {},
+      this.bookings = const {},
       this.onDayChanged,
-      this.controller,
-      this.initialDate,
+      required this.controller,
+      required this.initialDate,
       this.onChildRendered})
       : super(key: key);
   @override
@@ -45,7 +45,7 @@ class _BappRowCalenderState extends State<BappRowCalender> {
           unavailableStyle: TextStyle(color: Theme.of(context).disabledColor),
           holidayStyle: TextStyle(color: Theme.of(context).disabledColor),
           weekendStyle:
-              TextStyle(color: Theme.of(context).textTheme.bodyText1.color),
+              TextStyle(color: Theme.of(context).textTheme.bodyText1?.color),
           outsideDaysVisible: false,
           canEventMarkersOverflow: true,
           markersColor: Theme.of(context).accentColor,
@@ -53,14 +53,14 @@ class _BappRowCalenderState extends State<BappRowCalender> {
           markersMaxAmount: 1),
       onDaySelected: (day, events, __) {
         widget.controller.setSelectedDay(day);
-        widget.onDayChanged(day, events, __);
+        widget.onDayChanged?.call(day, events, __);
       },
       onVisibleDaysChanged: (_, __, ___) {},
       onCalendarCreated: (_, __, ___) {
         widget.controller.setSelectedDay(widget.initialDate);
         if (widget.onChildRendered != null) {
-          WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-            widget.onChildRendered(context.size);
+          WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+            widget.onChildRendered?.call(context.size);
           });
         }
       },

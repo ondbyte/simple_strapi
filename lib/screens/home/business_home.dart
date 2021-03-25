@@ -8,7 +8,9 @@ import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/screens/tabs/updates_tab.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
+import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:bapp/widgets/business/business_branch_switch.dart';
 import 'package:bapp/widgets/app/menu.dart';
 import 'package:flutter/material.dart';
@@ -16,11 +18,12 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
 import '../../stores/business_store.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BusinessHome extends StatefulWidget {
-  final UserRole forRole;
+  final UserRole? forRole;
 
-  const BusinessHome({Key key, this.forRole}) : super(key: key);
+  const BusinessHome({Key? key, this.forRole}) : super(key: key);
   @override
   _BusinessHomeState createState() => _BusinessHomeState();
 }
@@ -38,15 +41,9 @@ class _BusinessHomeState extends State<BusinessHome> {
       if (_shouldShowToolkit) BusinessToolkitTab(),
       UpdatesTab(),
     ]);
-    return Consumer3<BusinessStore, BookingFlow, CloudStore>(
-        builder: (_, businessStore, flow, cloudStore, __) {
+    return Builder(builder: (_) {
       return InitWidget(
-        initializer: () async {
-          if (businessStore.business == null) {
-            businessStore.getMyBusiness();
-          }
-          flow.getBranchBookings();
-        },
+        initializer: () async {},
         child: Scaffold(
           appBar: _selectedPage != _tabs.length - 1
               ? AppBar(
@@ -55,11 +52,18 @@ class _BusinessHomeState extends State<BusinessHome> {
                 )
               : null,
           endDrawer: Menu(),
-          body: Consumer<BusinessStore>(
-            builder: (_, businessStore, __) {
-              return Observer(
-                builder: (_) {
-                  if (businessStore.business == null) {
+          body: Builder(
+            builder: (_) {
+              return FutureBuilder(
+                future: DefaultDataX.i.getValue("selectedBusiness"),
+                builder: (_, snap) {
+                  final id = snap.data ?? "";
+                  final business = UserX.i
+                      .user()
+                      ?.partner
+                      ?.businesses
+                      ?.firstWhere((element) => element.id == id);
+                  if (business is! Business) {
                     return Center(
                       child: Text(
                         "No business is selected",
@@ -78,15 +82,7 @@ class _BusinessHomeState extends State<BusinessHome> {
           bottomNavigationBar: BottomNavigationBar(
             type: BottomNavigationBarType.fixed,
             // selectedFontSize: 14,
-            onTap: (i) {
-              if (i == 1) {
-                Provider.of<BookingFlow>(context, listen: false)
-                    .filterStaffAndBookings();
-              }
-              setState(() {
-                _selectedPage = i;
-              });
-            },
+            onTap: (i) {},
             currentIndex: _selectedPage,
             items: [..._filterBottomNavigations()],
           ),

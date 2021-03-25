@@ -5,9 +5,10 @@ import 'package:flutter/cupertino.dart';
 
 class OnChildSizedWidget extends StatefulWidget {
   final Widget child;
-  final Function(Size) onChildSize;
+  final Function(Size?) onChildSize;
 
-  const OnChildSizedWidget({Key key, this.onChildSize, this.child})
+  const OnChildSizedWidget(
+      {Key? key, required this.onChildSize, required this.child})
       : super(key: key);
   @override
   _OnChildSizedWidgetState createState() => _OnChildSizedWidgetState();
@@ -16,7 +17,7 @@ class OnChildSizedWidget extends StatefulWidget {
 class _OnChildSizedWidgetState extends State<OnChildSizedWidget> {
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
       setState(() {
         widget.onChildSize(context.size);
       });
@@ -31,10 +32,11 @@ class _OnChildSizedWidgetState extends State<OnChildSizedWidget> {
 }
 
 class RenderAfterChildWidget extends StatefulWidget {
-  final Widget Function(Size) onChildRendered;
+  final Widget Function(Size?) onChildRendered;
   final Widget child;
 
-  const RenderAfterChildWidget({Key key, this.onChildRendered, this.child})
+  const RenderAfterChildWidget(
+      {Key? key, required this.onChildRendered, required this.child})
       : super(key: key);
   @override
   _RenderAfterChildWidgetState createState() => _RenderAfterChildWidgetState();

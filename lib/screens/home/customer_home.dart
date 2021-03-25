@@ -97,29 +97,30 @@ class _CustomerHomeState extends State<CustomerHome> {
 }
 
 class PendingUpdatesIcon extends StatefulWidget {
-  final Widget child;
+  final Widget? child;
 
-  const PendingUpdatesIcon({Key key, this.child}) : super(key: key);
+  const PendingUpdatesIcon({Key? key, this.child}) : super(key: key);
   @override
   _PendingUpdatesIconState createState() => _PendingUpdatesIconState();
 }
 
 class _PendingUpdatesIconState extends State<PendingUpdatesIcon> {
-  Size _childSize;
+  Size? _childSize;
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        OnChildSizedWidget(
-          child: widget.child,
-          onChildSize: (s) {
-            if (mounted) {
-              setState(() {
-                _childSize = s;
-              });
-            }
-          },
-        ),
+        if (widget.child is Widget)
+          OnChildSizedWidget(
+            child: widget.child as Widget,
+            onChildSize: (s) {
+              if (mounted) {
+                setState(() {
+                  _childSize = s;
+                });
+              }
+            },
+          ),
         if (_childSize != null)
           Observer(
             builder: (_) {
@@ -130,14 +131,14 @@ class _PendingUpdatesIconState extends State<PendingUpdatesIcon> {
                       child: Align(
                         alignment: Alignment.topRight,
                         child: Container(
-                          width: _childSize.width / 2,
-                          height: _childSize.width / 2,
+                          width: _childSize?.width ?? 0 / 2,
+                          height: _childSize?.width ?? 0 / 2,
                           decoration: BoxDecoration(
                               shape: BoxShape.circle, color: Colors.redAccent),
                           alignment: Alignment.center,
                           child: Text(
                             "${totalUpdates < 10 ? totalUpdates : 9}",
-                            style: Theme.of(context).textTheme.caption.apply(
+                            style: Theme.of(context).textTheme.caption?.apply(
                                   color: Colors.white,
                                 ),
                           ),

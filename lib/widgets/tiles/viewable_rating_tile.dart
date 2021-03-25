@@ -1,29 +1,25 @@
 import 'package:bapp/classes/firebase_structures/rating.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/booking_flow/review.dart';
+import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:flutter/material.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class ViewableRating extends StatelessWidget {
-  final EdgeInsets padding;
+  final EdgeInsets? padding;
   final bool showReview;
-  final CompleteBookingRating rating;
-  final String name;
-  final Function onTap;
+  final Review review;
+  final Function()? onTap;
 
-  ViewableRating(
-      {this.showReview = true,
-      this.rating,
-      this.onTap,
-      this.name,
-      this.padding});
+  ViewableRating({
+    this.showReview = true,
+    required this.review,
+    this.onTap,
+    this.padding,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final overallRating = rating.get(BookingRatingType.overAll);
-    if (overallRating == null) {
-      Helper.bPrint("no overall rating found");
-      return SizedBox();
-    }
     return GestureDetector(
       onTap: onTap,
       child: Padding(
@@ -33,24 +29,26 @@ class ViewableRating extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              name,
+              review.booking?.bookedByUser?.name ??
+                  "no user name present inform yadu",
               style: Theme.of(context).textTheme.subtitle1,
             ),
             SizedBox(
               height: 10,
             ),
             BappRatingBar(
-              initialRating: overallRating.stars,
+              onRatingUpdated: (_) {},
+              initialRating: review.rating ?? 0,
               ignoreGesture: true,
               ratedColor: Colors.amber,
             ),
-            if (rating.review.isNotEmpty)
+            if (review.review?.isEmpty ?? false)
               SizedBox(
                 height: 10,
               ),
-            if (rating.review.isNotEmpty && showReview)
+            if ((review.review?.isNotEmpty) ?? false && showReview)
               Text(
-                rating.review,
+                review.review ?? "no review, inform yadu",
                 style: Theme.of(context).textTheme.bodyText1,
                 maxLines: 4,
                 overflow: TextOverflow.ellipsis,

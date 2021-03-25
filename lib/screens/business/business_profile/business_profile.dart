@@ -11,69 +11,50 @@ import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/super_strapi/my_strapi/reviewX.dart';
+import 'package:bapp/super_strapi/my_strapi/userX.dart';
+import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:bapp/widgets/firebase_image.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:bapp/widgets/tiles/viewable_rating_tile.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:provider/provider.dart';
 import 'package:show_up_animation/show_up_animation.dart';
-import 'package:mobx/mobx.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BusinessProfileScreen extends StatefulWidget {
-  BusinessProfileScreen();
+  final Business business;
+  BusinessProfileScreen({required this.business});
   @override
   _BusinessProfileScreenState createState() => _BusinessProfileScreenState();
 }
 
 class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
-  final _showReviews = Observable(false);
-
   @override
   Widget build(BuildContext context) {
-    final flow = Provider.of<BookingFlow>(context, listen: false);
-    final cloudStore = Provider.of<CloudStore>(context, listen: false);
+    var _showReviews = true;
     return Scaffold(
       bottomNavigationBar: Observer(
         builder: (_) {
-          return cloudStore.status == AuthStatus.userPresent
+          return UserX.i.userPresent
               ? BottomPrimaryButton(
                   label: "Book an Appointment",
-                  title: flow.selectedTitle.value.isNotEmpty
-                      ? flow.selectedTitle.value
-                      : null,
-                  subTitle: flow.selectedSubTitle.value.isNotEmpty
-                      ? flow.selectedSubTitle.value
-                      : null,
-                  onPressed: flow.services.isEmpty
-                      ? null
-                      : () async {
-                          flow.getBranchBookings();
-                          await BappNavigator.push(
-                              context, const SelectAProfessionalScreen());
-                        },
+                  title: null,
+                  subTitle: null,
+                  onPressed: null,
                 )
               : BottomPrimaryButton(
                   label: "Sign in to Book",
-                  title: flow.selectedTitle.value.isNotEmpty
-                      ? flow.selectedTitle.value
-                      : null,
-                  subTitle: flow.selectedSubTitle.value.isNotEmpty
-                      ? flow.selectedSubTitle.value
-                      : null,
-                  onPressed: flow.services.isEmpty
-                      ? null
-                      : () async {
-                          await BappNavigator.push(context, LoginScreen());
-                        },
+                  title: null,
+                  subTitle: null,
+                  onPressed: null,
                 );
         },
       ),
       body: DefaultTabController(
-        length: 2 +
-            (flow.branch.offers.isEmpty ? 0 : 1) +
-            (flow.branch.packages.isEmpty ? 0 : 1),
+        length: 2 + (true ? 0 : 1) + (true ? 0 : 1),
         initialIndex: 0,
         child: NestedScrollView(
           headerSliverBuilder: (_, __) {
@@ -81,15 +62,14 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
               SliverAppBar(
                 expandedHeight: 256,
                 actions: [
-                  Consumer<CloudStore>(
-                    builder: (_, cloudStore, __) {
-                      final fav = Favorite(
-                          businessBranch: flow.branch,
-                          type: FavoriteType.businessBranch);
+                  Builder(
+                    builder: (_) {
                       return Observer(
                         builder: (_) {
-                          final hearted =
-                              cloudStore.favorites.any((e) => e == fav);
+                          final hearted = UserX.i.user()?.favourites?.any(
+                                    (e) => e.business?.id == widget.business.id,
+                                  ) ??
+                              false;
                           return IconButton(
                             icon: Icon(
                               hearted
@@ -97,8 +77,23 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                   : Icons.favorite_border_outlined,
                               color: Colors.white,
                             ),
-                            onPressed: () {
-                              cloudStore.addOrRemoveFavorite(fav);
+                            onPressed: () async {
+                              final user = UserX.i.user();
+                              !hearted
+                                  ? user?.favourites?.add(
+                                      Favourites(
+                                          addedOn: DateTime.now(),
+                                          business: widget.business),
+                                    )
+                                  : user?.favourites?.removeWhere(
+                                      (f) =>
+                                          f.business?.name ==
+                                          widget.business.name,
+                                    );
+                              UserX.i.user(user);
+                              if (user is User) {
+                                UserX.i.user(await Users.update(user));
+                              }
                             },
                           );
                         },
@@ -114,14 +109,14 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                   ),
                 ],
                 flexibleSpace: FlexibleSpaceBar(
-                  background: FirebaseStorageImage(
-                    fit: BoxFit.cover,
-                    storagePathOrURL: flow.branch.images.isNotEmpty
-                        ? flow.branch.images.keys.elementAt(0)
-                        : null,
-                    ifEmpty: Initial(
-                      forName: flow.branch.name.value,
-                    ),
+                  background: Builder(
+                    builder: (_) {
+                      final img = UserX.i.user()?.partner?.logo?.first.url;
+                      if (img is String) {
+                        return CachedNetworkImage(imageUrl: img);
+                      }
+                      return SizedBox();
+                    },
                   ),
                 ),
               ),
@@ -130,28 +125,24 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                   [
                     BusinessTileWidget(
                       titleStyle: Theme.of(context).textTheme.headline1,
-                      branch: flow.branch,
+                      branch: widget.business,
                       onTap: null,
                       padding:
                           EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      onTrailingTapped: () {
-                        act(() {
-                          _showReviews.value = !_showReviews.value;
-                        });
-                      },
+                      onTrailingTapped: () {},
                     ),
-                    Observer(builder: (_){
-                      return !_showReviews.value?
-                        getBappTabBar(
-                          context,
-                          [
-                            if (flow.branch.offers.isNotEmpty) const Text("Offers"),
-                            const Text("Services"),
-                            if (flow.branch.packages.isNotEmpty)
-                              const Text("Packages"),
-                            const Text("About"),
-                          ],
-                        ):SizedBox();
+                    Observer(builder: (_) {
+                      return _showReviews
+                          ? getBappTabBar(
+                              context,
+                              [
+                                if (false) const Text("Offers"),
+                                const Text("Services"),
+                                if (false) const Text("Packages"),
+                                const Text("About"),
+                              ],
+                            )
+                          : SizedBox();
                     })
                   ],
                 ),
@@ -162,28 +153,35 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
             children: [
               Observer(
                 builder: (_) {
-                  if (_showReviews.value) {
+                  if (_showReviews) {
                     return Container(
                       color: Theme.of(context).scaffoldBackgroundColor,
-
                       child: SingleChildScrollView(
                         physics: NeverScrollableScrollPhysics(),
-                        child: FutureBuilder(
-                          future: flow.getRatedBookings(),
+                        child: FutureBuilder<List<Review>>(
+                          future:
+                              ReviewX.i.getReviewsForBusiness(widget.business),
                           builder: (_, snap) {
-                            if (snap.connectionState == ConnectionState.waiting) {
+                            if (snap.connectionState ==
+                                ConnectionState.waiting) {
                               return LinearProgressIndicator();
                             }
-                            if (flow.ratedBookings.isNotEmpty) {
+                            //flow.ratedBookings.isNotEmpty
+                            final data = snap.data ?? [];
+                            if (_showReviews) {
                               return Column(
-                                children: flow.ratedBookings
+                                children: data
                                     .map(
-                                      (b) => ViewableRating(
-                                        padding: EdgeInsets.only(left: 16,right: 16,bottom: 16,top: 16,),
-                                    rating: b.rating,
-                                    name: b.bookedByName,
-                                  ),
-                                )
+                                      (review) => ViewableRating(
+                                        padding: EdgeInsets.only(
+                                          left: 16,
+                                          right: 16,
+                                          bottom: 16,
+                                          top: 16,
+                                        ),
+                                        review: review,
+                                      ),
+                                    )
                                     .toList(),
                               );
                             }
@@ -197,10 +195,14 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                   }
                   return TabBarView(
                     children: [
-                      if (flow.branch.offers.isNotEmpty) const SizedBox(),
-                      const BusinessProfileServicesTab(),
-                      if (flow.branch.packages.isNotEmpty) const SizedBox(),
-                      const BusinessProfileAboutTab(),
+                      if (true) const SizedBox(),
+                      BusinessProfileServicesTab(
+                        business: widget.business,
+                      ),
+                      if (false) const SizedBox(),
+                      BusinessProfileAboutTab(
+                        business: widget.business,
+                      ),
                     ],
                   );
                 },
@@ -211,7 +213,4 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
       ),
     );
   }
-
-  BookingFlow get flow => Provider.of<BookingFlow>(context);
 }
-

@@ -4,6 +4,7 @@ import 'package:bapp/route_manager.dart';
 import 'package:bapp/screens/business/branch_chooser.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -13,24 +14,25 @@ import '../../helpers/helper.dart';
 class BusinessBranchSwitchWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer2<BusinessStore, CloudStore>(
-      builder: (_, businessStore, cloudStore, __) {
+    return Builder(
+      builder: (_) {
         return GestureDetector(
-          onTap: _branchChangeAllowed(cloudStore)
-              ? () {
-            BappNavigator.push(context, BranchChooserScreen());
-                }
-              : null,
           child: Row(
             children: [
-              Observer(
-                builder: (_) {
-                  final text = businessStore
-                      .business?.selectedBranch?.value?.address?.value;
+              FutureBuilder(
+                future: DefaultDataX.i.getValue("selectedBarnch"),
+                builder: (_, snap) {
+                  final data = snap.data;
+                  if (snap.connectionState == ConnectionState.done) {
+                    if (data is String) {
+                      return Text(
+                        data,
+                        style: Theme.of(context).textTheme.subtitle1,
+                      );
+                    }
+                  }
                   return Text(
-                    isNullOrEmpty(text)
-                        ? "Select a branch"
-                        : text.split(", ").first,
+                    "Select a branch",
                     style: Theme.of(context).textTheme.subtitle1,
                   );
                 },
@@ -38,8 +40,7 @@ class BusinessBranchSwitchWidget extends StatelessWidget {
               SizedBox(
                 width: 4,
               ),
-              if (_branchChangeAllowed(cloudStore))
-                Icon(Icons.keyboard_arrow_down),
+              if (_branchChangeAllowed()) Icon(Icons.keyboard_arrow_down),
             ],
           ),
         );
@@ -47,8 +48,7 @@ class BusinessBranchSwitchWidget extends StatelessWidget {
     );
   }
 
-  bool _branchChangeAllowed(CloudStore cloudStore) {
-    return cloudStore.bappUser.userType.value == UserType.businessManager ||
-        cloudStore.bappUser.userType.value == UserType.businessOwner;
+  bool _branchChangeAllowed() {
+    return true;
   }
 }

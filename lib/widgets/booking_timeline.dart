@@ -6,12 +6,14 @@ import 'package:bapp/stores/booking_flow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_week_view/flutter_week_view.dart';
 import 'package:provider/provider.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BookingTimeLineWidget extends StatefulWidget {
   final DateTime date;
-  final List<BusinessBooking> list;
+  final List<Booking> list;
 
-  const BookingTimeLineWidget({Key key, this.date, this.list = const []})
+  const BookingTimeLineWidget(
+      {Key? key, required this.date, this.list = const []})
       : super(key: key);
   @override
   _BookingTimeLineWidgetState createState() => _BookingTimeLineWidgetState();
@@ -46,33 +48,37 @@ class _BookingTimeLineWidgetState extends State<BookingTimeLineWidget> {
       events: [
         ...List.generate(
           list.length,
-          (index) => FlutterWeekViewEvent(
-            eventTextBuilder: (event, _, dayView, a, b) {
-              return Text(event.title);
-            },
-            onTap: () {
-              BappNavigator.push(
-                context,
-                BookingDetailsScreen(
-                  booking: list[index],
-                  isCustomerView: false,
-                ),
-              );
-            },
-            decoration: BoxDecoration(
+          (index) {
+            final start = list[index].bookingStartTime ?? DateTime.now();
+            final end = list[index].bookingEndTime ?? DateTime.now();
+            return FlutterWeekViewEvent(
+              eventTextBuilder: (event, _, dayView, a, b) {
+                return Text(event.title);
+              },
+              onTap: () {
+                BappNavigator.push(
+                  context,
+                  BookingDetailsScreen(
+                    booking: list[index],
+                    isCustomerView: false,
+                  ),
+                );
+              },
+              decoration: BoxDecoration(
                 color: CardsColor.next(
-                    uid: list[index].bookedByNumber.toString())),
-            title: "By " + list[index].bookedByNumber,
-            description: "",
-            start: list[index].fromToTiming.from,
-            end: list[index].fromToTiming.to,
-          ),
+                  uid: (list[index].bookedByUser?.username) ?? "",
+                ),
+              ),
+              title: "By " + (list[index].bookedByUser?.name ?? ""),
+              description: "",
+              start: start,
+              end: end,
+            );
+          },
         )
       ],
     );
   }
-
-  BookingFlow get flow => Provider.of<BookingFlow>(context, listen: false);
 }
 
 /*

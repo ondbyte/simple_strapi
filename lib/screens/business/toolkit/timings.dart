@@ -1,4 +1,4 @@
-import 'package:bapp/classes/firebase_structures/business_timings.dart';
+/* import 'package:bapp/classes/firebase_structures/business_timings.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:flutter/material.dart';
@@ -9,10 +9,12 @@ import 'package:time_range_picker/time_range_picker.dart';
 
 class BusinessManageWorkingHoursScreen extends StatefulWidget {
   @override
-  _BusinessManageWorkingHoursScreenState createState() => _BusinessManageWorkingHoursScreenState();
+  _BusinessManageWorkingHoursScreenState createState() =>
+      _BusinessManageWorkingHoursScreenState();
 }
 
-class _BusinessManageWorkingHoursScreenState extends State<BusinessManageWorkingHoursScreen> {
+class _BusinessManageWorkingHoursScreenState
+    extends State<BusinessManageWorkingHoursScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,17 +24,13 @@ class _BusinessManageWorkingHoursScreenState extends State<BusinessManageWorking
       ),
       body: WillPopScope(
         onWillPop: () async {
-          final businessStore =
-              Provider.of<BusinessStore>(context, listen: false);
-          businessStore.business.selectedBranch.value.saveTimings();
           return true;
         },
-        child: Consumer<BusinessStore>(
-          builder: (_, businessStore, __) {
+        child: Builder(
+          builder: (_) {
             return Observer(
               builder: (_) {
-                final timings = businessStore.business.selectedBranch.value
-                    .businessTimings.value.allDayTimings;
+                final timings = [];
                 return CustomScrollView(
                   slivers: [
                     SliverPadding(
@@ -66,7 +64,8 @@ class DayTimingsWidget extends StatefulWidget {
   final String dayName;
   final DayTiming dayTiming;
 
-  const DayTimingsWidget({Key key, this.dayName, this.dayTiming})
+  const DayTimingsWidget(
+      {Key? key, required this.dayName, required this.dayTiming})
       : super(key: key);
   @override
   _DayTimingsWidgetState createState() => _DayTimingsWidgetState();
@@ -174,11 +173,14 @@ class _DayTimingsWidgetState extends State<DayTimingsWidget> {
 
 class DayTimingRowWidget extends StatefulWidget {
   final FromToTiming fromToTiming;
-  final Function onRemove;
+  final VoidCallback? onRemove;
   final Function(FromToTiming) onChange;
 
   const DayTimingRowWidget(
-      {Key key, this.fromToTiming, this.onRemove, this.onChange})
+      {Key? key,
+      required this.fromToTiming,
+      required this.onRemove,
+      required this.onChange})
       : super(key: key);
 
   @override
@@ -186,7 +188,7 @@ class DayTimingRowWidget extends StatefulWidget {
 }
 
 class _DayTimingRowWidgetState extends State<DayTimingRowWidget> {
-  FromToTiming _fromToTiming;
+  FromToTiming? _fromToTiming;
   @override
   void initState() {
     _fromToTiming = widget.fromToTiming;
@@ -199,12 +201,12 @@ class _DayTimingRowWidgetState extends State<DayTimingRowWidget> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          format(_fromToTiming.from),
+          format(_fromToTiming?.from),
           style: Theme.of(context).textTheme.bodyText1,
         ),
         Text("To"),
         Text(
-          format(_fromToTiming.to),
+          format(_fromToTiming?.to),
           style: Theme.of(context).textTheme.bodyText1,
         ),
         SizedBox(
@@ -212,9 +214,7 @@ class _DayTimingRowWidgetState extends State<DayTimingRowWidget> {
         ),
         IconButton(
           icon: Icon(Icons.edit),
-          onPressed: () async {
-            await _edit();
-          },
+          onPressed: () async {},
         ),
         IconButton(
           icon: Icon(Icons.remove_circle_outline),
@@ -224,33 +224,8 @@ class _DayTimingRowWidgetState extends State<DayTimingRowWidget> {
     );
   }
 
-  _edit() async {
-    final TimeRange timeRange = await showTimeRangePicker(
-      context: context,
-      backgroundColor: Theme.of(context).primaryColor,
-      interval: const Duration(minutes: 15),
-      start: TimeOfDay.fromDateTime(_fromToTiming.from),
-      end: TimeOfDay.fromDateTime(_fromToTiming.to),
-      handlerRadius: 32,
-      snap: true,
-      use24HourFormat: false,
-    );
-    if (timeRange == null) {
-      return;
-    }
-    final from =
-        DateTime(0, 0, 0, timeRange.startTime.hour, timeRange.startTime.minute);
-    final to =
-        DateTime(0, 0, 0, timeRange.endTime.hour, timeRange.endTime.minute);
-    setState(
-      () {
-        _fromToTiming = FromToTiming.fromDates(from: from, to: to);
-        widget.onChange(_fromToTiming);
-      },
-    );
-  }
-
-  String format(DateTime dt) {
+  String format(DateTime? dt) {
     return DateFormat.jm().format(dt);
   }
 }
+ */

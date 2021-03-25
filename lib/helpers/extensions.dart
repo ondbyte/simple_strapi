@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -86,9 +85,9 @@ extension TimeOfDayDateAndTime on DateTime {
     return _format.format(this);
   }
 
-  Timestamp toTimeStamp() {
+/*   Timestamp toTimeStamp() {
     return Timestamp.fromDate(this);
-  }
+  } */
 
   bool isDay(DateTime dt) {
     return day == dt.day && month == dt.month;

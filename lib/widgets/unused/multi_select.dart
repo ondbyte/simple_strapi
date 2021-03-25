@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 
 class MultiSelect<T> extends StatefulWidget {
   final List<T> options;
-  final Function(List<T>) onChanged;
+  final Function(List<T>)? onChanged;
   final String Function(T) titleForThis, subTitleForThis;
 
   const MultiSelect({
-    Key key,
+    Key? key,
     this.onChanged,
-    this.options,
-    this.titleForThis,
-    this.subTitleForThis,
+    this.options = const [],
+    required this.titleForThis,
+    required this.subTitleForThis,
   }) : super(key: key);
   @override
   _MultiSelectState createState() => _MultiSelectState();
@@ -38,7 +38,7 @@ class _MultiSelectState<T> extends State<MultiSelect<T>> {
             } else {
               _selectedList.add(widget.options[i]);
             }
-            widget.onChanged(_selectedList);
+            widget.onChanged?.call(_selectedList);
           },
         );
       },
@@ -50,7 +50,11 @@ class Selector extends StatefulWidget {
   final Function(bool) onSelected;
   final String Function() title, subTitle;
 
-  const Selector({Key key, this.onSelected, this.title, this.subTitle})
+  const Selector(
+      {Key? key,
+      required this.onSelected,
+      required this.title,
+      required this.subTitle})
       : super(key: key);
   @override
   _SelectorState createState() => _SelectorState();

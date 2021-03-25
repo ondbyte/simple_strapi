@@ -34,9 +34,9 @@ class _BusinessProductsPricingScreenState
               color: Theme.of(context).indicatorColor,
             ),
             onPressed: () {
-              final selected = DefaultTabController.of(context).index;
+              final selected = DefaultTabController.of(context)?.index ?? 0;
               if (selected == 0) {
-                BappNavigator.push(context, BusinessAddAServiceScreen());
+                //BappNavigator.push(context, BusinessAddAServiceScreen());
               } else if (selected == 1) {
                 BappNavigator.push(context, BusinessAddServiceCategoryScreen());
               }
@@ -83,7 +83,7 @@ class _BusinessProductsPricingScreenState
 
 class BusinessServicesTab extends StatefulWidget {
   final Function keepAlive;
-  BusinessServicesTab({Key key, @required this.keepAlive}) : super(key: key);
+  BusinessServicesTab({Key? key, required this.keepAlive}) : super(key: key);
 
   @override
   _BusinessServicesTabState createState() => _BusinessServicesTabState();
@@ -94,7 +94,8 @@ class _BusinessServicesTabState extends State<BusinessServicesTab>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Consumer2<BusinessStore, CloudStore>(
+    return SizedBox();
+    /* return Consumer2<BusinessStore, CloudStore>(
       builder: (_, businessStore, cloudStore, __) {
         return Observer(
           builder: (_) {
@@ -105,14 +106,18 @@ class _BusinessServicesTabState extends State<BusinessServicesTab>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     ...List.generate(
-                      businessStore.business.selectedBranch.value.businessServices
-                          .value.all.length,
-                          (index) {
+                      businessStore.business.selectedBranch.value
+                          .businessServices.value.all.length,
+                      (index) {
                         final service = businessStore.business.selectedBranch
                             .value.businessServices.value.all[index];
                         return ListTile(
-                          onTap: (){
-                            BappNavigator.push(context, BusinessAddAServiceScreen(service: service,));
+                          onTap: () {
+                            BappNavigator.push(
+                                context,
+                                BusinessAddAServiceScreen(
+                                  service: service,
+                                ));
                           },
                           title: Text(service.serviceName.value),
                           subtitle: Text(
@@ -127,20 +132,29 @@ class _BusinessServicesTabState extends State<BusinessServicesTab>
                                 service.category.value.categoryName.value,
                           ),
                           leading: ListTileFirebaseImage(
-                            ifEmpty: Initial(forName: service.serviceName.value,),
+                            ifEmpty: Initial(
+                              forName: service.serviceName.value,
+                            ),
                             storagePathOrURL: service.images.isNotEmpty
                                 ? service.images.keys.elementAt(0)
                                 : service.category.value.images.isNotEmpty
-                                ? service.category.value.images.keys
-                                .elementAt(0)
-                                : null,
+                                    ? service.category.value.images.keys
+                                        .elementAt(0)
+                                    : null,
                           ),
                           trailing: Switch(
-                            value: businessStore.business.selectedBranch.value
-                                .businessServices.value.all[index].enabled.value,
+                            value: businessStore
+                                .business
+                                .selectedBranch
+                                .value
+                                .businessServices
+                                .value
+                                .all[index]
+                                .enabled
+                                .value,
                             onChanged: (b) {
                               act(
-                                    () {
+                                () {
                                   businessStore
                                       .business
                                       .selectedBranch
@@ -171,6 +185,7 @@ class _BusinessServicesTabState extends State<BusinessServicesTab>
         );
       },
     );
+  */
   }
 
   @override
@@ -179,7 +194,7 @@ class _BusinessServicesTabState extends State<BusinessServicesTab>
 
 class BusinessServiceCategoriesTab extends StatefulWidget {
   final Function keepAlive;
-  BusinessServiceCategoriesTab({Key key, @required this.keepAlive})
+  BusinessServiceCategoriesTab({Key? key, required this.keepAlive})
       : super(key: key);
 
   @override
@@ -193,7 +208,8 @@ class _BusinessServiceCategoriesTabState
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    return Consumer<BusinessStore>(
+    return SizedBox();
+    /* return Consumer<BusinessStore>(
       builder: (_, businessStore, __) {
         return Observer(builder: (_) {
           return CustomScrollView(
@@ -213,7 +229,9 @@ class _BusinessServiceCategoriesTabState
                             title: Text(t.categoryName.value),
                             subtitle: Text(t.description.value),
                             leading: ListTileFirebaseImage(
-                              ifEmpty: Initial(forName: t.categoryName.value,),
+                              ifEmpty: Initial(
+                                forName: t.categoryName.value,
+                              ),
                               storagePathOrURL: t.images.isNotEmpty
                                   ? t.images.keys.elementAt(0)
                                   : null,
@@ -248,6 +266,7 @@ class _BusinessServiceCategoriesTabState
         });
       },
     );
+   */
   }
 
   @override

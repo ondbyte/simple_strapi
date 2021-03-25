@@ -18,8 +18,10 @@ class _UpdatesTabState extends State<UpdatesTab> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: Consumer<UpdatesStore>(
-        builder: (_, updatesStore, __) {
+      child: Builder(
+        builder: (
+          _,
+        ) {
           return Padding(
             padding: EdgeInsets.all(16),
             child: DefaultTabController(
@@ -38,7 +40,9 @@ class _UpdatesTabState extends State<UpdatesTab> {
                               indicator: BubbleTabIndicator(
                                 indicatorHeight: 40,
                                 tabBarIndicatorSize: TabBarIndicatorSize.tab,
-                                indicatorColor: CardsColor.colors["lightGreen"],
+                                indicatorColor:
+                                    CardsColor.colors["lightGreen"] ??
+                                        Colors.green,
                               ),
                               labelStyle: Theme.of(context).textTheme.headline4,
                               labelColor: Theme.of(context).indicatorColor,
@@ -69,8 +73,8 @@ class _UpdatesTabState extends State<UpdatesTab> {
                             child: IndexedStack(
                               index: _selectedUpdateTab,
                               children: [
-                                _getUpdates(updatesStore.updates),
-                                _getNews(updatesStore.news),
+                                _getUpdates(),
+                                _getNews(),
                               ],
                             ),
                           )
@@ -115,7 +119,7 @@ class _UpdatesTabState extends State<UpdatesTab> {
   }
 
   ///updates tab
-  Widget _getUpdates(List<BappFCMMessage> updates) {
+  Widget _getUpdates({List<BappFCMMessage> updates = const []}) {
     return updates.isNotEmpty
         ? CustomScrollView(
             slivers: <Widget>[
@@ -130,7 +134,7 @@ class _UpdatesTabState extends State<UpdatesTab> {
   }
 
   ///news tab
-  Widget _getNews(List<BappFCMMessage> updates) {
+  Widget _getNews({List<BappFCMMessage> updates = const []}) {
     return updates.isNotEmpty
         ? CustomScrollView(
             slivers: <Widget>[
@@ -168,15 +172,16 @@ class _UpdatesTabState extends State<UpdatesTab> {
 class NotificationUpdateTileWidget extends StatelessWidget {
   final BappFCMMessage update;
 
-  const NotificationUpdateTileWidget({Key key, this.update}) : super(key: key);
+  const NotificationUpdateTileWidget({Key? key, required this.update})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(6),
-        color: CardsColor.next(uid: update.myDoc.id)
-            .withOpacity(update.read ? 0.4 : 1),
+        color: CardsColor.next(uid: "")
+            .withOpacity(/* update.read ? */ false ? 0.4 : 1),
       ),
       padding: EdgeInsets.all(10),
       child: Column(
@@ -190,8 +195,8 @@ class NotificationUpdateTileWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  update.title,
-                  style: Theme.of(context).textTheme.headline2.apply(
+                  "",
+                  style: Theme.of(context).textTheme.headline2?.apply(
                         color: Theme.of(context).indicatorColor,
                       ),
                 ),
@@ -199,8 +204,8 @@ class NotificationUpdateTileWidget extends StatelessWidget {
                   height: 10,
                 ),
                 Text(
-                  update.body,
-                  style: Theme.of(context).textTheme.bodyText1.apply(
+                  "",
+                  style: Theme.of(context).textTheme.bodyText1?.apply(
                         color: Theme.of(context).indicatorColor,
                       ),
                 ),
@@ -208,16 +213,17 @@ class NotificationUpdateTileWidget extends StatelessWidget {
             ),
           ),
           Align(
-            alignment: Alignment.centerRight,
-            child: _decideAndGetButton(context),
+            alignment: Alignment
+                .centerRight, /* 
+            child: _decideAndGetButton(context), */
           )
         ],
       ),
     );
   }
 
-  Widget _decideAndGetButton(BuildContext context) {
-    Widget text, button;
+  /*  Widget _decideAndGetButton(BuildContext context) {
+    Widget? text, button;
     switch (update.type) {
       case MessageOrUpdateType.news:
         {
@@ -261,4 +267,5 @@ class NotificationUpdateTileWidget extends StatelessWidget {
       ],
     );
   }
+ */
 }

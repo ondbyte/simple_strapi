@@ -17,7 +17,7 @@ class BusinessManageContactDetailsScreen extends StatefulWidget {
 
 class _BusinessManageContactDetailsScreenState
     extends State<BusinessManageContactDetailsScreen> {
-  TheNumber _enteredNumber, _previousNumber;
+  TheNumber? _enteredNumber, _previousNumber;
   final _isCustomNumber = Observable(false);
   String _email = "",
       _previousEmail = "",
@@ -29,56 +29,25 @@ class _BusinessManageContactDetailsScreenState
   void initState() {
     super.initState();
     act(() {
-      _customNumber = Provider.of<BusinessStore>(context, listen: false)
-          .business
-          .selectedBranch
-          .value
-          .customContactNumber
-          .value;
       _isCustomNumber.value = _customNumber.isNotEmpty;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<BusinessStore>(
-      builder: (_, businessStore, __) {
-        _previousEmail =
-            businessStore.business.selectedBranch.value.email.value;
-        _previousNumber = TheCountryNumber().parseNumber(
-            internationalNumber: businessStore.business.contactNumber.value);
-        _enteredNumber = _previousNumber;
-        _email = _previousEmail;
+    return Builder(
+      builder: (
+        _,
+      ) {
         return Scaffold(
           appBar: AppBar(
             automaticallyImplyLeading: true,
           ),
           bottomNavigationBar: BottomPrimaryButton(
+            subTitle: "",
+            title: "",
             label: "Update",
-            onPressed: () {
-              act(
-                () {
-                  businessStore.business.selectedBranch.value.email.value =
-                      _email;
-                  businessStore.business.selectedBranch.value.website.value =
-                      _website;
-                  businessStore.business.selectedBranch.value.facebook.value =
-                      _fb;
-                  businessStore.business.selectedBranch.value.instagram.value =
-                      _insta;
-                  if (!_isCustomNumber.value) {
-                    businessStore.business.selectedBranch.value.contactNumber
-                        .value = _enteredNumber.internationalNumber;
-                    businessStore.business.selectedBranch.value
-                        .customContactNumber.value = "";
-                  } else {
-                    businessStore.business.selectedBranch.value
-                        .customContactNumber.value = _customNumber;
-                  }
-                  BappNavigator.pop(context, null);
-                },
-              );
-            },
+            onPressed: () async {},
           ),
           body: GestureDetector(
             onTap: () {
@@ -128,7 +97,9 @@ class _BusinessManageContactDetailsScreenState
                     Observer(builder: (_) {
                       return !_isCustomNumber.value
                           ? TheCountryNumberInput(
-                              _previousNumber,
+                              _previousNumber ??
+                                  TheCountryNumber()
+                                      .parseNumber(iso2Code: "AE"),
                               decoration:
                                   TheInputDecor(labelText: "PhoneNumber"),
                               onChanged: (tn) {
@@ -152,7 +123,7 @@ class _BusinessManageContactDetailsScreenState
                                 labelText: "Custom PhoneNumber",
                               ),
                               validator: (s) {
-                                if (s.isEmpty) {
+                                if (s?.isEmpty ?? false) {
                                   return "Enter a custom number";
                                 }
                                 return null;
@@ -164,8 +135,6 @@ class _BusinessManageContactDetailsScreenState
                     ),
                     TextFormField(
                       initialValue: () {
-                        _website = businessStore
-                            .business.selectedBranch.value.website.value;
                         return _website;
                       }(),
                       decoration: InputDecoration(
@@ -180,8 +149,6 @@ class _BusinessManageContactDetailsScreenState
                     ),
                     TextFormField(
                       initialValue: () {
-                        _fb = businessStore
-                            .business.selectedBranch.value.facebook.value;
                         return _fb;
                       }(),
                       decoration: InputDecoration(
@@ -196,8 +163,6 @@ class _BusinessManageContactDetailsScreenState
                     ),
                     TextFormField(
                       initialValue: () {
-                        _insta = businessStore
-                            .business.selectedBranch.value.instagram.value;
                         return _insta;
                       }(),
                       decoration: InputDecoration(

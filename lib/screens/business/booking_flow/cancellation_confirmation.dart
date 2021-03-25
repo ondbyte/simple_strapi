@@ -13,9 +13,9 @@ class CancellationConfirmDialog extends StatefulWidget {
   final bool needReason;
 
   const CancellationConfirmDialog({
-    Key key,
-    this.title,
-    this.message,
+    Key? key,
+    required this.title,
+    required this.message,
     this.needReason = false,
   }) : super(key: key);
   @override
@@ -35,7 +35,8 @@ class _CancellationConfirmDialogState extends State<CancellationConfirmDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
+    return SizedBox();
+    /* return WillPopScope(
       onWillPop: () async {
         BappNavigator.pop(context, CancellationConfirm());
         return false;
@@ -91,5 +92,6 @@ class _CancellationConfirmDialogState extends State<CancellationConfirmDialog> {
         ],
       ),
     );
+   */
   }
 }

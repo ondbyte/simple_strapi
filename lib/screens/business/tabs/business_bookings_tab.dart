@@ -28,17 +28,6 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
   final _selectedDay = Observable(DateTime.now());
 
   @override
-  void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      flow.branch = Provider.of<BusinessStore>(context, listen: false)
-          .business
-          .selectedBranch
-          .value;
-    });
-    super.initState();
-  }
-
-  @override
   void dispose() {
     _calendarController.dispose();
     super.dispose();
@@ -46,7 +35,8 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SizedBox();
+    /* return Scaffold(
       floatingActionButton: Observer(builder: (_) {
         return flow.professional.value == null
             ? SizedBox()
@@ -151,9 +141,8 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
         ],
       ),
     );
+   */
   }
-
-  BookingFlow get flow => Provider.of<BookingFlow>(context, listen: false);
 }
 
 class BookingsTabAddOptions extends StatefulWidget {
@@ -203,7 +192,8 @@ class _BlockTimeScreenState extends State<BlockTimeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<BookingFlow>(
+    return SizedBox();
+    /* return Consumer<BookingFlow>(
       builder: (_, flow, __) {
         final _staffTimeOff = StaffTimeOff(
           myDoc: StaffTimeOff.newRef(),
@@ -308,16 +298,21 @@ class _BlockTimeScreenState extends State<BlockTimeScreen> {
         );
       },
     );
+   */
   }
 }
 
 class FromToDatePicker extends StatefulWidget {
   final bool onlyTime;
   final DateTime from, to;
-  final Function(DateTime, DateTime) onChange;
+  final Function(DateTime, DateTime)? onChange;
 
   const FromToDatePicker(
-      {Key key, this.onlyTime = true, this.from, this.to, this.onChange})
+      {Key? key,
+      this.onlyTime = true,
+      required this.from,
+      required this.to,
+      this.onChange})
       : super(key: key);
   @override
   _FromToDatePickerState createState() => _FromToDatePickerState();
@@ -363,7 +358,7 @@ class _FromToDatePickerState extends State<FromToDatePicker> {
                   if (tod != null) {
                     fromTime = tod.toDateAndTime();
                     fromCtrl.text = timeFormatter.format(fromTime);
-                    widget?.onChange(fromTime, toTime);
+                    widget.onChange?.call(fromTime, toTime);
                   }
                 },
               ),
@@ -396,7 +391,7 @@ class _FromToDatePickerState extends State<FromToDatePicker> {
                       toTime = fromTime.add(Duration(minutes: 1));
                     }
                     toCtrl.text = timeFormatter.format(toTime);
-                    widget?.onChange(fromTime, toTime);
+                    widget.onChange?.call(fromTime, toTime);
                   }
                 },
               ),

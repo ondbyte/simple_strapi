@@ -5,14 +5,16 @@ import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
 import 'package:bapp/super_strapi/my_strapi/localityX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
+import 'package:bapp/super_strapi/my_strapi/x_helpers.dart';
 import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:bapp/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class PickAPlaceScreen extends StatelessWidget {
-  final Country country;
-  const PickAPlaceScreen({this.country, Key key}) : super(key: key);
+  final Country? country;
+  const PickAPlaceScreen({this.country, Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +31,7 @@ class PickAPlaceScreen extends StatelessWidget {
     return FutureBuilder<List<Country>>(
       future: LocalityX.i.getCountries(),
       builder: (_, snap) {
+        final data = snap.data ?? [];
         return Scaffold(
           appBar: AppBar(
             automaticallyImplyLeading: true,
@@ -37,12 +40,12 @@ class PickAPlaceScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.headline1,
             ),
           ),
-          body: snap.hasData
+          body: snap.connectionState == ConnectionState.done
               ? ListView(
                   children: <Widget>[
-                    ...snap.data.map(
+                    ...data.map(
                       (e) => ListTile(
-                        title: Text(e.name),
+                        title: Text(e.name ?? "no name inform yadu"),
                         trailing: Icon(Icons.arrow_forward_ios),
                         onTap: () async {
                           //cloudStore.getLocationsInCountry(e);
@@ -73,15 +76,20 @@ class PickAPlaceScreen extends StatelessWidget {
         ),
       ),
       body: FutureBuilder<List<City>>(
-        future: LocalityX.i.getCitiesOfCountry(country),
+        future: runNullAware<List<City>>(
+          country,
+          (c) => LocalityX.i.getCitiesOfCountry(c),
+          ifNull: [],
+        ),
         builder: (_, snap) {
+          final data = snap.data ?? [];
           return snap.hasData
               ? ListView(
                   children: List.generate(
-                    snap.data.length,
+                    data.length,
                     (index) => _getSubLocationWidget(
                       context,
-                      snap.data[index],
+                      data[index],
                     ),
                   ),
                 )
@@ -92,7 +100,7 @@ class PickAPlaceScreen extends StatelessWidget {
   }
 
   Widget _getSubLocationWidget(BuildContext context, City city) {
-    return city.enabled
+    return city.enabled ?? false
         ? Column(
             children: [
               ListTile(
@@ -103,27 +111,36 @@ class PickAPlaceScreen extends StatelessWidget {
                 ),
                 onTap: () async {
                   if (UserX.i.userPresent) {
-                    await Users.update(UserX.i.user().copyWIth(city: city));
+                    final copied = UserX.i.user()?.copyWIth(city: city);
+                    if (copied is User) {
+                      await Users.update(copied);
+                    }
                   } else {
-                    await DefaultDataX.i.setLocalityOrCity(null, city);
+                    await DefaultDataX.i.setLocalityOrCity(
+                      city: city,
+                    );
                   }
                   BappNavigator.pushAndRemoveAll(context, Bapp());
                 },
               ),
               ...List.generate(
-                city.localities.length,
+                city.localities?.length ?? 0,
                 (index) => ListTile(
                   trailing: Icon(Icons.arrow_forward_ios),
-                  title: Text(city.localities[index].name,
+                  title: Text(city.localities?[index].name ?? "",
                       style: Theme.of(context).textTheme.subtitle2),
                   onTap: () async {
                     if (UserX.i.userPresent) {
-                      await Users.update(UserX.i
+                      final copied = UserX.i
                           .user()
-                          .copyWIth(locality: city.localities[index]));
+                          ?.copyWIth(locality: city.localities?[index]);
+                      if (copied is User) {
+                        await Users.update(copied);
+                      }
                     } else {
-                      await DefaultDataX.i
-                          .setLocalityOrCity(city.localities[index], null);
+                      await DefaultDataX.i.setLocalityOrCity(
+                        locality: city.localities?[index],
+                      );
                     }
                     BappNavigator.pushAndRemoveAll(context, Bapp());
                   },
