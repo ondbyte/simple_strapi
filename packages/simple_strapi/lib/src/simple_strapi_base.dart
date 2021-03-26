@@ -270,6 +270,10 @@ class Strapi {
       final uri = _strapiUri(path, params: params, queryString: queryString);
       if (verbose) {
         sPrint(uri);
+        sPrint(body);
+        sPrint(method);
+        sPrint(params);
+        sPrint(queryString);
       }
       final request = await _client.openUrl(
         method,

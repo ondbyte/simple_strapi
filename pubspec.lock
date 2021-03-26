@@ -1025,8 +1025,8 @@ packages:
   super_strapi_generated:
     dependency: "direct main"
     description:
-      path: "/media/yadu/yadu/code/bigmints/super_strapi_generated"
-      relative: false
+      path: "packages/super_strapi_generated"
+      relative: true
     source: path
     version: "0.0.0"
   synchronized:

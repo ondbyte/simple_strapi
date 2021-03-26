@@ -42,7 +42,7 @@ dependencies:
   simple_strapi:
     path: ./packages/simple_strapi
   super_strapi_generated:
-    path: /media/yadu/yadu/code/bigmints/super_strapi_generated
+    path: ./packages/super_strapi_generated
 
   #ICONS
   feather_icons_flutter: ^4.7.4
