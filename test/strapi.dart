@@ -16,7 +16,7 @@ import 'package:simple_strapi/simple_strapi.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 Future<void> main() async {
-  test("countries", () async {
+  /*test("countries", () async {
     final i = StrapiSettings.i;
     final cs = await LocalityX.i.getCountries();
     if (cs.isNotEmpty) {
@@ -47,9 +47,9 @@ Future<void> main() async {
         query: StrapiFieldQuery.equalTo,
         value: "Al Barsha",
       ),
-  );
+  ); */
 
-  test(
+  /* test(
     "graph query",
     () async {
       final q = StrapiCollectionQuery(
@@ -59,6 +59,19 @@ Future<void> main() async {
 
       final response = await Cities.executeQuery(q);
       print(response);
+    },
+  ); */
+  test(
+    "default data test",
+    () async {
+      await StrapiSettings.i.init();
+      final dd = await DefaultDatas.findOne("605ccfad19ddf7000e3ed9c0");
+      if (dd is DefaultData) {
+        final newDd = dd.copyWIth(
+          locality: Locality.fromID("5ffb4e8f7c2625000eb3b516"),
+        );
+        await DefaultDatas.update(newDd);
+      }
     },
   );
 }
