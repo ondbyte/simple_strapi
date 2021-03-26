@@ -37,7 +37,7 @@ class _BookingsTabState extends State<BookingsTab> {
       ) {
         return OrientationBuilder(
           builder: (_, o) {
-            return Observer(
+            return Builder(
               builder: (_) {
                 return UserX.i.userPresent
                     ? AskToLoginWidget(
@@ -86,7 +86,7 @@ class _BookingsTabState extends State<BookingsTab> {
 
   Widget _getBookingsScroll() {
     return SafeArea(
-      child: Observer(
+      child: Builder(
         builder: (_) {
           final list = [];
           if (list.isEmpty) {

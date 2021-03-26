@@ -29,9 +29,8 @@ class LocationSwitch extends StatelessWidget {
           ),
           Builder(
             builder: (_) {
-              return Observer(
+              return Builder(
                 builder: (_) {
-                  final bappUser = UserX.i.user();
                   return Text(
                     UserX.i.userNotPresent
                         ? placeName(

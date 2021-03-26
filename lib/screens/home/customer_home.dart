@@ -14,7 +14,6 @@ import 'package:bapp/widgets/app/menu.dart';
 import 'package:bapp/widgets/size_provider.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 
 class CustomerHome extends StatefulWidget {
   @override
@@ -36,13 +35,13 @@ class _CustomerHomeState extends State<CustomerHome> {
       body: Padding(
         padding: EdgeInsets.symmetric(horizontal: 0),
         child: IndexedStack(
+          index: _selectedPage,
           children: [
             DiscoverTab(),
             BookingsTab(),
             FavoritesTab(),
             UpdatesTab(),
           ],
-          index: _selectedPage,
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -122,7 +121,7 @@ class _PendingUpdatesIconState extends State<PendingUpdatesIcon> {
             },
           ),
         if (_childSize != null)
-          Observer(
+          Builder(
             builder: (_) {
               final totalUpdates = 2;
               return totalUpdates > 0

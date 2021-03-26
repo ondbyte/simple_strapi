@@ -49,26 +49,34 @@ class BusinessX extends X {
 
   Future<List<Business>> getNearestBusinesses({
     BusinessCategory? forCategory,
+    bool force = false,
+    Rx? observe,
   }) async {
     final q = StrapiCollectionQuery(
       collectionName: Business.collectionName,
       requiredFields: Business.fields(),
     );
-    if (forCategory is BusinessCategory) {
-      q
-        ..whereModelField(
-          field: Business.fields.business_category,
-          query: StrapiModelQuery(
-            requiredFields: BusinessCategory.fields(),
-          )..whereField(
-              field: BusinessCategory.fields.name,
-              query: StrapiFieldQuery.equalTo,
-              value: forCategory.name,
-            ),
-        );
-    }
-    final found = await Businesses.executeQuery(q);
-    return found;
+    return memoize(
+      "getNearestBusinesses",
+      () async {
+        if (forCategory is BusinessCategory) {
+          q.whereModelField(
+            field: Business.fields.business_category,
+            query: StrapiModelQuery(
+              requiredFields: BusinessCategory.fields(),
+            )..whereField(
+                field: BusinessCategory.fields.name,
+                query: StrapiFieldQuery.equalTo,
+                value: forCategory.name,
+              ),
+          );
+        }
+        final found = await Businesses.executeQuery(q);
+        return found;
+      },
+      force: force,
+      runWhenChanged: observe,
+    );
   }
 
   @override

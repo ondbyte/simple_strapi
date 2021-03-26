@@ -20,7 +20,6 @@ import 'package:bapp/widgets/tiles/viewable_rating_tile.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:show_up_animation/show_up_animation.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
@@ -36,7 +35,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
   Widget build(BuildContext context) {
     var _showReviews = true;
     return Scaffold(
-      bottomNavigationBar: Observer(
+      bottomNavigationBar: Builder(
         builder: (_) {
           return UserX.i.userPresent
               ? BottomPrimaryButton(
@@ -64,7 +63,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                 actions: [
                   Builder(
                     builder: (_) {
-                      return Observer(
+                      return Builder(
                         builder: (_) {
                           final hearted = UserX.i.user()?.favourites?.any(
                                     (e) => e.business?.id == widget.business.id,
@@ -131,7 +130,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                           EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       onTrailingTapped: () {},
                     ),
-                    Observer(builder: (_) {
+                    Builder(builder: (_) {
                       return _showReviews
                           ? getBappTabBar(
                               context,
@@ -151,7 +150,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
           },
           body: Stack(
             children: [
-              Observer(
+              Builder(
                 builder: (_) {
                   if (_showReviews) {
                     return Container(

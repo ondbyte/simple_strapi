@@ -28,7 +28,7 @@ class _UpdatesTabState extends State<UpdatesTab> {
               length: 2,
               child: LayoutBuilder(
                 builder: (_, cons) {
-                  return Observer(
+                  return Builder(
                     builder: (_) {
                       return Column(
                         mainAxisSize: MainAxisSize.min,

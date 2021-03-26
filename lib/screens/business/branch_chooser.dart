@@ -8,7 +8,6 @@ import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Action;
-import 'package:flutter_mobx/flutter_mobx.dart';
 import "package:provider/provider.dart";
 
 class BranchChooserScreen extends StatelessWidget {
@@ -27,7 +26,7 @@ class BranchChooserScreen extends StatelessWidget {
         builder: (
           _,
         ) {
-          return Observer(
+          return Builder(
             builder: (context) {
               final branches = UserX.i.user()?.partner?.businesses ?? [];
               return Padding(

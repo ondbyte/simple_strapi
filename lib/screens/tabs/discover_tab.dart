@@ -14,6 +14,7 @@ import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
 import 'package:bapp/super_strapi/my_strapi/localityX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x_helpers.dart';
+import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
 import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:bapp/widgets/search_bar.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
@@ -22,7 +23,6 @@ import 'package:bapp/widgets/tiles/rr_list_tile.dart';
 import 'package:bapp/widgets/tiles/see_all_tile.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:get/state_manager.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
@@ -38,7 +38,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
       builder: (
         _,
       ) {
-        return Observer(builder: (_) {
+        return Builder(builder: (_) {
           return CustomScrollView(
             slivers: <Widget>[
               SliverPadding(
@@ -97,6 +97,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     ),
                     _getCategoriesScroller(context),
                     if (false)
+                      // ignore: dead_code
                       const SizedBox(
                         height: 30,
                       ),
@@ -147,10 +148,13 @@ class _DiscoverTabState extends State<DiscoverTab> {
   }
 
   Widget _getNearestFeatured(BuildContext context) {
-    return Obx(
-      () {
-        return FutureBuilder<List<Business>>(
-          future: BusinessX.i.getNearestBusinesses(),
+    return Builder(
+      builder: (_) {
+        return XFutureBuilder<List<Business>>(
+          futureCaller: (force) => BusinessX.i.getNearestBusinesses(
+            force: force,
+          ),
+          observe: UserX.i.user,
           builder: (_, snap) {
             final data = snap.data ?? [];
             return LayoutBuilder(
@@ -221,7 +225,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
       future: CategoryX.i.getAllCategories(),
       builder: (_, snap) {
         final data = snap.data ?? [];
-        return Observer(
+        return Builder(
           builder: (_) {
             return SearchBarWidget(
               possibilities: (data.map((e) => e.name ?? "null").toList())
@@ -255,7 +259,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
   }
 
   Widget _getHowWasYourExperience(BuildContext context) {
-    return Observer(
+    return Builder(
       builder: (_) {
         return SizedBox();
         /* if (flow.myBookings.isEmpty) {
@@ -353,7 +357,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
         future: CategoryX.i.getAllCategories(),
         builder: (_, snap) {
           final data = snap.data ?? [];
-          return Observer(
+          return Builder(
             builder: (_) {
               return Row(
                 children: [
@@ -377,6 +381,30 @@ class _DiscoverTabState extends State<DiscoverTab> {
 
   Widget _getCategoryBox(BusinessCategory c) {
     return Obx(() => GestureDetector(
+          onTap: () {
+            final place = UserX.i.userNotPresent
+                ? placeName(
+                      city: DefaultDataX.i.defaultData()?.city,
+                      locality: DefaultDataX.i.defaultData()?.locality,
+                    ) ??
+                    "no place, inform yadu"
+                : placeName(
+                      city: UserX.i.user()?.city,
+                      locality: UserX.i.user()?.locality,
+                    ) ??
+                    "no place, inform yadu";
+            BappNavigator.push(
+              context,
+              BranchesResultScreen(
+                categoryImage: c.image?.url ?? "",
+                categoryName: c.name ?? "",
+                placeName: place,
+                title: "Top " + (c.name ?? "no cat name, inform yadu"),
+                subTitle: "In " + place,
+                futureBranchList: BusinessX.i.getNearestBusinesses(),
+              ),
+            );
+          },
           child: RRShape(
             child: Container(
               padding: EdgeInsets.all(10),
@@ -402,30 +430,6 @@ class _DiscoverTabState extends State<DiscoverTab> {
               ),
             ),
           ),
-          onTap: () {
-            final place = UserX.i.userNotPresent
-                ? placeName(
-                      city: DefaultDataX.i.defaultData()?.city,
-                      locality: DefaultDataX.i.defaultData()?.locality,
-                    ) ??
-                    "no place, inform yadu"
-                : placeName(
-                      city: UserX.i.user()?.city,
-                      locality: UserX.i.user()?.locality,
-                    ) ??
-                    "no place, inform yadu";
-            BappNavigator.push(
-              context,
-              BranchesResultScreen(
-                categoryImage: c.image?.url ?? "",
-                categoryName: c.name ?? "",
-                placeName: place,
-                title: "Top " + (c.name ?? "no cat name, inform yadu"),
-                subTitle: "In " + place,
-                futureBranchList: BusinessX.i.getNearestBusinesses(),
-              ),
-            );
-          },
         ));
   }
 }

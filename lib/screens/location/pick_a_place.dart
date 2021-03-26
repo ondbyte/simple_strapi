@@ -116,9 +116,12 @@ class PickAPlaceScreen extends StatelessWidget {
                       await Users.update(copied);
                     }
                   } else {
-                    await DefaultDataX.i.setLocalityOrCity(
-                      city: city,
-                    );
+                    final copied = DefaultDataX.i.defaultData()?.copyWIth(
+                          city: city,
+                        );
+                    if (copied is DefaultData) {
+                      await DefaultDatas.update(copied);
+                    }
                   }
                   BappNavigator.pushAndRemoveAll(context, Bapp());
                 },
@@ -138,9 +141,12 @@ class PickAPlaceScreen extends StatelessWidget {
                         await Users.update(copied);
                       }
                     } else {
-                      await DefaultDataX.i.setLocalityOrCity(
-                        locality: city.localities?[index],
-                      );
+                      final copied = DefaultDataX.i.defaultData()?.copyWIth(
+                            locality: city.localities?[index],
+                          );
+                      if (copied is DefaultData) {
+                        await DefaultDatas.update(copied);
+                      }
                     }
                     BappNavigator.pushAndRemoveAll(context, Bapp());
                   },

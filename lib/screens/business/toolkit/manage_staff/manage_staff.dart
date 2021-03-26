@@ -42,7 +42,7 @@ class _BusinessManageStaffScreenState extends State<BusinessManageStaffScreen> {
       ),
       body: Builder(
         builder: (_) {
-          return Observer(builder: (_) {
+          return Builder(builder: (_) {
             final staffs = [];
             return CustomScrollView(
               slivers: [
@@ -53,7 +53,7 @@ class _BusinessManageStaffScreenState extends State<BusinessManageStaffScreen> {
                         staffs.length,
                         (index) => BusinessStaffListTile(
                           staff: staffs[index],
-                          trailing: Observer(
+                          trailing: Builder(
                             builder: (_) {
                               return Switch(
                                 value: staffs[index].enabled.value,

@@ -124,13 +124,13 @@ class _BappNavigatorState extends State<BappNavigator> {
         return AlertDialog(
           content: Text("Close app and exit?"),
           actions: [
-            FlatButton(
+            TextButton(
               onPressed: () {
                 _navKey.currentState?.pop(true);
               },
               child: Text("Yes"),
             ),
-            FlatButton(
+            TextButton(
               onPressed: () {
                 _navKey.currentState?.pop(false);
               },

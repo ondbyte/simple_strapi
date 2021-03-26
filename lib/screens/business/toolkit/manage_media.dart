@@ -30,7 +30,7 @@ class _BusinessManageMediaScreenState extends State<BusinessManageMediaScreen> {
           automaticallyImplyLeading: true,
           title: Text("Add Branch images"),
         ),
-        bottomNavigationBar: Observer(
+        bottomNavigationBar: Builder(
           builder: (_) {
             final b = !_changed.value;
             return BottomPrimaryButton(
@@ -63,10 +63,10 @@ class _BusinessManageMediaScreenState extends State<BusinessManageMediaScreen> {
           padding: EdgeInsets.zero,
           child: Builder(
             builder: (_) {
-              return Observer(
+              return Builder(
                 builder: (_) {
                   return AddImageTileWidget(
-                    existingImages:{},
+                    existingImages: {},
                     maxImage: 6,
                     title: "Add Images",
                     subTitle: "Add upto 6 Images that show off your business",

@@ -10,7 +10,6 @@ import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/widgets/choose_category.dart';
 import 'package:bapp/widgets/login_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
@@ -40,7 +39,7 @@ class _ChooseYourBusinessCategoryScreenState
                       child: FutureBuilder<List<BusinessCategory>>(
                         future: CategoryX.i.getAllCategories(),
                         builder: (_, snap) {
-                          return Observer(
+                          return Builder(
                             builder: (_) {
                               final data = snap.data ?? [];
 

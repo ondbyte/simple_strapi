@@ -12,7 +12,7 @@ class CompleteYourBookingTile extends StatelessWidget {
   const CompleteYourBookingTile({Key? key, this.padding}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return Observer(
+    return Builder(
       builder: (_) {
         return SizedBox();
         return Padding(

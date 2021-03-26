@@ -20,7 +20,7 @@ class _LoadingStackWidgetState extends State<LoadingStackWidget> {
     return Stack(
       children: [
         widget.child,
-        Observer(
+        Builder(
           builder: (_) {
             return kLoading.value
                 ? SizedBox(

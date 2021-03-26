@@ -46,7 +46,7 @@ class _MenuState extends State<Menu> {
           builder: (
             _,
           ) {
-            return Observer(
+            return Builder(
               builder: (_) {
                 return ListView(
                   children: [

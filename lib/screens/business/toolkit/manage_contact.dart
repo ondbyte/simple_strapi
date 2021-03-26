@@ -83,7 +83,7 @@ class _BusinessManageContactDetailsScreenState
                           "Custom PhoneNumber",
                           style: Theme.of(context).textTheme.caption,
                         ),
-                        Observer(builder: (_) {
+                        Builder(builder: (_) {
                           return Switch(
                               value: _isCustomNumber.value,
                               onChanged: (b) {
