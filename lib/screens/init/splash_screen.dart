@@ -12,7 +12,6 @@ import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
 import 'package:bapp/super_strapi/my_strapi/firebaseX.dart';
 import 'package:bapp/super_strapi/my_strapi/init.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
-import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';

@@ -1,4 +1,3 @@
-import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

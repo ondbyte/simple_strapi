@@ -2,7 +2,6 @@ import 'package:bapp/classes/firebase_structures/business_services.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/super_strapi/my_strapi/businessX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
-import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:bapp/widgets/firebase_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

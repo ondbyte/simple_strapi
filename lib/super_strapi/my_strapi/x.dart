@@ -1,11 +1,9 @@
 import 'package:async/async.dart';
-import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
 export "x_helpers.dart";
-
-export 'package:bapp/super_strapi/super_strapi.dart';
+export "./x_extensions/all.dart";
 
 ///base class for new bapp reactive stores
 abstract class X {

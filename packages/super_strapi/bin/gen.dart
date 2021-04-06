@@ -549,8 +549,8 @@ class Gen {
       if (type.symbol == "Map<String,dynamic>?") {
         return CodeExpression(
           fromMap
-              ? Code("jsonDecode(map[\"${f.name}\"])")
-              : Code("\"${f.name}\":jsonEncode(${f.name})"),
+              ? Code("map[\"${f.name}\"]")
+              : Code("\"${f.name}\":${f.name}"),
         );
       }
       return fromMap

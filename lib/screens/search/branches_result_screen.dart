@@ -3,7 +3,6 @@ import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/screens/business/business_profile/business_profile.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/stores/booking_flow.dart';
-import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';

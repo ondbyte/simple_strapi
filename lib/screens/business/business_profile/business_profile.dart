@@ -13,7 +13,6 @@ import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/super_strapi/my_strapi/reviewX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
-import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:bapp/widgets/firebase_image.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:bapp/widgets/tiles/viewable_rating_tile.dart';

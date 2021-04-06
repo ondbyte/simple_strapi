@@ -293,15 +293,6 @@ class Strapi {
     try {
       var closed = false;
       final uri = _strapiUri(path, params: params, queryString: queryString);
-      if (verbose) {
-        sPrint(uri);
-        sPrint(
-          jsonEncode(body),
-        );
-        sPrint(method);
-        sPrint(params);
-        sPrint(queryString);
-      }
       final request = await _client.openUrl(
         method,
         uri,
@@ -334,8 +325,17 @@ class Strapi {
       try {
         responseJson = jsonDecode(responseBodyString);
         if (verbose) {
-          sPrint("raw response is");
-          sPrint(JsonEncoder.withIndent("  ").convert(responseJson));
+          sPrint("================Verbose report==================");
+          print(uri);
+          print(
+            jsonEncode(body),
+          );
+          print(method);
+          print(params);
+          print(queryString);
+          print("raw response is");
+          print(JsonEncoder.withIndent("  ").convert(responseJson));
+          sPrint("================Verbose report end==================");
         }
       } on FormatException catch (e) {
         return StrapiResponse(

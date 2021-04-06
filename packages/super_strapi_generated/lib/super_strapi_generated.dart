@@ -2,7 +2,7 @@ import 'package:simple_strapi/simple_strapi.dart';
 import 'dart:convert';
 
 class City {
-  City.fromID(this.id)  
+  City.fromID(this.id)
       : _synced = false,
         name = null,
         enabled = null,
@@ -265,10 +265,8 @@ class Cities {
         final object = response.body.first;
         if (object is Map && object.containsKey("data")) {
           final data = object["data"];
-          print("===========================");
-          print(data);
-          if (data is Map && data.containsKey(collectionName)) {
-            final myList = data[collectionName];
+          if (data is Map && data.containsKey(query.collectionName)) {
+            final myList = data[query.collectionName];
             if (myList is List) {
               final list = <City>[];
               myList.forEach((e) {
@@ -629,10 +627,8 @@ class Employees {
         final object = response.body.first;
         if (object is Map && object.containsKey("data")) {
           final data = object["data"];
-          print("===========================");
-          print(data);
-          if (data is Map && data.containsKey(collectionName)) {
-            final myList = data[collectionName];
+          if (data is Map && data.containsKey(query.collectionName)) {
+            final myList = data[query.collectionName];
             if (myList is List) {
               final list = <Employee>[];
               myList.forEach((e) {
@@ -1126,10 +1122,8 @@ class Bookings {
         final object = response.body.first;
         if (object is Map && object.containsKey("data")) {
           final data = object["data"];
-          print("===========================");
-          print(data);
-          if (data is Map && data.containsKey(collectionName)) {
-            final myList = data[collectionName];
+          if (data is Map && data.containsKey(query.collectionName)) {
+            final myList = data[query.collectionName];
             if (myList is List) {
               final list = <Booking>[];
               myList.forEach((e) {
@@ -1493,10 +1487,8 @@ class Localities {
         final object = response.body.first;
         if (object is Map && object.containsKey("data")) {
           final data = object["data"];
-          print("===========================");
-          print(data);
-          if (data is Map && data.containsKey(collectionName)) {
-            final myList = data[collectionName];
+          if (data is Map && data.containsKey(query.collectionName)) {
+            final myList = data[query.collectionName];
             if (myList is List) {
               final list = <Locality>[];
               myList.forEach((e) {
@@ -1810,10 +1802,8 @@ class PushNotifications {
         final object = response.body.first;
         if (object is Map && object.containsKey("data")) {
           final data = object["data"];
-          print("===========================");
-          print(data);
-          if (data is Map && data.containsKey(collectionName)) {
-            final myList = data[collectionName];
+          if (data is Map && data.containsKey(query.collectionName)) {
+            final myList = data[query.collectionName];
             if (myList is List) {
               final list = <PushNotification>[];
               myList.forEach((e) {
@@ -2205,10 +2195,8 @@ class Countries {
         final object = response.body.first;
         if (object is Map && object.containsKey("data")) {
           final data = object["data"];
-          print("===========================");
-          print(data);
-          if (data is Map && data.containsKey(collectionName)) {
-            final myList = data[collectionName];
+          if (data is Map && data.containsKey(query.collectionName)) {
+            final myList = data[query.collectionName];
             if (myList is List) {
               final list = <Country>[];
               myList.forEach((e) {
@@ -2727,10 +2715,8 @@ class Businesses {
         final object = response.body.first;
         if (object is Map && object.containsKey("data")) {
           final data = object["data"];
-          print("===========================");
-          print(data);
-          if (data is Map && data.containsKey(collectionName)) {
-            final myList = data[collectionName];
+          if (data is Map && data.containsKey(query.collectionName)) {
+            final myList = data[query.collectionName];
             if (myList is List) {
               final list = <Business>[];
               myList.forEach((e) {
@@ -3099,10 +3085,8 @@ class BusinessCategories {
         final object = response.body.first;
         if (object is Map && object.containsKey("data")) {
           final data = object["data"];
-          print("===========================");
-          print(data);
-          if (data is Map && data.containsKey(collectionName)) {
-            final myList = data[collectionName];
+          if (data is Map && data.containsKey(query.collectionName)) {
+            final myList = data[query.collectionName];
             if (myList is List) {
               final list = <BusinessCategory>[];
               myList.forEach((e) {
@@ -3454,10 +3438,8 @@ class Partners {
         final object = response.body.first;
         if (object is Map && object.containsKey("data")) {
           final data = object["data"];
-          print("===========================");
-          print(data);
-          if (data is Map && data.containsKey(collectionName)) {
-            final myList = data[collectionName];
+          if (data is Map && data.containsKey(query.collectionName)) {
+            final myList = data[query.collectionName];
             if (myList is List) {
               final list = <Partner>[];
               myList.forEach((e) {
@@ -3785,10 +3767,8 @@ class DefaultDatas {
         final object = response.body.first;
         if (object is Map && object.containsKey("data")) {
           final data = object["data"];
-          print("===========================");
-          print(data);
-          if (data is Map && data.containsKey(collectionName)) {
-            final myList = data[collectionName];
+          if (data is Map && data.containsKey(query.collectionName)) {
+            final myList = data[query.collectionName];
             if (myList is List) {
               final list = <DefaultData>[];
               myList.forEach((e) {
@@ -4092,11 +4072,8 @@ class MasterProducts {
         final object = response.body.first;
         if (object is Map && object.containsKey("data")) {
           final data = object["data"];
-          print("===========================");
-          print(data);
-          _collect
-          if (data is Map && data.containsKey(collectionName)) {
-            final myList = data[collectionName];
+          if (data is Map && data.containsKey(query.collectionName)) {
+            final myList = data[query.collectionName];
             if (myList is List) {
               final list = <MasterProduct>[];
               myList.forEach((e) {
@@ -4423,10 +4400,8 @@ class BusinessFeatures {
         final object = response.body.first;
         if (object is Map && object.containsKey("data")) {
           final data = object["data"];
-          print("===========================");
-          print(data);
-          if (data is Map && data.containsKey(collectionName)) {
-            final myList = data[collectionName];
+          if (data is Map && data.containsKey(query.collectionName)) {
+            final myList = data[query.collectionName];
             if (myList is List) {
               final list = <BusinessFeature>[];
               myList.forEach((e) {
@@ -4824,10 +4799,8 @@ class Reviews {
         final object = response.body.first;
         if (object is Map && object.containsKey("data")) {
           final data = object["data"];
-          print("===========================");
-          print(data);
-          if (data is Map && data.containsKey(collectionName)) {
-            final myList = data[collectionName];
+          if (data is Map && data.containsKey(query.collectionName)) {
+            final myList = data[query.collectionName];
             if (myList is List) {
               final list = <Review>[];
               myList.forEach((e) {
@@ -5194,10 +5167,8 @@ class Roles {
         final object = response.body.first;
         if (object is Map && object.containsKey("data")) {
           final data = object["data"];
-          print("===========================");
-          print(data);
-          if (data is Map && data.containsKey(collectionName)) {
-            final myList = data[collectionName];
+          if (data is Map && data.containsKey(query.collectionName)) {
+            final myList = data[query.collectionName];
             if (myList is List) {
               final list = <Role>[];
               myList.forEach((e) {
@@ -5721,10 +5692,8 @@ class Users {
         final object = response.body.first;
         if (object is Map && object.containsKey("data")) {
           final data = object["data"];
-          print("===========================");
-          print(data);
-          if (data is Map && data.containsKey(collectionName)) {
-            final myList = data[collectionName];
+          if (data is Map && data.containsKey(query.collectionName)) {
+            final myList = data[query.collectionName];
             if (myList is List) {
               final list = <User>[];
               myList.forEach((e) {
@@ -6156,10 +6125,8 @@ class Permissions {
         final object = response.body.first;
         if (object is Map && object.containsKey("data")) {
           final data = object["data"];
-          print("===========================");
-          print(data);
-          if (data is Map && data.containsKey(collectionName)) {
-            final myList = data[collectionName];
+          if (data is Map && data.containsKey(query.collectionName)) {
+            final myList = data[query.collectionName];
             if (myList is List) {
               final list = <Permission>[];
               myList.forEach((e) {
@@ -6459,7 +6426,7 @@ class StrapiFile {
           map["caption"],
           StrapiUtils.parseInt(map["width"]),
           StrapiUtils.parseInt(map["height"]),
-          jsonDecode(map["formats"]),
+          map["formats"],
           map["hash"],
           map["ext"],
           map["mime"],
@@ -6467,7 +6434,7 @@ class StrapiFile {
           map["url"],
           map["previewUrl"],
           map["provider"],
-          jsonDecode(map["provider_metadata"]),
+          map["provider_metadata"],
           map["related"],
           StrapiUtils.parseDateTime(map["createdAt"]),
           StrapiUtils.parseDateTime(map["updatedAt"]),
@@ -6478,7 +6445,7 @@ class StrapiFile {
       map["caption"],
       StrapiUtils.parseInt(map["width"]),
       StrapiUtils.parseInt(map["height"]),
-      jsonDecode(map["formats"]),
+      map["formats"],
       map["hash"],
       map["ext"],
       map["mime"],
@@ -6486,7 +6453,7 @@ class StrapiFile {
       map["url"],
       map["previewUrl"],
       map["provider"],
-      jsonDecode(map["provider_metadata"]),
+      map["provider_metadata"],
       map["related"],
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
@@ -6501,8 +6468,7 @@ class StrapiFile {
       if (!_emptyFields.caption && caption != null) "caption": caption,
       if (!_emptyFields.width && width != null) "width": width,
       if (!_emptyFields.height && height != null) "height": height,
-      if (!_emptyFields.formats && formats != null)
-        "formats": jsonEncode(formats),
+      if (!_emptyFields.formats && formats != null) "formats": formats,
       if (!_emptyFields.hash && hash != null) "hash": hash,
       if (!_emptyFields.ext && ext != null) "ext": ext,
       if (!_emptyFields.mime && mime != null) "mime": mime,
@@ -6512,7 +6478,7 @@ class StrapiFile {
         "previewUrl": previewUrl,
       if (!_emptyFields.provider && provider != null) "provider": provider,
       if (!_emptyFields.provider_metadata && provider_metadata != null)
-        "provider_metadata": jsonEncode(provider_metadata),
+        "provider_metadata": provider_metadata,
       if (!_emptyFields.related && related != null) "related": related,
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
@@ -6669,10 +6635,8 @@ class StrapiFiles {
         final object = response.body.first;
         if (object is Map && object.containsKey("data")) {
           final data = object["data"];
-          print("===========================");
-          print(data);
-          if (data is Map && data.containsKey(collectionName)) {
-            final myList = data[collectionName];
+          if (data is Map && data.containsKey(query.collectionName)) {
+            final myList = data[query.collectionName];
             if (myList is List) {
               final list = <StrapiFile>[];
               myList.forEach((e) {

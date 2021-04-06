@@ -7,7 +7,6 @@ import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
 import 'package:bapp/super_strapi/my_strapi/localityX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x_helpers.dart';
-import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:bapp/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';

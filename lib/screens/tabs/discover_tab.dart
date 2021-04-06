@@ -15,7 +15,6 @@ import 'package:bapp/super_strapi/my_strapi/localityX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x_helpers.dart';
 import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
-import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:bapp/widgets/search_bar.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:bapp/widgets/tiles/complete_your_booking_tile.dart';
@@ -132,7 +131,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                         ) {
                           return (UserX.i.userNotPresent ||
                                   UserX.i.user()?.partner != null)
-                              ? _getOwnABusiness(context)
+                              ? const SizedBox() //_getOwnABusiness(context)
                               : const SizedBox();
                         },
                       ),
@@ -380,56 +379,55 @@ class _DiscoverTabState extends State<DiscoverTab> {
   }
 
   Widget _getCategoryBox(BusinessCategory c) {
-    return Obx(() => GestureDetector(
-          onTap: () {
-            final place = UserX.i.userNotPresent
-                ? placeName(
-                      city: DefaultDataX.i.defaultData()?.city,
-                      locality: DefaultDataX.i.defaultData()?.locality,
-                    ) ??
-                    "no place, inform yadu"
-                : placeName(
-                      city: UserX.i.user()?.city,
-                      locality: UserX.i.user()?.locality,
-                    ) ??
-                    "no place, inform yadu";
-            BappNavigator.push(
-              context,
-              BranchesResultScreen(
-                categoryImage: c.image?.url ?? "",
-                categoryName: c.name ?? "",
-                placeName: place,
-                title: "Top " + (c.name ?? "no cat name, inform yadu"),
-                subTitle: "In " + place,
-                futureBranchList: BusinessX.i.getNearestBusinesses(),
-              ),
-            );
-          },
-          child: RRShape(
-            child: Container(
-              padding: EdgeInsets.all(10),
-              width: 120,
-              height: 80,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  colorFilter:
-                      ColorFilter.mode(Colors.black54, BlendMode.multiply),
-                  image: CachedNetworkImageProvider(
-                    c.image?.url,
-                  ),
-                ),
-              ),
-              child: Align(
-                alignment: Alignment.bottomLeft,
-                child: Text(
-                  c.name ?? "no cat name, inform yadu",
-                  style: Theme.of(context).textTheme.bodyText1?.apply(
-                        color: Theme.of(context).primaryColorLight,
-                      ),
-                ),
+    return GestureDetector(
+      onTap: () {
+        final place = UserX.i.userNotPresent
+            ? placeName(
+                  city: DefaultDataX.i.defaultData()?.city,
+                  locality: DefaultDataX.i.defaultData()?.locality,
+                ) ??
+                "no place, inform yadu"
+            : placeName(
+                  city: UserX.i.user()?.city,
+                  locality: UserX.i.user()?.locality,
+                ) ??
+                "no place, inform yadu";
+        BappNavigator.push(
+          context,
+          BranchesResultScreen(
+            categoryImage: c.image?.url ?? "",
+            categoryName: c.name ?? "",
+            placeName: place,
+            title: "Top " + (c.name ?? "no cat name, inform yadu"),
+            subTitle: "In " + place,
+            futureBranchList: BusinessX.i.getNearestBusinesses(),
+          ),
+        );
+      },
+      child: RRShape(
+        child: Container(
+          padding: EdgeInsets.all(10),
+          width: 120,
+          height: 80,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              colorFilter: ColorFilter.mode(Colors.black54, BlendMode.multiply),
+              image: CachedNetworkImageProvider(
+                c.image?.url,
               ),
             ),
           ),
-        ));
+          child: Align(
+            alignment: Alignment.bottomLeft,
+            child: Text(
+              c.name ?? "no cat name, inform yadu",
+              style: Theme.of(context).textTheme.bodyText1?.apply(
+                    color: Theme.of(context).primaryColorLight,
+                  ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

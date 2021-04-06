@@ -1,6 +1,5 @@
 import 'package:bapp/config/constants.dart';
 import 'package:flutter/material.dart';
-import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 import '../firebase_image.dart';

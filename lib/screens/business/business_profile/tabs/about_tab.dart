@@ -1,6 +1,5 @@
 import 'package:bapp/helpers/third_party_launcher.dart';
 import 'package:bapp/stores/booking_flow.dart';
-import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:bapp/widgets/padded_text.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';

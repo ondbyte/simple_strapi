@@ -1,7 +1,6 @@
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/super_strapi/my_strapi/partnerX.dart';
 import 'package:bapp/super_strapi/my_strapi/x.dart';
-import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/state_manager.dart';
 import 'package:simple_strapi/simple_strapi.dart';

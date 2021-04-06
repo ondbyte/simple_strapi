@@ -24,11 +24,12 @@ class StrapiCollectionQuery extends StrapiModelQuery {
   ///[limit] is the maximum number of documents in the response,
   ///[start] can be used to paginate the queries,
   StrapiCollectionQuery({
-    required this.collectionName,
+    required collectionName,
     required List<StrapiField> requiredFields,
     this.limit,
     this.start,
-  }) : super(requiredFields: requiredFields);
+  })  : this.collectionName = _collectionNameToGraphQlName(collectionName),
+        super(requiredFields: requiredFields);
 
   @override
   MapEntry<String, String> _queryParts() {
@@ -42,8 +43,9 @@ class StrapiCollectionQuery extends StrapiModelQuery {
   ///stringified query, pass the [collectionName] to replace the original root collectionName
   ///in output string
   String query({String? collectionName}) {
-    final cn =
-        _collectionNameToGraphQlName(collectionName ?? this.collectionName);
+    final cn = (collectionName is String)
+        ? _collectionNameToGraphQlName(collectionName)
+        : this.collectionName;
     final l = _queryParts();
     return "$cn(${l.key}){${l.value}}";
   }

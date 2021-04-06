@@ -1,6 +1,5 @@
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/screens/location/pick_a_location.dart';
-import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:flutter/material.dart';
 import 'package:google_place/google_place.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';

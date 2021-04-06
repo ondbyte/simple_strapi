@@ -1,7 +1,6 @@
 import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x.dart';
-import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 

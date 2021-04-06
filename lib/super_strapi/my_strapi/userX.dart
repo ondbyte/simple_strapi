@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
-import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:simple_strapi/simple_strapi.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';

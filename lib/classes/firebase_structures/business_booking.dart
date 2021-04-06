@@ -4,7 +4,6 @@ import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
-import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';

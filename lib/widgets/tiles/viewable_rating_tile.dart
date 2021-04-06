@@ -1,7 +1,6 @@
 import 'package:bapp/classes/firebase_structures/rating.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/booking_flow/review.dart';
-import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:flutter/material.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 

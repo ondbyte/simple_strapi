@@ -6,7 +6,6 @@ import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/location/search_a_place.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
-import 'package:bapp/super_strapi/super_strapi.dart';
 
 import 'package:flutter/material.dart';
 import 'package:geocoder/geocoder.dart' as g;

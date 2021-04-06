@@ -10,7 +10,6 @@ import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
 import 'package:bapp/super_strapi/my_strapi/init.dart';
 import 'package:bapp/super_strapi/my_strapi/localityX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
-import 'package:bapp/super_strapi/super_strapi.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:simple_strapi/simple_strapi.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';

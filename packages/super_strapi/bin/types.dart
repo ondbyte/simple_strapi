@@ -331,10 +331,8 @@ class <CollectionClassName> {
         final object = response.body.first;
         if(object is Map&&object.containsKey("data")){
           final data = object["data"];
-          print("===========================");
-          print(data);
-          if(data is Map&&data.containsKey(collectionName)){
-            final myList = data[collectionName];
+          if(data is Map&&data.containsKey(query.collectionName)){
+            final myList = data[query.collectionName];
             if(myList is List){
               final list = <className>[];
               myList.forEach((e){
