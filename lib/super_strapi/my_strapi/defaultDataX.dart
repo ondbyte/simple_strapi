@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:bapp/helpers/exceptions.dart';
 import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/super_strapi/my_strapi/x.dart';
 import 'package:device_info/device_info.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/state_manager.dart';
@@ -11,7 +13,7 @@ import 'package:simple_strapi/simple_strapi.dart'
 
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
-class DefaultDataX {
+class DefaultDataX extends X {
   static final i = DefaultDataX._x();
 
   DefaultDataX._x();
@@ -22,37 +24,24 @@ class DefaultDataX {
 
   bool isFirstTimeOnDevice = true;
 
+  late final StrapiObjectListener _updateListener;
+
   Future<DefaultData?> init() async {
     final path = (isMobile)
         ? (await getApplicationSupportDirectory()).path
         : Directory.current.path;
     Hive.init(path);
     _hiveBox = await Hive.openLazyBox("default_data");
-    final info = DeviceInfoPlugin();
-    final id = Platform.isLinux
-        ? "xyz"
-        : (Platform.isAndroid
-            ? (await info.androidInfo).androidId
-            : (await info.iosInfo).identifierForVendor);
 
     defaultData.value = await () async {
-      final data = Map.castFrom<dynamic, dynamic, String, dynamic>(
-          await _hiveBox?.get(id));
-      if (data is Map<String, dynamic>) {
-        try {
-          print(data);
-          return DefaultData.fromMap(data);
-        } catch (e) {
-          print(e);
-        }
-      }
-      return (await _getDefaultDataFromServer(id)) ??
-          (await DefaultDatas.create(DefaultData.fresh(deviceId: id)));
+      return (await getDefaultDataFromServer());
     }();
-    if (defaultData != null && (defaultData()?.synced ?? false)) {
-      _hiveBox?.put("$id", defaultData()?.toMap() ?? {});
+    if ((defaultData()?.synced ?? false)) {
+      _hiveBox?.put(DefaultDataKeys.defaultdata, defaultData()?.toMap() ?? {});
     }
     await _doOtherStorageStuffs();
+    _updateListener = _listenForUpdate();
+    print(defaultData());
     return defaultData.value;
   }
 
@@ -60,16 +49,67 @@ class DefaultDataX {
     isFirstTimeOnDevice =
         await getValue(DefaultDataKeys.isFirstTimeOnDevice, defaultValue: true);
     if (isFirstTimeOnDevice) {
-      await saveValue(DefaultDataKeys.isFirstTimeOnDevice, false);
+      await saveValue(
+        DefaultDataKeys.isFirstTimeOnDevice,
+        false,
+      );
     }
   }
 
-  Future<DefaultData?> _getDefaultDataFromServer(String id) async {
-    final multiple = await StrapiCollectionQuery(
+  StrapiObjectListener _listenForUpdate() {
+    final id = defaultData.value?.id;
+    if (id is String) {
+      return StrapiObjectListener(
+        id: id,
+        listener: (map) {
+          final newDefaultData = DefaultData.fromSyncedMap(map);
+          _hiveBox?.put(DefaultDataKeys.defaultdata, newDefaultData.toMap());
+          defaultData(newDefaultData);
+        },
+      );
+    } else {
+      throw BappException(msg: "cannot listen for strapi object");
+    }
+  }
+
+  Future<DefaultData?> getDefaultDataFromServer() async {
+    final info = DeviceInfoPlugin();
+    final id = Platform.isLinux
+        ? "xyz"
+        : (Platform.isAndroid
+            ? (await info.androidInfo).androidId
+            : (await info.iosInfo).identifierForVendor);
+    final query = StrapiCollectionQuery(
       collectionName: DefaultDatas.collectionName,
       limit: 1,
       requiredFields: DefaultData.fields(),
-    );
+    )
+      ..whereField(
+        field: DefaultData.fields.deviceId,
+        query: StrapiFieldQuery.equalTo,
+        value: "$id",
+      )
+      ..whereModelField(
+        field: DefaultData.fields.city,
+        query: StrapiModelQuery(
+          requiredFields: City.fields(),
+        ),
+      )
+      ..whereModelField(
+        field: DefaultData.fields.locality,
+        query: StrapiModelQuery(
+          requiredFields: Locality.fields(),
+        ),
+      );
+
+    final response = await DefaultDatas.executeQuery(query);
+    if (response.isNotEmpty) {
+      return response.first;
+    } else {
+      return DefaultDatas.create(
+        DefaultData.fresh(deviceId: id),
+      );
+    }
   }
 
   Future setLocalityOrCity({Locality? locality, City? city}) async {
@@ -107,9 +147,16 @@ class DefaultDataX {
   Future wait50() async {
     await Future.delayed(Duration(milliseconds: 50));
   }
+
+  @override
+  Future dispose() async {
+    _updateListener.stopListening();
+    super.dispose();
+  }
 }
 
 class DefaultDataKeys {
   static String get lastBooking => "lastBooking";
+  static String get defaultdata => "defaultdata1";
   static String get isFirstTimeOnDevice => "isFirstTimeOnDevice6";
 }

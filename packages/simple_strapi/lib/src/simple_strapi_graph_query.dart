@@ -13,8 +13,8 @@ enum PublicationState {
 }
 
 class StrapiCollectionQuery extends StrapiModelQuery {
-  final String collectionName;
   final int? limit, start;
+  final String collectionName;
 
   ///graph query against strapi cllection or List of references (think of contains many references in strapi) in Strapi data structure,
   ///you can nest it according to the reference fields that exists in the data structure of the collection model,
@@ -42,7 +42,8 @@ class StrapiCollectionQuery extends StrapiModelQuery {
   ///stringified query, pass the [collectionName] to replace the original root collectionName
   ///in output string
   String query({String? collectionName}) {
-    final cn = collectionName ?? this.collectionName;
+    final cn =
+        _collectionNameToGraphQlName(collectionName ?? this.collectionName);
     final l = _queryParts();
     return "$cn(${l.key}){${l.value}}";
   }
@@ -254,4 +255,24 @@ enum StrapiFieldQuery {
   includesInAnArray,
   notIncludesInAnArray,
   equalsNull,
+}
+
+String _collectionNameToGraphQlName(
+  String collectionName,
+) {
+  final all = collectionName.split(RegExp(r'[\s_-]'));
+  final from2nd = all.sublist(1);
+  var returnable = "" + all[0];
+  from2nd.forEach((s) {
+    returnable += _capitalizeFirst(s);
+  });
+  return returnable;
+}
+
+String _capitalizeFirst(String s) {
+  final f = s.split("").first;
+  return s.replaceFirst(
+    f,
+    f.toUpperCase(),
+  );
 }

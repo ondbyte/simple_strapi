@@ -1,5 +1,6 @@
 import 'package:bapp/classes/firebase_structures/bapp_user.dart';
 import 'package:bapp/helpers/extensions.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/home/bapp.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
@@ -146,6 +147,8 @@ class PickAPlaceScreen extends StatelessWidget {
                           );
                       if (copied is DefaultData) {
                         await DefaultDatas.update(copied);
+                      } else {
+                        bPrint("fail");
                       }
                     }
                     BappNavigator.pushAndRemoveAll(context, Bapp());

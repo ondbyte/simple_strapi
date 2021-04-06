@@ -8,6 +8,7 @@ import 'package:inflection2/inflection2.dart';
 import 'package:path/path.dart' as path;
 
 import 'helpers.dart';
+import 'super_strapi.dart';
 import 'types.dart';
 
 class Gen {
@@ -39,7 +40,10 @@ class Gen {
     );
   }
 
-  String? getCollectionNameFromRoutesFile(File file) {
+  String getCollectionNameFromRoutesFile(File file) {
+    final n =
+        path.basenameWithoutExtension(path.basenameWithoutExtension(file.path));
+    return pluralize(n);
     final splitted = path.split(file.path);
     splitted.removeLast();
     splitted.removeLast();
@@ -52,21 +56,33 @@ class Gen {
       final data = configFile.readAsStringSync();
       final j = jsonDecode(data);
       final routes = j["routes"];
-      if (routes is List) {
+      if (routes is List && routes.isNotEmpty) {
         final name = path
             .basenameWithoutExtension(path.basenameWithoutExtension(file.path));
-        final route =
-            routes.firstWhere((element) => element["handler"] == "$name.find");
+        final route = routes.firstWhere(
+            (element) => (element["handler"].toString() == "$name.find" ||
+                element["handler"].toString() == "$name.find"),
+            orElse: () => null);
         if (route is Map) {
           final path = route["path"];
           if (route.containsKey("path")) {
             if (path is String) {
               return path.replaceFirst("/", "");
+            } else {
+              print("noo4");
             }
+          } else {
+            print("noo3");
           }
+        } else {
+          print(routes);
+          print(name);
         }
+      } else {
+        print("noo");
       }
     }
+    throw Exception("cannot get collection name for file: " + file.path);
   }
 
   Future generate() async {
@@ -74,9 +90,10 @@ class Gen {
         await readFilesWithExtension(apiDirectory, extn: ".settings.json")
             .toList();
     final extensionFolderFiles = await () async {
-      final fs = await readFilesWithExtension(extensionsDirectory,
-              extn: ".settings.json")
-          .toList();
+      final fs = await readFilesWithExtension(
+        extensionsDirectory,
+        extn: ".settings.json",
+      ).toList();
       final files1 = fs.map((event) => path.basename(event.path));
       final files2 = defaultModels.map((e) => path.basename(e.path));
       final toAdd = [];
@@ -97,7 +114,19 @@ class Gen {
 
     final apiJsons = await readAllFileToJson(apiFolderFiles);
 
-    final extnJsons = await readAllFileToJson(extensionFolderFiles);
+    final _extnJsons = await readAllFileToJson(extensionFolderFiles);
+
+    final extnJsons = () {
+      final returnable = <File, Map<String, dynamic>>{};
+      _extnJsons.forEach((key, value) {
+        final name = path.basename(key.path);
+        final defaultOne = defaultModels.firstWhere(
+          (element) => element.path.endsWith(name),
+        );
+        returnable.addAll({defaultOne: value});
+      });
+      return returnable;
+    }();
 
     final componentJsons = await readAllFileToJson(componentsFolderFiles);
 
@@ -207,6 +236,15 @@ class Gen {
     };
 
     final fields = getFieldsFromStrapiAttributes(j["attributes"], ifEnumerator);
+
+    final emptyFieldsField = Field(
+      (b) => b
+        ..name = "_emptyFields"
+        ..type = Reference("_$className" "EmptyFields")
+        ..assignment = Code(
+          "_$className" "EmptyFields()",
+        ),
+    );
 
     final createdAtField = Field(
       (b) => {
@@ -413,15 +451,24 @@ class Gen {
                 ..type = Reference("bool")
                 ..defaultTo = Code("false"))
               .build()))
-          ..body = CodeExpression(Code("$className._unsynced")).call([
-            ...fields
-                .map((field) => CodeExpression(
-                    Code("${field.name}?null:this.${field.name}")))
-                .toList(),
-            CodeExpression(Code("this.${createdAtField.name}")),
-            CodeExpression(Code("this.${updatedAtField.name}")),
-            CodeExpression(Code("this.${idField.name}")),
-          ]).code)
+          ..body = Block.of([
+            CodeExpression(Code("return $className._unsynced")).call([
+              ...fields
+                  .map((field) => CodeExpression(
+                      Code("${field.name}?null:this.${field.name}")))
+                  .toList(),
+              CodeExpression(Code("this.${createdAtField.name}")),
+              CodeExpression(Code("this.${updatedAtField.name}")),
+              CodeExpression(Code("this.${idField.name}")),
+            ]).code,
+            Code(
+              fields
+                  .map(
+                      (field) => ".._emptyFields.${field.name} = ${field.name}")
+                  .join(""),
+            ),
+            Code(";"),
+          ]))
         .build();
 
     final accessFromMapExpression = (Field f, bool fromMap) {
@@ -440,7 +487,8 @@ class Gen {
                     "StrapiUtils.objFromListOfMap<${type.className}>(map[\"${f.name}\"],(e)=>${pluralize(type.className)}._fromIDorData(e))"),
               )
             : CodeExpression(
-                Code("\"${f.name}\":${f.name}?.map((e)=>e.toMap()).toList()"),
+                Code(
+                    "\"${f.name}\":${f.name}?.map((e)=>toServer?e.id:e._toMap(level:level+level)).toList()"),
               );
       }
       if (type is CollectionReference) {
@@ -448,7 +496,8 @@ class Gen {
           fromMap
               ? Code(
                   "StrapiUtils.objFromMap<${type.className}>(map[\"${f.name}\"],(e)=>${pluralize(type.className)}._fromIDorData(e))")
-              : Code("\"${f.name}\":${f.name}?.toMap()"),
+              : Code(
+                  "\"${f.name}\":toServer?${f.name}?.id:${f.name}?._toMap(level:level+level)"),
         );
       }
       if (type is ComponentListReference) {
@@ -457,7 +506,7 @@ class Gen {
               ? Code(
                   "StrapiUtils.objFromListOfMap<${type.className}>(map[\"${f.name}\"],(e)=>${type.className}.fromMap(e))")
               : Code(
-                  "\"${f.name}\":${f.name}?.map((e)=>e.toMap()).toList()",
+                  "\"${f.name}\":${f.name}?.map((e)=>e._toMap(level:level+level)).toList()",
                 ),
         );
       }
@@ -466,7 +515,7 @@ class Gen {
           fromMap
               ? Code(
                   "StrapiUtils.objFromMap<${type.className}>(map[\"${f.name}\"],(e)=>${type.className}.fromMap(e))")
-              : Code("\"${f.name}\":${f.name}?.toMap()"),
+              : Code("\"${f.name}\":${f.name}?._toMap(level:level+level)"),
         );
       }
       if (type.symbol == "DateTime?") {
@@ -509,17 +558,39 @@ class Gen {
           : CodeExpression(Code("\"${f.name}\":${f.name}"));
     };
 
-    final toMapMethod = (MethodBuilder()
-          ..name = "toMap"
+    final toMapMethod = Method((b) => b
+      ..name = "toMap"
+      ..returns = Reference("Map<String,dynamic>")
+      ..lambda = true
+      ..body = Code("_toMap(level:-1)"));
+
+    final toPrivateMapMethod = (MethodBuilder()
+          ..name = "_toMap"
           ..returns = Reference("Map<String,dynamic>")
-          ..lambda = true
+          ..optionalParameters.add(Parameter((b) => b
+            ..name = "level"
+            ..named = true
+            ..type = Reference("int")
+            ..defaultTo = Code("0")))
           ..body = Code(
-            "{${[
-              ...fields,
-              if (!isComponent) createdAtField,
-              if (!isComponent) updatedAtField,
-              if (!isComponent) idField,
-            ].map((field) => accessFromMapExpression(field, false).code.toString()).join(",")}}",
+            "final toServer = level==0;\nreturn {${[
+              ...fields.map((field) => CodeExpression(Code(isComponent
+                      ? "${accessFromMapExpression(field, false).code.toString()}"
+                      : ("if(!_emptyFields.${field.name} && ${field.name}!=null) ${accessFromMapExpression(field, false).code.toString()}")))
+                  .code
+                  .toString()),
+              if (!isComponent)
+                accessFromMapExpression(createdAtField, false).code.toString(),
+              if (!isComponent)
+                accessFromMapExpression(updatedAtField, false).code.toString(),
+              if (!isComponent)
+                accessFromMapExpression(idField, false).code.toString(),
+            ].fold<List<String>>([], (pv, e) {
+              if (e is String && e.isNotEmpty) {
+                return [...pv, e];
+              }
+              return pv;
+            }).join(",")}};",
           ))
         .build();
 
@@ -561,7 +632,7 @@ class Gen {
           ..lambda = true
           ..annotations.addAll([CodeExpression(Code("override"))])
           ..body = Code(
-              '''"${isComponent ? "[Strapi Component Type $className]: " : "[Strapi Collection Type $className]"}\\n"+toMap().toString()'''))
+              '''"${isComponent ? "[Strapi Component Type $className]: " : "[Strapi Collection Type $className]"}\\n"+_toMap().toString()'''))
         .build();
 
     classBuilder
@@ -572,7 +643,8 @@ class Gen {
         if (!isComponent) createdAtField,
         if (!isComponent) updatedAtField,
         if (!isComponent) idField,
-        if (!isComponent) collectionNameField
+        if (!isComponent) collectionNameField,
+        if (!isComponent) emptyFieldsField,
       ])
       ..constructors.addAll([
         if (!isComponent) constructorFromID,
@@ -588,6 +660,7 @@ class Gen {
         if (!isComponent) fromSyncedMapMethod,
         fromMapMethod,
         toMapMethod,
+        toPrivateMapMethod,
         if (!isComponent) syncMethod,
         getFieldsMethod,
         toStringMethod
@@ -609,7 +682,33 @@ class Gen {
           if (!isComponent) idField,
         ],
       ),
+      generateEmptyFieldsClass(
+        className,
+        camelClassName,
+        fields,
+      ),
     ];
+  }
+
+  Class generateEmptyFieldsClass(
+    String className,
+    String camelClassName,
+    List<Field> fields,
+  ) {
+    return Class(
+      (b) => b
+        ..name = "_$className" "EmptyFields"
+        ..fields.addAll(
+          fields.map(
+            (e) => Field(
+              (fb) => fb
+                ..name = e.name
+                ..type = Reference("bool")
+                ..assignment = Code("false"),
+            ),
+          ),
+        ),
+    );
   }
 
   Class generateFieldsClass(String className, String camelClassName,
@@ -687,17 +786,5 @@ class Gen {
       print("unable to read file to json ${file.path}");
     }
     return {};
-  }
-
-  Stream<File> readFilesWithExtension(Directory dir,
-      {String extn = ""}) async* {
-    final stream = dir.list(recursive: true);
-    await for (final maybeFile in stream) {
-      if (maybeFile is File) {
-        if (maybeFile.path.endsWith(extn)) {
-          yield maybeFile;
-        }
-      }
-    }
   }
 }

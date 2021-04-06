@@ -51,7 +51,8 @@ void main(List<String> arguments) async {
       final strapiProjectDirectory = Directory(strapiProjectPath);
       final outPutFile = await setupOutPutDirectory(Directory(outPutPath));
       checkStrapiProjectRoot(strapiProjectDirectory);
-      final defaultModels = await _getLatestDefaultModels(shouldGetLatestModel);
+      final defaultModels = await _getLatestDefaultModels(
+          strapiProjectDirectory, shouldGetLatestModel);
       //print(defaultModels);
 
       final gen = Gen(
@@ -87,31 +88,32 @@ final defaultModelNames = <String>[
 
 final tmpDirectory = join(Directory.systemTemp.path);
 
-Future<List<File>> _getLatestDefaultModels(bool shouldGet) async {
-  final h = HttpClient();
+Future<List<File>> _getLatestDefaultModels(
+    Directory strapiProjectDir, bool shouldGet) async {
   final fileList = <File>[];
-  for (final fileName in defaultModelNames) {
-    final file = shouldGet
-        ? Uri.parse(fileName)
-        : File(join(tmpDirectory, basename(Uri.parse(fileName).path)));
-    if (file is File) {
-      if (!await file.exists()) {
-        return _getLatestDefaultModels(true);
-      } else {
-        fileList.add(file);
-      }
-    } else if (file is Uri) {
-      final request = await h.getUrl(file);
-      final response = await request.close();
-      if (response.statusCode == 200) {
-        final data = await response.transform(utf8.decoder).toList();
-        final newFile =
-            File(join(tmpDirectory, basename(Uri.parse(fileName).path)));
-        await newFile.writeAsString(data.join("\n"));
-        fileList.add(newFile);
+  final modulesDirectory = Directory(
+    join(strapiProjectDir.path, "node_modules"),
+  );
+  if (!(await modulesDirectory.exists())) {
+    print(
+        "${modulesDirectory.path} doesnt exists, make sure you are referring a strapi project as input, and make sure you ran 'npm install' in your strapi project");
+    exit(0);
+  }
+  final all =
+      await (await modulesDirectory.list()).fold<List<Directory>>([], (pv, e) {
+    if (e is Directory) {
+      final name = basename(e.path);
+      if (name.startsWith("strapi-plugin-")) {
+        return [...pv, e];
       }
     }
-  }
+    return pv;
+  });
+
+  await Future.forEach<Directory>(all, (e) async {
+    fileList.addAll(
+        await readFilesWithExtension(e, extn: "settings.json").toList());
+  });
   return fileList;
 }
 
@@ -177,4 +179,15 @@ Future<bool> _makeProject(Directory directory) async {
     return true;
   }
   return false;
+}
+
+Stream<File> readFilesWithExtension(Directory dir, {String extn = ""}) async* {
+  final stream = dir.list(recursive: true);
+  await for (final maybeFile in stream) {
+    if (maybeFile is File) {
+      if (maybeFile.path.endsWith(extn)) {
+        yield maybeFile;
+      }
+    }
+  }
 }

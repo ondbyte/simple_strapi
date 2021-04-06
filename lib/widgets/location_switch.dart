@@ -8,6 +8,7 @@ import 'package:bapp/super_strapi/my_strapi/x.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:get/state_manager.dart';
 import 'package:provider/provider.dart';
 
 class LocationSwitch extends StatelessWidget {
@@ -29,15 +30,15 @@ class LocationSwitch extends StatelessWidget {
           ),
           Builder(
             builder: (_) {
-              return Builder(
-                builder: (_) {
+              return Obx(
+                () {
                   return Text(
                     UserX.i.userNotPresent
                         ? placeName(
                               city: DefaultDataX.i.defaultData()?.city,
                               locality: DefaultDataX.i.defaultData()?.locality,
                             ) ??
-                            "no place,inform yadu"
+                            "no place,inform yadu.."
                         : placeName(
                               city: UserX.i.user()?.city,
                               locality: UserX.i.user()?.locality,

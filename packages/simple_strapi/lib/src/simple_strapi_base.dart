@@ -153,6 +153,9 @@ class StrapiCollection {
 class Strapi {
   String host = "localhost:1337";
 
+  ///max listeners for an object id
+  static int maxListenersForAnObject = 12;
+
   ///should the requests use 'https' or not defaults to false
   bool shouldUseHttps = false;
   final _client = HttpClient();
@@ -265,12 +268,36 @@ class Strapi {
     String? queryString,
     int maxTimeOutInMillis = 15000,
   }) async {
+    final response = await _request(
+      path,
+      body: body,
+      method: method,
+      params: params,
+      queryString: queryString,
+      maxTimeOutInMillis: maxTimeOutInMillis,
+    );
+    if (!response.failed) {
+      StrapiObjectListener._inform(response.body);
+    }
+    return response;
+  }
+
+  Future<StrapiResponse> _request(
+    String path, {
+    Map<String, dynamic>? body,
+    String method = "GET",
+    Map<String, String>? params,
+    String? queryString,
+    int maxTimeOutInMillis = 15000,
+  }) async {
     try {
       var closed = false;
       final uri = _strapiUri(path, params: params, queryString: queryString);
       if (verbose) {
         sPrint(uri);
-        sPrint(body);
+        sPrint(
+          jsonEncode(body),
+        );
         sPrint(method);
         sPrint(params);
         sPrint(queryString);
@@ -366,8 +393,8 @@ class Strapi {
       }
     } on HttpException catch (e, s) {
       if (verbose) {
-        print(e);
-        print(s);
+        sPrint(e);
+        sPrint(s);
       }
       return StrapiResponse(
         body: [],
@@ -477,4 +504,71 @@ class StrapiUtils {
 
 void sPrint(d) {
   print("[Strapi] " + d.toString());
+}
+
+class StrapiObjectListener {
+  static final _allListeners = <String, List<StrapiObjectListener>>{};
+
+  final Function(Map<String, dynamic> listener) _listener;
+  final String id;
+  StrapiObjectListener._private(this.id, this._listener);
+
+  void stopListening() {
+    final objectId = id.split("-")[0];
+    final myListeners = _allListeners[objectId];
+    final me = myListeners?.remove(this);
+    if (me is StrapiObjectListener) {
+      final toAdd = myListeners ?? [];
+      if (toAdd.isNotEmpty) {
+        _allListeners.update(objectId, (value) => toAdd);
+      }
+      sPrint("Object listener removed");
+    } else {
+      sPrint("This should not be the case, no listner found");
+    }
+  }
+
+  static void _inform(List<Map<String, dynamic>> list) {
+    if (list is List) {
+      list.forEach((data) {
+        final id = data["id"];
+        if (id is String) {
+          final allListenerForId = _allListeners[id];
+          if (allListenerForId is List) {
+            allListenerForId?.forEach((l) {
+              final d =
+                  data.map((key, value) => MapEntry(key as String, value));
+              l._listener(d);
+            });
+          }
+        }
+      });
+    }
+  }
+
+  factory StrapiObjectListener(
+      {required String id, required Function(Map<String, dynamic>) listener}) {
+    sPrint("Startingto listen for object $id");
+    final existingListeners = _allListeners[id];
+    var length = 0;
+    if (existingListeners is List) {
+      if (existingListeners?.length == Strapi.maxListenersForAnObject) {
+        throw Exception(
+          "no more listeners for object id $id can be added this, set Strapi.maxListenersForAnObject to higher value",
+        );
+      }
+      length = existingListeners?.length ?? 0;
+    }
+
+    final l = StrapiObjectListener._private(
+      id + "-" + length.toString(),
+      listener,
+    );
+    _allListeners.update(
+      id,
+      (value) => [...value, l],
+      ifAbsent: () => [l],
+    );
+    return l;
+  }
 }

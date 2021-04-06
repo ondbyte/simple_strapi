@@ -251,7 +251,7 @@ class <CollectionClassName> {
     try{
       final map = await StrapiCollection.create(
       collection: collectionName,
-      data: classVariableName.toMap(),
+      data: classVariableName._toMap(level:0),
     );
     if (map.isNotEmpty) {
       return className.fromSyncedMap(map);
@@ -269,7 +269,7 @@ class <CollectionClassName> {
       final map = await StrapiCollection.update(
         collection: collectionName,
         id: id,
-        data: classVariableName.toMap(),
+        data: classVariableName._toMap(level:0),
       );
       if (map.isNotEmpty) {
         return className.fromSyncedMap(map);
@@ -331,6 +331,8 @@ class <CollectionClassName> {
         final object = response.body.first;
         if(object is Map&&object.containsKey("data")){
           final data = object["data"];
+          print("===========================");
+          print(data);
           if(data is Map&&data.containsKey(collectionName)){
             final myList = data[collectionName];
             if(myList is List){
@@ -394,7 +396,7 @@ class <CollectionClassName> {
     widgetBuilderSTring = '''static Widget widget(
       {className strapiObject, Widget Function(className) builder}) {
     return StrapiObs(
-      strapiObject: strapiObject.toMap(),
+      strapiObject: strapiObject._toMap(level:0),
       builder: (map) {
         return builder(className.fromMap(map));
       },
