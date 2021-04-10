@@ -1,5 +1,6 @@
 import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/config/config.dart';
+import 'package:bapp/helpers/exceptions.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/screens/business/addbusiness/choose_category.dart';
 import 'package:bapp/screens/business/booking_flow/review.dart';
@@ -149,11 +150,10 @@ class _DiscoverTabState extends State<DiscoverTab> {
   Widget _getNearestFeatured(BuildContext context) {
     return Builder(
       builder: (_) {
-        return XFutureBuilder<List<Business>>(
+        return RetriableFutureBuilder<List<Business>>(
           futureCaller: (force) => BusinessX.i.getNearestBusinesses(
             force: force,
           ),
-          observe: UserX.i.user,
           builder: (_, snap) {
             final data = snap.data ?? [];
             return LayoutBuilder(
@@ -190,12 +190,16 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     itemCount: data.length,
                     itemBuilder: (context, i) {
                       return BusinessTileBigWidget(
-                        branch: data[i],
+                        business: data[i],
                         onTap: () {
                           //Provider.of<BookingFlow>(context, listen: false)
                           //.branch = snap.data[i];
-                          BappNavigator.push(context,
-                              BusinessProfileScreen(business: data[i]));
+                          BappNavigator.push(
+                            context,
+                            BusinessProfileScreen(
+                              business: data[i],
+                            ),
+                          );
                         },
                         tag: Chip(
                           backgroundColor: CardsColor.colors["lightGreen"],
@@ -383,26 +387,31 @@ class _DiscoverTabState extends State<DiscoverTab> {
       onTap: () {
         final place = UserX.i.userNotPresent
             ? placeName(
-                  city: DefaultDataX.i.defaultData()?.city,
-                  locality: DefaultDataX.i.defaultData()?.locality,
-                ) ??
-                "no place, inform yadu"
+                city: DefaultDataX.i.defaultData()?.city,
+                locality: DefaultDataX.i.defaultData()?.locality,
+              )
             : placeName(
-                  city: UserX.i.user()?.city,
-                  locality: UserX.i.user()?.locality,
-                ) ??
-                "no place, inform yadu";
-        BappNavigator.push(
-          context,
-          BranchesResultScreen(
-            categoryImage: c.image?.url ?? "",
-            categoryName: c.name ?? "",
-            placeName: place,
-            title: "Top " + (c.name ?? "no cat name, inform yadu"),
-            subTitle: "In " + place,
-            futureBranchList: BusinessX.i.getNearestBusinesses(),
-          ),
-        );
+                city: UserX.i.user()?.city,
+                locality: UserX.i.user()?.locality,
+              );
+        if (place is String) {
+          BappNavigator.push(
+            context,
+            BranchesResultScreen(
+              categoryImage: c.image?.url ?? "",
+              categoryName: c.name ?? "",
+              placeName: place,
+              title: "Top " + (c.name ?? "no cat name, inform yadu"),
+              subTitle: "In " + place,
+              futureBranchList: BusinessX.i.getNearestBusinesses(),
+            ),
+          );
+        } else {
+          throw BappException(
+            msg:
+                "This cannot be the case, unable to get the place name from default data or user data",
+          );
+        }
       },
       child: RRShape(
         child: Container(

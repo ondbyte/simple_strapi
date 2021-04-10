@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
+import 'package:bapp/super_strapi/my_strapi/firebaseX.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:simple_strapi/simple_strapi.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
@@ -10,7 +11,7 @@ class UserX {
 
   UserX._x();
 
-  Rx<User> user = Rx<User>();
+  final user = Rx<User?>(null);
   bool get userPresent => user.value != null;
   bool get userNotPresent => !userPresent;
 
@@ -25,21 +26,35 @@ class UserX {
   }
 
   Future<User?> loginWithFirebase(
-      String firebaseToken, String email, String name) async {
+    String firebaseToken,
+    String email,
+    String name,
+  ) async {
     if (userPresent) {
+      print("user present");
       return user.value;
     }
-    final response = await Strapi.i.authenticateWithFirebaseToken(
-        firebaseProviderToken: firebaseToken, email: email, name: name);
-    if (response.failed) {
-      return null;
+    try {
+      final response = await Strapi.i.authenticateWithFirebaseUid(
+        firebaseUid: firebaseToken,
+        email: email,
+        name: name,
+      );
+      if (response.failed) {
+        print("user failed");
+        print(response);
+        return null;
+      }
+      user(User.fromMap(response.body.first));
+      final token = Strapi.i.strapiToken;
+      if (token.isNotEmpty) {
+        DefaultDataX.i.saveValue("token", "$token");
+      }
+      return user.value;
+    } on StrapiException catch (_) {
+      print("user logout");
+      await FirebaseX.i.logOut();
     }
-    user(User.fromMap(response.body.first));
-    final token = Strapi.i.strapiToken;
-    if (token.isNotEmpty) {
-      DefaultDataX.i.saveValue("token", "$token");
-    }
-    return user.value;
   }
 
   Future<User?> getOtherUser(User? otherUser) async {

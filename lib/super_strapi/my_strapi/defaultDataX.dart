@@ -18,7 +18,7 @@ class DefaultDataX extends X {
 
   DefaultDataX._x();
 
-  Rx<DefaultData> defaultData = Rx<DefaultData>();
+  Rx<DefaultData?> defaultData = Rx<DefaultData?>(null);
 
   LazyBox? _hiveBox;
 

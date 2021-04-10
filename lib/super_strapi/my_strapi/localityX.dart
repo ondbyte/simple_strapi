@@ -60,6 +60,36 @@ class LocalityX extends X {
     );
   }
 
+  Future<Country?> getCountryFor(
+      {Locality? locality, City? city, bool force = false}) async {
+    return memoize(
+      "getCountryFor",
+      () async {
+        final targetCity = city ?? locality?.city;
+        final query = StrapiCollectionQuery(
+          collectionName: Country.collectionName,
+          requiredFields: Country.fields(),
+        )..whereCollectionField(
+            field: Country.fields.cities,
+            query: StrapiCollectionQuery(
+              collectionName: City.collectionName,
+              requiredFields: City.fields(),
+            )..whereField(
+                field: City.fields.id,
+                query: StrapiFieldQuery.equalTo,
+                value: targetCity?.id,
+              ),
+          );
+        final all = await Countries.executeQuery(query);
+        if (all.isNotEmpty) {
+          print(all);
+          return all.first;
+        }
+      },
+      force: force,
+    );
+  }
+
   @override
   Future dispose() async {
     await super.dispose();

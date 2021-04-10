@@ -1,16 +1,20 @@
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
+import 'package:bapp/widgets/image/strapi_image.dart';
+import 'package:bapp/widgets/loading.dart';
 import 'package:flutter/material.dart';
+import 'package:simple_strapi/simple_strapi.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 import '../firebase_image.dart';
 
 class BusinessTileBigWidget extends StatelessWidget {
-  final Business? branch;
+  final Business business;
   final Widget tag;
   final Function()? onTap;
 
   const BusinessTileBigWidget(
-      {Key? key, this.branch, required this.tag, this.onTap})
+      {Key? key, required this.business, required this.tag, this.onTap})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -23,32 +27,29 @@ class BusinessTileBigWidget extends StatelessWidget {
             SizedBox(
               width: cons.maxWidth,
               height: cons.maxWidth * (9 / 16),
-              child: AspectRatio(
-                aspectRatio: 9 / 16,
-                child: Stack(
-                  alignment: Alignment.bottomLeft,
-                  children: [
-                    RRFirebaseStorageImage(
-                      fit: BoxFit.contain,
-                      storagePathOrURL:
-                          branch?.partner?.logo?.isNotEmpty ?? false
-                              ? branch?.partner?.logo?.first.url
-                              : null,
-                      ifEmpty: Initial(
-                        forName: branch?.name ?? "zz",
-                      ),
+              child: Stack(
+                alignment: Alignment.bottomLeft,
+                children: [
+                  if (business.partner is Partner)
+                    Partners.listenerWidget(
+                      strapiObject: business.partner as Partner,
+                      sync: true,
+                      builder: (_, partner) {
+                        final files = partner.logo ?? [];
+                        final logo = files.isNotEmpty ? files.first : null;
+                        return StrapiImage(file: logo);
+                      },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 16, bottom: 8),
-                      child: tag,
-                    )
-                  ],
-                ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 16, bottom: 8),
+                    child: tag,
+                  )
+                ],
               ),
             ),
-            if (branch is Business)
+            if (business is Business)
               BusinessTileWidget(
-                branch: branch as Business,
+                branch: business as Business,
                 onTap: () {},
                 padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 0),
               ),
@@ -79,6 +80,7 @@ class BusinessTileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(branch);
     return ListTile(
       onTap: onTap,
       dense: true,

@@ -23,8 +23,8 @@ class _BusinessProfileServicesTabState
   @override
   Widget build(BuildContext context) {
     final catalogs = widget.business.catalogue;
-    if (catalogs is! List<Catalogue>) {
-      return Text("Catalogue is empty");
+    if (catalogs is! List<ProductCategory>) {
+      return Text("ProductCategory  is empty");
     }
     return ListView.builder(
       padding: EdgeInsets.only(top: 15),
@@ -41,7 +41,7 @@ class _BusinessProfileServicesTabState
 }
 
 class CatlogueWidget extends StatefulWidget {
-  final Catalogue catalogue;
+  final ProductCategory catalogue;
 
   const CatlogueWidget({
     Key? key,
@@ -95,7 +95,7 @@ class _CatlogueWidgetState extends State<CatlogueWidget> {
     return list;
   }
 
-  Widget bookButton(CatalogueItem s) {
+  Widget bookButton(Product s) {
     return FlatButton(
       onPressed: () {},
       textColor: Theme.of(context).primaryColor,
@@ -103,7 +103,7 @@ class _CatlogueWidgetState extends State<CatlogueWidget> {
     );
   }
 
-  Widget cancelBookingButton(CatalogueItem s) {
+  Widget cancelBookingButton(Product s) {
     return FlatButton(
       textColor: Theme.of(context).errorColor,
       onPressed: () {},
@@ -113,7 +113,7 @@ class _CatlogueWidgetState extends State<CatlogueWidget> {
 }
 
 class CatalogueItemWidget extends StatelessWidget {
-  final CatalogueItem item;
+  final Product item;
   final Widget bookWidget;
 
   const CatalogueItemWidget(
@@ -123,15 +123,16 @@ class CatalogueItemWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(vertical: 8),
-      title: Text(item.name ?? "no name, inform yadu"),
+      title: Text(item.nameOverride ?? "no name, inform yadu"),
       subtitle: _makeSubTitle(context),
       trailing: bookWidget,
       leading: ListTileFirebaseImage(
         ifEmpty: Initial(
-          forName: item.name ?? "no name, inform yadu",
+          forName: item.nameOverride ?? "no name, inform yadu",
         ),
-        storagePathOrURL:
-            (item.images?.isNotEmpty ?? false) ? item.images?.first.url : null,
+        storagePathOrURL: (item.imageOverride?.isNotEmpty ?? false)
+            ? item.imageOverride?.first.url
+            : null,
       ),
     );
   }
@@ -150,10 +151,10 @@ class CatalogueItemWidget extends StatelessWidget {
             " " +
             currency +
             ", " +
-            item.durationInMinutes.toString() +
+            item.duration.toString() +
             " Minutes" +
             "\n" +
-            (item.description ?? "");
+            (item.descriptionOverride ?? "");
     return Text(
       s,
       maxLines: 2,

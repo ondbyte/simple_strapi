@@ -9,7 +9,7 @@ class PartnerX extends X {
   static final i = PartnerX._x();
   PartnerX._x();
 
-  final Rx<Partner> partner = Rx<Partner>();
+  final partner = Rx<Partner?>(null);
 
   Future<Partner?> init() async {
     ever(UserX.i.user, (user) async {

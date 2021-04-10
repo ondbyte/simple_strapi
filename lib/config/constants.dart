@@ -4,6 +4,10 @@ import 'package:bapp/config/config_data_types.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:uuid/uuid.dart';
 
+///universal logo
+const kLogo =
+    "https://storage.googleapis.com/bapp-strapi-dev/jpg_1x_da79d226f0/jpg_1x_da79d226f0.jpg";
+
 var kAppName = "Bapp";
 var kPackageName = "com.bigmints.bapp";
 var kRandom = Random();

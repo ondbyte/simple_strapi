@@ -12,7 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BusinessAddAServiceScreen extends StatefulWidget {
-  final CatalogueItem service;
+  final Product service;
 
   const BusinessAddAServiceScreen({Key? key, required this.service})
       : super(key: key);
@@ -24,7 +24,7 @@ class BusinessAddAServiceScreen extends StatefulWidget {
 
 class _BusinessAddAServiceScreenState extends State<BusinessAddAServiceScreen> {
   final _key = GlobalKey<FormState>();
-  late CatalogueItem _service;
+  late Product _service;
   @override
   void initState() {
     _service = widget.service;

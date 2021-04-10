@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:json2yaml/json2yaml.dart';
 import 'package:path/path.dart';
 
 import 'package:yaml/yaml.dart';
@@ -30,11 +31,11 @@ void main(List<String> arguments) async {
           "defaults to false, if set to true only schema is generated from strapi models otherwise dart classes is generated from strapi models",
     );
     argvParser.addFlag(
-      "get-latest-models",
-      abbr: "g",
-      defaultsTo: false,
+      "generate-widgets",
+      abbr: "w",
+      defaultsTo: true,
       help:
-          "defaults to false, if set to true latest default models are fetched from strapi github",
+          "defaults to true, if set to true flutter updateListener widgets for all collection types will be generated",
     );
 
     final argvResults = argvParser.parse(arguments);
@@ -45,14 +46,19 @@ void main(List<String> arguments) async {
       throw FormatException();
     }
     final isSchemaOnly = argvResults["only-schema"];
-    final shouldGetLatestModel = argvResults["get-latest-models"];
+
+    final shouldGenerateWidgets = argvResults["generate-widgets"];
 
     if (strapiProjectPath != null && outPutPath != null) {
       final strapiProjectDirectory = Directory(strapiProjectPath);
-      final outPutFile = await setupOutPutDirectory(Directory(outPutPath));
+      final outPutFile = await setupOutPutDirectory(
+        Directory(outPutPath),
+        shouldGenerateWidgets,
+      );
       checkStrapiProjectRoot(strapiProjectDirectory);
       final defaultModels = await _getLatestDefaultModels(
-          strapiProjectDirectory, shouldGetLatestModel);
+        strapiProjectDirectory,
+      );
       //print(defaultModels);
 
       final gen = Gen(
@@ -60,7 +66,7 @@ void main(List<String> arguments) async {
         outPutFile,
         isSchemaOnly,
         defaultModels,
-        false,
+        shouldGenerateWidgets,
       );
 
       await gen.generate();
@@ -89,7 +95,8 @@ final defaultModelNames = <String>[
 final tmpDirectory = join(Directory.systemTemp.path);
 
 Future<List<File>> _getLatestDefaultModels(
-    Directory strapiProjectDir, bool shouldGet) async {
+  Directory strapiProjectDir,
+) async {
   final fileList = <File>[];
   final modulesDirectory = Directory(
     join(strapiProjectDir.path, "node_modules"),
@@ -127,24 +134,29 @@ void checkStrapiProjectRoot(Directory directory) {
   }
 }
 
-Future<File> setupOutPutDirectory(Directory directory) async {
-  if (await _validatePubspec(directory)) {
+Future<File> setupOutPutDirectory(
+    Directory directory, bool shouldGenerateWidgets) async {
+  if (await _validatePubspec(directory, shouldGenerateWidgets)) {
     return File(
-      join(directory.path, "super_strapi_generated", "lib",
-          "super_strapi_generated.dart"),
+      join(
+        directory.path,
+        "super_strapi_generated",
+        "lib",
+        "super_strapi_generated.dart",
+      ),
     );
   } else {
-    throw Exception(
-        "unable to validate out-put directory @ ${directory.absolute.path}");
+    exit(0);
   }
 }
 
-Future<bool> _validatePubspec(Directory directory) async {
+Future<bool> _validatePubspec(
+    Directory directory, bool shouldGenerateWidgets) async {
   final pubspec =
       File(join(directory.path, "super_strapi_generated", "pubspec.yaml"));
   var projectExists = await pubspec.exists();
   if (!projectExists) {
-    projectExists = await _makeProject(directory);
+    projectExists = await _makeProject(directory, shouldGenerateWidgets);
   }
   if (!projectExists) {
     print("problem creating a dart project");
@@ -152,32 +164,85 @@ Future<bool> _validatePubspec(Directory directory) async {
   }
   final yamlString = await pubspec.readAsString();
   final parsed = loadYaml(yamlString);
-  final enabled = parsed?["super_strapi"]?["enabled"] ?? false;
+  var enabled = parsed?["super_strapi"]?["enabled"] ?? false;
+  if (shouldGenerateWidgets) {
+    final flutterProject = () {
+      try {
+        return (parsed?["dependencies"]["flutter"]["sdk"] == "flutter");
+      } catch (e) {
+        return false;
+      }
+    }();
+    if (!flutterProject) {
+      print(
+        "existing project is dart project, if you want to generate widgets remove existing dart project first so the program can generate flutter project",
+      );
+      return false;
+    }
+  }
+  if (!enabled) {
+    print("unable to validate existing project");
+  }
   return enabled;
 }
 
-Future<bool> _makeProject(Directory directory) async {
+Future<bool> _makeProject(
+    Directory directory, bool shouldGenerateWidgets) async {
   print("generating a dart project @ ${directory.path}");
-  final process = await Process.run(
-    "dart",
-    ["create", "-t", "package-simple", "super_strapi_generated"],
-    workingDirectory: directory.path,
-  );
+  final process = (shouldGenerateWidgets)
+      ? Process.runSync(
+          "flutter",
+          [
+            "create",
+            "--no-pub",
+            "--org",
+            "xyz.yadunandan",
+            "--project-name",
+            "super_strapi_generated",
+            "-t",
+            "package",
+            "./super_strapi_generated",
+          ],
+          workingDirectory: directory.path,
+        )
+      : Process.runSync(
+          "dart",
+          [
+            "create",
+            "-t",
+            "package-simple",
+            "super_strapi_generated",
+          ],
+          workingDirectory: directory.path,
+        );
 
   final pubspecFile = File(join(
     directory.path,
     "super_strapi_generated",
     "pubspec.yaml",
   ));
-  if (await pubspecFile.exists()) {
+  if (pubspecFile.existsSync()) {
     final yamlString = await pubspecFile.readAsString();
-    final yaml = loadYaml(yamlString);
+    final yaml = Map<String, dynamic>.fromEntries(
+        (loadYaml(yamlString).entries.toList() as List).map((e) {
+      return MapEntry(e.key as String, e.value);
+    }));
     yaml["super_strapi"] = {"enabled": true};
-    yaml["dependencies"]["simple_strapi"] = "any";
-
-    await pubspecFile.writeAsString(yaml.toYamlString());
+    if (shouldGenerateWidgets) {
+      yaml["dependencies"] = {
+        "flutter": {"sdk": "flutter"},
+        "simple_strapi": "any",
+      };
+    } else {
+      yaml["dependencies"] = {
+        "simple_strapi": "any",
+      };
+    }
+    await pubspecFile.writeAsString(json2yaml(yaml));
+    print("go to genereted project folder and run pub get/flutter pub get");
     return true;
   }
+  print("no pubspec");
   return false;
 }
 

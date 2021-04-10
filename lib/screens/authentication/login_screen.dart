@@ -5,14 +5,24 @@ import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/authentication/create_profile.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
+import 'package:bapp/super_strapi/my_strapi/firebaseX.dart';
+import 'package:bapp/super_strapi/my_strapi/localityX.dart';
+import 'package:bapp/super_strapi/my_strapi/userX.dart';
+import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
 import 'package:bapp/widgets/buttons.dart';
+import 'package:bapp/widgets/failed_strapi_response.dart';
+import 'package:bapp/widgets/loading.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 import 'package:the_country_number/the_country_number.dart';
 import 'package:the_country_number_widgets/the_country_number_widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -24,8 +34,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   TheNumber? _number;
-  bool _canVerify = false, _canVerifyotp = false;
-  bool _askOTP = false;
+  Rx<bool> _canVerify = false.obs, _canVerifyotp = false.obs;
+  Rx<bool> _askOTP = false.obs, _loading = false.obs;
   List<Completer<String>>? _otpFutureCompleters = [];
 
   @override
@@ -34,37 +44,53 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  final _key = GlobalKey();
   @override
   Widget build(BuildContext context) {
-    return SizedBox();
-    /* return Consumer<CloudStore>(
-      builder: (_, cloudStore, __) {
-        return Scaffold(
-          appBar: AppBar(
-            leading: CloseButton(
-              onPressed: () {
-                BappNavigator.pop(context, null);
-              },
+    return Scaffold(
+      appBar: AppBar(
+        leading: CloseButton(
+          onPressed: () {
+            BappNavigator.pop(context, null);
+          },
+        ),
+      ),
+      body: RetriableFutureBuilder<Country?>(
+        futureCaller: (retry) {
+          return LocalityX.i.getCountryFor(
+            city: UserX.i.user()?.city ?? DefaultDataX.i.defaultData()?.city,
+            locality: UserX.i.user()?.locality ??
+                DefaultDataX.i.defaultData()?.locality,
+            force: retry,
+          );
+        },
+        builder: (_, snap) {
+          if (snap.connectionState != ConnectionState.done) {
+            return LoadingWidget();
+          }
+          final country = snap.data;
+          if (country is! Country) {
+            return FailedStrapiResponse(message: "Unable to get country");
+          }
+          return Center(
+            child: SingleChildScrollView(
+              child: Obx(
+                () {
+                  return !_askOTP()
+                      ? _loading()
+                          ? LoadingWidget()
+                          : _getNumberWidget(country)
+                      : _getOTPWidget();
+                },
+              ),
             ),
-          ),
-          body: LayoutBuilder(
-            builder: (_, c) {
-              return Center(
-                child: SingleChildScrollView(
-                  child: !_askOTP
-                      ? _getNumberWidget(cloudStore)
-                      : _getOTPWidget(cloudStore),
-                ),
-              );
-            },
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
-   */
   }
 
-/*   Widget _getNumberWidget(CloudStore cloudStore) {
+  Widget _getNumberWidget(Country c) {
     return Padding(
       padding: EdgeInsets.all(16),
       child: Center(
@@ -88,59 +114,78 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 20,
             ),
             TheCountryNumberInput(
-              TheCountryNumber()
-                  .parseNumber(iso2Code: cloudStore.bappUser.address.iso2),
+              TheCountryNumber().parseNumber(
+                iso2Code: c.iso2Code,
+              ),
               onChanged: (tn) {
                 _number = tn;
-                setState(() {
-                  _canVerify = _number.isValidLength;
-                });
+                _canVerify.value = _number?.isValidLength ?? false;
               },
             ),
             const SizedBox(
               height: 20,
             ),
-            PrimaryButton(
-              "Verify",
-              onPressed: _canVerify
-                  ? () {
-                      cloudStore.loginOrSignUpWithNumber(
-                        number: _number,
-                        onAskOTP: (bool b) async {
-                          if (b) {
+            Obx(
+              () => PrimaryButton(
+                "Verify",
+                onPressed: _canVerify()
+                    ? () {
+                        if (_number is! TheNumber) {
+                          return;
+                        }
+                        _loading(true);
+                        FirebaseX.i.loginOrSignUpWithNumber(
+                          onResendOTPPossible: () {},
+                          number: _number as TheNumber,
+                          onAskOTP: (bool b) async {
+                            if (b) {
+                              Flushbar(
+                                message: "Please enter the correct OTP.",
+                                duration: const Duration(seconds: 2),
+                              ).show(context);
+                            }
+
+                            final t = Completer<String>();
+                            _otpFutureCompleters?.add(t);
+
+                            _canVerifyotp.value = false;
+                            _askOTP.value = true;
+                            _loading.value = false;
+                            return t.future;
+                          },
+                          onFail: (e) {
                             Flushbar(
-                              message: "Please enter the correct OTP.",
+                              message: "${e.code}",
                               duration: const Duration(seconds: 2),
                             ).show(context);
-                          }
-
-                          final t = Completer<String>();
-                          _otpFutureCompleters.add(t);
-                          setState(() {
-                            _canVerifyotp = false;
-                            _askOTP = true;
-                            //print("Ask AGain");
-                          });
-                          return t.future;
-                        },
-                        onFail: (e) {
-                          Flushbar(
-                            message: "${e.code}",
-                            duration: const Duration(seconds: 2),
-                          ).show(context);
-                        },
-                        onVerified: () {
-                          if (isNullOrEmpty(cloudStore.user.email) ||
-                              isNullOrEmpty(cloudStore.user.displayName)) {
-                            BappNavigator.pushReplacement(
-                                context, CreateYourProfileScreen());
-                          } else {
-                            BappNavigator.pop(context, true);
-                          }
-                        },
-                      );
-                    }
-                  : null,
+                            _loading(false);
+                          },
+                          onVerified: () {
+                            if (FirebaseX.i.userPresent &&
+                                (isNullOrEmpty(
+                                        FirebaseX.i.firebaseUser?.email) ||
+                                    isNullOrEmpty(
+                                      FirebaseX.i.firebaseUser?.displayName,
+                                    ))) {
+                              BappNavigator.pushReplacement(
+                                context,
+                                CreateYourProfileScreen(
+                                  shouldPop: () async {
+                                    return UserX.i.userPresent;
+                                  },
+                                ),
+                              );
+                            } else {
+                              BappNavigator.pop(
+                                context,
+                                true,
+                              );
+                            }
+                          },
+                        );
+                      }
+                    : null,
+              ),
             ),
             SizedBox(
               height: 20,
@@ -159,7 +204,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: Theme.of(context)
                           .textTheme
                           .caption
-                          .apply(color: Theme.of(context).primaryColor),
+                          ?.apply(color: Theme.of(context).primaryColor),
                     ),
                     TextSpan(
                       text: "and ",
@@ -174,7 +219,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: Theme.of(context)
                           .textTheme
                           .caption
-                          .apply(color: Theme.of(context).primaryColor),
+                          ?.apply(color: Theme.of(context).primaryColor),
                     ),
                   ]),
             ),
@@ -185,91 +230,88 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   String _otp = "";
-  Widget _getOTPWidget(CloudStore cloudStore) {
+  Widget _getOTPWidget() {
     return Padding(
       padding: EdgeInsets.all(16),
       child: Center(
-        child: Observer(
-          builder: (_) {
-            return cloudStore.loadingForOTP
-                ? CircularProgressIndicator()
-                : Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SvgPicture.asset(
-                        "assets/svg/review.svg",
-                        width: 256,
+        child: Obx(
+          () => !_askOTP()
+              ? CircularProgressIndicator()
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset(
+                      "assets/svg/review.svg",
+                      width: 256,
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Text(
+                      "Enter the 6 digit verification code we just sent you.",
+                      style: Theme.of(context).textTheme.headline1,
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Check your SMS inbox for a message.",
+                        style: Theme.of(context).textTheme.bodyText1,
                       ),
-                      SizedBox(
-                        height: 20,
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    PinCodeTextField(
+                      autoFocus: true,
+                      enablePinAutofill: true,
+                      textStyle: Theme.of(context).textTheme.headline1,
+                      backgroundColor:
+                          Theme.of(context).scaffoldBackgroundColor,
+                      pinTheme: PinTheme(
+                        activeColor: Theme.of(context).primaryColor,
+                        selectedColor: Theme.of(context).primaryColor,
+                        inactiveColor: Theme.of(context).primaryColor,
+                        borderWidth: 3.0,
                       ),
-                      Text(
-                        "Enter the 6 digit verification code we just sent you.",
-                        style: Theme.of(context).textTheme.headline1,
-                      ),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Check your SMS inbox for a message.",
-                          style: Theme.of(context).textTheme.bodyText1,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      PinCodeTextField(
-                        autoFocus: true,
-                        enablePinAutofill: true,
-                        textStyle: Theme.of(context).textTheme.headline1,
-                        backgroundColor:
-                            Theme.of(context).scaffoldBackgroundColor,
-                        pinTheme: PinTheme(
-                          activeColor: Theme.of(context).primaryColor,
-                          selectedColor: Theme.of(context).primaryColor,
-                          inactiveColor: Theme.of(context).primaryColor,
-                          borderWidth: 3.0,
-                        ),
-                        appContext: context,
-                        length: 6,
-                        onChanged: (v) {
-                          setState(
-                            () {
-                              if (v.length == 6) {
-                                _otp = v;
-                                _canVerifyotp = true;
-                              } else {
-                                _otp = "";
-                                _canVerifyotp = false;
-                              }
-                            },
-                          );
-                        },
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      PrimaryButton(
+                      appContext: context,
+                      length: 6,
+                      onChanged: (v) {
+                        if (v.length == 6) {
+                          _otp = v;
+                          _canVerifyotp.value = true;
+                        } else {
+                          _otp = "";
+                          _canVerifyotp.value = false;
+                        }
+                      },
+                    ),
+                    SizedBox(
+                      height: 20,
+                    ),
+                    Obx(
+                      () => PrimaryButton(
                         "Verify",
-                        onPressed: _canVerifyotp
+                        onPressed: _canVerifyotp()
                             ? () {
-                                if (!_otpFutureCompleters.last.isCompleted) {
-                                  _otpFutureCompleters.last.complete(_otp);
+                                if (!(_otpFutureCompleters?.last.isCompleted ??
+                                    true)) {
+                                  _otpFutureCompleters?.last.complete(_otp);
                                 } else {
                                   print("COMPLETED");
                                 }
                               }
                             : null,
                       ),
-                    ],
-                  );
-          },
+                    ),
+                  ],
+                ),
         ),
       ),
     );
-  } */
+  }
 }

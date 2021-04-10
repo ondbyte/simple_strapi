@@ -48,12 +48,16 @@ class BusinessX extends X {
 
   Future<List<Business>> getNearestBusinesses({
     BusinessCategory? forCategory,
-    bool force = false,
+    bool force = true,
     Rx? observe,
   }) async {
     final q = StrapiCollectionQuery(
       collectionName: Business.collectionName,
       requiredFields: Business.fields(),
+    );
+    q.requireCompenentField(
+      Business.fields.address,
+      Address.fields(),
     );
     return memoize(
       "getNearestBusinesses",

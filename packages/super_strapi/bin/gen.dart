@@ -553,6 +553,13 @@ class Gen {
               : Code("\"${f.name}\":${f.name}"),
         );
       }
+      if (type is EnumeratorReference) {
+        return fromMap
+            ? CodeExpression(Code(
+                "StrapiUtils.toEnum<${type.enumName}>(${type.enumName}.values,map[\"${f.name}\"])"))
+            : CodeExpression(
+                Code("\"${f.name}\":StrapiUtils.enumToString(${f.name})"));
+      }
       return fromMap
           ? CodeExpression(Code("map[\"${f.name}\"]"))
           : CodeExpression(Code("\"${f.name}\":${f.name}"));
@@ -681,6 +688,7 @@ class Gen {
           if (!isComponent) updatedAtField,
           if (!isComponent) idField,
         ],
+        isComponent,
       ),
       generateEmptyFieldsClass(
         className,
@@ -711,8 +719,13 @@ class Gen {
     );
   }
 
-  Class generateFieldsClass(String className, String camelClassName,
-      collectionName, List<Field> fields) {
+  Class generateFieldsClass(
+    String className,
+    String camelClassName,
+    collectionName,
+    List<Field> fields,
+    bool isComponent,
+  ) {
     final b = ClassBuilder();
     b
       ..name = "_${className}Fields"
@@ -730,8 +743,22 @@ class Gen {
       ..methods.add(Method((b) {
         b
           ..name = "call"
-          ..body = Code("return [${fields.map((e) => e.name).join(",")}];")
-          ..returns = Reference("List<StrapiField>");
+          ..body = Code("return ${isComponent ? "\"{" : "["}${fields.map((e) {
+            if (isComponent) {
+              if ((e.type is ComponentReference ||
+                  e.type is ComponentListReference)) {
+                final cn = (e.type as dynamic).className;
+                return "${e.name}\${_${toClassName(cn)}Fields.i()}";
+              } else if ((e.type is CollectionListReference ||
+                  e.type is CollectionReference)) {
+                return "${e.name}{id}";
+              }
+            }
+            return e.name;
+          }).join(",")}${isComponent ? "}\"" : "]"};")
+          ..returns = Reference(
+            isComponent ? "String" : "List<StrapiField>",
+          );
       }))
       ..fields.addAll(fields.map((e) {
         final ref = e.type;

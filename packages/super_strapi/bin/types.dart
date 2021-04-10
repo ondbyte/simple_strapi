@@ -3,13 +3,14 @@ import 'package:inflection2/inflection2.dart';
 
 import 'helpers.dart';
 
-Reference? getDartTypeFromStrapiType(
-    {String name = "",
-    String strapiType = "",
-    String component = "",
-    String collection = "",
-    String model = "",
-    bool componentRepeatable = false}) {
+Reference? getDartTypeFromStrapiType({
+  String name = "",
+  String strapiType = "",
+  String component = "",
+  String collection = "",
+  String model = "",
+  bool componentRepeatable = false,
+}) {
   switch (strapiType) {
     case "date":
     case "datetime":
@@ -49,7 +50,11 @@ Reference? getDartTypeFromStrapiType(
       }
     case "enumeration":
       {
-        return Reference("${toClassName(name)}?");
+        final enumName = toClassName(name);
+        return EnumeratorReference(
+          "$enumName?",
+          enumName,
+        );
       }
     case "component":
       {
@@ -90,6 +95,11 @@ class CollectionListReference extends Reference {
     String symbol,
     this.className,
   ) : super(symbol);
+}
+
+class EnumeratorReference extends Reference {
+  final String enumName;
+  EnumeratorReference(String symbol, this.enumName) : super(symbol);
 }
 
 class CollectionReference extends Reference {
@@ -149,6 +159,7 @@ List<Field> getFieldsFromStrapiAttributes(Map<String, dynamic> attributes,
       }
     },
   );
+  //print(returnable.map((e) => e.type.runtimeType.toString()).join("\n"));
   return returnable;
 }
 
@@ -391,13 +402,21 @@ class <CollectionClassName> {
   var widgetBuilderSTring = "";
   if (buildWidgets) {
     // ignore: prefer_double_quotes
-    widgetBuilderSTring = '''static Widget widget(
-      {className strapiObject, Widget Function(className) builder}) {
-    return StrapiObs(
-      strapiObject: strapiObject._toMap(level:0),
-      builder: (map) {
-        return builder(className.fromMap(map));
-      },
+    widgetBuilderSTring = '''
+  static Widget listenerWidget({
+    required className strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      className,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<className>(
+      strapiObject: strapiObject,
+      generator: className.fromMap,
+      builder: builder,
+      sync:sync,
     );
   }''';
   }
@@ -412,45 +431,65 @@ class <CollectionClassName> {
 };
 
 final strapiBaseWidget = '''
-typedef Widget StrapiWidgetBuilder(Map);
 
-class StrapiObs extends StatefulWidget {
-  ///an object with a field id, mostly a collection object from strapi, whenever a new object arrives for a same
-  ///id, every instance of the collection object which is encapsulated in [StrapiObs] rebuilds by providing
-  ///the new instance accross the app
-  final Map<String, dynamic> strapiObject;
-  final StrapiWidgetBuilder builder;
-
-  ///make strapi collection objects reactive, whenever a new version of the [strapiObject] arrives
-  ///widget is rebuilt with new object provided to the [builder].
-  StrapiObs({Key key, this.strapiObject, this.builder}) : super(key: key);
+class _StrapiListenerWidget<T> extends StatefulWidget {
+  final bool sync;
+  final T strapiObject;
+  final T? Function(Map<String, dynamic>) generator;
+  final Widget Function(BuildContext, T) builder;
+  _StrapiListenerWidget({
+    Key? key,
+    required this.strapiObject,
+    required this.generator,
+    required this.builder,
+    required this.sync,
+  }) : super(key: key);
 
   @override
-  _StrapiObsState createState() => _StrapiObsState();
+  _StrapiListenerWidgetState<T> createState() => _StrapiListenerWidgetState();
 }
 
-class _StrapiObsState extends State<StrapiObs> {
-  Map<String, dynamic> strapiObject;
+class _StrapiListenerWidgetState<T> extends State<_StrapiListenerWidget<T>> {
+  late T _strapiObject;
+  late final StrapiObjectListener? _listener;
   @override
   void initState() {
-    strapiObject = widget.strapiObject;
     super.initState();
-    if (widget.strapiObject.containsKey("id")) {
-      Strapi.i.objectsStram.listen((newStrapiObject) {
-        if (newStrapiObject["id"] == widget.strapiObject["id"]) {
-          setState(() {
-            strapiObject = newStrapiObject;
-          });
-        }
-      });
+    _strapiObject = widget.strapiObject;
+
+    final id = (widget.strapiObject as dynamic).id;
+    if (id is String) {
+      _listener = StrapiObjectListener(
+        id: id,
+        listener: (map) {
+          final updated = widget.generator(map);
+          if (updated is T) {
+            setState(() {
+              _strapiObject = updated;
+            });
+          }
+        },
+      );
+      if (widget.sync) {
+        (_strapiObject as dynamic).sync();
+      }
     } else {
-      throw Exception(
-          "provided strapi object doesn't contain an ID field, only collection types are supported, do not provide fresh objects");
+      _listener = null;
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    return widget.builder(strapiObject);
+  void dispose() {
+    _listener?.stopListening();
+    super.dispose();
   }
-}''';
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(
+      context,
+      _strapiObject,
+    );
+  }
+}
+''';

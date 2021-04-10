@@ -43,7 +43,7 @@ class _AppState extends State<App> {
           showWhileInit: Splash(),
           child: PackageInfoCheck(
             child: Obx(
-              () => firstScreen() ?? SizedBox(),
+              () => firstScreen(),
             ),
           ),
         ),

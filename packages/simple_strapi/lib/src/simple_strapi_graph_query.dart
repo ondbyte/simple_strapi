@@ -16,13 +16,87 @@ class StrapiCollectionQuery extends StrapiModelQuery {
   final int? limit, start;
   final String collectionName;
 
-  ///graph query against strapi cllection or List of references (think of contains many references in strapi) in Strapi data structure,
+  ///graph query against strapi collection or List of references (think of repeatable references in strapi) in Strapi data structure,
   ///you can nest it according to the reference fields that exists in the data structure of the collection model,
   ///[collectionName] is required only for the root query, any [collectionName] passed to additional
   ///queries of a root query are ignored because query will be made against the field name,
-  ///[requiredFields] in the response,
+  ///pass [requiredFields] to be in the response,
   ///[limit] is the maximum number of documents in the response,
   ///[start] can be used to paginate the queries,
+  ///
+  ///if you have a collections like the fallowing,
+  ///
+  ///A with model
+  ///```json
+  ///{
+  ///   "id":"<value>",
+  ///   "name": "<value>",
+  ///   "single_reference_for_B": "<id>",
+  ///   "repeatable_reference_for_C": ["<id>","<id>",...],
+  ///}
+  ///```
+  ///
+  ///B with model
+  ///```json
+  ///{
+  ///   "id":"<value>",
+  ///   "dob": "<value>",
+  ///}
+  ///```
+  ///
+  ///C with model
+  ///```json
+  ///{
+  ///   "id":"<value>",
+  ///   "place": "<value>",
+  ///}
+  ///```
+  ///for above collection models, if you are making graph query against A, required fields are passed like this
+  ///```dart
+  ///final query = StrapiCollectionQuery(
+  /// collectionName: "A",
+  /// requiredFields: [
+  ///   StrapiLeafField("id"),
+  ///   StrapiLeafField("name"),
+  /// ],
+  ///);
+  //////and [StrapiLeafField]s are filtered like this, this query returns objects contining the id (must return only one)
+  //////check out [StrapiFieldQuery] to see all the filter posibilities
+  ///query.whereField(
+  ///    field: StrapiLeafField("id"),
+  ///    query: StrapiFieldQuery.equalTo,
+  ///    value: "<value>",
+  ///  );
+  ///```
+  ///you cannot require the fields `single_reference_for_B` and `repeatable_reference_for_C`
+  ///as they are references, if you want to require them you have to nest the query against them like this,
+  ///
+  ///lets modify the last query
+  ///
+  ///```
+  //////use [StrapiModelQuery] if the reference is single
+  ///query.whereModelField(
+  /// field: StrapiModelField("single_reference_for_B"),
+  ///   query: StrapiModelQuery(
+  ///   requiredFields: [
+  ///     StrapiLeafField("id"),
+  ///     StrapiLeafField("dob"),
+  ///   ],
+  /// ),
+  ///);
+  ///
+  //////use [StrapiCollectionQuery] if the reference is repeatable i.e list of references as mentioned earlier
+  ///query.whereCollectionField(
+  /// field: StrapiCollectionField("repeatable_reference_for_C"),
+  /// query: StrapiCollectionQuery(
+  ///   collectionName: "C",
+  ///   requiredFields: [
+  ///     StrapiLeafField("id"),
+  ///     StrapiLeafField("place"),
+  ///   ],
+  /// ),
+  ///);
+  ///```
   StrapiCollectionQuery({
     required collectionName,
     required List<StrapiField> requiredFields,
@@ -51,13 +125,17 @@ class StrapiCollectionQuery extends StrapiModelQuery {
   }
 }
 
+///query to be made aginst single references in the collection model
 class StrapiModelQuery {
   final _where = <String>[];
   final _fields = <StrapiField, String>{};
+  var a = StrapiLeafField("ya");
 
   ///base strapi graph query
   ///this query is made against single reference field which exist in a strapi data/model structure
-  ///[requiredFields] in the response,
+  ///pass [requiredFields] to be in the response, if the reference field contains repeatable collection object
+  ///then you must use [StrapiCollectionQuery],
+  ///for complete idea how to use this check [StrapiCollectionQuery],
   StrapiModelQuery({
     required List<StrapiField> requiredFields,
   }) {
@@ -74,20 +152,25 @@ class StrapiModelQuery {
     );
   }
 
+  ///compenents of strapi models cannot be queried, it isn't supported by strapi as of now, so to include them in
+  ///the response you have to explicitly pass the field names as String, for example
+  ///```dart
+  ///requireCompenentField(
+  ///   field: StrapiComponentField("someField"),
+  ///   fields: "{ componentFieldA,componentFieldB,componentFieldC }",
+  ///)
+  ///```
   void requireCompenentField(
-      StrapiComponentField field, List<StrapiField> fields) {
-    var s = "";
-    fields.forEach((e) {
-      if (e is StrapiCollectionField || e is StrapiModelField) {
-        s += "${e.fieldName}{\nid\n}\n";
-      } else if (e is StrapiLeafField) {
-        s += "${e.fieldName}\n";
-      }
-    });
-    _fields.addAll({field: "${field.fieldName}{\n$s\n}"});
+    StrapiComponentField field,
+    String fields,
+  ) {
+    _fields.addAll({field: "${field.fieldName}$fields"});
   }
 
-  ///used to filter against a field in strapi data structure in collection
+  ///used to filter against a field in strapi data structure in collection, [field] should be a
+  ///leaf fields, which means it should be a basic data type supported by strapi like
+  ///Date, String, Number, bool etc
+  ///throws [StrapiException] if field isnt truw [StrapiLeafField]
   void whereField({
     required StrapiLeafField field,
     required StrapiFieldQuery query,
@@ -97,12 +180,14 @@ class StrapiModelQuery {
     if (v is String) {
       _where.add(field.fieldName + _operation(query) + ":$v");
     } else {
-      throw Exception(
-        "leaf value must be a basic type or list of basic type incase of includes/notincludes in an array operation ${v.runtimeType}",
+      throw StrapiException(
+        msg:
+            "leaf value must be a basic type or list of basic type incase of includes/notincludes in an array operation ${v.runtimeType}",
       );
     }
   }
 
+  ///query against a field containing single reference to other collection object
   void whereModelField({
     required StrapiModelField field,
     required StrapiModelQuery query,
@@ -113,6 +198,7 @@ class StrapiModelQuery {
     _fields.addAll({field: "${field.fieldName}{${entry.value}}"});
   }
 
+  ///query against field containing repeatable reference to other collection objects
   void whereCollectionField({
     required StrapiCollectionField field,
     required StrapiCollectionQuery query,
@@ -144,6 +230,7 @@ class StrapiModelQuery {
           if (key is StrapiModelField || key is StrapiCollectionField) {
             tmp.addAll({key: "${key.fieldName}{\nid\n}"});
           } else if (key is StrapiComponentField) {
+            tmp.addAll({key: value});
           } else {
             tmp.addAll(
               {key: "${key.fieldName}"},
@@ -161,26 +248,23 @@ class StrapiModelQuery {
   }
 }
 
-class StrapiStatics {
-  static final _statics = <String, dynamic>{};
-
-  static getValue(String key) {
-    return _statics[key];
-  }
-}
-
+///Strapi object field containing references to other colection objects
 class StrapiCollectionField extends StrapiField {
   StrapiCollectionField(String fieldName) : super(fieldName);
 }
 
+///Strapi object field containing reference to other colection object
 class StrapiModelField extends StrapiField {
   StrapiModelField(String fieldName) : super(fieldName);
 }
 
+///Strapi field containing base strapi data types like
+///Date, String, Number, bool etc
 class StrapiLeafField extends StrapiField {
   StrapiLeafField(String fieldName) : super(fieldName);
 }
 
+///Strapi field containing a strapi components
 class StrapiComponentField extends StrapiField {
   StrapiComponentField(String fieldName) : super(fieldName);
 }

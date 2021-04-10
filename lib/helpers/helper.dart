@@ -205,7 +205,7 @@ PreferredSizeWidget getBappTabBar(BuildContext context, List<Widget> tabs) {
     indicatorPadding: const EdgeInsets.all(16),
     indicatorWeight: 6,
     indicatorSize: TabBarIndicatorSize.tab,
-    labelPadding: const EdgeInsets.all(8),
+    labelPadding: const EdgeInsets.only(bottom: 16, top: 8),
     tabs: tabs,
   );
 }

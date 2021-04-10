@@ -7,14 +7,14 @@ packages:
       name: _fe_analyzer_shared
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "14.0.0"
+    version: "20.0.0"
   analyzer:
     dependency: transitive
     description:
       name: analyzer
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.41.2"
+    version: "1.4.0"
   args:
     dependency: "direct main"
     description:
@@ -84,14 +84,14 @@ packages:
       name: crypto
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.0"
+    version: "3.0.1"
   dart_style:
     dependency: "direct main"
     description:
       name: dart_style
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.3.12"
+    version: "2.0.0"
   file:
     dependency: transitive
     description:
@@ -112,7 +112,7 @@ packages:
       name: glob
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.0.0"
+    version: "2.0.1"
   inflection2:
     dependency: "direct main"
     description:
@@ -120,6 +120,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.4.3"
+  json2yaml:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "14abbc358c3b5c1d04fec9220c389bea55e4d157"
+      url: "https://github.com/ondbyte/json2yaml.git"
+    source: git
+    version: "1.0.1+1"
   matcher:
     dependency: transitive
     description:
@@ -140,7 +149,7 @@ packages:
       name: package_config
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.9.3"
+    version: "2.0.0"
   path:
     dependency: "direct main"
     description:
@@ -154,7 +163,7 @@ packages:
       name: pedantic
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.10.0"
+    version: "1.11.0"
   pub_semver:
     dependency: transitive
     description:
@@ -212,4 +221,4 @@ packages:
     source: hosted
     version: "3.1.0"
 sdks:
-  dart: "2.13.0-116.0.dev"
+  dart: ">=2.12.2 <3.0.0"

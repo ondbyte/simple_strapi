@@ -1,33 +1,48 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:web_gl';
 
 import 'package:simple_strapi/simple_strapi.dart';
 
 part 'simple_strapi_graph_query.dart';
 
-class StrapiResponseException implements Exception {
-  final String log;
+///Exception thrown when you call [Strapi.i.request]
+class StrapiResponseException extends StrapiException {
   final StrapiResponse response;
 
-  StrapiResponseException(this.log, this.response);
+  StrapiResponseException(String msg, this.response) : super(msg: msg);
 
   @override
   String toString() {
-    return "$log\n$response";
+    return "$msg\n$response";
   }
 }
 
-class StrapiGraphCollection {
-  static _find({
-    required String collectionName,
-    required int limit,
-    required int start,
-  }) async {}
+class StrapiException implements Exception {
+  final String msg;
+
+  StrapiException({required this.msg});
+
+  @override
+  String toString() {
+    return "$msg";
+  }
 }
 
+///basic queries against a collection object of strapi
 class StrapiCollection {
-  static Future<dynamic> customEndpoint({
+  ///use this to reach a custom endpoint you've setup for a strapi collection
+  ///if you setup a endpoint name `xEndPoint` for collection name `xCollection` and the resulting route is
+  /// `/xCollection/xEndPoint`, then you have to use this method like this
+  ///```dart
+  ///final response = await StrapiCollection.customEndpoint(
+  ///   collection: "xCollection",
+  ///   endPoint: "xEndPoint",
+  ///)
+  ///```
+  ///throws [StrapiResponseException] if response is failed
+  static Future<List<Map<String, dynamic>>> customEndpoint({
     required String collection,
     required String endPoint,
     int? limit,
@@ -45,6 +60,8 @@ class StrapiCollection {
     return response.body;
   }
 
+  ///returns all objects in a collection, run get query against a [collection], limit the number of objects in the response by setting [limit],
+  ///throws [StrapiResponseException] if response is failed
   static Future<List<Map<String, dynamic>>> findMultiple({
     required String collection,
     int? limit,
@@ -60,6 +77,8 @@ class StrapiCollection {
     return response.body;
   }
 
+  ///gets a single object in a [collection] with [id],
+  ///throws [StrapiResponseException] if response is failed
   static Future<Map<String, dynamic>> findOne(
       {required String collection, required String id}) async {
     final path = collection + "/" + id;
@@ -75,6 +94,8 @@ class StrapiCollection {
     return response.body.first;
   }
 
+  ///create a new object at [collection] with the provided [data], returns the object with a [id],
+  ///throws [StrapiResponseException] if response is failed
   static Future<Map<String, dynamic>> create({
     required String collection,
     required Map<String, dynamic> data,
@@ -95,6 +116,8 @@ class StrapiCollection {
     return response.body.first;
   }
 
+  ///update a object with [id] at [collection] with the new [data], returns updated object,
+  ///throws [StrapiResponseException] if response is failed
   static Future<Map<String, dynamic>> update({
     required String collection,
     required String id,
@@ -111,6 +134,8 @@ class StrapiCollection {
     return response.body.first;
   }
 
+  ///count the objects in the [collection],
+  ///throws [StrapiResponseException] if response is failed
   static Future<int> count(String collection) async {
     final path = collection + "/count";
     final response = await Strapi.i.request(
@@ -123,6 +148,7 @@ class StrapiCollection {
     return response.count;
   }
 
+  ///deletes a object with [id] at [collection]
   static Future<Map<String, dynamic>> delete({
     required String collection,
     required String id,
@@ -153,8 +179,10 @@ class StrapiCollection {
 class Strapi {
   String host = "localhost:1337";
 
-  ///max listeners for an object id
-  static int maxListenersForAnObject = 12;
+  ///max listeners for an object id,
+  ///exception will be thrown if the max number of listners crosses [Strapi.i.maxListenersForAnObject], set
+  ///it as per requirement
+  int maxListenersForAnObject = 12;
 
   ///should the requests use 'https' or not defaults to false
   bool shouldUseHttps = false;
@@ -163,8 +191,10 @@ class Strapi {
 
   static final _instance = Strapi._private();
 
+  ///get [Strapi] instance
   static Strapi get instance => _instance;
 
+  ///get [Strapi] instance
   static Strapi get i => _instance;
 
   ///output the error to console if any
@@ -198,18 +228,21 @@ class Strapi {
   bool get userPresent => strapiToken.isNotEmpty;
 
   ///to use this provider first you need to add a custom provider for strapi with Firebase SDK enabled
-  ///otherwise you'll recieve "This provider is disabled." response
-  Future<StrapiResponse> authenticateWithFirebaseToken({
-    required String firebaseProviderToken,
+  ///otherwise you'll recieve "This provider is disabled." response, go here https://yadunandan.xyz/authenticateWithFirebaseForStrapi to know how to add firebase
+  ///as a authentication method, as of now it is the only method which is supported in authenticating with strapi
+  Future<StrapiResponse> authenticateWithFirebaseUid({
+    required String firebaseUid,
     required String email,
     required String name,
   }) async {
-    assert(firebaseProviderToken.isNotEmpty);
-    assert(email.isNotEmpty);
-    assert(name.isNotEmpty);
+    if (firebaseUid.isEmpty || email.isEmpty || name.isEmpty) {
+      throw StrapiException(
+        msg: "empty string cannot be passed as parameters",
+      );
+    }
 
     final response = await request("/auth/firebase/callback", params: {
-      "access_token": "$firebaseProviderToken",
+      "access_token": "$firebaseUid",
       "email": email,
       "name": name,
     });
@@ -224,12 +257,16 @@ class Strapi {
       {Map<String, String>? params, String? queryString}) {
     if (shouldUseHttps) {
       final https = Uri.https(host, unencodedPath, params);
-      return https.replace(query: queryString);
+      return https.replace(query: https.query + (queryString ?? ""));
     }
     final http = Uri.http(host, unencodedPath, params);
-    return http.replace(query: queryString);
+    return http.replace(query: http.query + (queryString ?? ""));
   }
 
+  ///do a graph request to the strapi server, pass the [queryString] mostly generated using,
+  ///[StrapiCollectionQuery] or [StrapiModelQuery], [maxTimeOutInMillis] for the request can be set,
+  ///returns a [StrapiResponse] which will contain graph response map in its body
+  ///throws [StrapiResponseException] if request is failed
   Future<StrapiResponse> graphRequest(String queryString,
       {int maxTimeOutInMillis = 15000}) async {
     if (verbose) {
@@ -338,6 +375,7 @@ class Strapi {
           sPrint("================Verbose report end==================");
         }
       } on FormatException catch (e) {
+        responseJson = null;
         return StrapiResponse(
           body: [],
           count: 0,
@@ -361,13 +399,14 @@ class Strapi {
             url: uri);
       } else if (responseJson is int) {
         return StrapiResponse(
-            statusCode: response.statusCode,
-            body: [],
-            error: "",
-            errorMessage: "",
-            failed: failed,
-            count: responseJson,
-            url: uri);
+          statusCode: response.statusCode,
+          body: [],
+          error: "",
+          errorMessage: "",
+          failed: failed,
+          count: responseJson,
+          url: uri,
+        );
       } else if (responseJson is List &&
           responseJson.isNotEmpty &&
           responseJson.first is Map<String, dynamic>) {
@@ -407,23 +446,33 @@ class Strapi {
       );
     }
   }
-
-  ///everytime a new object is recieved from server it is added to this stream
-  final _objectsStramController =
-      StreamController<Map<String, dynamic>>.broadcast();
-  Stream<Map<String, dynamic>> get objectsStram =>
-      _objectsStramController.stream;
 }
 
+///callng [Strapi.i.request] will return this
 class StrapiResponse {
+  ///http response code for the rquest made
   final int statusCode;
+
+  ///immediate check whether this response is failed or not i.e non ~200 code
   final bool failed;
+
+  ///short error message
   final String error;
+
+  ///error message
   final String errorMessage;
+
+  ///strapi json response body as dart map
   final List<Map<String, dynamic>> body;
+
+  ///number of entities in the response
+  ///or the result of count api against a collection
   final int count;
+
+  ///url the request is made against
   final Uri? url;
 
+  ///object that is returned when you call [Strapi.i.request]
   StrapiResponse(
       {required this.statusCode,
       required this.failed,
@@ -439,7 +488,34 @@ class StrapiResponse {
   }
 }
 
+///helpers for simple_strapi package
 class StrapiUtils {
+  ///from string to dart enum
+  static T? toEnum<T>(List<T> enums, String? name) {
+    if (name?.isEmpty ?? true) {
+      return null;
+    }
+    if (enums.isEmpty) {
+      return null;
+    }
+    T? t;
+    for (final e in enums) {
+      if (enumToString(e) == name) {
+        t = e;
+        break;
+      }
+    }
+    return t;
+  }
+
+  ///from dart enum to string, calling this by passing `Some.enumarator` will give you `enumarator`
+  static String enumToString(enumConstant) {
+    if (enumConstant == null) {
+      return "";
+    }
+    return enumConstant.toString().split(".").last;
+  }
+
   static double? parseDouble(source) {
     if (source == null) {
       return null;
@@ -506,13 +582,17 @@ void sPrint(d) {
   print("[Strapi] " + d.toString());
 }
 
+///static class which manages all listeners of any strapi collection object
 class StrapiObjectListener {
+  ///every listeners instantiated
   static final _allListeners = <String, List<StrapiObjectListener>>{};
 
+  ///listener function belonging to a instance of [StrapiObjectListener]
   final Function(Map<String, dynamic> listener) _listener;
   final String id;
   StrapiObjectListener._private(this.id, this._listener);
 
+  ///call when you no more need to listen and free up resource
   void stopListening() {
     final objectId = id.split("-")[0];
     final myListeners = _allListeners[objectId];
@@ -528,7 +608,14 @@ class StrapiObjectListener {
     }
   }
 
-  static void _inform(List<Map<String, dynamic>> list) {
+  ///call when you no more need to listen and free up resource
+  void dispose() {
+    stopListening();
+  }
+
+  static void _inform(
+    List<Map<String, dynamic>> list,
+  ) {
     if (list is List) {
       list.forEach((data) {
         final id = data["id"];
@@ -546,13 +633,20 @@ class StrapiObjectListener {
     }
   }
 
-  factory StrapiObjectListener(
-      {required String id, required Function(Map<String, dynamic>) listener}) {
+  ///listen to a Strapi collection object, listening for now means any new instance of the collection
+  ///object with [id] is received will be delivered to the [listner], no server changes are are streamed as
+  ///of now
+  factory StrapiObjectListener({
+    required String id,
+    required Function(Map<String, dynamic>) listener,
+  }) {
     sPrint("Startingto listen for object $id");
     final existingListeners = _allListeners[id];
     var length = 0;
     if (existingListeners is List) {
-      if (existingListeners?.length == Strapi.maxListenersForAnObject) {
+      if (existingListeners?.length == Strapi.i.maxListenersForAnObject) {
+        ///exception will be thrown if the max number of listners crosses [Strapi.i.maxListenersForAnObject], set
+        ///it as per requirement
         throw Exception(
           "no more listeners for object id $id can be added this, set Strapi.maxListenersForAnObject to higher value",
         );

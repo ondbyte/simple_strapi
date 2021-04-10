@@ -1,5 +1,67 @@
 import 'package:simple_strapi/simple_strapi.dart';
 import 'dart:convert';
+import 'package:flutter/widgets.dart';
+
+class _StrapiListenerWidget<T> extends StatefulWidget {
+  final bool sync;
+  final T strapiObject;
+  final T? Function(Map<String, dynamic>) generator;
+  final Widget Function(BuildContext, T) builder;
+  _StrapiListenerWidget({
+    Key? key,
+    required this.strapiObject,
+    required this.generator,
+    required this.builder,
+    required this.sync,
+  }) : super(key: key);
+
+  @override
+  _StrapiListenerWidgetState<T> createState() => _StrapiListenerWidgetState();
+}
+
+class _StrapiListenerWidgetState<T> extends State<_StrapiListenerWidget<T>> {
+  late T _strapiObject;
+  late final StrapiObjectListener? _listener;
+  @override
+  void initState() {
+    super.initState();
+    _strapiObject = widget.strapiObject;
+
+    final id = (widget.strapiObject as dynamic).id;
+    if (id is String) {
+      _listener = StrapiObjectListener(
+        id: id,
+        listener: (map) {
+          final updated = widget.generator(map);
+          if (updated is T) {
+            setState(() {
+              _strapiObject = updated;
+            });
+          }
+        },
+      );
+      if (widget.sync) {
+        (_strapiObject as dynamic).sync();
+      }
+    } else {
+      _listener = null;
+    }
+  }
+
+  @override
+  void dispose() {
+    _listener?.stopListening();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.builder(
+      context,
+      _strapiObject,
+    );
+  }
+}
 
 class City {
   City.fromID(this.id)
@@ -290,6 +352,23 @@ class Cities {
       sPrint(s);
     }
     return [];
+  }
+
+  static Widget listenerWidget({
+    required City strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      City,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<City>(
+      strapiObject: strapiObject,
+      generator: City.fromMap,
+      builder: builder,
+      sync: sync,
+    );
   }
 }
 
@@ -653,6 +732,23 @@ class Employees {
     }
     return [];
   }
+
+  static Widget listenerWidget({
+    required Employee strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      Employee,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<Employee>(
+      strapiObject: strapiObject,
+      generator: Employee.fromMap,
+      builder: builder,
+      sync: sync,
+    );
+  }
 }
 
 class _EmployeeFields {
@@ -805,7 +901,7 @@ class Booking {
 
   final List<Package>? packages;
 
-  final List<MenuItem>? products;
+  final List<Product>? products;
 
   final Employee? employee;
 
@@ -833,7 +929,7 @@ class Booking {
           DateTime? bookingEndTime,
           BookingType? bookingType,
           List<Package>? packages,
-          List<MenuItem>? products,
+          List<Product>? products,
           Employee? employee,
           Review? review,
           BookingStatus? bookingStatus,
@@ -899,16 +995,17 @@ class Booking {
       StrapiUtils.parseDateTime(map["bookedOn"]),
       StrapiUtils.parseDateTime(map["bookingStartTime"]),
       StrapiUtils.parseDateTime(map["bookingEndTime"]),
-      map["bookingType"],
+      StrapiUtils.toEnum<BookingType>(BookingType.values, map["bookingType"]),
       StrapiUtils.objFromListOfMap<Package>(
           map["packages"], (e) => Package.fromMap(e)),
-      StrapiUtils.objFromListOfMap<MenuItem>(
-          map["products"], (e) => MenuItem.fromMap(e)),
+      StrapiUtils.objFromListOfMap<Product>(
+          map["products"], (e) => Product.fromMap(e)),
       StrapiUtils.objFromMap<Employee>(
           map["employee"], (e) => Employees._fromIDorData(e)),
       StrapiUtils.objFromMap<Review>(
           map["review"], (e) => Reviews._fromIDorData(e)),
-      map["bookingStatus"],
+      StrapiUtils.toEnum<BookingStatus>(
+          BookingStatus.values, map["bookingStatus"]),
       StrapiUtils.objFromMap<User>(
           map["bookedByUser"], (e) => Users._fromIDorData(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
@@ -920,16 +1017,17 @@ class Booking {
       StrapiUtils.parseDateTime(map["bookedOn"]),
       StrapiUtils.parseDateTime(map["bookingStartTime"]),
       StrapiUtils.parseDateTime(map["bookingEndTime"]),
-      map["bookingType"],
+      StrapiUtils.toEnum<BookingType>(BookingType.values, map["bookingType"]),
       StrapiUtils.objFromListOfMap<Package>(
           map["packages"], (e) => Package.fromMap(e)),
-      StrapiUtils.objFromListOfMap<MenuItem>(
-          map["products"], (e) => MenuItem.fromMap(e)),
+      StrapiUtils.objFromListOfMap<Product>(
+          map["products"], (e) => Product.fromMap(e)),
       StrapiUtils.objFromMap<Employee>(
           map["employee"], (e) => Employees._fromIDorData(e)),
       StrapiUtils.objFromMap<Review>(
           map["review"], (e) => Reviews._fromIDorData(e)),
-      map["bookingStatus"],
+      StrapiUtils.toEnum<BookingStatus>(
+          BookingStatus.values, map["bookingStatus"]),
       StrapiUtils.objFromMap<User>(
           map["bookedByUser"], (e) => Users._fromIDorData(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
@@ -949,7 +1047,7 @@ class Booking {
       if (!_emptyFields.bookingEndTime && bookingEndTime != null)
         "bookingEndTime": bookingEndTime?.toIso8601String(),
       if (!_emptyFields.bookingType && bookingType != null)
-        "bookingType": bookingType,
+        "bookingType": StrapiUtils.enumToString(bookingType),
       if (!_emptyFields.packages && packages != null)
         "packages":
             packages?.map((e) => e._toMap(level: level + level)).toList(),
@@ -962,7 +1060,7 @@ class Booking {
       if (!_emptyFields.review && review != null)
         "review": toServer ? review?.id : review?._toMap(level: level + level),
       if (!_emptyFields.bookingStatus && bookingStatus != null)
-        "bookingStatus": bookingStatus,
+        "bookingStatus": StrapiUtils.enumToString(bookingStatus),
       if (!_emptyFields.bookedByUser && bookedByUser != null)
         "bookedByUser": toServer
             ? bookedByUser?.id
@@ -1147,6 +1245,23 @@ class Bookings {
       sPrint(s);
     }
     return [];
+  }
+
+  static Widget listenerWidget({
+    required Booking strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      Booking,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<Booking>(
+      strapiObject: strapiObject,
+      generator: Booking.fromMap,
+      builder: builder,
+      sync: sync,
+    );
   }
 }
 
@@ -1513,6 +1628,23 @@ class Localities {
     }
     return [];
   }
+
+  static Widget listenerWidget({
+    required Locality strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      Locality,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<Locality>(
+      strapiObject: strapiObject,
+      generator: Locality.fromMap,
+      builder: builder,
+      sync: sync,
+    );
+  }
 }
 
 class _LocalityFields {
@@ -1554,21 +1686,21 @@ class PushNotification {
       : _synced = false,
         data = null,
         pushed_on = null,
-        pushedForUser = null,
+        user = null,
         createdAt = null,
         updatedAt = null;
 
-  PushNotification.fresh({this.data, this.pushed_on, this.pushedForUser})
+  PushNotification.fresh({this.data, this.pushed_on, this.user})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
         id = null;
 
-  PushNotification._synced(this.data, this.pushed_on, this.pushedForUser,
-      this.createdAt, this.updatedAt, this.id)
+  PushNotification._synced(this.data, this.pushed_on, this.user, this.createdAt,
+      this.updatedAt, this.id)
       : _synced = true;
 
-  PushNotification._unsynced(this.data, this.pushed_on, this.pushedForUser,
+  PushNotification._unsynced(this.data, this.pushed_on, this.user,
       this.createdAt, this.updatedAt, this.id)
       : _synced = false;
 
@@ -1578,7 +1710,7 @@ class PushNotification {
 
   final DateTime? pushed_on;
 
-  final User? pushedForUser;
+  final User? user;
 
   final DateTime? createdAt;
 
@@ -1591,27 +1723,21 @@ class PushNotification {
   _PushNotificationEmptyFields _emptyFields = _PushNotificationEmptyFields();
 
   bool get synced => _synced;
-  PushNotification copyWIth(
-          {String? data, DateTime? pushed_on, User? pushedForUser}) =>
-      PushNotification._unsynced(
-          data ?? this.data,
-          pushed_on ?? this.pushed_on,
-          pushedForUser ?? this.pushedForUser,
-          this.createdAt,
-          this.updatedAt,
-          this.id);
+  PushNotification copyWIth({String? data, DateTime? pushed_on, User? user}) =>
+      PushNotification._unsynced(data ?? this.data, pushed_on ?? this.pushed_on,
+          user ?? this.user, this.createdAt, this.updatedAt, this.id);
   PushNotification setNull(
-      {bool data = false, bool pushed_on = false, bool pushedForUser = false}) {
+      {bool data = false, bool pushed_on = false, bool user = false}) {
     return PushNotification._unsynced(
         data ? null : this.data,
         pushed_on ? null : this.pushed_on,
-        pushedForUser ? null : this.pushedForUser,
+        user ? null : this.user,
         this.createdAt,
         this.updatedAt,
         this.id)
       .._emptyFields.data = data
       .._emptyFields.pushed_on = pushed_on
-      .._emptyFields.pushedForUser = pushedForUser;
+      .._emptyFields.user = user;
   }
 
   static PushNotification fromSyncedMap(Map<dynamic, dynamic> map) =>
@@ -1619,7 +1745,7 @@ class PushNotification {
           map["data"],
           StrapiUtils.parseDateTime(map["pushed_on"]),
           StrapiUtils.objFromMap<User>(
-              map["pushedForUser"], (e) => Users._fromIDorData(e)),
+              map["user"], (e) => Users._fromIDorData(e)),
           StrapiUtils.parseDateTime(map["createdAt"]),
           StrapiUtils.parseDateTime(map["updatedAt"]),
           map["id"]);
@@ -1628,7 +1754,7 @@ class PushNotification {
           map["data"],
           StrapiUtils.parseDateTime(map["pushed_on"]),
           StrapiUtils.objFromMap<User>(
-              map["pushedForUser"], (e) => Users._fromIDorData(e)),
+              map["user"], (e) => Users._fromIDorData(e)),
           StrapiUtils.parseDateTime(map["createdAt"]),
           StrapiUtils.parseDateTime(map["updatedAt"]),
           map["id"]);
@@ -1639,10 +1765,8 @@ class PushNotification {
       if (!_emptyFields.data && data != null) "data": data,
       if (!_emptyFields.pushed_on && pushed_on != null)
         "pushed_on": pushed_on?.toIso8601String(),
-      if (!_emptyFields.pushedForUser && pushedForUser != null)
-        "pushedForUser": toServer
-            ? pushedForUser?.id
-            : pushedForUser?._toMap(level: level + level),
+      if (!_emptyFields.user && user != null)
+        "user": toServer ? user?.id : user?._toMap(level: level + level),
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
       "id": id
@@ -1828,6 +1952,23 @@ class PushNotifications {
     }
     return [];
   }
+
+  static Widget listenerWidget({
+    required PushNotification strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      PushNotification,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<PushNotification>(
+      strapiObject: strapiObject,
+      generator: PushNotification.fromMap,
+      builder: builder,
+      sync: sync,
+    );
+  }
 }
 
 class _PushNotificationFields {
@@ -1839,7 +1980,7 @@ class _PushNotificationFields {
 
   final pushed_on = StrapiLeafField("pushed_on");
 
-  final pushedForUser = StrapiModelField("pushedForUser");
+  final user = StrapiModelField("user");
 
   final createdAt = StrapiLeafField("createdAt");
 
@@ -1848,7 +1989,7 @@ class _PushNotificationFields {
   final id = StrapiLeafField("id");
 
   List<StrapiField> call() {
-    return [data, pushed_on, pushedForUser, createdAt, updatedAt, id];
+    return [data, pushed_on, user, createdAt, updatedAt, id];
   }
 }
 
@@ -1857,7 +1998,7 @@ class _PushNotificationEmptyFields {
 
   bool pushed_on = false;
 
-  bool pushedForUser = false;
+  bool user = false;
 }
 
 class Country {
@@ -2221,6 +2362,23 @@ class Countries {
     }
     return [];
   }
+
+  static Widget listenerWidget({
+    required Country strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      Country,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<Country>(
+      strapiObject: strapiObject,
+      generator: Country.fromMap,
+      builder: builder,
+      sync: sync,
+    );
+  }
 }
 
 class _CountryFields {
@@ -2297,10 +2455,10 @@ class Business {
         businessFeatures = null,
         business_category = null,
         starRating = null,
-        catalogue = null,
-        email = null,
         contactNumber = null,
+        email = null,
         about = null,
+        catalogue = null,
         createdAt = null,
         updatedAt = null;
 
@@ -2314,10 +2472,10 @@ class Business {
       this.businessFeatures,
       this.business_category,
       this.starRating,
-      this.catalogue,
-      this.email,
       this.contactNumber,
-      this.about})
+      this.email,
+      this.about,
+      this.catalogue})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
@@ -2333,10 +2491,10 @@ class Business {
       this.businessFeatures,
       this.business_category,
       this.starRating,
-      this.catalogue,
-      this.email,
       this.contactNumber,
+      this.email,
       this.about,
+      this.catalogue,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -2352,10 +2510,10 @@ class Business {
       this.businessFeatures,
       this.business_category,
       this.starRating,
-      this.catalogue,
-      this.email,
       this.contactNumber,
+      this.email,
       this.about,
+      this.catalogue,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -2381,13 +2539,13 @@ class Business {
 
   final double? starRating;
 
-  final List<Catalogue>? catalogue;
+  final String? contactNumber;
 
   final String? email;
 
-  final String? contactNumber;
-
   final String? about;
+
+  final List<ProductCategory>? catalogue;
 
   final DateTime? createdAt;
 
@@ -2410,10 +2568,10 @@ class Business {
           List<BusinessFeature>? businessFeatures,
           BusinessCategory? business_category,
           double? starRating,
-          List<Catalogue>? catalogue,
-          String? email,
           String? contactNumber,
-          String? about}) =>
+          String? email,
+          String? about,
+          List<ProductCategory>? catalogue}) =>
       Business._unsynced(
           name ?? this.name,
           address ?? this.address,
@@ -2424,10 +2582,10 @@ class Business {
           businessFeatures ?? this.businessFeatures,
           business_category ?? this.business_category,
           starRating ?? this.starRating,
-          catalogue ?? this.catalogue,
-          email ?? this.email,
           contactNumber ?? this.contactNumber,
+          email ?? this.email,
           about ?? this.about,
+          catalogue ?? this.catalogue,
           this.createdAt,
           this.updatedAt,
           this.id);
@@ -2441,10 +2599,10 @@ class Business {
       bool businessFeatures = false,
       bool business_category = false,
       bool starRating = false,
-      bool catalogue = false,
-      bool email = false,
       bool contactNumber = false,
-      bool about = false}) {
+      bool email = false,
+      bool about = false,
+      bool catalogue = false}) {
     return Business._unsynced(
         name ? null : this.name,
         address ? null : this.address,
@@ -2455,10 +2613,10 @@ class Business {
         businessFeatures ? null : this.businessFeatures,
         business_category ? null : this.business_category,
         starRating ? null : this.starRating,
-        catalogue ? null : this.catalogue,
-        email ? null : this.email,
         contactNumber ? null : this.contactNumber,
+        email ? null : this.email,
         about ? null : this.about,
+        catalogue ? null : this.catalogue,
         this.createdAt,
         this.updatedAt,
         this.id)
@@ -2471,10 +2629,10 @@ class Business {
       .._emptyFields.businessFeatures = businessFeatures
       .._emptyFields.business_category = business_category
       .._emptyFields.starRating = starRating
-      .._emptyFields.catalogue = catalogue
-      .._emptyFields.email = email
       .._emptyFields.contactNumber = contactNumber
-      .._emptyFields.about = about;
+      .._emptyFields.email = email
+      .._emptyFields.about = about
+      .._emptyFields.catalogue = catalogue;
   }
 
   static Business fromSyncedMap(Map<dynamic, dynamic> map) => Business._synced(
@@ -2493,11 +2651,11 @@ class Business {
       StrapiUtils.objFromMap<BusinessCategory>(
           map["business_category"], (e) => BusinessCategories._fromIDorData(e)),
       StrapiUtils.parseDouble(map["starRating"]),
-      StrapiUtils.objFromListOfMap<Catalogue>(
-          map["catalogue"], (e) => Catalogue.fromMap(e)),
-      map["email"],
       map["contactNumber"],
+      map["email"],
       map["about"],
+      StrapiUtils.objFromListOfMap<ProductCategory>(
+          map["catalogue"], (e) => ProductCategory.fromMap(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -2517,11 +2675,11 @@ class Business {
       StrapiUtils.objFromMap<BusinessCategory>(
           map["business_category"], (e) => BusinessCategories._fromIDorData(e)),
       StrapiUtils.parseDouble(map["starRating"]),
-      StrapiUtils.objFromListOfMap<Catalogue>(
-          map["catalogue"], (e) => Catalogue.fromMap(e)),
-      map["email"],
       map["contactNumber"],
+      map["email"],
       map["about"],
+      StrapiUtils.objFromListOfMap<ProductCategory>(
+          map["catalogue"], (e) => ProductCategory.fromMap(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -2553,13 +2711,13 @@ class Business {
             : business_category?._toMap(level: level + level),
       if (!_emptyFields.starRating && starRating != null)
         "starRating": starRating,
+      if (!_emptyFields.contactNumber && contactNumber != null)
+        "contactNumber": contactNumber,
+      if (!_emptyFields.email && email != null) "email": email,
+      if (!_emptyFields.about && about != null) "about": about,
       if (!_emptyFields.catalogue && catalogue != null)
         "catalogue":
             catalogue?.map((e) => e._toMap(level: level + level)).toList(),
-      if (!_emptyFields.email && email != null) "email": email,
-      if (!_emptyFields.contactNumber && contactNumber != null)
-        "contactNumber": contactNumber,
-      if (!_emptyFields.about && about != null) "about": about,
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
       "id": id
@@ -2741,6 +2899,23 @@ class Businesses {
     }
     return [];
   }
+
+  static Widget listenerWidget({
+    required Business strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      Business,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<Business>(
+      strapiObject: strapiObject,
+      generator: Business.fromMap,
+      builder: builder,
+      sync: sync,
+    );
+  }
 }
 
 class _BusinessFields {
@@ -2766,13 +2941,13 @@ class _BusinessFields {
 
   final starRating = StrapiLeafField("starRating");
 
-  final catalogue = StrapiComponentField("catalogue");
+  final contactNumber = StrapiLeafField("contactNumber");
 
   final email = StrapiLeafField("email");
 
-  final contactNumber = StrapiLeafField("contactNumber");
-
   final about = StrapiLeafField("about");
+
+  final catalogue = StrapiComponentField("catalogue");
 
   final createdAt = StrapiLeafField("createdAt");
 
@@ -2791,10 +2966,10 @@ class _BusinessFields {
       businessFeatures,
       business_category,
       starRating,
-      catalogue,
-      email,
       contactNumber,
+      email,
       about,
+      catalogue,
       createdAt,
       updatedAt,
       id
@@ -2821,13 +2996,13 @@ class _BusinessEmptyFields {
 
   bool starRating = false;
 
-  bool catalogue = false;
+  bool contactNumber = false;
 
   bool email = false;
 
-  bool contactNumber = false;
-
   bool about = false;
+
+  bool catalogue = false;
 }
 
 class BusinessCategory {
@@ -3110,6 +3285,23 @@ class BusinessCategories {
       sPrint(s);
     }
     return [];
+  }
+
+  static Widget listenerWidget({
+    required BusinessCategory strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      BusinessCategory,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<BusinessCategory>(
+      strapiObject: strapiObject,
+      generator: BusinessCategory.fromMap,
+      builder: builder,
+      sync: sync,
+    );
   }
 }
 
@@ -3464,6 +3656,23 @@ class Partners {
     }
     return [];
   }
+
+  static Widget listenerWidget({
+    required Partner strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      Partner,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<Partner>(
+      strapiObject: strapiObject,
+      generator: Partner.fromMap,
+      builder: builder,
+      sync: sync,
+    );
+  }
 }
 
 class _PartnerFields {
@@ -3793,6 +4002,23 @@ class DefaultDatas {
     }
     return [];
   }
+
+  static Widget listenerWidget({
+    required DefaultData strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      DefaultData,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<DefaultData>(
+      strapiObject: strapiObject,
+      generator: DefaultData.fromMap,
+      builder: builder,
+      sync: sync,
+    );
+  }
 }
 
 class _DefaultDataFields {
@@ -4098,6 +4324,23 @@ class MasterProducts {
     }
     return [];
   }
+
+  static Widget listenerWidget({
+    required MasterProduct strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      MasterProduct,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<MasterProduct>(
+      strapiObject: strapiObject,
+      generator: MasterProduct.fromMap,
+      builder: builder,
+      sync: sync,
+    );
+  }
 }
 
 class _MasterProductFields {
@@ -4212,7 +4455,7 @@ class BusinessFeature {
 
   static BusinessFeature fromSyncedMap(Map<dynamic, dynamic> map) =>
       BusinessFeature._synced(
-          map["feature"],
+          StrapiUtils.toEnum<Feature>(Feature.values, map["feature"]),
           StrapiUtils.parseDateTime(map["startDate"]),
           StrapiUtils.parseDateTime(map["endDate"]),
           StrapiUtils.objFromMap<Business>(
@@ -4222,7 +4465,7 @@ class BusinessFeature {
           map["id"]);
   static BusinessFeature? fromMap(Map<String, dynamic> map) =>
       BusinessFeature._unsynced(
-          map["feature"],
+          StrapiUtils.toEnum<Feature>(Feature.values, map["feature"]),
           StrapiUtils.parseDateTime(map["startDate"]),
           StrapiUtils.parseDateTime(map["endDate"]),
           StrapiUtils.objFromMap<Business>(
@@ -4234,7 +4477,8 @@ class BusinessFeature {
   Map<String, dynamic> _toMap({int level = 0}) {
     final toServer = level == 0;
     return {
-      if (!_emptyFields.feature && feature != null) "feature": feature,
+      if (!_emptyFields.feature && feature != null)
+        "feature": StrapiUtils.enumToString(feature),
       if (!_emptyFields.startDate && startDate != null)
         "startDate": startDate?.toIso8601String(),
       if (!_emptyFields.endDate && endDate != null)
@@ -4425,6 +4669,23 @@ class BusinessFeatures {
       sPrint(s);
     }
     return [];
+  }
+
+  static Widget listenerWidget({
+    required BusinessFeature strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      BusinessFeature,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<BusinessFeature>(
+      strapiObject: strapiObject,
+      generator: BusinessFeature.fromMap,
+      builder: builder,
+      sync: sync,
+    );
   }
 }
 
@@ -4825,6 +5086,23 @@ class Reviews {
     }
     return [];
   }
+
+  static Widget listenerWidget({
+    required Review strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      Review,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<Review>(
+      strapiObject: strapiObject,
+      generator: Review.fromMap,
+      builder: builder,
+      sync: sync,
+    );
+  }
 }
 
 class _ReviewFields {
@@ -5193,6 +5471,23 @@ class Roles {
     }
     return [];
   }
+
+  static Widget listenerWidget({
+    required Role strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      Role,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<Role>(
+      strapiObject: strapiObject,
+      generator: Role.fromMap,
+      builder: builder,
+      sync: sync,
+    );
+  }
 }
 
 class _RoleFields {
@@ -5255,6 +5550,7 @@ class User {
         role = null,
         favourites = null,
         name = null,
+        pushNotifications = null,
         employee = null,
         partner = null,
         locality = null,
@@ -5274,6 +5570,7 @@ class User {
       this.role,
       this.favourites,
       this.name,
+      this.pushNotifications,
       this.employee,
       this.partner,
       this.locality,
@@ -5295,6 +5592,7 @@ class User {
       this.role,
       this.favourites,
       this.name,
+      this.pushNotifications,
       this.employee,
       this.partner,
       this.locality,
@@ -5316,6 +5614,7 @@ class User {
       this.role,
       this.favourites,
       this.name,
+      this.pushNotifications,
       this.employee,
       this.partner,
       this.locality,
@@ -5347,6 +5646,8 @@ class User {
   final List<Favourites>? favourites;
 
   final String? name;
+
+  final List<PushNotification>? pushNotifications;
 
   final Employee? employee;
 
@@ -5380,6 +5681,7 @@ class User {
           Role? role,
           List<Favourites>? favourites,
           String? name,
+          List<PushNotification>? pushNotifications,
           Employee? employee,
           Partner? partner,
           Locality? locality,
@@ -5396,6 +5698,7 @@ class User {
           role ?? this.role,
           favourites ?? this.favourites,
           name ?? this.name,
+          pushNotifications ?? this.pushNotifications,
           employee ?? this.employee,
           partner ?? this.partner,
           locality ?? this.locality,
@@ -5415,6 +5718,7 @@ class User {
       bool role = false,
       bool favourites = false,
       bool name = false,
+      bool pushNotifications = false,
       bool employee = false,
       bool partner = false,
       bool locality = false,
@@ -5431,6 +5735,7 @@ class User {
         role ? null : this.role,
         favourites ? null : this.favourites,
         name ? null : this.name,
+        pushNotifications ? null : this.pushNotifications,
         employee ? null : this.employee,
         partner ? null : this.partner,
         locality ? null : this.locality,
@@ -5449,6 +5754,7 @@ class User {
       .._emptyFields.role = role
       .._emptyFields.favourites = favourites
       .._emptyFields.name = name
+      .._emptyFields.pushNotifications = pushNotifications
       .._emptyFields.employee = employee
       .._emptyFields.partner = partner
       .._emptyFields.locality = locality
@@ -5468,6 +5774,8 @@ class User {
       StrapiUtils.objFromListOfMap<Favourites>(
           map["favourites"], (e) => Favourites.fromMap(e)),
       map["name"],
+      StrapiUtils.objFromListOfMap<PushNotification>(
+          map["pushNotifications"], (e) => PushNotifications._fromIDorData(e)),
       StrapiUtils.objFromMap<Employee>(
           map["employee"], (e) => Employees._fromIDorData(e)),
       StrapiUtils.objFromMap<Partner>(
@@ -5492,6 +5800,8 @@ class User {
       StrapiUtils.objFromListOfMap<Favourites>(
           map["favourites"], (e) => Favourites.fromMap(e)),
       map["name"],
+      StrapiUtils.objFromListOfMap<PushNotification>(
+          map["pushNotifications"], (e) => PushNotifications._fromIDorData(e)),
       StrapiUtils.objFromMap<Employee>(
           map["employee"], (e) => Employees._fromIDorData(e)),
       StrapiUtils.objFromMap<Partner>(
@@ -5523,6 +5833,10 @@ class User {
         "favourites":
             favourites?.map((e) => e._toMap(level: level + level)).toList(),
       if (!_emptyFields.name && name != null) "name": name,
+      if (!_emptyFields.pushNotifications && pushNotifications != null)
+        "pushNotifications": pushNotifications
+            ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
+            .toList(),
       if (!_emptyFields.employee && employee != null)
         "employee":
             toServer ? employee?.id : employee?._toMap(level: level + level),
@@ -5737,6 +6051,23 @@ class Users {
       sPrint(s);
     }
   }
+
+  static Widget listenerWidget({
+    required User strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      User,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<User>(
+      strapiObject: strapiObject,
+      generator: User.fromMap,
+      builder: builder,
+      sync: sync,
+    );
+  }
 }
 
 class _UserFields {
@@ -5763,6 +6094,8 @@ class _UserFields {
   final favourites = StrapiComponentField("favourites");
 
   final name = StrapiLeafField("name");
+
+  final pushNotifications = StrapiCollectionField("pushNotifications");
 
   final employee = StrapiModelField("employee");
 
@@ -5792,6 +6125,7 @@ class _UserFields {
       role,
       favourites,
       name,
+      pushNotifications,
       employee,
       partner,
       locality,
@@ -5824,6 +6158,8 @@ class _UserEmptyFields {
   bool favourites = false;
 
   bool name = false;
+
+  bool pushNotifications = false;
 
   bool employee = false;
 
@@ -6150,6 +6486,23 @@ class Permissions {
       sPrint(s);
     }
     return [];
+  }
+
+  static Widget listenerWidget({
+    required Permission strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      Permission,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<Permission>(
+      strapiObject: strapiObject,
+      generator: Permission.fromMap,
+      builder: builder,
+      sync: sync,
+    );
   }
 }
 
@@ -6661,6 +7014,23 @@ class StrapiFiles {
     }
     return [];
   }
+
+  static Widget listenerWidget({
+    required StrapiFile strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      StrapiFile,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<StrapiFile>(
+      strapiObject: strapiObject,
+      generator: StrapiFile.fromMap,
+      builder: builder,
+      sync: sync,
+    );
+  }
 }
 
 class _StrapiFileFields {
@@ -6760,16 +7130,19 @@ class _StrapiFileEmptyFields {
   bool related = false;
 }
 
-class MenuCategories {
-  MenuCategories._unsynced(this.name, this.enabled, this.image,
+class ProductCategory {
+  ProductCategory._unsynced(this.mine, this.name, this.enabled, this.image,
       this.description, this.catalogueItems);
 
-  MenuCategories(
-      {this.name,
+  ProductCategory(
+      {this.mine,
+      this.name,
       this.enabled,
       this.image,
       this.description,
       this.catalogueItems});
+
+  final double? mine;
 
   final String? name;
 
@@ -6779,21 +7152,23 @@ class MenuCategories {
 
   final String? description;
 
-  final List<MenuItem>? catalogueItems;
+  final List<Product>? catalogueItems;
 
-  static MenuCategories? fromMap(Map<String, dynamic> map) =>
-      MenuCategories._unsynced(
+  static ProductCategory? fromMap(Map<String, dynamic> map) =>
+      ProductCategory._unsynced(
+          StrapiUtils.parseDouble(map["mine"]),
           map["name"],
           StrapiUtils.parseBool(map["enabled"]),
           StrapiUtils.objFromListOfMap<StrapiFile>(
               map["image"], (e) => StrapiFiles._fromIDorData(e)),
           map["description"],
-          StrapiUtils.objFromListOfMap<MenuItem>(
-              map["catalogueItems"], (e) => MenuItem.fromMap(e)));
+          StrapiUtils.objFromListOfMap<Product>(
+              map["catalogueItems"], (e) => Product.fromMap(e)));
   Map<String, dynamic> toMap() => _toMap(level: -1);
   Map<String, dynamic> _toMap({int level = 0}) {
     final toServer = level == 0;
     return {
+      "mine": mine,
       "name": name,
       "enabled": enabled,
       "image": image
@@ -6805,16 +7180,18 @@ class MenuCategories {
     };
   }
 
-  static _MenuCategoriesFields get fields => _MenuCategoriesFields.i;
+  static _ProductCategoryFields get fields => _ProductCategoryFields.i;
   @override
   String toString() =>
-      "[Strapi Component Type MenuCategories]: \n" + _toMap().toString();
+      "[Strapi Component Type ProductCategory]: \n" + _toMap().toString();
 }
 
-class _MenuCategoriesFields {
-  _MenuCategoriesFields._i();
+class _ProductCategoryFields {
+  _ProductCategoryFields._i();
 
-  static final _MenuCategoriesFields i = _MenuCategoriesFields._i();
+  static final _ProductCategoryFields i = _ProductCategoryFields._i();
+
+  final mine = StrapiLeafField("mine");
 
   final name = StrapiLeafField("name");
 
@@ -6826,12 +7203,14 @@ class _MenuCategoriesFields {
 
   final catalogueItems = StrapiComponentField("catalogueItems");
 
-  List<StrapiField> call() {
-    return [name, enabled, image, description, catalogueItems];
+  String call() {
+    return "{mine,name,enabled,image{id},description,catalogueItems${_ProductFields.i()}}";
   }
 }
 
-class _MenuCategoriesEmptyFields {
+class _ProductCategoryEmptyFields {
+  bool mine = false;
+
   bool name = false;
 
   bool enabled = false;
@@ -6841,6 +7220,107 @@ class _MenuCategoriesEmptyFields {
   bool description = false;
 
   bool catalogueItems = false;
+}
+
+class Product {
+  Product._unsynced(this.price, this.duration, this.enabled, this.nameOverride,
+      this.descriptionOverride, this.imageOverride, this.productReference);
+
+  Product(
+      {this.price,
+      this.duration,
+      this.enabled,
+      this.nameOverride,
+      this.descriptionOverride,
+      this.imageOverride,
+      this.productReference});
+
+  final double? price;
+
+  final int? duration;
+
+  final bool? enabled;
+
+  final String? nameOverride;
+
+  final String? descriptionOverride;
+
+  final List<StrapiFile>? imageOverride;
+
+  final MasterProduct? productReference;
+
+  static Product? fromMap(Map<String, dynamic> map) => Product._unsynced(
+      StrapiUtils.parseDouble(map["price"]),
+      StrapiUtils.parseInt(map["duration"]),
+      StrapiUtils.parseBool(map["enabled"]),
+      map["nameOverride"],
+      map["descriptionOverride"],
+      StrapiUtils.objFromListOfMap<StrapiFile>(
+          map["imageOverride"], (e) => StrapiFiles._fromIDorData(e)),
+      StrapiUtils.objFromMap<MasterProduct>(
+          map["productReference"], (e) => MasterProducts._fromIDorData(e)));
+  Map<String, dynamic> toMap() => _toMap(level: -1);
+  Map<String, dynamic> _toMap({int level = 0}) {
+    final toServer = level == 0;
+    return {
+      "price": price,
+      "duration": duration,
+      "enabled": enabled,
+      "nameOverride": nameOverride,
+      "descriptionOverride": descriptionOverride,
+      "imageOverride": imageOverride
+          ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
+          .toList(),
+      "productReference": toServer
+          ? productReference?.id
+          : productReference?._toMap(level: level + level)
+    };
+  }
+
+  static _ProductFields get fields => _ProductFields.i;
+  @override
+  String toString() =>
+      "[Strapi Component Type Product]: \n" + _toMap().toString();
+}
+
+class _ProductFields {
+  _ProductFields._i();
+
+  static final _ProductFields i = _ProductFields._i();
+
+  final price = StrapiLeafField("price");
+
+  final duration = StrapiLeafField("duration");
+
+  final enabled = StrapiLeafField("enabled");
+
+  final nameOverride = StrapiLeafField("nameOverride");
+
+  final descriptionOverride = StrapiLeafField("descriptionOverride");
+
+  final imageOverride = StrapiCollectionField("imageOverride");
+
+  final productReference = StrapiModelField("productReference");
+
+  String call() {
+    return "{price,duration,enabled,nameOverride,descriptionOverride,imageOverride{id},productReference{id}}";
+  }
+}
+
+class _ProductEmptyFields {
+  bool price = false;
+
+  bool duration = false;
+
+  bool enabled = false;
+
+  bool nameOverride = false;
+
+  bool descriptionOverride = false;
+
+  bool imageOverride = false;
+
+  bool productReference = false;
 }
 
 class Address {
@@ -6888,8 +7368,8 @@ class _AddressFields {
 
   final locality = StrapiModelField("locality");
 
-  List<StrapiField> call() {
-    return [address, coordinates, locality];
+  String call() {
+    return "{address,coordinates${_CoordinatesFields.i()},locality{id}}";
   }
 }
 
@@ -6903,7 +7383,7 @@ class _AddressEmptyFields {
 
 class Package {
   Package._unsynced(this.name, this.startDate, this.endDate, this.enabled,
-      this.priceBefore, this.priceAfter, this.catalogueItems);
+      this.priceBefore, this.priceAfter);
 
   Package(
       {this.name,
@@ -6911,8 +7391,7 @@ class Package {
       this.endDate,
       this.enabled,
       this.priceBefore,
-      this.priceAfter,
-      this.catalogueItems});
+      this.priceAfter});
 
   final String? name;
 
@@ -6926,17 +7405,13 @@ class Package {
 
   final double? priceAfter;
 
-  final List<CatalogueItem>? catalogueItems;
-
   static Package? fromMap(Map<String, dynamic> map) => Package._unsynced(
       map["name"],
       StrapiUtils.parseDateTime(map["startDate"]),
       StrapiUtils.parseDateTime(map["endDate"]),
       StrapiUtils.parseBool(map["enabled"]),
       StrapiUtils.parseDouble(map["priceBefore"]),
-      StrapiUtils.parseDouble(map["priceAfter"]),
-      StrapiUtils.objFromListOfMap<CatalogueItem>(
-          map["catalogueItems"], (e) => CatalogueItem.fromMap(e)));
+      StrapiUtils.parseDouble(map["priceAfter"]));
   Map<String, dynamic> toMap() => _toMap(level: -1);
   Map<String, dynamic> _toMap({int level = 0}) {
     final toServer = level == 0;
@@ -6946,9 +7421,7 @@ class Package {
       "endDate": endDate?.toIso8601String(),
       "enabled": enabled,
       "priceBefore": priceBefore,
-      "priceAfter": priceAfter,
-      "catalogueItems":
-          catalogueItems?.map((e) => e._toMap(level: level + level)).toList()
+      "priceAfter": priceAfter
     };
   }
 
@@ -6975,18 +7448,8 @@ class _PackageFields {
 
   final priceAfter = StrapiLeafField("priceAfter");
 
-  final catalogueItems = StrapiComponentField("catalogueItems");
-
-  List<StrapiField> call() {
-    return [
-      name,
-      startDate,
-      endDate,
-      enabled,
-      priceBefore,
-      priceAfter,
-      catalogueItems
-    ];
+  String call() {
+    return "{name,startDate,endDate,enabled,priceBefore,priceAfter}";
   }
 }
 
@@ -7002,117 +7465,6 @@ class _PackageEmptyFields {
   bool priceBefore = false;
 
   bool priceAfter = false;
-
-  bool catalogueItems = false;
-}
-
-class MenuItem {
-  MenuItem._unsynced(this.price, this.duration, this.enabled, this.nameOverride,
-      this.descriptionOverride, this.imageOverride, this.productReference);
-
-  MenuItem(
-      {this.price,
-      this.duration,
-      this.enabled,
-      this.nameOverride,
-      this.descriptionOverride,
-      this.imageOverride,
-      this.productReference});
-
-  final double? price;
-
-  final int? duration;
-
-  final bool? enabled;
-
-  final String? nameOverride;
-
-  final String? descriptionOverride;
-
-  final List<StrapiFile>? imageOverride;
-
-  final MasterProduct? productReference;
-
-  static MenuItem? fromMap(Map<String, dynamic> map) => MenuItem._unsynced(
-      StrapiUtils.parseDouble(map["price"]),
-      StrapiUtils.parseInt(map["duration"]),
-      StrapiUtils.parseBool(map["enabled"]),
-      map["nameOverride"],
-      map["descriptionOverride"],
-      StrapiUtils.objFromListOfMap<StrapiFile>(
-          map["imageOverride"], (e) => StrapiFiles._fromIDorData(e)),
-      StrapiUtils.objFromMap<MasterProduct>(
-          map["productReference"], (e) => MasterProducts._fromIDorData(e)));
-  Map<String, dynamic> toMap() => _toMap(level: -1);
-  Map<String, dynamic> _toMap({int level = 0}) {
-    final toServer = level == 0;
-    return {
-      "price": price,
-      "duration": duration,
-      "enabled": enabled,
-      "nameOverride": nameOverride,
-      "descriptionOverride": descriptionOverride,
-      "imageOverride": imageOverride
-          ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
-          .toList(),
-      "productReference": toServer
-          ? productReference?.id
-          : productReference?._toMap(level: level + level)
-    };
-  }
-
-  static _MenuItemFields get fields => _MenuItemFields.i;
-  @override
-  String toString() =>
-      "[Strapi Component Type MenuItem]: \n" + _toMap().toString();
-}
-
-class _MenuItemFields {
-  _MenuItemFields._i();
-
-  static final _MenuItemFields i = _MenuItemFields._i();
-
-  final price = StrapiLeafField("price");
-
-  final duration = StrapiLeafField("duration");
-
-  final enabled = StrapiLeafField("enabled");
-
-  final nameOverride = StrapiLeafField("nameOverride");
-
-  final descriptionOverride = StrapiLeafField("descriptionOverride");
-
-  final imageOverride = StrapiCollectionField("imageOverride");
-
-  final productReference = StrapiModelField("productReference");
-
-  List<StrapiField> call() {
-    return [
-      price,
-      duration,
-      enabled,
-      nameOverride,
-      descriptionOverride,
-      imageOverride,
-      productReference
-    ];
-  }
-}
-
-class _MenuItemEmptyFields {
-  bool price = false;
-
-  bool duration = false;
-
-  bool enabled = false;
-
-  bool nameOverride = false;
-
-  bool descriptionOverride = false;
-
-  bool imageOverride = false;
-
-  bool productReference = false;
 }
 
 class Favourites {
@@ -7153,8 +7505,8 @@ class _FavouritesFields {
 
   final addedOn = StrapiLeafField("addedOn");
 
-  List<StrapiField> call() {
-    return [business, addedOn];
+  String call() {
+    return "{business{id},addedOn}";
   }
 }
 
@@ -7197,8 +7549,8 @@ class _CoordinatesFields {
 
   final longitude = StrapiLeafField("longitude");
 
-  List<StrapiField> call() {
-    return [latitude, longitude];
+  String call() {
+    return "{latitude,longitude}";
   }
 }
 
@@ -7206,193 +7558,4 @@ class _CoordinatesEmptyFields {
   bool latitude = false;
 
   bool longitude = false;
-}
-
-class Catalogue {
-  Catalogue._unsynced(this.name, this.description, this.enabled,
-      this.catalogueItems, this.images);
-
-  Catalogue(
-      {this.name,
-      this.description,
-      this.enabled,
-      this.catalogueItems,
-      this.images});
-
-  final String? name;
-
-  final String? description;
-
-  final bool? enabled;
-
-  final List<CatalogueItem>? catalogueItems;
-
-  final List<StrapiFile>? images;
-
-  static Catalogue? fromMap(Map<String, dynamic> map) => Catalogue._unsynced(
-      map["name"],
-      map["description"],
-      StrapiUtils.parseBool(map["enabled"]),
-      StrapiUtils.objFromListOfMap<CatalogueItem>(
-          map["catalogueItems"], (e) => CatalogueItem.fromMap(e)),
-      StrapiUtils.objFromListOfMap<StrapiFile>(
-          map["images"], (e) => StrapiFiles._fromIDorData(e)));
-  Map<String, dynamic> toMap() => _toMap(level: -1);
-  Map<String, dynamic> _toMap({int level = 0}) {
-    final toServer = level == 0;
-    return {
-      "name": name,
-      "description": description,
-      "enabled": enabled,
-      "catalogueItems":
-          catalogueItems?.map((e) => e._toMap(level: level + level)).toList(),
-      "images": images
-          ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
-          .toList()
-    };
-  }
-
-  static _CatalogueFields get fields => _CatalogueFields.i;
-  @override
-  String toString() =>
-      "[Strapi Component Type Catalogue]: \n" + _toMap().toString();
-}
-
-class _CatalogueFields {
-  _CatalogueFields._i();
-
-  static final _CatalogueFields i = _CatalogueFields._i();
-
-  final name = StrapiLeafField("name");
-
-  final description = StrapiLeafField("description");
-
-  final enabled = StrapiLeafField("enabled");
-
-  final catalogueItems = StrapiComponentField("catalogueItems");
-
-  final images = StrapiCollectionField("images");
-
-  List<StrapiField> call() {
-    return [name, description, enabled, catalogueItems, images];
-  }
-}
-
-class _CatalogueEmptyFields {
-  bool name = false;
-
-  bool description = false;
-
-  bool enabled = false;
-
-  bool catalogueItems = false;
-
-  bool images = false;
-}
-
-class CatalogueItem {
-  CatalogueItem._unsynced(this.name, this.description, this.enabled, this.price,
-      this.durationInMinutes, this.images, this.catlogueName);
-
-  CatalogueItem(
-      {this.name,
-      this.description,
-      this.enabled,
-      this.price,
-      this.durationInMinutes,
-      this.images,
-      this.catlogueName});
-
-  final String? name;
-
-  final String? description;
-
-  final bool? enabled;
-
-  final double? price;
-
-  final int? durationInMinutes;
-
-  final List<StrapiFile>? images;
-
-  final String? catlogueName;
-
-  static CatalogueItem? fromMap(Map<String, dynamic> map) =>
-      CatalogueItem._unsynced(
-          map["name"],
-          map["description"],
-          StrapiUtils.parseBool(map["enabled"]),
-          StrapiUtils.parseDouble(map["price"]),
-          StrapiUtils.parseInt(map["durationInMinutes"]),
-          StrapiUtils.objFromListOfMap<StrapiFile>(
-              map["images"], (e) => StrapiFiles._fromIDorData(e)),
-          map["catlogueName"]);
-  Map<String, dynamic> toMap() => _toMap(level: -1);
-  Map<String, dynamic> _toMap({int level = 0}) {
-    final toServer = level == 0;
-    return {
-      "name": name,
-      "description": description,
-      "enabled": enabled,
-      "price": price,
-      "durationInMinutes": durationInMinutes,
-      "images": images
-          ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
-          .toList(),
-      "catlogueName": catlogueName
-    };
-  }
-
-  static _CatalogueItemFields get fields => _CatalogueItemFields.i;
-  @override
-  String toString() =>
-      "[Strapi Component Type CatalogueItem]: \n" + _toMap().toString();
-}
-
-class _CatalogueItemFields {
-  _CatalogueItemFields._i();
-
-  static final _CatalogueItemFields i = _CatalogueItemFields._i();
-
-  final name = StrapiLeafField("name");
-
-  final description = StrapiLeafField("description");
-
-  final enabled = StrapiLeafField("enabled");
-
-  final price = StrapiLeafField("price");
-
-  final durationInMinutes = StrapiLeafField("durationInMinutes");
-
-  final images = StrapiCollectionField("images");
-
-  final catlogueName = StrapiLeafField("catlogueName");
-
-  List<StrapiField> call() {
-    return [
-      name,
-      description,
-      enabled,
-      price,
-      durationInMinutes,
-      images,
-      catlogueName
-    ];
-  }
-}
-
-class _CatalogueItemEmptyFields {
-  bool name = false;
-
-  bool description = false;
-
-  bool enabled = false;
-
-  bool price = false;
-
-  bool durationInMinutes = false;
-
-  bool images = false;
-
-  bool catlogueName = false;
 }

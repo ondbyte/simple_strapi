@@ -3,6 +3,8 @@ import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/screens/authentication/login_screen.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/super_strapi/my_strapi/firebaseX.dart';
+import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/widgets/buttons.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flushbar/flushbar.dart';
@@ -11,6 +13,12 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
 class CreateYourProfileScreen extends StatefulWidget {
+  final Future<bool> Function()? shouldPop;
+
+  const CreateYourProfileScreen({
+    Key? key,
+    this.shouldPop,
+  }) : super(key: key);
   @override
   _CreateYourProfileScreenState createState() =>
       _CreateYourProfileScreenState();
@@ -23,8 +31,7 @@ class _CreateYourProfileScreenState extends State<CreateYourProfileScreen> {
   bool _loading = false;
   @override
   Widget build(BuildContext context) {
-    return SizedBox();
-    /* return Scaffold(
+    return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: true,
       ),
@@ -33,14 +40,7 @@ class _CreateYourProfileScreenState extends State<CreateYourProfileScreen> {
           FocusScope.of(context).unfocus();
         },
         child: WillPopScope(
-          onWillPop: () async {
-            _key.currentState.validate();
-            final user = FirebaseAuth.instance.currentUser;
-            if (isNullOrEmpty(user.displayName) || isNullOrEmpty(user.email)) {
-              return false;
-            }
-            return true;
-          },
+          onWillPop: widget.shouldPop,
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Center(
@@ -59,11 +59,11 @@ class _CreateYourProfileScreenState extends State<CreateYourProfileScreen> {
                             const SizedBox(
                               height: 20,
                             ),
-                            Consumer<CloudStore>(
-                              builder: (_, cloudStore, __) {
-                                return Observer(
+                            Builder(
+                              builder: (_) {
+                                return Builder(
                                   builder: (_) {
-                                    _name = cloudStore.user.displayName;
+                                    _name = UserX.i.user()?.name ?? "";
                                     return TextFormField(
                                       initialValue: _name,
                                       decoration: const InputDecoration(
@@ -72,7 +72,7 @@ class _CreateYourProfileScreenState extends State<CreateYourProfileScreen> {
                                         _name = s;
                                       },
                                       validator: (s) {
-                                        if (s.length > 4) {
+                                        if ((s?.length ?? 0) > 4) {
                                           return null;
                                         }
                                         return "Enter your full name";
@@ -92,19 +92,21 @@ class _CreateYourProfileScreenState extends State<CreateYourProfileScreen> {
                             const SizedBox(
                               height: 20,
                             ),
-                            Consumer<CloudStore>(
-                              builder: (_, cloudStore, __) {
-                                return Observer(
+                            Builder(
+                              builder: (_) {
+                                return Builder(
                                   builder: (_) {
-                                    _email = cloudStore.user.email;
+                                    _email = UserX.i.user()?.email ?? "";
                                     return TextFormField(
                                       initialValue: _email,
                                       decoration: const InputDecoration(
-                                          labelText: "Email address"),
+                                        labelText: "Email address",
+                                      ),
                                       onChanged: (s) {
                                         _email = s;
                                       },
                                       validator: (s) {
+                                        s ??= "";
                                         if (s.indexOf("@") <
                                             s.lastIndexOf(".")) {
                                           return null;
@@ -128,88 +130,86 @@ class _CreateYourProfileScreenState extends State<CreateYourProfileScreen> {
                             ),
                             PrimaryButton(
                               "Update",
-                              onPressed: () {
-                                if (_key.currentState.validate()) {
+                              onPressed: () async {
+                                if (_key.currentState?.validate() ?? false) {
                                   setState(() {
                                     _loading = true;
                                   });
-                                  Provider.of<CloudStore>(context,
-                                          listen: false)
-                                      .updateProfile(
-                                          displayName: _name,
-                                          email: _email,
-                                          onSuccess: () {
-                                            //Helper.printLog("Success");
-                                            BappNavigator.pop(context, null);
-                                          },
-                                          onFail: (e) {
-                                            //Helper.printLog("Fail");
-                                            setState(() {
-                                              _loading = false;
-                                            });
-                                            switch (e.code) {
-                                              case "invalid-email":
-                                                {
-                                                  Flushbar(
-                                                    message:
-                                                        "The email is invalid",
-                                                    duration: const Duration(
-                                                        seconds: 2),
-                                                  ).show(context);
-                                                  break;
-                                                }
-                                              case "same-email":
-                                                {
-                                                  Flushbar(
-                                                    message: "Existing email",
-                                                    duration: const Duration(
-                                                        seconds: 2),
-                                                  ).show(context);
-                                                  break;
-                                                }
-                                              case "email-already-in-use":
-                                                {
-                                                  Flushbar(
-                                                    message:
-                                                        "The email is already in use",
-                                                    duration: const Duration(
-                                                        seconds: 2),
-                                                  ).show(context);
-                                                  break;
-                                                }
-                                              case "requires-recent-login":
-                                                {
-                                                  Flushbar(
-                                                    message:
-                                                        "Changing email requires recent login",
-                                                    duration: const Duration(
-                                                        seconds: 4),
-                                                    mainButton: FlatButton(
-                                                      onPressed: () async {
-                                                        final loggedIn =
-                                                        await BappNavigator.push(context, LoginScreen());
-                                                        if (loggedIn) {
-                                                          Flushbar(
-                                                            message:
-                                                                "Logged in",
-                                                            duration:
-                                                                const Duration(
-                                                                    seconds: 2),
-                                                          ).show(context);
-                                                        }
-                                                      },
-                                                      child: Text(
-                                                        "Login",
-                                                        style: TextStyle(
-                                                          color: Colors.white,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ).show(context);
-                                                  break;
-                                                }
+                                  await FirebaseX.i.updateProfile(
+                                      displayName: _name,
+                                      email: _email,
+                                      onSuccess: () {
+                                        //Helper.printLog("Success");
+                                        BappNavigator.pop(context, null);
+                                      },
+                                      onFail: (e) {
+                                        //Helper.printLog("Fail");
+                                        setState(() {
+                                          _loading = false;
+                                        });
+                                        switch (e.code) {
+                                          case "invalid-email":
+                                            {
+                                              Flushbar(
+                                                message: "The email is invalid",
+                                                duration:
+                                                    const Duration(seconds: 2),
+                                              ).show(context);
+                                              break;
                                             }
-                                          });
+                                          case "same-email":
+                                            {
+                                              Flushbar(
+                                                message: "Existing email",
+                                                duration:
+                                                    const Duration(seconds: 2),
+                                              ).show(context);
+                                              break;
+                                            }
+                                          case "email-already-in-use":
+                                            {
+                                              Flushbar(
+                                                message:
+                                                    "The email is already in use",
+                                                duration:
+                                                    const Duration(seconds: 2),
+                                              ).show(context);
+                                              break;
+                                            }
+                                          case "requires-recent-login":
+                                            {
+                                              Flushbar(
+                                                message:
+                                                    "Changing email requires recent login",
+                                                duration:
+                                                    const Duration(seconds: 4),
+                                                mainButton: FlatButton(
+                                                  onPressed: () async {
+                                                    final loggedIn =
+                                                        await BappNavigator
+                                                            .push(context,
+                                                                LoginScreen());
+                                                    if (loggedIn) {
+                                                      Flushbar(
+                                                        message: "Logged in",
+                                                        duration:
+                                                            const Duration(
+                                                                seconds: 2),
+                                                      ).show(context);
+                                                    }
+                                                  },
+                                                  child: Text(
+                                                    "Login",
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ).show(context);
+                                              break;
+                                            }
+                                        }
+                                      });
                                 }
                               },
                             ),
@@ -223,6 +223,5 @@ class _CreateYourProfileScreenState extends State<CreateYourProfileScreen> {
         ),
       ),
     );
-   */
   }
 }

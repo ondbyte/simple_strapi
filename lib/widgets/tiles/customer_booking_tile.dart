@@ -37,6 +37,39 @@ class _BookingTileState extends State<BookingTile> {
       child: Padding(
         padding: widget.margin ?? EdgeInsets.all(8),
         child: RenderAfterChildWidget(
+          onChildRendered: (s) {
+            if (s != null) {
+              return SizedBox.fromSize(
+                size: s,
+                child: Padding(
+                  padding: widget.padding ?? EdgeInsets.all(8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 8,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: color,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                        ),
+                      ),
+                      Text(
+                        "inform yadu",
+                        style: Theme.of(context)
+                            .textTheme
+                            .subtitle1
+                            ?.apply(color: color),
+                      )
+                    ],
+                  ),
+                ),
+              );
+            }
+            return const SizedBox();
+          },
           child: Container(
             decoration: BoxDecoration(
               color: Theme.of(context).backgroundColor,
@@ -85,39 +118,6 @@ class _BookingTileState extends State<BookingTile> {
               ),
             ),
           ),
-          onChildRendered: (s) {
-            if (s != null) {
-              return SizedBox.fromSize(
-                size: s,
-                child: Padding(
-                  padding: widget.padding ?? EdgeInsets.all(8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(
-                        width: 8,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: color,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                        ),
-                      ),
-                      Text(
-                        "inform yadu",
-                        style: Theme.of(context)
-                            .textTheme
-                            .subtitle1
-                            ?.apply(color: color),
-                      )
-                    ],
-                  ),
-                ),
-              );
-            }
-            return const SizedBox();
-          },
         ),
       ),
     );
