@@ -227,7 +227,7 @@ class Strapi {
   ///```
   bool get userPresent => strapiToken.isNotEmpty;
 
-  ///to use this provider first you need to add a custom provider for strapi with Firebase SDK enabled
+  ///to use this method first you need to add a custom provider for strapi with Firebase SDK enabled
   ///otherwise you'll recieve "This provider is disabled." response, go here https://yadunandan.xyz/authenticateWithFirebaseForStrapi to know how to add firebase
   ///as a authentication method, as of now it is the only method which is supported in authenticating with strapi
   Future<StrapiResponse> authenticateWithFirebaseUid({
