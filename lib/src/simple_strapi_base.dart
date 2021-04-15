@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:web_gl';
 
 import 'package:simple_strapi/simple_strapi.dart';
 
@@ -594,17 +593,19 @@ class StrapiObjectListener {
 
   ///call when you no more need to listen and free up resource
   void stopListening() {
-    final objectId = id.split("-")[0];
+    final objectId = id.split("-").first;
     final myListeners = _allListeners[objectId];
-    final me = myListeners?.remove(this);
-    if (me is StrapiObjectListener) {
+    final me = myListeners?.remove(this) ?? false;
+    if (me) {
       final toAdd = myListeners ?? [];
       if (toAdd.isNotEmpty) {
         _allListeners.update(objectId, (value) => toAdd);
       }
       sPrint("Object listener removed");
     } else {
-      sPrint("This should not be the case, no listner found");
+      throw StrapiException(
+        msg: "This should not be the case, no listner found, $me",
+      );
     }
   }
 
@@ -661,7 +662,9 @@ class StrapiObjectListener {
     _allListeners.update(
       id,
       (value) => [...value, l],
-      ifAbsent: () => [l],
+      ifAbsent: () => [
+        l,
+      ],
     );
     return l;
   }
