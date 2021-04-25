@@ -1,6 +1,6 @@
 ![header](https://raw.githubusercontent.com/ondbyte/simple_strapi/main/template.png)
 
-A Strapi library for Dart developers. with which you can make basic find, findOne, count.. etc queries, as well as complex graph queries.
+A Strapi library for Dart developers. with which you can make basic find, findOne, count.. etc queries, as well as complex graph queries. this is the basic package, I highly reccommend using this in conjunction with [super_strapi](https://github.com/ondbyte/super_strapi) which supports dart clas generation from strapi models.
 
 
 # Usage
