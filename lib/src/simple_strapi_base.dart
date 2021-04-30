@@ -60,6 +60,9 @@ class StrapiCollection {
         response,
       );
     }
+    if (!response.failed) {
+      StrapiObjectListener._inform(response.body);
+    }
     return response.body;
   }
 
@@ -77,6 +80,9 @@ class StrapiCollection {
         response,
       );
     }
+    if (!response.failed) {
+      StrapiObjectListener._inform(response.body);
+    }
     return response.body;
   }
 
@@ -84,6 +90,7 @@ class StrapiCollection {
   ///throws [StrapiResponseException] if response is failed
   static Future<Map<String, dynamic>> findOne(
       {required String collection, required String id}) async {
+    StrapiObjectListener._informLoading(id);
     final path = collection + "/" + id;
     final response = await Strapi.i.request(
       path,
@@ -93,6 +100,9 @@ class StrapiCollection {
         "failed to get single object from collection $collection",
         response,
       );
+    }
+    if (!response.failed) {
+      StrapiObjectListener._inform(response.body);
     }
     return response.body.first;
   }
@@ -126,6 +136,7 @@ class StrapiCollection {
     required String id,
     required Map<String, dynamic> data,
   }) async {
+    StrapiObjectListener._informLoading(id);
     final path = collection + "/" + id;
     final response = await Strapi.i.request(path, method: "PUT", body: data);
     if (response.failed) {
@@ -133,6 +144,9 @@ class StrapiCollection {
         "failed to update single object with id $id at collection $collection",
         response,
       );
+    }
+    if (!response.failed) {
+      StrapiObjectListener._inform(response.body);
     }
     return response.body.first;
   }
@@ -316,9 +330,6 @@ class Strapi {
       queryString: queryString,
       maxTimeOutInMillis: maxTimeOutInMillis,
     );
-    if (!response.failed) {
-      StrapiObjectListener._inform(response.body);
-    }
     return response;
   }
 
@@ -591,9 +602,18 @@ class StrapiObjectListener {
   static final _allListeners = <String, List<StrapiObjectListener>>{};
 
   ///listener function belonging to a instance of [StrapiObjectListener]
-  final Function(Map<String, dynamic> listener) _listener;
+  final Function(Map<String, dynamic> listener, bool loading) _listener;
   final String id;
-  StrapiObjectListener._private(this.id, this._listener);
+  Map<String, dynamic> _lastData;
+  StrapiObjectListener._private(this.id, this._listener, this._lastData);
+
+  void _loading() {
+    _listener(_lastData, true);
+  }
+
+  void _executeListener() {
+    _listener(_lastData, false);
+  }
 
   ///call when you no more need to listen and free up resource
   void stopListening() {
@@ -618,6 +638,17 @@ class StrapiObjectListener {
     stopListening();
   }
 
+  static void _informLoading(String id) {
+    final allListenerForId = _allListeners[id];
+    if (allListenerForId is List) {
+      allListenerForId?.forEach(
+        (l) {
+          l._loading();
+        },
+      );
+    }
+  }
+
   static void _inform(
     List<Map<String, dynamic>> list,
   ) {
@@ -627,11 +658,12 @@ class StrapiObjectListener {
         if (id is String) {
           final allListenerForId = _allListeners[id];
           if (allListenerForId is List) {
-            allListenerForId?.forEach((l) {
-              final d =
-                  data.map((key, value) => MapEntry(key as String, value));
-              l._listener(d);
-            });
+            allListenerForId?.forEach(
+              (l) {
+                l._lastData = data;
+                l._executeListener();
+              },
+            );
           }
         }
       });
@@ -643,7 +675,8 @@ class StrapiObjectListener {
   ///of now
   factory StrapiObjectListener({
     required String id,
-    required Function(Map<String, dynamic>) listener,
+    required Function(Map<String, dynamic>, bool) listener,
+    required Map<String, dynamic> initailData,
   }) {
     sPrint("Startingto listen for object $id");
     final existingListeners = _allListeners[id];
@@ -662,6 +695,7 @@ class StrapiObjectListener {
     final l = StrapiObjectListener._private(
       id + "-" + length.toString(),
       listener,
+      initailData,
     );
     _allListeners.update(
       id,
