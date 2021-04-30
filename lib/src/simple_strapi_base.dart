@@ -44,11 +44,15 @@ class StrapiCollection {
   static Future<List<Map<String, dynamic>>> customEndpoint({
     required String collection,
     required String endPoint,
+    Map<String, String>? params,
+    String? method,
     int? limit,
   }) async {
     final path = collection + "/" + endPoint;
     final response = await Strapi.i.request(
       path,
+      params: params,
+      method: method,
     );
     if (response.failed) {
       throw StrapiResponseException(
@@ -299,7 +303,7 @@ class Strapi {
   Future<StrapiResponse> request(
     String path, {
     Map<String, dynamic>? body,
-    String method = "GET",
+    String? method,
     Map<String, String>? params,
     String? queryString,
     int maxTimeOutInMillis = 15000,
@@ -307,7 +311,7 @@ class Strapi {
     final response = await _request(
       path,
       body: body,
-      method: method,
+      method: method ?? "GET",
       params: params,
       queryString: queryString,
       maxTimeOutInMillis: maxTimeOutInMillis,
