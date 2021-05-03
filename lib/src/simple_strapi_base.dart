@@ -341,9 +341,9 @@ class Strapi {
     String? queryString,
     int maxTimeOutInMillis = 15000,
   }) async {
+    final uri = _strapiUri(path, params: params, queryString: queryString);
     try {
       var closed = false;
-      final uri = _strapiUri(path, params: params, queryString: queryString);
       final request = await _client.openUrl(
         method,
         uri,
@@ -362,8 +362,11 @@ class Strapi {
         () => {
           if (!closed)
             {
-              request.abort(TimeoutException(
-                  "reaching strapi server timed out, current timeout is $maxTimeOutInMillis millis"))
+              request.abort(
+                TimeoutException(
+                  "reaching strapi server timed out, current timeout is $maxTimeOutInMillis millis",
+                ),
+              )
             }
         },
       );
@@ -456,7 +459,21 @@ class Strapi {
         errorMessage: e.message,
         failed: true,
         statusCode: -1,
-        url: e.uri,
+        url: uri,
+      );
+    } on TimeoutException catch (e, s) {
+      if (verbose) {
+        sPrint(e);
+        sPrint(s);
+      }
+      return StrapiResponse(
+        body: [],
+        count: 0,
+        error: "timeout-exception",
+        errorMessage: e.message ?? "",
+        failed: true,
+        statusCode: -1,
+        url: uri,
       );
     }
   }
