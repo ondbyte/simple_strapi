@@ -203,6 +203,9 @@ class Strapi {
 
   ///should the requests use 'https' or not defaults to false
   bool shouldUseHttps = false;
+
+  ///maximum timeout for any http request you make
+  int maxTimeOutInMillis = 20000;
   final _client = HttpClient();
   String strapiToken = "";
 
@@ -320,7 +323,7 @@ class Strapi {
     String? method,
     Map<String, String>? params,
     String? queryString,
-    int maxTimeOutInMillis = 15000,
+    int? maxTimeOutInMillis,
   }) async {
     final response = await _request(
       path,
@@ -328,7 +331,7 @@ class Strapi {
       method: method ?? "GET",
       params: params,
       queryString: queryString,
-      maxTimeOutInMillis: maxTimeOutInMillis,
+      maxTimeOutInMillis: maxTimeOutInMillis ?? Strapi.i.maxTimeOutInMillis,
     );
     return response;
   }
