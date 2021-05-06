@@ -35,9 +35,9 @@ class _AppState extends State<App> {
             final defaultData = await DefaultDataX.i.init();
             final user = await UserX.i.init();
             if (DefaultDataX.i.isFirstTimeOnDevice) {
-              firstScreen(BappNavigator(rootScreen: OnBoardingScreen()));
+              firstScreen(OnBoardingScreen());
             } else {
-              firstScreen(BappNavigator(rootScreen: Bapp()));
+              firstScreen(Bapp());
             }
           },
           showWhileInit: Splash(),

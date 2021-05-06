@@ -18,12 +18,16 @@ class AppEventsWithExtra {
 }
 
 class BappNavigator extends StatefulWidget {
+  final GlobalKey<NavigatorState> navigatorKey;
   final Widget rootScreen;
-  const BappNavigator({Key? key, required this.rootScreen}) : super(key: key);
+  const BappNavigator(
+      {Key? key, required this.rootScreen, required this.navigatorKey})
+      : super(key: key);
   @override
   _BappNavigatorState createState() => _BappNavigatorState();
 
   static Future<T?> push<T>(BuildContext context, Widget routeWidget) async {
+    return Navigator.push(context, _pageRoute(routeWidget));
     bPrint("pushing screen ${routeWidget.runtimeType}");
     final state = context.findAncestorStateOfType<_BappNavigatorState>();
     return state?._navKey.currentState?.push<T>(_pageRoute<T>(routeWidget));
@@ -31,6 +35,8 @@ class BappNavigator extends StatefulWidget {
 
   static Future<T?> pushAndRemoveAll<T>(
       BuildContext context, Widget routeWidget) async {
+    return Navigator.pushAndRemoveUntil<T>(
+        context, _pageRoute<T>(routeWidget), (route) => false);
     bPrint("pushing screen ${routeWidget.runtimeType}");
     final state = context.findAncestorStateOfType<_BappNavigatorState>();
     return state?._navKey.currentState
@@ -40,6 +46,8 @@ class BappNavigator extends StatefulWidget {
   static Future<T?>? pushReplacement<T, TO>(
       BuildContext context, Widget routeWidget,
       {TO? result}) async {
+    return Navigator.of(context)
+        .pushReplacement(_pageRoute<T>(routeWidget), result: result);
     bPrint("pushing screen ${routeWidget.runtimeType}");
     final state = context.findAncestorStateOfType<_BappNavigatorState>();
     state?._navKey.currentState?.pop(result);
@@ -47,6 +55,7 @@ class BappNavigator extends StatefulWidget {
   }
 
   static void pop<T>(BuildContext context, T result) {
+    return Navigator.of(context).pop(result);
     final state = context.findAncestorStateOfType<_BappNavigatorState>();
     return state?._navKey.currentState?.pop(result);
   }
@@ -75,32 +84,27 @@ class BappNavigator extends StatefulWidget {
 }
 
 class _BappNavigatorState extends State<BappNavigator> {
-  final _key = GlobalKey<NavigatorState>();
-
   @override
   void didChangeDependencies() {
     _listenForEvents(context);
     super.didChangeDependencies();
   }
 
-  GlobalKey<NavigatorState> get _navKey => _key;
+  GlobalKey<NavigatorState> get _navKey => widget.navigatorKey;
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        if (_navKey.currentState?.canPop() ?? false) {
-          _navKey.currentState?.pop();
-          return false;
-        } else {
-          return true;
-        }
+        return false;
       },
       child: Navigator(
-        key: _key,
-        onPopPage: (r, res) {
-          Helper.bPrint("pop");
-          return r.didPop(res);
+        key: widget.navigatorKey,
+        onPopPage: (r, s) {
+          if (r.isFirst) {
+            return false;
+          }
+          return r.didPop(s);
         },
         onGenerateRoute: (settings) {
           return MaterialPageRoute(
@@ -150,7 +154,7 @@ class _BappNavigatorState extends State<BappNavigator> {
             {
               Helper.bPrint("ERROR Showing error screen");
               BappNavigator.pushAndRemoveAll(
-                _key.currentContext ?? context,
+                _navKey.currentContext ?? context,
                 NoInternet(),
               );
               break;

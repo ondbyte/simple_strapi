@@ -6,7 +6,7 @@ class _StrapiListenerWidget<T> extends StatefulWidget {
   final bool sync;
   final T strapiObject;
   final T? Function(Map<String, dynamic>) generator;
-  final Widget Function(BuildContext, T) builder;
+  final Widget Function(BuildContext, T, bool) builder;
   _StrapiListenerWidget({
     Key? key,
     required this.strapiObject,
@@ -22,30 +22,40 @@ class _StrapiListenerWidget<T> extends StatefulWidget {
 class _StrapiListenerWidgetState<T> extends State<_StrapiListenerWidget<T>> {
   late T _strapiObject;
   late final StrapiObjectListener? _listener;
+  bool _loading = false;
+
   @override
   void initState() {
     super.initState();
     _strapiObject = widget.strapiObject;
 
-    final id = (widget.strapiObject as dynamic).id;
-    if (id is String) {
-      _listener = StrapiObjectListener(
-        id: id,
-        listener: (map) {
-          final updated = widget.generator(map);
-          if (updated is T) {
-            setState(() {
-              _strapiObject = updated;
-            });
-          }
-        },
-      );
-      if (widget.sync) {
-        (_strapiObject as dynamic).sync();
+    _postInit();
+  }
+
+  void _postInit() {
+    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+      final id = (_strapiObject as dynamic).id;
+      if (id is String) {
+        _listener = StrapiObjectListener(
+          id: id,
+          initailData: (_strapiObject as dynamic).toMap(),
+          listener: (map, loading) {
+            final updated = widget.generator(map);
+            if (updated is T) {
+              setState(() {
+                _strapiObject = updated;
+                _loading = loading;
+              });
+            }
+          },
+        );
+        if (widget.sync) {
+          (_strapiObject as dynamic).sync();
+        }
+      } else {
+        _listener = null;
       }
-    } else {
-      _listener = null;
-    }
+    });
   }
 
   @override
@@ -56,10 +66,7 @@ class _StrapiListenerWidgetState<T> extends State<_StrapiListenerWidget<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(
-      context,
-      _strapiObject,
-    );
+    return widget.builder(context, _strapiObject, _loading);
   }
 }
 
@@ -210,98 +217,69 @@ class Cities {
     return ids.map((id) => City.fromID(id)).toList();
   }
 
-  static Future<City?> findOne(String id) async {
-    try {
-      final mapResponse = await StrapiCollection.findOne(
-        collection: collectionName,
-        id: id,
-      );
-      if (mapResponse.isNotEmpty) {
-        return City.fromSyncedMap(mapResponse);
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+  static Future<City?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return City.fromSyncedMap(mapResponse);
     }
   }
 
   static Future<List<City>> findMultiple({int limit = 16}) async {
-    try {
-      final list = await StrapiCollection.findMultiple(
-        collection: collectionName,
-        limit: limit,
-      );
-      if (list.isNotEmpty) {
-        return list.map((map) => City.fromSyncedMap(map)).toList();
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => City.fromSyncedMap(map)).toList();
     }
     return [];
   }
 
   static Future<City?> create(City city) async {
-    try {
-      final map = await StrapiCollection.create(
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: city._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return City.fromSyncedMap(map);
+    }
+  }
+
+  static Future<City?> update(City city) async {
+    final id = city.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
         collection: collectionName,
+        id: id,
         data: city._toMap(level: 0),
       );
       if (map.isNotEmpty) {
         return City.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-  }
-
-  static Future<City?> update(City city) async {
-    try {
-      final id = city.id;
-      if (id is String) {
-        final map = await StrapiCollection.update(
-          collection: collectionName,
-          id: id,
-          data: city._toMap(level: 0),
-        );
-        if (map.isNotEmpty) {
-          return City.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while updating");
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while updating");
     }
   }
 
   static Future<int> count() async {
-    try {
-      return await StrapiCollection.count(collectionName);
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-    return 0;
+    return await StrapiCollection.count(collectionName);
   }
 
   static Future<City?> delete(City city) async {
-    try {
-      final id = city.id;
-      if (id is String) {
-        final map =
-            await StrapiCollection.delete(collection: collectionName, id: id);
-        if (map.isNotEmpty) {
-          return City.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while deleting");
+    final id = city.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return City.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while deleting");
     }
   }
 
@@ -320,50 +298,48 @@ class Cities {
     final queryString = query.query(
       collectionName: collectionName,
     );
-    try {
-      final response = await Strapi.i
-          .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
-      if (response.body.isNotEmpty) {
-        final object = response.body.first;
-        if (object is Map && object.containsKey("data")) {
-          final data = object["data"];
-          if (data is Map && data.containsKey(query.collectionName)) {
-            final myList = data[query.collectionName];
-            if (myList is List) {
-              final list = <City>[];
-              myList.forEach((e) {
-                final o = _fromIDorData(e);
-                if (o is City) {
-                  list.add(o);
-                }
-              });
-              return list;
-            } else if (myList is Map && myList.containsKey("id")) {
-              final o = _fromIDorData(myList);
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <City>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
               if (o is City) {
-                return [o];
+                list.add(o);
               }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is City) {
+              return [o];
             }
           }
         }
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
     }
     return [];
   }
 
   static Widget listenerWidget({
+    Key? key,
     required City strapiObject,
     bool sync = false,
     required Widget Function(
       BuildContext,
       City,
+      bool,
     )
         builder,
   }) {
     return _StrapiListenerWidget<City>(
+      key: key,
       strapiObject: strapiObject,
       generator: City.fromMap,
       builder: builder,
@@ -414,7 +390,9 @@ class Employee {
         enabled = null,
         user = null,
         bookings = null,
-        businesses = null,
+        holidays = null,
+        business = null,
+        starRating = null,
         createdAt = null,
         updatedAt = null;
 
@@ -424,18 +402,40 @@ class Employee {
       this.enabled,
       this.user,
       this.bookings,
-      this.businesses})
+      this.holidays,
+      this.business,
+      this.starRating})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
         id = null;
 
-  Employee._synced(this.name, this.image, this.enabled, this.user,
-      this.bookings, this.businesses, this.createdAt, this.updatedAt, this.id)
+  Employee._synced(
+      this.name,
+      this.image,
+      this.enabled,
+      this.user,
+      this.bookings,
+      this.holidays,
+      this.business,
+      this.starRating,
+      this.createdAt,
+      this.updatedAt,
+      this.id)
       : _synced = true;
 
-  Employee._unsynced(this.name, this.image, this.enabled, this.user,
-      this.bookings, this.businesses, this.createdAt, this.updatedAt, this.id)
+  Employee._unsynced(
+      this.name,
+      this.image,
+      this.enabled,
+      this.user,
+      this.bookings,
+      this.holidays,
+      this.business,
+      this.starRating,
+      this.createdAt,
+      this.updatedAt,
+      this.id)
       : _synced = false;
 
   final bool _synced;
@@ -450,7 +450,11 @@ class Employee {
 
   final List<Booking>? bookings;
 
-  final List<Business>? businesses;
+  final List<Holiday>? holidays;
+
+  final Business? business;
+
+  final double? starRating;
 
   final DateTime? createdAt;
 
@@ -469,14 +473,18 @@ class Employee {
           bool? enabled,
           User? user,
           List<Booking>? bookings,
-          List<Business>? businesses}) =>
+          List<Holiday>? holidays,
+          Business? business,
+          double? starRating}) =>
       Employee._unsynced(
           name ?? this.name,
           image ?? this.image,
           enabled ?? this.enabled,
           user ?? this.user,
           bookings ?? this.bookings,
-          businesses ?? this.businesses,
+          holidays ?? this.holidays,
+          business ?? this.business,
+          starRating ?? this.starRating,
           this.createdAt,
           this.updatedAt,
           this.id);
@@ -486,14 +494,18 @@ class Employee {
       bool enabled = false,
       bool user = false,
       bool bookings = false,
-      bool businesses = false}) {
+      bool holidays = false,
+      bool business = false,
+      bool starRating = false}) {
     return Employee._unsynced(
         name ? null : this.name,
         image ? null : this.image,
         enabled ? null : this.enabled,
         user ? null : this.user,
         bookings ? null : this.bookings,
-        businesses ? null : this.businesses,
+        holidays ? null : this.holidays,
+        business ? null : this.business,
+        starRating ? null : this.starRating,
         this.createdAt,
         this.updatedAt,
         this.id)
@@ -502,7 +514,9 @@ class Employee {
       .._emptyFields.enabled = enabled
       .._emptyFields.user = user
       .._emptyFields.bookings = bookings
-      .._emptyFields.businesses = businesses;
+      .._emptyFields.holidays = holidays
+      .._emptyFields.business = business
+      .._emptyFields.starRating = starRating;
   }
 
   static Employee fromSyncedMap(Map<dynamic, dynamic> map) => Employee._synced(
@@ -513,8 +527,11 @@ class Employee {
       StrapiUtils.objFromMap<User>(map["user"], (e) => Users._fromIDorData(e)),
       StrapiUtils.objFromListOfMap<Booking>(
           map["bookings"], (e) => Bookings._fromIDorData(e)),
-      StrapiUtils.objFromListOfMap<Business>(
-          map["businesses"], (e) => Businesses._fromIDorData(e)),
+      StrapiUtils.objFromListOfMap<Holiday>(
+          map["holidays"], (e) => Holiday.fromMap(e)),
+      StrapiUtils.objFromMap<Business>(
+          map["business"], (e) => Businesses._fromIDorData(e)),
+      StrapiUtils.parseDouble(map["starRating"]),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -526,8 +543,11 @@ class Employee {
       StrapiUtils.objFromMap<User>(map["user"], (e) => Users._fromIDorData(e)),
       StrapiUtils.objFromListOfMap<Booking>(
           map["bookings"], (e) => Bookings._fromIDorData(e)),
-      StrapiUtils.objFromListOfMap<Business>(
-          map["businesses"], (e) => Businesses._fromIDorData(e)),
+      StrapiUtils.objFromListOfMap<Holiday>(
+          map["holidays"], (e) => Holiday.fromMap(e)),
+      StrapiUtils.objFromMap<Business>(
+          map["business"], (e) => Businesses._fromIDorData(e)),
+      StrapiUtils.parseDouble(map["starRating"]),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -547,10 +567,14 @@ class Employee {
         "bookings": bookings
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
-      if (!_emptyFields.businesses && businesses != null)
-        "businesses": businesses
-            ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
-            .toList(),
+      if (!_emptyFields.holidays && holidays != null)
+        "holidays":
+            holidays?.map((e) => e._toMap(level: level + level)).toList(),
+      if (!_emptyFields.business && business != null)
+        "business":
+            toServer ? business?.id : business?._toMap(level: level + level),
+      if (!_emptyFields.starRating && starRating != null)
+        "starRating": starRating,
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
       "id": id
@@ -589,98 +613,69 @@ class Employees {
     return ids.map((id) => Employee.fromID(id)).toList();
   }
 
-  static Future<Employee?> findOne(String id) async {
-    try {
-      final mapResponse = await StrapiCollection.findOne(
-        collection: collectionName,
-        id: id,
-      );
-      if (mapResponse.isNotEmpty) {
-        return Employee.fromSyncedMap(mapResponse);
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+  static Future<Employee?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return Employee.fromSyncedMap(mapResponse);
     }
   }
 
   static Future<List<Employee>> findMultiple({int limit = 16}) async {
-    try {
-      final list = await StrapiCollection.findMultiple(
-        collection: collectionName,
-        limit: limit,
-      );
-      if (list.isNotEmpty) {
-        return list.map((map) => Employee.fromSyncedMap(map)).toList();
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => Employee.fromSyncedMap(map)).toList();
     }
     return [];
   }
 
   static Future<Employee?> create(Employee employee) async {
-    try {
-      final map = await StrapiCollection.create(
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: employee._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return Employee.fromSyncedMap(map);
+    }
+  }
+
+  static Future<Employee?> update(Employee employee) async {
+    final id = employee.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
         collection: collectionName,
+        id: id,
         data: employee._toMap(level: 0),
       );
       if (map.isNotEmpty) {
         return Employee.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-  }
-
-  static Future<Employee?> update(Employee employee) async {
-    try {
-      final id = employee.id;
-      if (id is String) {
-        final map = await StrapiCollection.update(
-          collection: collectionName,
-          id: id,
-          data: employee._toMap(level: 0),
-        );
-        if (map.isNotEmpty) {
-          return Employee.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while updating");
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while updating");
     }
   }
 
   static Future<int> count() async {
-    try {
-      return await StrapiCollection.count(collectionName);
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-    return 0;
+    return await StrapiCollection.count(collectionName);
   }
 
   static Future<Employee?> delete(Employee employee) async {
-    try {
-      final id = employee.id;
-      if (id is String) {
-        final map =
-            await StrapiCollection.delete(collection: collectionName, id: id);
-        if (map.isNotEmpty) {
-          return Employee.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while deleting");
+    final id = employee.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return Employee.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while deleting");
     }
   }
 
@@ -699,50 +694,48 @@ class Employees {
     final queryString = query.query(
       collectionName: collectionName,
     );
-    try {
-      final response = await Strapi.i
-          .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
-      if (response.body.isNotEmpty) {
-        final object = response.body.first;
-        if (object is Map && object.containsKey("data")) {
-          final data = object["data"];
-          if (data is Map && data.containsKey(query.collectionName)) {
-            final myList = data[query.collectionName];
-            if (myList is List) {
-              final list = <Employee>[];
-              myList.forEach((e) {
-                final o = _fromIDorData(e);
-                if (o is Employee) {
-                  list.add(o);
-                }
-              });
-              return list;
-            } else if (myList is Map && myList.containsKey("id")) {
-              final o = _fromIDorData(myList);
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <Employee>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
               if (o is Employee) {
-                return [o];
+                list.add(o);
               }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is Employee) {
+              return [o];
             }
           }
         }
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
     }
     return [];
   }
 
   static Widget listenerWidget({
+    Key? key,
     required Employee strapiObject,
     bool sync = false,
     required Widget Function(
       BuildContext,
       Employee,
+      bool,
     )
         builder,
   }) {
     return _StrapiListenerWidget<Employee>(
+      key: key,
       strapiObject: strapiObject,
       generator: Employee.fromMap,
       builder: builder,
@@ -766,7 +759,11 @@ class _EmployeeFields {
 
   final bookings = StrapiCollectionField("bookings");
 
-  final businesses = StrapiCollectionField("businesses");
+  final holidays = StrapiComponentField("holidays");
+
+  final business = StrapiModelField("business");
+
+  final starRating = StrapiLeafField("starRating");
 
   final createdAt = StrapiLeafField("createdAt");
 
@@ -781,7 +778,9 @@ class _EmployeeFields {
       enabled,
       user,
       bookings,
-      businesses,
+      holidays,
+      business,
+      starRating,
       createdAt,
       updatedAt,
       id
@@ -800,7 +799,11 @@ class _EmployeeEmptyFields {
 
   bool bookings = false;
 
-  bool businesses = false;
+  bool holidays = false;
+
+  bool business = false;
+
+  bool starRating = false;
 }
 
 enum BookingType { normal, package }
@@ -1103,98 +1106,69 @@ class Bookings {
     return ids.map((id) => Booking.fromID(id)).toList();
   }
 
-  static Future<Booking?> findOne(String id) async {
-    try {
-      final mapResponse = await StrapiCollection.findOne(
-        collection: collectionName,
-        id: id,
-      );
-      if (mapResponse.isNotEmpty) {
-        return Booking.fromSyncedMap(mapResponse);
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+  static Future<Booking?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return Booking.fromSyncedMap(mapResponse);
     }
   }
 
   static Future<List<Booking>> findMultiple({int limit = 16}) async {
-    try {
-      final list = await StrapiCollection.findMultiple(
-        collection: collectionName,
-        limit: limit,
-      );
-      if (list.isNotEmpty) {
-        return list.map((map) => Booking.fromSyncedMap(map)).toList();
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => Booking.fromSyncedMap(map)).toList();
     }
     return [];
   }
 
   static Future<Booking?> create(Booking booking) async {
-    try {
-      final map = await StrapiCollection.create(
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: booking._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return Booking.fromSyncedMap(map);
+    }
+  }
+
+  static Future<Booking?> update(Booking booking) async {
+    final id = booking.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
         collection: collectionName,
+        id: id,
         data: booking._toMap(level: 0),
       );
       if (map.isNotEmpty) {
         return Booking.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-  }
-
-  static Future<Booking?> update(Booking booking) async {
-    try {
-      final id = booking.id;
-      if (id is String) {
-        final map = await StrapiCollection.update(
-          collection: collectionName,
-          id: id,
-          data: booking._toMap(level: 0),
-        );
-        if (map.isNotEmpty) {
-          return Booking.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while updating");
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while updating");
     }
   }
 
   static Future<int> count() async {
-    try {
-      return await StrapiCollection.count(collectionName);
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-    return 0;
+    return await StrapiCollection.count(collectionName);
   }
 
   static Future<Booking?> delete(Booking booking) async {
-    try {
-      final id = booking.id;
-      if (id is String) {
-        final map =
-            await StrapiCollection.delete(collection: collectionName, id: id);
-        if (map.isNotEmpty) {
-          return Booking.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while deleting");
+    final id = booking.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return Booking.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while deleting");
     }
   }
 
@@ -1213,50 +1187,48 @@ class Bookings {
     final queryString = query.query(
       collectionName: collectionName,
     );
-    try {
-      final response = await Strapi.i
-          .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
-      if (response.body.isNotEmpty) {
-        final object = response.body.first;
-        if (object is Map && object.containsKey("data")) {
-          final data = object["data"];
-          if (data is Map && data.containsKey(query.collectionName)) {
-            final myList = data[query.collectionName];
-            if (myList is List) {
-              final list = <Booking>[];
-              myList.forEach((e) {
-                final o = _fromIDorData(e);
-                if (o is Booking) {
-                  list.add(o);
-                }
-              });
-              return list;
-            } else if (myList is Map && myList.containsKey("id")) {
-              final o = _fromIDorData(myList);
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <Booking>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
               if (o is Booking) {
-                return [o];
+                list.add(o);
               }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is Booking) {
+              return [o];
             }
           }
         }
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
     }
     return [];
   }
 
   static Widget listenerWidget({
+    Key? key,
     required Booking strapiObject,
     bool sync = false,
     required Widget Function(
       BuildContext,
       Booking,
+      bool,
     )
         builder,
   }) {
     return _StrapiListenerWidget<Booking>(
+      key: key,
       strapiObject: strapiObject,
       generator: Booking.fromMap,
       builder: builder,
@@ -1485,98 +1457,69 @@ class Localities {
     return ids.map((id) => Locality.fromID(id)).toList();
   }
 
-  static Future<Locality?> findOne(String id) async {
-    try {
-      final mapResponse = await StrapiCollection.findOne(
-        collection: collectionName,
-        id: id,
-      );
-      if (mapResponse.isNotEmpty) {
-        return Locality.fromSyncedMap(mapResponse);
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+  static Future<Locality?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return Locality.fromSyncedMap(mapResponse);
     }
   }
 
   static Future<List<Locality>> findMultiple({int limit = 16}) async {
-    try {
-      final list = await StrapiCollection.findMultiple(
-        collection: collectionName,
-        limit: limit,
-      );
-      if (list.isNotEmpty) {
-        return list.map((map) => Locality.fromSyncedMap(map)).toList();
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => Locality.fromSyncedMap(map)).toList();
     }
     return [];
   }
 
   static Future<Locality?> create(Locality locality) async {
-    try {
-      final map = await StrapiCollection.create(
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: locality._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return Locality.fromSyncedMap(map);
+    }
+  }
+
+  static Future<Locality?> update(Locality locality) async {
+    final id = locality.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
         collection: collectionName,
+        id: id,
         data: locality._toMap(level: 0),
       );
       if (map.isNotEmpty) {
         return Locality.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-  }
-
-  static Future<Locality?> update(Locality locality) async {
-    try {
-      final id = locality.id;
-      if (id is String) {
-        final map = await StrapiCollection.update(
-          collection: collectionName,
-          id: id,
-          data: locality._toMap(level: 0),
-        );
-        if (map.isNotEmpty) {
-          return Locality.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while updating");
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while updating");
     }
   }
 
   static Future<int> count() async {
-    try {
-      return await StrapiCollection.count(collectionName);
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-    return 0;
+    return await StrapiCollection.count(collectionName);
   }
 
   static Future<Locality?> delete(Locality locality) async {
-    try {
-      final id = locality.id;
-      if (id is String) {
-        final map =
-            await StrapiCollection.delete(collection: collectionName, id: id);
-        if (map.isNotEmpty) {
-          return Locality.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while deleting");
+    final id = locality.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return Locality.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while deleting");
     }
   }
 
@@ -1595,50 +1538,48 @@ class Localities {
     final queryString = query.query(
       collectionName: collectionName,
     );
-    try {
-      final response = await Strapi.i
-          .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
-      if (response.body.isNotEmpty) {
-        final object = response.body.first;
-        if (object is Map && object.containsKey("data")) {
-          final data = object["data"];
-          if (data is Map && data.containsKey(query.collectionName)) {
-            final myList = data[query.collectionName];
-            if (myList is List) {
-              final list = <Locality>[];
-              myList.forEach((e) {
-                final o = _fromIDorData(e);
-                if (o is Locality) {
-                  list.add(o);
-                }
-              });
-              return list;
-            } else if (myList is Map && myList.containsKey("id")) {
-              final o = _fromIDorData(myList);
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <Locality>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
               if (o is Locality) {
-                return [o];
+                list.add(o);
               }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is Locality) {
+              return [o];
             }
           }
         }
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
     }
     return [];
   }
 
   static Widget listenerWidget({
+    Key? key,
     required Locality strapiObject,
     bool sync = false,
     required Widget Function(
       BuildContext,
       Locality,
+      bool,
     )
         builder,
   }) {
     return _StrapiListenerWidget<Locality>(
+      key: key,
       strapiObject: strapiObject,
       generator: Locality.fromMap,
       builder: builder,
@@ -1805,101 +1746,72 @@ class PushNotifications {
     return ids.map((id) => PushNotification.fromID(id)).toList();
   }
 
-  static Future<PushNotification?> findOne(String id) async {
-    try {
-      final mapResponse = await StrapiCollection.findOne(
-        collection: collectionName,
-        id: id,
-      );
-      if (mapResponse.isNotEmpty) {
-        return PushNotification.fromSyncedMap(mapResponse);
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+  static Future<PushNotification?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return PushNotification.fromSyncedMap(mapResponse);
     }
   }
 
   static Future<List<PushNotification>> findMultiple({int limit = 16}) async {
-    try {
-      final list = await StrapiCollection.findMultiple(
-        collection: collectionName,
-        limit: limit,
-      );
-      if (list.isNotEmpty) {
-        return list.map((map) => PushNotification.fromSyncedMap(map)).toList();
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => PushNotification.fromSyncedMap(map)).toList();
     }
     return [];
   }
 
   static Future<PushNotification?> create(
       PushNotification pushNotification) async {
-    try {
-      final map = await StrapiCollection.create(
-        collection: collectionName,
-        data: pushNotification._toMap(level: 0),
-      );
-      if (map.isNotEmpty) {
-        return PushNotification.fromSyncedMap(map);
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: pushNotification._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return PushNotification.fromSyncedMap(map);
     }
   }
 
   static Future<PushNotification?> update(
       PushNotification pushNotification) async {
-    try {
-      final id = pushNotification.id;
-      if (id is String) {
-        final map = await StrapiCollection.update(
-          collection: collectionName,
-          id: id,
-          data: pushNotification._toMap(level: 0),
-        );
-        if (map.isNotEmpty) {
-          return PushNotification.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while updating");
+    final id = pushNotification.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
+        collection: collectionName,
+        id: id,
+        data: pushNotification._toMap(level: 0),
+      );
+      if (map.isNotEmpty) {
+        return PushNotification.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while updating");
     }
   }
 
   static Future<int> count() async {
-    try {
-      return await StrapiCollection.count(collectionName);
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-    return 0;
+    return await StrapiCollection.count(collectionName);
   }
 
   static Future<PushNotification?> delete(
       PushNotification pushNotification) async {
-    try {
-      final id = pushNotification.id;
-      if (id is String) {
-        final map =
-            await StrapiCollection.delete(collection: collectionName, id: id);
-        if (map.isNotEmpty) {
-          return PushNotification.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while deleting");
+    final id = pushNotification.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return PushNotification.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while deleting");
     }
   }
 
@@ -1919,50 +1831,48 @@ class PushNotifications {
     final queryString = query.query(
       collectionName: collectionName,
     );
-    try {
-      final response = await Strapi.i
-          .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
-      if (response.body.isNotEmpty) {
-        final object = response.body.first;
-        if (object is Map && object.containsKey("data")) {
-          final data = object["data"];
-          if (data is Map && data.containsKey(query.collectionName)) {
-            final myList = data[query.collectionName];
-            if (myList is List) {
-              final list = <PushNotification>[];
-              myList.forEach((e) {
-                final o = _fromIDorData(e);
-                if (o is PushNotification) {
-                  list.add(o);
-                }
-              });
-              return list;
-            } else if (myList is Map && myList.containsKey("id")) {
-              final o = _fromIDorData(myList);
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <PushNotification>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
               if (o is PushNotification) {
-                return [o];
+                list.add(o);
               }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is PushNotification) {
+              return [o];
             }
           }
         }
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
     }
     return [];
   }
 
   static Widget listenerWidget({
+    Key? key,
     required PushNotification strapiObject,
     bool sync = false,
     required Widget Function(
       BuildContext,
       PushNotification,
+      bool,
     )
         builder,
   }) {
     return _StrapiListenerWidget<PushNotification>(
+      key: key,
       strapiObject: strapiObject,
       generator: PushNotification.fromMap,
       builder: builder,
@@ -2219,98 +2129,69 @@ class Countries {
     return ids.map((id) => Country.fromID(id)).toList();
   }
 
-  static Future<Country?> findOne(String id) async {
-    try {
-      final mapResponse = await StrapiCollection.findOne(
-        collection: collectionName,
-        id: id,
-      );
-      if (mapResponse.isNotEmpty) {
-        return Country.fromSyncedMap(mapResponse);
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+  static Future<Country?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return Country.fromSyncedMap(mapResponse);
     }
   }
 
   static Future<List<Country>> findMultiple({int limit = 16}) async {
-    try {
-      final list = await StrapiCollection.findMultiple(
-        collection: collectionName,
-        limit: limit,
-      );
-      if (list.isNotEmpty) {
-        return list.map((map) => Country.fromSyncedMap(map)).toList();
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => Country.fromSyncedMap(map)).toList();
     }
     return [];
   }
 
   static Future<Country?> create(Country country) async {
-    try {
-      final map = await StrapiCollection.create(
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: country._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return Country.fromSyncedMap(map);
+    }
+  }
+
+  static Future<Country?> update(Country country) async {
+    final id = country.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
         collection: collectionName,
+        id: id,
         data: country._toMap(level: 0),
       );
       if (map.isNotEmpty) {
         return Country.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-  }
-
-  static Future<Country?> update(Country country) async {
-    try {
-      final id = country.id;
-      if (id is String) {
-        final map = await StrapiCollection.update(
-          collection: collectionName,
-          id: id,
-          data: country._toMap(level: 0),
-        );
-        if (map.isNotEmpty) {
-          return Country.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while updating");
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while updating");
     }
   }
 
   static Future<int> count() async {
-    try {
-      return await StrapiCollection.count(collectionName);
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-    return 0;
+    return await StrapiCollection.count(collectionName);
   }
 
   static Future<Country?> delete(Country country) async {
-    try {
-      final id = country.id;
-      if (id is String) {
-        final map =
-            await StrapiCollection.delete(collection: collectionName, id: id);
-        if (map.isNotEmpty) {
-          return Country.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while deleting");
+    final id = country.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return Country.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while deleting");
     }
   }
 
@@ -2329,50 +2210,48 @@ class Countries {
     final queryString = query.query(
       collectionName: collectionName,
     );
-    try {
-      final response = await Strapi.i
-          .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
-      if (response.body.isNotEmpty) {
-        final object = response.body.first;
-        if (object is Map && object.containsKey("data")) {
-          final data = object["data"];
-          if (data is Map && data.containsKey(query.collectionName)) {
-            final myList = data[query.collectionName];
-            if (myList is List) {
-              final list = <Country>[];
-              myList.forEach((e) {
-                final o = _fromIDorData(e);
-                if (o is Country) {
-                  list.add(o);
-                }
-              });
-              return list;
-            } else if (myList is Map && myList.containsKey("id")) {
-              final o = _fromIDorData(myList);
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <Country>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
               if (o is Country) {
-                return [o];
+                list.add(o);
               }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is Country) {
+              return [o];
             }
           }
         }
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
     }
     return [];
   }
 
   static Widget listenerWidget({
+    Key? key,
     required Country strapiObject,
     bool sync = false,
     required Widget Function(
       BuildContext,
       Country,
+      bool,
     )
         builder,
   }) {
     return _StrapiListenerWidget<Country>(
+      key: key,
       strapiObject: strapiObject,
       generator: Country.fromMap,
       builder: builder,
@@ -2451,7 +2330,6 @@ class Business {
         enabled = null,
         partner = null,
         packages = null,
-        employees = null,
         businessFeatures = null,
         business_category = null,
         starRating = null,
@@ -2459,6 +2337,9 @@ class Business {
         email = null,
         about = null,
         catalogue = null,
+        dayTiming = null,
+        holidays = null,
+        employees = null,
         createdAt = null,
         updatedAt = null;
 
@@ -2468,14 +2349,16 @@ class Business {
       this.enabled,
       this.partner,
       this.packages,
-      this.employees,
       this.businessFeatures,
       this.business_category,
       this.starRating,
       this.contactNumber,
       this.email,
       this.about,
-      this.catalogue})
+      this.catalogue,
+      this.dayTiming,
+      this.holidays,
+      this.employees})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
@@ -2487,7 +2370,6 @@ class Business {
       this.enabled,
       this.partner,
       this.packages,
-      this.employees,
       this.businessFeatures,
       this.business_category,
       this.starRating,
@@ -2495,6 +2377,9 @@ class Business {
       this.email,
       this.about,
       this.catalogue,
+      this.dayTiming,
+      this.holidays,
+      this.employees,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -2506,7 +2391,6 @@ class Business {
       this.enabled,
       this.partner,
       this.packages,
-      this.employees,
       this.businessFeatures,
       this.business_category,
       this.starRating,
@@ -2514,6 +2398,9 @@ class Business {
       this.email,
       this.about,
       this.catalogue,
+      this.dayTiming,
+      this.holidays,
+      this.employees,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -2531,8 +2418,6 @@ class Business {
 
   final List<Package>? packages;
 
-  final List<Employee>? employees;
-
   final List<BusinessFeature>? businessFeatures;
 
   final BusinessCategory? business_category;
@@ -2546,6 +2431,12 @@ class Business {
   final String? about;
 
   final List<ProductCategory>? catalogue;
+
+  final List<DayTiming>? dayTiming;
+
+  final List<Holiday>? holidays;
+
+  final List<Employee>? employees;
 
   final DateTime? createdAt;
 
@@ -2564,21 +2455,22 @@ class Business {
           bool? enabled,
           Partner? partner,
           List<Package>? packages,
-          List<Employee>? employees,
           List<BusinessFeature>? businessFeatures,
           BusinessCategory? business_category,
           double? starRating,
           String? contactNumber,
           String? email,
           String? about,
-          List<ProductCategory>? catalogue}) =>
+          List<ProductCategory>? catalogue,
+          List<DayTiming>? dayTiming,
+          List<Holiday>? holidays,
+          List<Employee>? employees}) =>
       Business._unsynced(
           name ?? this.name,
           address ?? this.address,
           enabled ?? this.enabled,
           partner ?? this.partner,
           packages ?? this.packages,
-          employees ?? this.employees,
           businessFeatures ?? this.businessFeatures,
           business_category ?? this.business_category,
           starRating ?? this.starRating,
@@ -2586,6 +2478,9 @@ class Business {
           email ?? this.email,
           about ?? this.about,
           catalogue ?? this.catalogue,
+          dayTiming ?? this.dayTiming,
+          holidays ?? this.holidays,
+          employees ?? this.employees,
           this.createdAt,
           this.updatedAt,
           this.id);
@@ -2595,21 +2490,22 @@ class Business {
       bool enabled = false,
       bool partner = false,
       bool packages = false,
-      bool employees = false,
       bool businessFeatures = false,
       bool business_category = false,
       bool starRating = false,
       bool contactNumber = false,
       bool email = false,
       bool about = false,
-      bool catalogue = false}) {
+      bool catalogue = false,
+      bool dayTiming = false,
+      bool holidays = false,
+      bool employees = false}) {
     return Business._unsynced(
         name ? null : this.name,
         address ? null : this.address,
         enabled ? null : this.enabled,
         partner ? null : this.partner,
         packages ? null : this.packages,
-        employees ? null : this.employees,
         businessFeatures ? null : this.businessFeatures,
         business_category ? null : this.business_category,
         starRating ? null : this.starRating,
@@ -2617,6 +2513,9 @@ class Business {
         email ? null : this.email,
         about ? null : this.about,
         catalogue ? null : this.catalogue,
+        dayTiming ? null : this.dayTiming,
+        holidays ? null : this.holidays,
+        employees ? null : this.employees,
         this.createdAt,
         this.updatedAt,
         this.id)
@@ -2625,14 +2524,16 @@ class Business {
       .._emptyFields.enabled = enabled
       .._emptyFields.partner = partner
       .._emptyFields.packages = packages
-      .._emptyFields.employees = employees
       .._emptyFields.businessFeatures = businessFeatures
       .._emptyFields.business_category = business_category
       .._emptyFields.starRating = starRating
       .._emptyFields.contactNumber = contactNumber
       .._emptyFields.email = email
       .._emptyFields.about = about
-      .._emptyFields.catalogue = catalogue;
+      .._emptyFields.catalogue = catalogue
+      .._emptyFields.dayTiming = dayTiming
+      .._emptyFields.holidays = holidays
+      .._emptyFields.employees = employees;
   }
 
   static Business fromSyncedMap(Map<dynamic, dynamic> map) => Business._synced(
@@ -2644,8 +2545,6 @@ class Business {
           map["partner"], (e) => Partners._fromIDorData(e)),
       StrapiUtils.objFromListOfMap<Package>(
           map["packages"], (e) => Package.fromMap(e)),
-      StrapiUtils.objFromListOfMap<Employee>(
-          map["employees"], (e) => Employees._fromIDorData(e)),
       StrapiUtils.objFromListOfMap<BusinessFeature>(
           map["businessFeatures"], (e) => BusinessFeatures._fromIDorData(e)),
       StrapiUtils.objFromMap<BusinessCategory>(
@@ -2656,6 +2555,12 @@ class Business {
       map["about"],
       StrapiUtils.objFromListOfMap<ProductCategory>(
           map["catalogue"], (e) => ProductCategory.fromMap(e)),
+      StrapiUtils.objFromListOfMap<DayTiming>(
+          map["dayTiming"], (e) => DayTiming.fromMap(e)),
+      StrapiUtils.objFromListOfMap<Holiday>(
+          map["holidays"], (e) => Holiday.fromMap(e)),
+      StrapiUtils.objFromListOfMap<Employee>(
+          map["employees"], (e) => Employees._fromIDorData(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -2668,8 +2573,6 @@ class Business {
           map["partner"], (e) => Partners._fromIDorData(e)),
       StrapiUtils.objFromListOfMap<Package>(
           map["packages"], (e) => Package.fromMap(e)),
-      StrapiUtils.objFromListOfMap<Employee>(
-          map["employees"], (e) => Employees._fromIDorData(e)),
       StrapiUtils.objFromListOfMap<BusinessFeature>(
           map["businessFeatures"], (e) => BusinessFeatures._fromIDorData(e)),
       StrapiUtils.objFromMap<BusinessCategory>(
@@ -2680,6 +2583,12 @@ class Business {
       map["about"],
       StrapiUtils.objFromListOfMap<ProductCategory>(
           map["catalogue"], (e) => ProductCategory.fromMap(e)),
+      StrapiUtils.objFromListOfMap<DayTiming>(
+          map["dayTiming"], (e) => DayTiming.fromMap(e)),
+      StrapiUtils.objFromListOfMap<Holiday>(
+          map["holidays"], (e) => Holiday.fromMap(e)),
+      StrapiUtils.objFromListOfMap<Employee>(
+          map["employees"], (e) => Employees._fromIDorData(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -2697,10 +2606,6 @@ class Business {
       if (!_emptyFields.packages && packages != null)
         "packages":
             packages?.map((e) => e._toMap(level: level + level)).toList(),
-      if (!_emptyFields.employees && employees != null)
-        "employees": employees
-            ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
-            .toList(),
       if (!_emptyFields.businessFeatures && businessFeatures != null)
         "businessFeatures": businessFeatures
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
@@ -2718,6 +2623,16 @@ class Business {
       if (!_emptyFields.catalogue && catalogue != null)
         "catalogue":
             catalogue?.map((e) => e._toMap(level: level + level)).toList(),
+      if (!_emptyFields.dayTiming && dayTiming != null)
+        "dayTiming":
+            dayTiming?.map((e) => e._toMap(level: level + level)).toList(),
+      if (!_emptyFields.holidays && holidays != null)
+        "holidays":
+            holidays?.map((e) => e._toMap(level: level + level)).toList(),
+      if (!_emptyFields.employees && employees != null)
+        "employees": employees
+            ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
+            .toList(),
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
       "id": id
@@ -2756,98 +2671,69 @@ class Businesses {
     return ids.map((id) => Business.fromID(id)).toList();
   }
 
-  static Future<Business?> findOne(String id) async {
-    try {
-      final mapResponse = await StrapiCollection.findOne(
-        collection: collectionName,
-        id: id,
-      );
-      if (mapResponse.isNotEmpty) {
-        return Business.fromSyncedMap(mapResponse);
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+  static Future<Business?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return Business.fromSyncedMap(mapResponse);
     }
   }
 
   static Future<List<Business>> findMultiple({int limit = 16}) async {
-    try {
-      final list = await StrapiCollection.findMultiple(
-        collection: collectionName,
-        limit: limit,
-      );
-      if (list.isNotEmpty) {
-        return list.map((map) => Business.fromSyncedMap(map)).toList();
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => Business.fromSyncedMap(map)).toList();
     }
     return [];
   }
 
   static Future<Business?> create(Business business) async {
-    try {
-      final map = await StrapiCollection.create(
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: business._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return Business.fromSyncedMap(map);
+    }
+  }
+
+  static Future<Business?> update(Business business) async {
+    final id = business.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
         collection: collectionName,
+        id: id,
         data: business._toMap(level: 0),
       );
       if (map.isNotEmpty) {
         return Business.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-  }
-
-  static Future<Business?> update(Business business) async {
-    try {
-      final id = business.id;
-      if (id is String) {
-        final map = await StrapiCollection.update(
-          collection: collectionName,
-          id: id,
-          data: business._toMap(level: 0),
-        );
-        if (map.isNotEmpty) {
-          return Business.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while updating");
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while updating");
     }
   }
 
   static Future<int> count() async {
-    try {
-      return await StrapiCollection.count(collectionName);
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-    return 0;
+    return await StrapiCollection.count(collectionName);
   }
 
   static Future<Business?> delete(Business business) async {
-    try {
-      final id = business.id;
-      if (id is String) {
-        final map =
-            await StrapiCollection.delete(collection: collectionName, id: id);
-        if (map.isNotEmpty) {
-          return Business.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while deleting");
+    final id = business.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return Business.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while deleting");
     }
   }
 
@@ -2866,50 +2752,48 @@ class Businesses {
     final queryString = query.query(
       collectionName: collectionName,
     );
-    try {
-      final response = await Strapi.i
-          .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
-      if (response.body.isNotEmpty) {
-        final object = response.body.first;
-        if (object is Map && object.containsKey("data")) {
-          final data = object["data"];
-          if (data is Map && data.containsKey(query.collectionName)) {
-            final myList = data[query.collectionName];
-            if (myList is List) {
-              final list = <Business>[];
-              myList.forEach((e) {
-                final o = _fromIDorData(e);
-                if (o is Business) {
-                  list.add(o);
-                }
-              });
-              return list;
-            } else if (myList is Map && myList.containsKey("id")) {
-              final o = _fromIDorData(myList);
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <Business>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
               if (o is Business) {
-                return [o];
+                list.add(o);
               }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is Business) {
+              return [o];
             }
           }
         }
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
     }
     return [];
   }
 
   static Widget listenerWidget({
+    Key? key,
     required Business strapiObject,
     bool sync = false,
     required Widget Function(
       BuildContext,
       Business,
+      bool,
     )
         builder,
   }) {
     return _StrapiListenerWidget<Business>(
+      key: key,
       strapiObject: strapiObject,
       generator: Business.fromMap,
       builder: builder,
@@ -2933,8 +2817,6 @@ class _BusinessFields {
 
   final packages = StrapiComponentField("packages");
 
-  final employees = StrapiCollectionField("employees");
-
   final businessFeatures = StrapiCollectionField("businessFeatures");
 
   final business_category = StrapiModelField("business_category");
@@ -2949,6 +2831,12 @@ class _BusinessFields {
 
   final catalogue = StrapiComponentField("catalogue");
 
+  final dayTiming = StrapiComponentField("dayTiming");
+
+  final holidays = StrapiComponentField("holidays");
+
+  final employees = StrapiCollectionField("employees");
+
   final createdAt = StrapiLeafField("createdAt");
 
   final updatedAt = StrapiLeafField("updatedAt");
@@ -2962,7 +2850,6 @@ class _BusinessFields {
       enabled,
       partner,
       packages,
-      employees,
       businessFeatures,
       business_category,
       starRating,
@@ -2970,6 +2857,9 @@ class _BusinessFields {
       email,
       about,
       catalogue,
+      dayTiming,
+      holidays,
+      employees,
       createdAt,
       updatedAt,
       id
@@ -2988,8 +2878,6 @@ class _BusinessEmptyFields {
 
   bool packages = false;
 
-  bool employees = false;
-
   bool businessFeatures = false;
 
   bool business_category = false;
@@ -3003,6 +2891,12 @@ class _BusinessEmptyFields {
   bool about = false;
 
   bool catalogue = false;
+
+  bool dayTiming = false;
+
+  bool holidays = false;
+
+  bool employees = false;
 }
 
 class BusinessCategory {
@@ -3139,101 +3033,72 @@ class BusinessCategories {
     return ids.map((id) => BusinessCategory.fromID(id)).toList();
   }
 
-  static Future<BusinessCategory?> findOne(String id) async {
-    try {
-      final mapResponse = await StrapiCollection.findOne(
-        collection: collectionName,
-        id: id,
-      );
-      if (mapResponse.isNotEmpty) {
-        return BusinessCategory.fromSyncedMap(mapResponse);
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+  static Future<BusinessCategory?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return BusinessCategory.fromSyncedMap(mapResponse);
     }
   }
 
   static Future<List<BusinessCategory>> findMultiple({int limit = 16}) async {
-    try {
-      final list = await StrapiCollection.findMultiple(
-        collection: collectionName,
-        limit: limit,
-      );
-      if (list.isNotEmpty) {
-        return list.map((map) => BusinessCategory.fromSyncedMap(map)).toList();
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => BusinessCategory.fromSyncedMap(map)).toList();
     }
     return [];
   }
 
   static Future<BusinessCategory?> create(
       BusinessCategory businessCategory) async {
-    try {
-      final map = await StrapiCollection.create(
-        collection: collectionName,
-        data: businessCategory._toMap(level: 0),
-      );
-      if (map.isNotEmpty) {
-        return BusinessCategory.fromSyncedMap(map);
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: businessCategory._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return BusinessCategory.fromSyncedMap(map);
     }
   }
 
   static Future<BusinessCategory?> update(
       BusinessCategory businessCategory) async {
-    try {
-      final id = businessCategory.id;
-      if (id is String) {
-        final map = await StrapiCollection.update(
-          collection: collectionName,
-          id: id,
-          data: businessCategory._toMap(level: 0),
-        );
-        if (map.isNotEmpty) {
-          return BusinessCategory.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while updating");
+    final id = businessCategory.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
+        collection: collectionName,
+        id: id,
+        data: businessCategory._toMap(level: 0),
+      );
+      if (map.isNotEmpty) {
+        return BusinessCategory.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while updating");
     }
   }
 
   static Future<int> count() async {
-    try {
-      return await StrapiCollection.count(collectionName);
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-    return 0;
+    return await StrapiCollection.count(collectionName);
   }
 
   static Future<BusinessCategory?> delete(
       BusinessCategory businessCategory) async {
-    try {
-      final id = businessCategory.id;
-      if (id is String) {
-        final map =
-            await StrapiCollection.delete(collection: collectionName, id: id);
-        if (map.isNotEmpty) {
-          return BusinessCategory.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while deleting");
+    final id = businessCategory.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return BusinessCategory.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while deleting");
     }
   }
 
@@ -3253,50 +3118,48 @@ class BusinessCategories {
     final queryString = query.query(
       collectionName: collectionName,
     );
-    try {
-      final response = await Strapi.i
-          .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
-      if (response.body.isNotEmpty) {
-        final object = response.body.first;
-        if (object is Map && object.containsKey("data")) {
-          final data = object["data"];
-          if (data is Map && data.containsKey(query.collectionName)) {
-            final myList = data[query.collectionName];
-            if (myList is List) {
-              final list = <BusinessCategory>[];
-              myList.forEach((e) {
-                final o = _fromIDorData(e);
-                if (o is BusinessCategory) {
-                  list.add(o);
-                }
-              });
-              return list;
-            } else if (myList is Map && myList.containsKey("id")) {
-              final o = _fromIDorData(myList);
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <BusinessCategory>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
               if (o is BusinessCategory) {
-                return [o];
+                list.add(o);
               }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is BusinessCategory) {
+              return [o];
             }
           }
         }
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
     }
     return [];
   }
 
   static Widget listenerWidget({
+    Key? key,
     required BusinessCategory strapiObject,
     bool sync = false,
     required Widget Function(
       BuildContext,
       BusinessCategory,
+      bool,
     )
         builder,
   }) {
     return _StrapiListenerWidget<BusinessCategory>(
+      key: key,
       strapiObject: strapiObject,
       generator: BusinessCategory.fromMap,
       builder: builder,
@@ -3513,98 +3376,69 @@ class Partners {
     return ids.map((id) => Partner.fromID(id)).toList();
   }
 
-  static Future<Partner?> findOne(String id) async {
-    try {
-      final mapResponse = await StrapiCollection.findOne(
-        collection: collectionName,
-        id: id,
-      );
-      if (mapResponse.isNotEmpty) {
-        return Partner.fromSyncedMap(mapResponse);
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+  static Future<Partner?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return Partner.fromSyncedMap(mapResponse);
     }
   }
 
   static Future<List<Partner>> findMultiple({int limit = 16}) async {
-    try {
-      final list = await StrapiCollection.findMultiple(
-        collection: collectionName,
-        limit: limit,
-      );
-      if (list.isNotEmpty) {
-        return list.map((map) => Partner.fromSyncedMap(map)).toList();
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => Partner.fromSyncedMap(map)).toList();
     }
     return [];
   }
 
   static Future<Partner?> create(Partner partner) async {
-    try {
-      final map = await StrapiCollection.create(
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: partner._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return Partner.fromSyncedMap(map);
+    }
+  }
+
+  static Future<Partner?> update(Partner partner) async {
+    final id = partner.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
         collection: collectionName,
+        id: id,
         data: partner._toMap(level: 0),
       );
       if (map.isNotEmpty) {
         return Partner.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-  }
-
-  static Future<Partner?> update(Partner partner) async {
-    try {
-      final id = partner.id;
-      if (id is String) {
-        final map = await StrapiCollection.update(
-          collection: collectionName,
-          id: id,
-          data: partner._toMap(level: 0),
-        );
-        if (map.isNotEmpty) {
-          return Partner.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while updating");
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while updating");
     }
   }
 
   static Future<int> count() async {
-    try {
-      return await StrapiCollection.count(collectionName);
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-    return 0;
+    return await StrapiCollection.count(collectionName);
   }
 
   static Future<Partner?> delete(Partner partner) async {
-    try {
-      final id = partner.id;
-      if (id is String) {
-        final map =
-            await StrapiCollection.delete(collection: collectionName, id: id);
-        if (map.isNotEmpty) {
-          return Partner.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while deleting");
+    final id = partner.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return Partner.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while deleting");
     }
   }
 
@@ -3623,50 +3457,48 @@ class Partners {
     final queryString = query.query(
       collectionName: collectionName,
     );
-    try {
-      final response = await Strapi.i
-          .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
-      if (response.body.isNotEmpty) {
-        final object = response.body.first;
-        if (object is Map && object.containsKey("data")) {
-          final data = object["data"];
-          if (data is Map && data.containsKey(query.collectionName)) {
-            final myList = data[query.collectionName];
-            if (myList is List) {
-              final list = <Partner>[];
-              myList.forEach((e) {
-                final o = _fromIDorData(e);
-                if (o is Partner) {
-                  list.add(o);
-                }
-              });
-              return list;
-            } else if (myList is Map && myList.containsKey("id")) {
-              final o = _fromIDorData(myList);
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <Partner>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
               if (o is Partner) {
-                return [o];
+                list.add(o);
               }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is Partner) {
+              return [o];
             }
           }
         }
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
     }
     return [];
   }
 
   static Widget listenerWidget({
+    Key? key,
     required Partner strapiObject,
     bool sync = false,
     required Widget Function(
       BuildContext,
       Partner,
+      bool,
     )
         builder,
   }) {
     return _StrapiListenerWidget<Partner>(
+      key: key,
       strapiObject: strapiObject,
       generator: Partner.fromMap,
       builder: builder,
@@ -3731,22 +3563,22 @@ class DefaultData {
   DefaultData.fromID(this.id)
       : _synced = false,
         locality = null,
-        deviceId = null,
         city = null,
+        customID = null,
         createdAt = null,
         updatedAt = null;
 
-  DefaultData.fresh({this.locality, this.deviceId, this.city})
+  DefaultData.fresh({this.locality, this.city, this.customID})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
         id = null;
 
-  DefaultData._synced(this.locality, this.deviceId, this.city, this.createdAt,
+  DefaultData._synced(this.locality, this.city, this.customID, this.createdAt,
       this.updatedAt, this.id)
       : _synced = true;
 
-  DefaultData._unsynced(this.locality, this.deviceId, this.city, this.createdAt,
+  DefaultData._unsynced(this.locality, this.city, this.customID, this.createdAt,
       this.updatedAt, this.id)
       : _synced = false;
 
@@ -3754,9 +3586,9 @@ class DefaultData {
 
   final Locality? locality;
 
-  final String? deviceId;
-
   final City? city;
+
+  final String? customID;
 
   final DateTime? createdAt;
 
@@ -3769,35 +3601,30 @@ class DefaultData {
   _DefaultDataEmptyFields _emptyFields = _DefaultDataEmptyFields();
 
   bool get synced => _synced;
-  DefaultData copyWIth({Locality? locality, String? deviceId, City? city}) =>
-      DefaultData._unsynced(
-          locality ?? this.locality,
-          deviceId ?? this.deviceId,
-          city ?? this.city,
-          this.createdAt,
-          this.updatedAt,
-          this.id);
+  DefaultData copyWIth({Locality? locality, City? city, String? customID}) =>
+      DefaultData._unsynced(locality ?? this.locality, city ?? this.city,
+          customID ?? this.customID, this.createdAt, this.updatedAt, this.id);
   DefaultData setNull(
-      {bool locality = false, bool deviceId = false, bool city = false}) {
+      {bool locality = false, bool city = false, bool customID = false}) {
     return DefaultData._unsynced(
         locality ? null : this.locality,
-        deviceId ? null : this.deviceId,
         city ? null : this.city,
+        customID ? null : this.customID,
         this.createdAt,
         this.updatedAt,
         this.id)
       .._emptyFields.locality = locality
-      .._emptyFields.deviceId = deviceId
-      .._emptyFields.city = city;
+      .._emptyFields.city = city
+      .._emptyFields.customID = customID;
   }
 
   static DefaultData fromSyncedMap(Map<dynamic, dynamic> map) =>
       DefaultData._synced(
           StrapiUtils.objFromMap<Locality>(
               map["locality"], (e) => Localities._fromIDorData(e)),
-          map["deviceId"],
           StrapiUtils.objFromMap<City>(
               map["city"], (e) => Cities._fromIDorData(e)),
+          map["customID"],
           StrapiUtils.parseDateTime(map["createdAt"]),
           StrapiUtils.parseDateTime(map["updatedAt"]),
           map["id"]);
@@ -3805,9 +3632,9 @@ class DefaultData {
       DefaultData._unsynced(
           StrapiUtils.objFromMap<Locality>(
               map["locality"], (e) => Localities._fromIDorData(e)),
-          map["deviceId"],
           StrapiUtils.objFromMap<City>(
               map["city"], (e) => Cities._fromIDorData(e)),
+          map["customID"],
           StrapiUtils.parseDateTime(map["createdAt"]),
           StrapiUtils.parseDateTime(map["updatedAt"]),
           map["id"]);
@@ -3818,9 +3645,9 @@ class DefaultData {
       if (!_emptyFields.locality && locality != null)
         "locality":
             toServer ? locality?.id : locality?._toMap(level: level + level),
-      if (!_emptyFields.deviceId && deviceId != null) "deviceId": deviceId,
       if (!_emptyFields.city && city != null)
         "city": toServer ? city?.id : city?._toMap(level: level + level),
+      if (!_emptyFields.customID && customID != null) "customID": customID,
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
       "id": id
@@ -3859,98 +3686,69 @@ class DefaultDatas {
     return ids.map((id) => DefaultData.fromID(id)).toList();
   }
 
-  static Future<DefaultData?> findOne(String id) async {
-    try {
-      final mapResponse = await StrapiCollection.findOne(
-        collection: collectionName,
-        id: id,
-      );
-      if (mapResponse.isNotEmpty) {
-        return DefaultData.fromSyncedMap(mapResponse);
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+  static Future<DefaultData?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return DefaultData.fromSyncedMap(mapResponse);
     }
   }
 
   static Future<List<DefaultData>> findMultiple({int limit = 16}) async {
-    try {
-      final list = await StrapiCollection.findMultiple(
-        collection: collectionName,
-        limit: limit,
-      );
-      if (list.isNotEmpty) {
-        return list.map((map) => DefaultData.fromSyncedMap(map)).toList();
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => DefaultData.fromSyncedMap(map)).toList();
     }
     return [];
   }
 
   static Future<DefaultData?> create(DefaultData defaultData) async {
-    try {
-      final map = await StrapiCollection.create(
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: defaultData._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return DefaultData.fromSyncedMap(map);
+    }
+  }
+
+  static Future<DefaultData?> update(DefaultData defaultData) async {
+    final id = defaultData.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
         collection: collectionName,
+        id: id,
         data: defaultData._toMap(level: 0),
       );
       if (map.isNotEmpty) {
         return DefaultData.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-  }
-
-  static Future<DefaultData?> update(DefaultData defaultData) async {
-    try {
-      final id = defaultData.id;
-      if (id is String) {
-        final map = await StrapiCollection.update(
-          collection: collectionName,
-          id: id,
-          data: defaultData._toMap(level: 0),
-        );
-        if (map.isNotEmpty) {
-          return DefaultData.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while updating");
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while updating");
     }
   }
 
   static Future<int> count() async {
-    try {
-      return await StrapiCollection.count(collectionName);
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-    return 0;
+    return await StrapiCollection.count(collectionName);
   }
 
   static Future<DefaultData?> delete(DefaultData defaultData) async {
-    try {
-      final id = defaultData.id;
-      if (id is String) {
-        final map =
-            await StrapiCollection.delete(collection: collectionName, id: id);
-        if (map.isNotEmpty) {
-          return DefaultData.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while deleting");
+    final id = defaultData.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return DefaultData.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while deleting");
     }
   }
 
@@ -3969,50 +3767,48 @@ class DefaultDatas {
     final queryString = query.query(
       collectionName: collectionName,
     );
-    try {
-      final response = await Strapi.i
-          .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
-      if (response.body.isNotEmpty) {
-        final object = response.body.first;
-        if (object is Map && object.containsKey("data")) {
-          final data = object["data"];
-          if (data is Map && data.containsKey(query.collectionName)) {
-            final myList = data[query.collectionName];
-            if (myList is List) {
-              final list = <DefaultData>[];
-              myList.forEach((e) {
-                final o = _fromIDorData(e);
-                if (o is DefaultData) {
-                  list.add(o);
-                }
-              });
-              return list;
-            } else if (myList is Map && myList.containsKey("id")) {
-              final o = _fromIDorData(myList);
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <DefaultData>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
               if (o is DefaultData) {
-                return [o];
+                list.add(o);
               }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is DefaultData) {
+              return [o];
             }
           }
         }
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
     }
     return [];
   }
 
   static Widget listenerWidget({
+    Key? key,
     required DefaultData strapiObject,
     bool sync = false,
     required Widget Function(
       BuildContext,
       DefaultData,
+      bool,
     )
         builder,
   }) {
     return _StrapiListenerWidget<DefaultData>(
+      key: key,
       strapiObject: strapiObject,
       generator: DefaultData.fromMap,
       builder: builder,
@@ -4028,9 +3824,9 @@ class _DefaultDataFields {
 
   final locality = StrapiModelField("locality");
 
-  final deviceId = StrapiLeafField("deviceId");
-
   final city = StrapiModelField("city");
+
+  final customID = StrapiLeafField("customID");
 
   final createdAt = StrapiLeafField("createdAt");
 
@@ -4039,16 +3835,16 @@ class _DefaultDataFields {
   final id = StrapiLeafField("id");
 
   List<StrapiField> call() {
-    return [locality, deviceId, city, createdAt, updatedAt, id];
+    return [locality, city, customID, createdAt, updatedAt, id];
   }
 }
 
 class _DefaultDataEmptyFields {
   bool locality = false;
 
-  bool deviceId = false;
-
   bool city = false;
+
+  bool customID = false;
 }
 
 class MasterProduct {
@@ -4181,98 +3977,69 @@ class MasterProducts {
     return ids.map((id) => MasterProduct.fromID(id)).toList();
   }
 
-  static Future<MasterProduct?> findOne(String id) async {
-    try {
-      final mapResponse = await StrapiCollection.findOne(
-        collection: collectionName,
-        id: id,
-      );
-      if (mapResponse.isNotEmpty) {
-        return MasterProduct.fromSyncedMap(mapResponse);
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+  static Future<MasterProduct?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return MasterProduct.fromSyncedMap(mapResponse);
     }
   }
 
   static Future<List<MasterProduct>> findMultiple({int limit = 16}) async {
-    try {
-      final list = await StrapiCollection.findMultiple(
-        collection: collectionName,
-        limit: limit,
-      );
-      if (list.isNotEmpty) {
-        return list.map((map) => MasterProduct.fromSyncedMap(map)).toList();
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => MasterProduct.fromSyncedMap(map)).toList();
     }
     return [];
   }
 
   static Future<MasterProduct?> create(MasterProduct masterProduct) async {
-    try {
-      final map = await StrapiCollection.create(
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: masterProduct._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return MasterProduct.fromSyncedMap(map);
+    }
+  }
+
+  static Future<MasterProduct?> update(MasterProduct masterProduct) async {
+    final id = masterProduct.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
         collection: collectionName,
+        id: id,
         data: masterProduct._toMap(level: 0),
       );
       if (map.isNotEmpty) {
         return MasterProduct.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-  }
-
-  static Future<MasterProduct?> update(MasterProduct masterProduct) async {
-    try {
-      final id = masterProduct.id;
-      if (id is String) {
-        final map = await StrapiCollection.update(
-          collection: collectionName,
-          id: id,
-          data: masterProduct._toMap(level: 0),
-        );
-        if (map.isNotEmpty) {
-          return MasterProduct.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while updating");
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while updating");
     }
   }
 
   static Future<int> count() async {
-    try {
-      return await StrapiCollection.count(collectionName);
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-    return 0;
+    return await StrapiCollection.count(collectionName);
   }
 
   static Future<MasterProduct?> delete(MasterProduct masterProduct) async {
-    try {
-      final id = masterProduct.id;
-      if (id is String) {
-        final map =
-            await StrapiCollection.delete(collection: collectionName, id: id);
-        if (map.isNotEmpty) {
-          return MasterProduct.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while deleting");
+    final id = masterProduct.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return MasterProduct.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while deleting");
     }
   }
 
@@ -4291,50 +4058,48 @@ class MasterProducts {
     final queryString = query.query(
       collectionName: collectionName,
     );
-    try {
-      final response = await Strapi.i
-          .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
-      if (response.body.isNotEmpty) {
-        final object = response.body.first;
-        if (object is Map && object.containsKey("data")) {
-          final data = object["data"];
-          if (data is Map && data.containsKey(query.collectionName)) {
-            final myList = data[query.collectionName];
-            if (myList is List) {
-              final list = <MasterProduct>[];
-              myList.forEach((e) {
-                final o = _fromIDorData(e);
-                if (o is MasterProduct) {
-                  list.add(o);
-                }
-              });
-              return list;
-            } else if (myList is Map && myList.containsKey("id")) {
-              final o = _fromIDorData(myList);
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <MasterProduct>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
               if (o is MasterProduct) {
-                return [o];
+                list.add(o);
               }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is MasterProduct) {
+              return [o];
             }
           }
         }
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
     }
     return [];
   }
 
   static Widget listenerWidget({
+    Key? key,
     required MasterProduct strapiObject,
     bool sync = false,
     required Widget Function(
       BuildContext,
       MasterProduct,
+      bool,
     )
         builder,
   }) {
     return _StrapiListenerWidget<MasterProduct>(
+      key: key,
       strapiObject: strapiObject,
       generator: MasterProduct.fromMap,
       builder: builder,
@@ -4524,101 +4289,72 @@ class BusinessFeatures {
     return ids.map((id) => BusinessFeature.fromID(id)).toList();
   }
 
-  static Future<BusinessFeature?> findOne(String id) async {
-    try {
-      final mapResponse = await StrapiCollection.findOne(
-        collection: collectionName,
-        id: id,
-      );
-      if (mapResponse.isNotEmpty) {
-        return BusinessFeature.fromSyncedMap(mapResponse);
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+  static Future<BusinessFeature?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return BusinessFeature.fromSyncedMap(mapResponse);
     }
   }
 
   static Future<List<BusinessFeature>> findMultiple({int limit = 16}) async {
-    try {
-      final list = await StrapiCollection.findMultiple(
-        collection: collectionName,
-        limit: limit,
-      );
-      if (list.isNotEmpty) {
-        return list.map((map) => BusinessFeature.fromSyncedMap(map)).toList();
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => BusinessFeature.fromSyncedMap(map)).toList();
     }
     return [];
   }
 
   static Future<BusinessFeature?> create(
       BusinessFeature businessFeature) async {
-    try {
-      final map = await StrapiCollection.create(
-        collection: collectionName,
-        data: businessFeature._toMap(level: 0),
-      );
-      if (map.isNotEmpty) {
-        return BusinessFeature.fromSyncedMap(map);
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: businessFeature._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return BusinessFeature.fromSyncedMap(map);
     }
   }
 
   static Future<BusinessFeature?> update(
       BusinessFeature businessFeature) async {
-    try {
-      final id = businessFeature.id;
-      if (id is String) {
-        final map = await StrapiCollection.update(
-          collection: collectionName,
-          id: id,
-          data: businessFeature._toMap(level: 0),
-        );
-        if (map.isNotEmpty) {
-          return BusinessFeature.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while updating");
+    final id = businessFeature.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
+        collection: collectionName,
+        id: id,
+        data: businessFeature._toMap(level: 0),
+      );
+      if (map.isNotEmpty) {
+        return BusinessFeature.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while updating");
     }
   }
 
   static Future<int> count() async {
-    try {
-      return await StrapiCollection.count(collectionName);
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-    return 0;
+    return await StrapiCollection.count(collectionName);
   }
 
   static Future<BusinessFeature?> delete(
       BusinessFeature businessFeature) async {
-    try {
-      final id = businessFeature.id;
-      if (id is String) {
-        final map =
-            await StrapiCollection.delete(collection: collectionName, id: id);
-        if (map.isNotEmpty) {
-          return BusinessFeature.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while deleting");
+    final id = businessFeature.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return BusinessFeature.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while deleting");
     }
   }
 
@@ -4637,50 +4373,48 @@ class BusinessFeatures {
     final queryString = query.query(
       collectionName: collectionName,
     );
-    try {
-      final response = await Strapi.i
-          .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
-      if (response.body.isNotEmpty) {
-        final object = response.body.first;
-        if (object is Map && object.containsKey("data")) {
-          final data = object["data"];
-          if (data is Map && data.containsKey(query.collectionName)) {
-            final myList = data[query.collectionName];
-            if (myList is List) {
-              final list = <BusinessFeature>[];
-              myList.forEach((e) {
-                final o = _fromIDorData(e);
-                if (o is BusinessFeature) {
-                  list.add(o);
-                }
-              });
-              return list;
-            } else if (myList is Map && myList.containsKey("id")) {
-              final o = _fromIDorData(myList);
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <BusinessFeature>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
               if (o is BusinessFeature) {
-                return [o];
+                list.add(o);
               }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is BusinessFeature) {
+              return [o];
             }
           }
         }
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
     }
     return [];
   }
 
   static Widget listenerWidget({
+    Key? key,
     required BusinessFeature strapiObject,
     bool sync = false,
     required Widget Function(
       BuildContext,
       BusinessFeature,
+      bool,
     )
         builder,
   }) {
     return _StrapiListenerWidget<BusinessFeature>(
+      key: key,
       strapiObject: strapiObject,
       generator: BusinessFeature.fromMap,
       builder: builder,
@@ -4943,98 +4677,69 @@ class Reviews {
     return ids.map((id) => Review.fromID(id)).toList();
   }
 
-  static Future<Review?> findOne(String id) async {
-    try {
-      final mapResponse = await StrapiCollection.findOne(
-        collection: collectionName,
-        id: id,
-      );
-      if (mapResponse.isNotEmpty) {
-        return Review.fromSyncedMap(mapResponse);
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+  static Future<Review?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return Review.fromSyncedMap(mapResponse);
     }
   }
 
   static Future<List<Review>> findMultiple({int limit = 16}) async {
-    try {
-      final list = await StrapiCollection.findMultiple(
-        collection: collectionName,
-        limit: limit,
-      );
-      if (list.isNotEmpty) {
-        return list.map((map) => Review.fromSyncedMap(map)).toList();
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => Review.fromSyncedMap(map)).toList();
     }
     return [];
   }
 
   static Future<Review?> create(Review review) async {
-    try {
-      final map = await StrapiCollection.create(
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: review._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return Review.fromSyncedMap(map);
+    }
+  }
+
+  static Future<Review?> update(Review review) async {
+    final id = review.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
         collection: collectionName,
+        id: id,
         data: review._toMap(level: 0),
       );
       if (map.isNotEmpty) {
         return Review.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-  }
-
-  static Future<Review?> update(Review review) async {
-    try {
-      final id = review.id;
-      if (id is String) {
-        final map = await StrapiCollection.update(
-          collection: collectionName,
-          id: id,
-          data: review._toMap(level: 0),
-        );
-        if (map.isNotEmpty) {
-          return Review.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while updating");
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while updating");
     }
   }
 
   static Future<int> count() async {
-    try {
-      return await StrapiCollection.count(collectionName);
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-    return 0;
+    return await StrapiCollection.count(collectionName);
   }
 
   static Future<Review?> delete(Review review) async {
-    try {
-      final id = review.id;
-      if (id is String) {
-        final map =
-            await StrapiCollection.delete(collection: collectionName, id: id);
-        if (map.isNotEmpty) {
-          return Review.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while deleting");
+    final id = review.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return Review.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while deleting");
     }
   }
 
@@ -5053,50 +4758,48 @@ class Reviews {
     final queryString = query.query(
       collectionName: collectionName,
     );
-    try {
-      final response = await Strapi.i
-          .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
-      if (response.body.isNotEmpty) {
-        final object = response.body.first;
-        if (object is Map && object.containsKey("data")) {
-          final data = object["data"];
-          if (data is Map && data.containsKey(query.collectionName)) {
-            final myList = data[query.collectionName];
-            if (myList is List) {
-              final list = <Review>[];
-              myList.forEach((e) {
-                final o = _fromIDorData(e);
-                if (o is Review) {
-                  list.add(o);
-                }
-              });
-              return list;
-            } else if (myList is Map && myList.containsKey("id")) {
-              final o = _fromIDorData(myList);
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <Review>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
               if (o is Review) {
-                return [o];
+                list.add(o);
               }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is Review) {
+              return [o];
             }
           }
         }
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
     }
     return [];
   }
 
   static Widget listenerWidget({
+    Key? key,
     required Review strapiObject,
     bool sync = false,
     required Widget Function(
       BuildContext,
       Review,
+      bool,
     )
         builder,
   }) {
     return _StrapiListenerWidget<Review>(
+      key: key,
       strapiObject: strapiObject,
       generator: Review.fromMap,
       builder: builder,
@@ -5328,98 +5031,69 @@ class Roles {
     return ids.map((id) => Role.fromID(id)).toList();
   }
 
-  static Future<Role?> findOne(String id) async {
-    try {
-      final mapResponse = await StrapiCollection.findOne(
-        collection: collectionName,
-        id: id,
-      );
-      if (mapResponse.isNotEmpty) {
-        return Role.fromSyncedMap(mapResponse);
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+  static Future<Role?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return Role.fromSyncedMap(mapResponse);
     }
   }
 
   static Future<List<Role>> findMultiple({int limit = 16}) async {
-    try {
-      final list = await StrapiCollection.findMultiple(
-        collection: collectionName,
-        limit: limit,
-      );
-      if (list.isNotEmpty) {
-        return list.map((map) => Role.fromSyncedMap(map)).toList();
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => Role.fromSyncedMap(map)).toList();
     }
     return [];
   }
 
   static Future<Role?> create(Role role) async {
-    try {
-      final map = await StrapiCollection.create(
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: role._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return Role.fromSyncedMap(map);
+    }
+  }
+
+  static Future<Role?> update(Role role) async {
+    final id = role.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
         collection: collectionName,
+        id: id,
         data: role._toMap(level: 0),
       );
       if (map.isNotEmpty) {
         return Role.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-  }
-
-  static Future<Role?> update(Role role) async {
-    try {
-      final id = role.id;
-      if (id is String) {
-        final map = await StrapiCollection.update(
-          collection: collectionName,
-          id: id,
-          data: role._toMap(level: 0),
-        );
-        if (map.isNotEmpty) {
-          return Role.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while updating");
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while updating");
     }
   }
 
   static Future<int> count() async {
-    try {
-      return await StrapiCollection.count(collectionName);
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-    return 0;
+    return await StrapiCollection.count(collectionName);
   }
 
   static Future<Role?> delete(Role role) async {
-    try {
-      final id = role.id;
-      if (id is String) {
-        final map =
-            await StrapiCollection.delete(collection: collectionName, id: id);
-        if (map.isNotEmpty) {
-          return Role.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while deleting");
+    final id = role.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return Role.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while deleting");
     }
   }
 
@@ -5438,50 +5112,48 @@ class Roles {
     final queryString = query.query(
       collectionName: collectionName,
     );
-    try {
-      final response = await Strapi.i
-          .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
-      if (response.body.isNotEmpty) {
-        final object = response.body.first;
-        if (object is Map && object.containsKey("data")) {
-          final data = object["data"];
-          if (data is Map && data.containsKey(query.collectionName)) {
-            final myList = data[query.collectionName];
-            if (myList is List) {
-              final list = <Role>[];
-              myList.forEach((e) {
-                final o = _fromIDorData(e);
-                if (o is Role) {
-                  list.add(o);
-                }
-              });
-              return list;
-            } else if (myList is Map && myList.containsKey("id")) {
-              final o = _fromIDorData(myList);
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <Role>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
               if (o is Role) {
-                return [o];
+                list.add(o);
               }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is Role) {
+              return [o];
             }
           }
         }
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
     }
     return [];
   }
 
   static Widget listenerWidget({
+    Key? key,
     required Role strapiObject,
     bool sync = false,
     required Widget Function(
       BuildContext,
       Role,
+      bool,
     )
         builder,
   }) {
     return _StrapiListenerWidget<Role>(
+      key: key,
       strapiObject: strapiObject,
       generator: Role.fromMap,
       builder: builder,
@@ -5556,6 +5228,7 @@ class User {
         locality = null,
         city = null,
         bookings = null,
+        cart = null,
         createdAt = null,
         updatedAt = null;
 
@@ -5575,7 +5248,8 @@ class User {
       this.partner,
       this.locality,
       this.city,
-      this.bookings})
+      this.bookings,
+      this.cart})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
@@ -5598,6 +5272,7 @@ class User {
       this.locality,
       this.city,
       this.bookings,
+      this.cart,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -5620,6 +5295,7 @@ class User {
       this.locality,
       this.city,
       this.bookings,
+      this.cart,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -5659,6 +5335,8 @@ class User {
 
   final List<Booking>? bookings;
 
+  final Booking? cart;
+
   final DateTime? createdAt;
 
   final DateTime? updatedAt;
@@ -5686,7 +5364,8 @@ class User {
           Partner? partner,
           Locality? locality,
           City? city,
-          List<Booking>? bookings}) =>
+          List<Booking>? bookings,
+          Booking? cart}) =>
       User._unsynced(
           username ?? this.username,
           email ?? this.email,
@@ -5704,6 +5383,7 @@ class User {
           locality ?? this.locality,
           city ?? this.city,
           bookings ?? this.bookings,
+          cart ?? this.cart,
           this.createdAt,
           this.updatedAt,
           this.id);
@@ -5723,7 +5403,8 @@ class User {
       bool partner = false,
       bool locality = false,
       bool city = false,
-      bool bookings = false}) {
+      bool bookings = false,
+      bool cart = false}) {
     return User._unsynced(
         username ? null : this.username,
         email ? null : this.email,
@@ -5741,6 +5422,7 @@ class User {
         locality ? null : this.locality,
         city ? null : this.city,
         bookings ? null : this.bookings,
+        cart ? null : this.cart,
         this.createdAt,
         this.updatedAt,
         this.id)
@@ -5759,7 +5441,8 @@ class User {
       .._emptyFields.partner = partner
       .._emptyFields.locality = locality
       .._emptyFields.city = city
-      .._emptyFields.bookings = bookings;
+      .._emptyFields.bookings = bookings
+      .._emptyFields.cart = cart;
   }
 
   static User fromSyncedMap(Map<dynamic, dynamic> map) => User._synced(
@@ -5785,6 +5468,8 @@ class User {
       StrapiUtils.objFromMap<City>(map["city"], (e) => Cities._fromIDorData(e)),
       StrapiUtils.objFromListOfMap<Booking>(
           map["bookings"], (e) => Bookings._fromIDorData(e)),
+      StrapiUtils.objFromMap<Booking>(
+          map["cart"], (e) => Bookings._fromIDorData(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -5811,6 +5496,8 @@ class User {
       StrapiUtils.objFromMap<City>(map["city"], (e) => Cities._fromIDorData(e)),
       StrapiUtils.objFromListOfMap<Booking>(
           map["bookings"], (e) => Bookings._fromIDorData(e)),
+      StrapiUtils.objFromMap<Booking>(
+          map["cart"], (e) => Bookings._fromIDorData(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -5852,6 +5539,8 @@ class User {
         "bookings": bookings
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
+      if (!_emptyFields.cart && cart != null)
+        "cart": toServer ? cart?.id : cart?._toMap(level: level + level),
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
       "id": id
@@ -5889,98 +5578,69 @@ class Users {
     return ids.map((id) => User.fromID(id)).toList();
   }
 
-  static Future<User?> findOne(String id) async {
-    try {
-      final mapResponse = await StrapiCollection.findOne(
-        collection: collectionName,
-        id: id,
-      );
-      if (mapResponse.isNotEmpty) {
-        return User.fromSyncedMap(mapResponse);
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+  static Future<User?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return User.fromSyncedMap(mapResponse);
     }
   }
 
   static Future<List<User>> findMultiple({int limit = 16}) async {
-    try {
-      final list = await StrapiCollection.findMultiple(
-        collection: collectionName,
-        limit: limit,
-      );
-      if (list.isNotEmpty) {
-        return list.map((map) => User.fromSyncedMap(map)).toList();
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => User.fromSyncedMap(map)).toList();
     }
     return [];
   }
 
   static Future<User?> create(User user) async {
-    try {
-      final map = await StrapiCollection.create(
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: user._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return User.fromSyncedMap(map);
+    }
+  }
+
+  static Future<User?> update(User user) async {
+    final id = user.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
         collection: collectionName,
+        id: id,
         data: user._toMap(level: 0),
       );
       if (map.isNotEmpty) {
         return User.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-  }
-
-  static Future<User?> update(User user) async {
-    try {
-      final id = user.id;
-      if (id is String) {
-        final map = await StrapiCollection.update(
-          collection: collectionName,
-          id: id,
-          data: user._toMap(level: 0),
-        );
-        if (map.isNotEmpty) {
-          return User.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while updating");
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while updating");
     }
   }
 
   static Future<int> count() async {
-    try {
-      return await StrapiCollection.count(collectionName);
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-    return 0;
+    return await StrapiCollection.count(collectionName);
   }
 
   static Future<User?> delete(User user) async {
-    try {
-      final id = user.id;
-      if (id is String) {
-        final map =
-            await StrapiCollection.delete(collection: collectionName, id: id);
-        if (map.isNotEmpty) {
-          return User.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while deleting");
+    final id = user.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return User.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while deleting");
     }
   }
 
@@ -5999,69 +5659,71 @@ class Users {
     final queryString = query.query(
       collectionName: collectionName,
     );
-    try {
-      final response = await Strapi.i
-          .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
-      if (response.body.isNotEmpty) {
-        final object = response.body.first;
-        if (object is Map && object.containsKey("data")) {
-          final data = object["data"];
-          if (data is Map && data.containsKey(query.collectionName)) {
-            final myList = data[query.collectionName];
-            if (myList is List) {
-              final list = <User>[];
-              myList.forEach((e) {
-                final o = _fromIDorData(e);
-                if (o is User) {
-                  list.add(o);
-                }
-              });
-              return list;
-            } else if (myList is Map && myList.containsKey("id")) {
-              final o = _fromIDorData(myList);
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <User>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
               if (o is User) {
-                return [o];
+                list.add(o);
               }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is User) {
+              return [o];
             }
           }
         }
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
     }
     return [];
   }
 
-  static Future<User?> me() async {
-    try {
-      if (Strapi.i.strapiToken.isEmpty) {
-        throw Exception(
-            "cannot get users/me endpoint without token, please authenticate first");
-      }
-      final response = await StrapiCollection.customEndpoint(
-          collection: "users", endPoint: "me");
-      if (response is Map) {
-        return User.fromSyncedMap(response);
-      } else if (response is List && response.isNotEmpty) {
-        return User.fromSyncedMap(response.first);
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+  static User? _me;
+  static Future<User?> me({asFindOne: false}) async {
+    final _id = _me?.id;
+    if (asFindOne && (_me is User && _id is String)) {
+      return findOne(_id);
     }
+
+    if (Strapi.i.strapiToken.isEmpty) {
+      throw StrapiException(
+          msg:
+              "cannot get users/me endpoint without token, please authenticate first");
+    }
+    final response = await StrapiCollection.customEndpoint(
+        collection: "users", endPoint: "me");
+    if (response is List && response.isNotEmpty) {
+      _me = User.fromSyncedMap(response.first);
+    }
+    if (_me is User && asFindOne) {
+      return me(asFindOne: asFindOne);
+    }
+    return _me;
   }
 
   static Widget listenerWidget({
+    Key? key,
     required User strapiObject,
     bool sync = false,
     required Widget Function(
       BuildContext,
       User,
+      bool,
     )
         builder,
   }) {
     return _StrapiListenerWidget<User>(
+      key: key,
       strapiObject: strapiObject,
       generator: User.fromMap,
       builder: builder,
@@ -6107,6 +5769,8 @@ class _UserFields {
 
   final bookings = StrapiCollectionField("bookings");
 
+  final cart = StrapiModelField("cart");
+
   final createdAt = StrapiLeafField("createdAt");
 
   final updatedAt = StrapiLeafField("updatedAt");
@@ -6131,6 +5795,7 @@ class _UserFields {
       locality,
       city,
       bookings,
+      cart,
       createdAt,
       updatedAt,
       id
@@ -6170,6 +5835,8 @@ class _UserEmptyFields {
   bool city = false;
 
   bool bookings = false;
+
+  bool cart = false;
 }
 
 class Permission {
@@ -6344,98 +6011,69 @@ class Permissions {
     return ids.map((id) => Permission.fromID(id)).toList();
   }
 
-  static Future<Permission?> findOne(String id) async {
-    try {
-      final mapResponse = await StrapiCollection.findOne(
-        collection: collectionName,
-        id: id,
-      );
-      if (mapResponse.isNotEmpty) {
-        return Permission.fromSyncedMap(mapResponse);
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+  static Future<Permission?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return Permission.fromSyncedMap(mapResponse);
     }
   }
 
   static Future<List<Permission>> findMultiple({int limit = 16}) async {
-    try {
-      final list = await StrapiCollection.findMultiple(
-        collection: collectionName,
-        limit: limit,
-      );
-      if (list.isNotEmpty) {
-        return list.map((map) => Permission.fromSyncedMap(map)).toList();
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => Permission.fromSyncedMap(map)).toList();
     }
     return [];
   }
 
   static Future<Permission?> create(Permission permission) async {
-    try {
-      final map = await StrapiCollection.create(
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: permission._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return Permission.fromSyncedMap(map);
+    }
+  }
+
+  static Future<Permission?> update(Permission permission) async {
+    final id = permission.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
         collection: collectionName,
+        id: id,
         data: permission._toMap(level: 0),
       );
       if (map.isNotEmpty) {
         return Permission.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-  }
-
-  static Future<Permission?> update(Permission permission) async {
-    try {
-      final id = permission.id;
-      if (id is String) {
-        final map = await StrapiCollection.update(
-          collection: collectionName,
-          id: id,
-          data: permission._toMap(level: 0),
-        );
-        if (map.isNotEmpty) {
-          return Permission.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while updating");
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while updating");
     }
   }
 
   static Future<int> count() async {
-    try {
-      return await StrapiCollection.count(collectionName);
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-    return 0;
+    return await StrapiCollection.count(collectionName);
   }
 
   static Future<Permission?> delete(Permission permission) async {
-    try {
-      final id = permission.id;
-      if (id is String) {
-        final map =
-            await StrapiCollection.delete(collection: collectionName, id: id);
-        if (map.isNotEmpty) {
-          return Permission.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while deleting");
+    final id = permission.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return Permission.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while deleting");
     }
   }
 
@@ -6454,50 +6092,48 @@ class Permissions {
     final queryString = query.query(
       collectionName: collectionName,
     );
-    try {
-      final response = await Strapi.i
-          .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
-      if (response.body.isNotEmpty) {
-        final object = response.body.first;
-        if (object is Map && object.containsKey("data")) {
-          final data = object["data"];
-          if (data is Map && data.containsKey(query.collectionName)) {
-            final myList = data[query.collectionName];
-            if (myList is List) {
-              final list = <Permission>[];
-              myList.forEach((e) {
-                final o = _fromIDorData(e);
-                if (o is Permission) {
-                  list.add(o);
-                }
-              });
-              return list;
-            } else if (myList is Map && myList.containsKey("id")) {
-              final o = _fromIDorData(myList);
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <Permission>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
               if (o is Permission) {
-                return [o];
+                list.add(o);
               }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is Permission) {
+              return [o];
             }
           }
         }
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
     }
     return [];
   }
 
   static Widget listenerWidget({
+    Key? key,
     required Permission strapiObject,
     bool sync = false,
     required Widget Function(
       BuildContext,
       Permission,
+      bool,
     )
         builder,
   }) {
     return _StrapiListenerWidget<Permission>(
+      key: key,
       strapiObject: strapiObject,
       generator: Permission.fromMap,
       builder: builder,
@@ -6871,98 +6507,69 @@ class StrapiFiles {
     return ids.map((id) => StrapiFile.fromID(id)).toList();
   }
 
-  static Future<StrapiFile?> findOne(String id) async {
-    try {
-      final mapResponse = await StrapiCollection.findOne(
-        collection: collectionName,
-        id: id,
-      );
-      if (mapResponse.isNotEmpty) {
-        return StrapiFile.fromSyncedMap(mapResponse);
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+  static Future<StrapiFile?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return StrapiFile.fromSyncedMap(mapResponse);
     }
   }
 
   static Future<List<StrapiFile>> findMultiple({int limit = 16}) async {
-    try {
-      final list = await StrapiCollection.findMultiple(
-        collection: collectionName,
-        limit: limit,
-      );
-      if (list.isNotEmpty) {
-        return list.map((map) => StrapiFile.fromSyncedMap(map)).toList();
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => StrapiFile.fromSyncedMap(map)).toList();
     }
     return [];
   }
 
   static Future<StrapiFile?> create(StrapiFile strapiFile) async {
-    try {
-      final map = await StrapiCollection.create(
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: strapiFile._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return StrapiFile.fromSyncedMap(map);
+    }
+  }
+
+  static Future<StrapiFile?> update(StrapiFile strapiFile) async {
+    final id = strapiFile.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
         collection: collectionName,
+        id: id,
         data: strapiFile._toMap(level: 0),
       );
       if (map.isNotEmpty) {
         return StrapiFile.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-  }
-
-  static Future<StrapiFile?> update(StrapiFile strapiFile) async {
-    try {
-      final id = strapiFile.id;
-      if (id is String) {
-        final map = await StrapiCollection.update(
-          collection: collectionName,
-          id: id,
-          data: strapiFile._toMap(level: 0),
-        );
-        if (map.isNotEmpty) {
-          return StrapiFile.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while updating");
-      }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while updating");
     }
   }
 
   static Future<int> count() async {
-    try {
-      return await StrapiCollection.count(collectionName);
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
-    }
-    return 0;
+    return await StrapiCollection.count(collectionName);
   }
 
   static Future<StrapiFile?> delete(StrapiFile strapiFile) async {
-    try {
-      final id = strapiFile.id;
-      if (id is String) {
-        final map =
-            await StrapiCollection.delete(collection: collectionName, id: id);
-        if (map.isNotEmpty) {
-          return StrapiFile.fromSyncedMap(map);
-        }
-      } else {
-        sPrint("id is null while deleting");
+    final id = strapiFile.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return StrapiFile.fromSyncedMap(map);
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
+    } else {
+      sPrint("id is null while deleting");
     }
   }
 
@@ -6981,50 +6588,48 @@ class StrapiFiles {
     final queryString = query.query(
       collectionName: collectionName,
     );
-    try {
-      final response = await Strapi.i
-          .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
-      if (response.body.isNotEmpty) {
-        final object = response.body.first;
-        if (object is Map && object.containsKey("data")) {
-          final data = object["data"];
-          if (data is Map && data.containsKey(query.collectionName)) {
-            final myList = data[query.collectionName];
-            if (myList is List) {
-              final list = <StrapiFile>[];
-              myList.forEach((e) {
-                final o = _fromIDorData(e);
-                if (o is StrapiFile) {
-                  list.add(o);
-                }
-              });
-              return list;
-            } else if (myList is Map && myList.containsKey("id")) {
-              final o = _fromIDorData(myList);
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <StrapiFile>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
               if (o is StrapiFile) {
-                return [o];
+                list.add(o);
               }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is StrapiFile) {
+              return [o];
             }
           }
         }
       }
-    } catch (e, s) {
-      sPrint(e);
-      sPrint(s);
     }
     return [];
   }
 
   static Widget listenerWidget({
+    Key? key,
     required StrapiFile strapiObject,
     bool sync = false,
     required Widget Function(
       BuildContext,
       StrapiFile,
+      bool,
     )
         builder,
   }) {
     return _StrapiListenerWidget<StrapiFile>(
+      key: key,
       strapiObject: strapiObject,
       generator: StrapiFile.fromMap,
       builder: builder,
@@ -7467,6 +7072,111 @@ class _PackageEmptyFields {
   bool priceAfter = false;
 }
 
+class Timing {
+  Timing._unsynced(this.from, this.to, this.enabled);
+
+  Timing({this.from, this.to, this.enabled});
+
+  final DateTime? from;
+
+  final DateTime? to;
+
+  final bool? enabled;
+
+  static Timing? fromMap(Map<String, dynamic> map) => Timing._unsynced(
+      StrapiUtils.parseDateTime(map["from"]),
+      StrapiUtils.parseDateTime(map["to"]),
+      StrapiUtils.parseBool(map["enabled"]));
+  Map<String, dynamic> toMap() => _toMap(level: -1);
+  Map<String, dynamic> _toMap({int level = 0}) {
+    final toServer = level == 0;
+    return {
+      "from": from?.toIso8601String(),
+      "to": to?.toIso8601String(),
+      "enabled": enabled
+    };
+  }
+
+  static _TimingFields get fields => _TimingFields.i;
+  @override
+  String toString() =>
+      "[Strapi Component Type Timing]: \n" + _toMap().toString();
+}
+
+class _TimingFields {
+  _TimingFields._i();
+
+  static final _TimingFields i = _TimingFields._i();
+
+  final from = StrapiLeafField("from");
+
+  final to = StrapiLeafField("to");
+
+  final enabled = StrapiLeafField("enabled");
+
+  String call() {
+    return "{from,to,enabled}";
+  }
+}
+
+class _TimingEmptyFields {
+  bool from = false;
+
+  bool to = false;
+
+  bool enabled = false;
+}
+
+enum DayName { sunday, monday, tuesday, wednesday, thursday, friday, saturday }
+
+class DayTiming {
+  DayTiming._unsynced(this.timings, this.dayName);
+
+  DayTiming({this.timings, this.dayName});
+
+  final List<Timing>? timings;
+
+  final DayName? dayName;
+
+  static DayTiming? fromMap(Map<String, dynamic> map) => DayTiming._unsynced(
+      StrapiUtils.objFromListOfMap<Timing>(
+          map["timings"], (e) => Timing.fromMap(e)),
+      StrapiUtils.toEnum<DayName>(DayName.values, map["dayName"]));
+  Map<String, dynamic> toMap() => _toMap(level: -1);
+  Map<String, dynamic> _toMap({int level = 0}) {
+    final toServer = level == 0;
+    return {
+      "timings": timings?.map((e) => e._toMap(level: level + level)).toList(),
+      "dayName": StrapiUtils.enumToString(dayName)
+    };
+  }
+
+  static _DayTimingFields get fields => _DayTimingFields.i;
+  @override
+  String toString() =>
+      "[Strapi Component Type DayTiming]: \n" + _toMap().toString();
+}
+
+class _DayTimingFields {
+  _DayTimingFields._i();
+
+  static final _DayTimingFields i = _DayTimingFields._i();
+
+  final timings = StrapiComponentField("timings");
+
+  final dayName = StrapiLeafField("dayName");
+
+  String call() {
+    return "{timings${_TimingFields.i()},dayName}";
+  }
+}
+
+class _DayTimingEmptyFields {
+  bool timings = false;
+
+  bool dayName = false;
+}
+
 class Favourites {
   Favourites._unsynced(this.business, this.addedOn);
 
@@ -7514,6 +7224,52 @@ class _FavouritesEmptyFields {
   bool business = false;
 
   bool addedOn = false;
+}
+
+class Holiday {
+  Holiday._unsynced(this.date, this.nameOfTheHoliday);
+
+  Holiday({this.date, this.nameOfTheHoliday});
+
+  final DateTime? date;
+
+  final String? nameOfTheHoliday;
+
+  static Holiday? fromMap(Map<String, dynamic> map) => Holiday._unsynced(
+      StrapiUtils.parseDateTime(map["date"]), map["nameOfTheHoliday"]);
+  Map<String, dynamic> toMap() => _toMap(level: -1);
+  Map<String, dynamic> _toMap({int level = 0}) {
+    final toServer = level == 0;
+    return {
+      "date": date?.toIso8601String(),
+      "nameOfTheHoliday": nameOfTheHoliday
+    };
+  }
+
+  static _HolidayFields get fields => _HolidayFields.i;
+  @override
+  String toString() =>
+      "[Strapi Component Type Holiday]: \n" + _toMap().toString();
+}
+
+class _HolidayFields {
+  _HolidayFields._i();
+
+  static final _HolidayFields i = _HolidayFields._i();
+
+  final date = StrapiLeafField("date");
+
+  final nameOfTheHoliday = StrapiLeafField("nameOfTheHoliday");
+
+  String call() {
+    return "{date,nameOfTheHoliday}";
+  }
+}
+
+class _HolidayEmptyFields {
+  bool date = false;
+
+  bool nameOfTheHoliday = false;
 }
 
 class Coordinates {

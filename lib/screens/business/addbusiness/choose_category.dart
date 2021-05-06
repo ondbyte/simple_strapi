@@ -25,6 +25,7 @@ class ChooseYourBusinessCategoryScreen extends StatefulWidget {
 
 class _ChooseYourBusinessCategoryScreenState
     extends State<ChooseYourBusinessCategoryScreen> {
+  ValueKey getAllCategoriesKey = ValueKey(DateTime.now());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,7 +38,9 @@ class _ChooseYourBusinessCategoryScreenState
                   ? Padding(
                       padding: EdgeInsets.all(16),
                       child: FutureBuilder<List<BusinessCategory>>(
-                        future: CategoryX.i.getAllCategories(),
+                        future: CategoryX.i.getAllCategories(
+                          key: getAllCategoriesKey,
+                        ),
                         builder: (_, snap) {
                           return Builder(
                             builder: (_) {

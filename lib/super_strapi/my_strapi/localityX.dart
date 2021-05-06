@@ -4,6 +4,7 @@ import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x.dart';
 import 'package:device_info/device_info.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:simple_strapi/simple_strapi.dart'
     hide DefaultData, Locality, City, Country;
@@ -14,21 +15,20 @@ class LocalityX extends X {
 
   LocalityX._x();
 
-  Future<List<Country>> getCountries({bool force = false}) async {
+  Future<List<Country>> getCountries(
+      {Key key = const ValueKey("getCountries")}) async {
     return memoize(
-      "getCountries",
+      key,
       () async {
         final countries = await Countries.findMultiple();
         return countries;
       },
-      force: force,
     );
   }
 
-  Future<List<City>> getCitiesOfCountry(Country country,
-      {bool force = false}) async {
+  Future<List<City>> getCitiesOfCountry(Country country, {Key? key}) async {
     return memoize(
-      "getCitiesOfCountry",
+      key ?? ValueKey("getCitiesOfCountry"),
       () async {
         final query = StrapiCollectionQuery(
           collectionName: City.collectionName,
@@ -56,14 +56,13 @@ class LocalityX extends X {
             Cities.executeQuery(query); //await Cities.getForListOfIDs(ids);
         return cities;
       },
-      force: force,
     );
   }
 
   Future<Country?> getCountryFor(
-      {Locality? locality, City? city, bool force = false}) async {
+      {Locality? locality, City? city, Key? key}) async {
     return memoize(
-      "getCountryFor",
+      key ?? ValueKey("getCountryFor"),
       () async {
         final targetCity = city ?? locality?.city;
         final query = StrapiCollectionQuery(
@@ -86,7 +85,6 @@ class LocalityX extends X {
           return all.first;
         }
       },
-      force: force,
     );
   }
 

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:bapp/super_strapi/my_strapi/x.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:simple_strapi/simple_strapi.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
@@ -13,9 +14,9 @@ class ReviewX extends X {
   Future init() async {}
 
   Future<List<Review>> getReviewsForBusiness(Business business,
-      {bool force = false, Rx? observe}) async {
+      {Key key = const ValueKey("getReviewsForBusiness"), Rx? observe}) async {
     return memoize(
-      "method",
+      key,
       () async {
         final q = StrapiCollectionQuery(
           collectionName: Review.collectionName,
@@ -45,7 +46,6 @@ class ReviewX extends X {
         final reviews = await Reviews.executeQuery(q);
         return reviews;
       },
-      force: force,
       runWhenChanged: observe,
     );
   }

@@ -12,6 +12,7 @@ class UserX {
   UserX._x();
 
   final user = Rx<User?>(null);
+  StrapiObjectListener? _userListener;
   bool get userPresent => user.value != null;
   bool get userNotPresent => !userPresent;
 
@@ -21,7 +22,7 @@ class UserX {
       return null;
     }
     Strapi.i.strapiToken = token;
-    user(await Users.me());
+    user(await Users.me(asFindOne: true));
     return user.value;
   }
 
@@ -41,19 +42,42 @@ class UserX {
         name: name,
       );
       if (response.failed) {
-        print("user failed");
-        print(response);
-        return null;
+        throw StrapiResponseException(
+          "unable to authenticateWithFirebaseUid",
+          response,
+        );
       }
-      user(User.fromMap(response.body.first));
+      final me = await Users.me(asFindOne: true);
+      user(me);
       final token = Strapi.i.strapiToken;
       if (token.isNotEmpty) {
         DefaultDataX.i.saveValue("token", "$token");
       }
+      _listenForUserObject();
       return user.value;
+    } on StrapiResponseException catch (_) {
+      print("Unable to Authenticate with firebase for strapi");
+      await FirebaseX.i.logOut();
     } on StrapiException catch (_) {
       print("user logout");
       await FirebaseX.i.logOut();
+    }
+  }
+
+  void _listenForUserObject() {
+    final id = user.value?.id;
+    final data = user.value?.toMap();
+    if (_userListener is! StrapiObjectListener && id is String && data is Map) {
+      _userListener = StrapiObjectListener(
+        id: id,
+        initailData: data as Map<String, dynamic>,
+        listener: (map, loading) {
+          final newUser = User.fromSyncedMap(map);
+          if (newUser is User) {
+            user(newUser);
+          }
+        },
+      );
     }
   }
 

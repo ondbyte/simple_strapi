@@ -33,9 +33,8 @@ class DefaultDataX extends X {
     Hive.init(path);
     _hiveBox = await Hive.openLazyBox("default_data");
 
-    defaultData.value = await () async {
-      return (await getDefaultDataFromServer());
-    }();
+    defaultData.value = await getDefaultDataFromServer();
+
     if ((defaultData()?.synced ?? false)) {
       _hiveBox?.put(DefaultDataKeys.defaultdata, defaultData()?.toMap() ?? {});
     }
@@ -58,10 +57,12 @@ class DefaultDataX extends X {
 
   StrapiObjectListener _listenForUpdate() {
     final id = defaultData.value?.id;
-    if (id is String) {
+    final data = defaultData.value?.toMap();
+    if (id is String && data is Map) {
       return StrapiObjectListener(
         id: id,
-        listener: (map) {
+        initailData: data as Map<String, dynamic>,
+        listener: (map, losding) {
           final newDefaultData = DefaultData.fromSyncedMap(map);
           _hiveBox?.put(DefaultDataKeys.defaultdata, newDefaultData.toMap());
           defaultData(newDefaultData);
@@ -79,37 +80,21 @@ class DefaultDataX extends X {
         : (Platform.isAndroid
             ? (await info.androidInfo).androidId
             : (await info.iosInfo).identifierForVendor);
-    final query = StrapiCollectionQuery(
-      collectionName: DefaultDatas.collectionName,
-      limit: 1,
-      requiredFields: DefaultData.fields(),
-    )
-      ..whereField(
-        field: DefaultData.fields.deviceId,
-        query: StrapiFieldQuery.equalTo,
-        value: "$id",
-      )
-      ..whereModelField(
-        field: DefaultData.fields.city,
-        query: StrapiModelQuery(
-          requiredFields: City.fields(),
-        ),
-      )
-      ..whereModelField(
-        field: DefaultData.fields.locality,
-        query: StrapiModelQuery(
-          requiredFields: Locality.fields(),
-        ),
-      );
 
-    final response = await DefaultDatas.executeQuery(query);
+    final response = await StrapiCollection.customEndpoint(
+        collection: DefaultData.collectionName,
+        endPoint: "customCreate",
+        method: "POST",
+        params: {
+          "customId": "$id",
+        });
     if (response.isNotEmpty) {
-      return response.first;
-    } else {
-      return DefaultDatas.create(
-        DefaultData.fresh(deviceId: id),
-      );
+      final map = response[0];
+      return DefaultData.fromSyncedMap(map);
     }
+    throw BappImpossibleException(
+      "this api should create or give already existing collection object, no other chances",
+    );
   }
 
   Future setLocalityOrCity({Locality? locality, City? city}) async {

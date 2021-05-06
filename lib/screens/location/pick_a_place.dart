@@ -7,31 +7,48 @@ import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
 import 'package:bapp/super_strapi/my_strapi/localityX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x_helpers.dart';
+import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
 import 'package:bapp/widgets/loading.dart';
+import 'package:bapp/widgets/tiles/error.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
-class PickAPlaceScreen extends StatelessWidget {
+class PickAPlaceScreen extends StatefulWidget {
   final Country? country;
   const PickAPlaceScreen({this.country, Key? key}) : super(key: key);
 
   @override
+  _PickAPlaceScreenState createState() => _PickAPlaceScreenState();
+}
+
+class _PickAPlaceScreenState extends State<PickAPlaceScreen> {
+  ValueKey getCountriesKey = ValueKey(DateTime.now());
+
+  @override
   Widget build(BuildContext context) {
-    if (country == null) {
+    if (widget.country == null) {
       return _showCountries(context);
     }
-    if (country != null) {
+    if (widget.country != null) {
       return _showLocations(context);
     }
     throw FlutterError("only countries and location screen supported");
   }
 
   Widget _showCountries(BuildContext context) {
-    return FutureBuilder<List<Country>>(
-      future: LocalityX.i.getCountries(),
-      builder: (_, snap) {
-        final data = snap.data ?? [];
+    return TapToReFetch<List<Country>>(
+      fetcher: () {
+        return LocalityX.i.getCountries();
+      },
+      onLoadBuilder: (_) {
+        return LoadingWidget();
+      },
+      onErrorBuilder: (_, e, s) {
+        return ErrorTile(message: "tap to refresh");
+      },
+      onSucessBuilder: (_, countries) {
+        final data = countries ?? [];
         return Scaffold(
           appBar: AppBar(
             automaticallyImplyLeading: true,
@@ -40,27 +57,25 @@ class PickAPlaceScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.headline1,
             ),
           ),
-          body: snap.connectionState == ConnectionState.done
-              ? ListView(
-                  children: <Widget>[
-                    ...data.map(
-                      (e) => ListTile(
-                        title: Text(e.name ?? "no name inform yadu"),
-                        trailing: Icon(Icons.arrow_forward_ios),
-                        onTap: () async {
-                          //cloudStore.getLocationsInCountry(e);
-                          BappNavigator.push(
-                            context,
-                            PickAPlaceScreen(
-                              country: e,
-                            ),
-                          );
-                        },
+          body: ListView(
+            children: <Widget>[
+              ...data.map(
+                (e) => ListTile(
+                  title: Text(e.name ?? "no name inform yadu"),
+                  trailing: Icon(Icons.arrow_forward_ios),
+                  onTap: () async {
+                    //cloudStore.getLocationsInCountry(e);
+                    BappNavigator.push(
+                      context,
+                      PickAPlaceScreen(
+                        country: e,
                       ),
-                    ),
-                  ],
-                )
-              : LoadingWidget(),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         );
       },
     );
@@ -77,7 +92,7 @@ class PickAPlaceScreen extends StatelessWidget {
       ),
       body: FutureBuilder<List<City>>(
         future: runNullAware<List<City>>(
-          country,
+          widget.country,
           (c) => LocalityX.i.getCitiesOfCountry(c),
           ifNull: [],
         ),

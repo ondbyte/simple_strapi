@@ -1,43 +1,43 @@
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 extension Formats on StrapiFile {
-  StrapiFileFormats? get thumbNail {
+  StrapiFileFormat? get thumbNail {
     final thumbnailData = formats?["thumbnail"];
     if (thumbnailData != null) {
-      return StrapiFileFormats.fromMap(thumbnailData);
+      return StrapiFileFormat.fromMap(thumbnailData);
     }
   }
 
-  StrapiFileFormats? get large {
+  StrapiFileFormat? get large {
     final thumbnailData = formats?["large"];
     if (thumbnailData != null) {
-      return StrapiFileFormats.fromMap(thumbnailData);
+      return StrapiFileFormat.fromMap(thumbnailData);
     }
   }
 
-  StrapiFileFormats? get medium {
+  StrapiFileFormat? get medium {
     final thumbnailData = formats?["medium"];
     if (thumbnailData != null) {
-      return StrapiFileFormats.fromMap(thumbnailData);
+      return StrapiFileFormat.fromMap(thumbnailData);
     }
   }
 
-  StrapiFileFormats? get small {
+  StrapiFileFormat? get small {
     final thumbnailData = formats?["small"];
     if (thumbnailData != null) {
-      return StrapiFileFormats.fromMap(thumbnailData);
+      return StrapiFileFormat.fromMap(thumbnailData);
     }
   }
 }
 
-class StrapiFileFormats {
+class StrapiFileFormat {
   final int width;
   final int height;
   final int size;
   final String url;
   final String mime;
 
-  StrapiFileFormats({
+  StrapiFileFormat({
     required this.width,
     required this.height,
     required this.size,
@@ -45,7 +45,7 @@ class StrapiFileFormats {
     required this.mime,
   });
 
-  static StrapiFileFormats? fromMap(Map<String, dynamic> map) {
+  static StrapiFileFormat? fromMap(Map<String, dynamic> map) {
     final width = map["width"];
     final height = map["height"];
     final size = map["size"];
@@ -56,7 +56,7 @@ class StrapiFileFormats {
         size is int &&
         url is String &&
         mime is String) {
-      return StrapiFileFormats(
+      return StrapiFileFormat(
         width: width,
         height: height,
         size: size,

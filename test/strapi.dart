@@ -5,15 +5,6 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-import 'package:bapp/helpers/helper.dart';
-import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
-import 'package:bapp/super_strapi/my_strapi/init.dart';
-import 'package:bapp/super_strapi/my_strapi/localityX.dart';
-import 'package:bapp/super_strapi/my_strapi/userX.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:simple_strapi/simple_strapi.dart';
-import 'package:super_strapi_generated/super_strapi_generated.dart';
-
 Future<void> main() async {
   /*test("countries", () async {
     final i = StrapiSettings.i;

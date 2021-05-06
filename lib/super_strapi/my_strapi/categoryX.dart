@@ -1,4 +1,5 @@
 import 'package:bapp/super_strapi/my_strapi/x.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
@@ -7,20 +8,13 @@ class CategoryX extends X {
 
   CategoryX._i();
 
-  Future<List<BusinessCategory>> init() async {
-    final all = await getAllCategories();
-    return all;
-  }
-
   Future<List<BusinessCategory>> getAllCategories(
-      {bool force = false, Rx? observe}) async {
+      {Key? key, Rx? observe}) async {
     return memoize(
-      "getAllCategories",
+      key ?? ValueKey("getAllCategories"),
       () async {
-        final all = await BusinessCategories.findMultiple();
-        return all;
+        return await BusinessCategories.findMultiple();
       },
-      force: force,
       runWhenChanged: observe,
     );
   }

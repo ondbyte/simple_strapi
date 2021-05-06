@@ -13,6 +13,7 @@ import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
 import 'package:bapp/widgets/buttons.dart';
 import 'package:bapp/widgets/failed_strapi_response.dart';
 import 'package:bapp/widgets/loading.dart';
+import 'package:bapp/widgets/tiles/error.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/gestures.dart';
@@ -55,20 +56,21 @@ class _LoginScreenState extends State<LoginScreen> {
           },
         ),
       ),
-      body: RetriableFutureBuilder<Country?>(
-        futureCaller: (retry) {
+      body: TapToReFetch<Country?>(
+        fetcher: () {
           return LocalityX.i.getCountryFor(
             city: UserX.i.user()?.city ?? DefaultDataX.i.defaultData()?.city,
             locality: UserX.i.user()?.locality ??
                 DefaultDataX.i.defaultData()?.locality,
-            force: retry,
           );
         },
-        builder: (_, snap) {
-          if (snap.connectionState != ConnectionState.done) {
-            return LoadingWidget();
-          }
-          final country = snap.data;
+        onLoadBuilder: (_) {
+          return LoadingWidget();
+        },
+        onErrorBuilder: (_, e, s) {
+          return ErrorTile(message: "Some error occured tap to refresh");
+        },
+        onSucessBuilder: (_, country) {
           if (country is! Country) {
             return FailedStrapiResponse(message: "Unable to get country");
           }

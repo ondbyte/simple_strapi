@@ -4,6 +4,7 @@ import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/widgets/buttons.dart';
+import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/loading_stack.dart';
 import 'package:bapp/widgets/tiles/add_image_sliver.dart';
 import 'package:flutter/material.dart';
@@ -288,11 +289,40 @@ class BottomPrimaryButton extends StatefulWidget {
     this.subTitle,
     this.padding,
   }) : super(key: key);
+
+  static load(
+    BuildContext context,
+  ) {
+    final state = context.findAncestorStateOfType<_BottomPrimaryButtonState>();
+    state?.load();
+  }
+
+  static stopLoading(
+    BuildContext context,
+  ) {
+    final state = context.findAncestorStateOfType<_BottomPrimaryButtonState>();
+    state?.stopLoading();
+  }
+
   @override
   _BottomPrimaryButtonState createState() => _BottomPrimaryButtonState();
 }
 
 class _BottomPrimaryButtonState extends State<BottomPrimaryButton> {
+  var _loading = false;
+
+  void load() {
+    setState(() {
+      _loading = true;
+    });
+  }
+
+  void stopLoading() {
+    setState(() {
+      _loading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     assert((widget.title != null && widget.subTitle != null ||
@@ -327,10 +357,12 @@ class _BottomPrimaryButtonState extends State<BottomPrimaryButton> {
                           : SizedBox(),
                     ),
                   (widget.label is String)
-                      ? PrimaryButton(
-                          widget.label as String,
-                          onPressed: widget.onPressed,
-                        )
+                      ? _loading
+                          ? LoadingWidget()
+                          : PrimaryButton(
+                              widget.label as String,
+                              onPressed: widget.onPressed,
+                            )
                       : SizedBox(),
                   SizedBox(height: 30)
                 ],

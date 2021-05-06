@@ -9,8 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  simple_strapi: 
-    path: ../simple_strapi
+  simple_strapi:
+    git:
+      url: https://github.com/ondbyte/simple_strapi.git
 dev_dependencies:
   flutter_test:
     sdk: flutter

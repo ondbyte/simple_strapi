@@ -34,7 +34,7 @@ class BusinessTileBigWidget extends StatelessWidget {
                     Partners.listenerWidget(
                       strapiObject: business.partner as Partner,
                       sync: true,
-                      builder: (_, partner) {
+                      builder: (_, partner, loading) {
                         final files = partner.logo ?? [];
                         final logo = files.isNotEmpty ? files.first : null;
                         return StrapiImage(file: logo);

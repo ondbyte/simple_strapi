@@ -8,7 +8,7 @@ import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BusinessProfileAboutTab extends StatelessWidget {
   final Business business;
-  BusinessProfileAboutTab({required this.business});
+  BusinessProfileAboutTab({Key? key, required this.business}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     final latlong = business.address?.coordinates;

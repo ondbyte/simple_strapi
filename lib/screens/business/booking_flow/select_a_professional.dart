@@ -1,23 +1,30 @@
-import 'package:bapp/classes/filtered_business_staff.dart';
-import 'package:bapp/classes/firebase_structures/business_timings.dart';
-import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/booking_flow/select_time_slot.dart';
-import 'package:bapp/stores/booking_flow.dart';
+import 'package:bapp/super_strapi/my_strapi/businessX.dart';
+import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
 import 'package:bapp/widgets/firebase_image.dart';
+import 'package:bapp/widgets/loading.dart';
+import 'package:bapp/widgets/tiles/employee_tile.dart';
+import 'package:bapp/widgets/tiles/error.dart';
 import 'package:bapp/widgets/tiles/rr_list_tile.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:provider/provider.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class SelectAProfessionalScreen extends StatefulWidget {
-  final Function(dynamic)? onSelected;
-
-  const SelectAProfessionalScreen({Key? key, required this.onSelected})
-      : super(key: key);
+  final String? title;
+  final String? subTitle;
+  final Business business;
+  final DateTime forDay;
+  const SelectAProfessionalScreen({
+    Key? key,
+    required this.business,
+    required this.forDay,
+    this.title,
+    this.subTitle,
+  }) : super(key: key);
   @override
   _SelectAProfessionalScreenState createState() =>
       _SelectAProfessionalScreenState();
@@ -25,14 +32,8 @@ class SelectAProfessionalScreen extends StatefulWidget {
 
 class _SelectAProfessionalScreenState extends State<SelectAProfessionalScreen> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return SizedBox();
-    /* return Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: const Text("Select A Professional"),
         automaticallyImplyLeading: true,
@@ -43,13 +44,17 @@ class _SelectAProfessionalScreenState extends State<SelectAProfessionalScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                if (flow.services.isNotEmpty)
+                if (true)
                   RRShape(
-                    child: ListTile(
-                      tileColor: Theme.of(context).backgroundColor,
-                      title: Text(flow.selectedTitle.value),
-                      subtitle: Text(flow.selectedSubTitle.value),
-                    ),
+                    child: widget.title is String
+                        ? ListTile(
+                            tileColor: Theme.of(context).backgroundColor,
+                            title: Text(widget.title!),
+                            subtitle: widget.subTitle is String
+                                ? Text(widget.subTitle!)
+                                : null,
+                          )
+                        : null,
                   ),
                 const SizedBox(
                   height: 20,
@@ -61,65 +66,62 @@ class _SelectAProfessionalScreenState extends State<SelectAProfessionalScreen> {
         ],
       ),
     );
-   */
   }
 
-/*   Widget _getProffessionalsTiles() {
-    return Observer(builder: (_) {
-      final list = <Widget>[];
-      flow.filteredStaffs.forEach(
-        (s) {
-          list.add(
-            ListTile(
-              onTap: widget.onSelected != null
-                  ? () {
-                      widget.onSelected(s);
-                      BappNavigator.pop(context, null);
-                    }
-                  : () {
-                      act(() {
-                        flow.professional.value = s;
-                      });
-                      BappNavigator.push(context, SelectTimeSlotScreen());
-                    },
-              contentPadding: EdgeInsets.symmetric(vertical: 8),
-              title: Text(s.staff.name),
-              trailing: Icon(Icons.arrow_forward_rounded),
-              leading: ListTileFirebaseImage(
-                ifEmpty: Initial(
-                  forName: s.staff.name,
-                ),
-                storagePathOrURL: s.staff.images.isNotEmpty
-                    ? s.staff.images.keys.elementAt(0)
-                    : null,
-              ),
-              subtitle: RatingBar.builder(
-                itemSize: 16,
-                itemBuilder: (_, __) {
-                  return Icon(
-                    FeatherIcons.star,
-                    color: Colors.amber,
-                  );
-                },
-                allowHalfRating: true,
-                ignoreGestures: true,
-                initialRating: s.staff.rating,
-                maxRating: 5,
-                onRatingUpdate: (_) {},
-              ),
+  Widget _getProffessionalsTiles() {
+    return TapToReFetch<Map<String, List<Employee>>?>(
+        fetcher: () => BusinessX.i.availableEmployees(
+              widget.business,
+              widget.forDay,
             ),
-          );
+        onLoadBuilder: (_) => LoadingWidget(),
+        onErrorBuilder: (_, e, s) {
+          bPrint(e);
+          bPrint(s);
+          return ErrorTile(message: "$e");
         },
-      );
-      if (flow.filteredStaffs.isEmpty) {
-        return SizedBox();
-      }
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        children: list,
-      );
-    });
-  }
+        onSucessBuilder: (_, employeesMap) {
+          if (employeesMap is! Map) {
+            return ErrorTile(message: "No employees available");
+          }
+          final availableEmplyeesWidget = <Widget>[];
+          final unAvailableEmplyeesWidget = <Widget>[];
 
-  BookingFlow get flow => Provider.of<BookingFlow>(context, listen: false); */
+          final availableEmplyees = employeesMap?["availableEmployees"] ?? [];
+          final unAvailableEmplyees =
+              employeesMap?["unAvailableEmployees"] ?? [];
+          if (availableEmplyees is List) {
+            if (availableEmplyees.isEmpty) {
+              availableEmplyeesWidget.add(Text("No proffesional available"));
+            }
+            availableEmplyeesWidget.addAll(
+              List.generate(
+                availableEmplyees.length,
+                (index) => EmployeeTile(
+                  employee: availableEmplyees[index],
+                  enabled: true,
+                ),
+              ),
+            );
+          }
+          if (unAvailableEmplyees is List) {
+            unAvailableEmplyeesWidget.addAll(
+              List.generate(
+                unAvailableEmplyees.length,
+                (index) => EmployeeTile(
+                  employee: unAvailableEmplyees[index],
+                  enabled: false,
+                ),
+              ),
+            );
+          }
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ...availableEmplyeesWidget,
+              ...unAvailableEmplyeesWidget,
+            ],
+          );
+        });
+  }
 }

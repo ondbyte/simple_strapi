@@ -60,13 +60,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  inflection2:
-    dependency: transitive
-    description:
-      name: inflection2
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.4.3"
   matcher:
     dependency: transitive
     description:
@@ -91,10 +84,12 @@ packages:
   simple_strapi:
     dependency: "direct main"
     description:
-      path: "../simple_strapi"
-      relative: true
-    source: path
-    version: "0.0.0"
+      path: "."
+      ref: HEAD
+      resolved-ref: "53c8a56976b953f9335703872deecfe0a41b26fe"
+      url: "https://github.com/ondbyte/simple_strapi.git"
+    source: git
+    version: "0.9.1-alpha+2"
   sky_engine:
     dependency: transitive
     description: flutter

@@ -16,9 +16,11 @@ import 'package:bapp/super_strapi/my_strapi/localityX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x_helpers.dart';
 import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
+import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/search_bar.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:bapp/widgets/tiles/complete_your_booking_tile.dart';
+import 'package:bapp/widgets/tiles/error.dart';
 import 'package:bapp/widgets/tiles/rr_list_tile.dart';
 import 'package:bapp/widgets/tiles/see_all_tile.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -32,9 +34,13 @@ class DiscoverTab extends StatefulWidget {
 }
 
 class _DiscoverTabState extends State<DiscoverTab> {
+  var getAllCategoriesKey = ValueKey(DateTime.now());
+
   @override
   Widget build(BuildContext context) {
-    return Builder(
+    return RefreshIndicator(onRefresh: () async {
+      getAllCategoriesKey = ValueKey(DateTime.now());
+    }, child: Builder(
       builder: (
         _,
       ) {
@@ -144,21 +150,33 @@ class _DiscoverTabState extends State<DiscoverTab> {
           );
         });
       },
-    );
+    ));
   }
 
+  var nearestFeaturedKey = ValueKey(DateTime.now());
   Widget _getNearestFeatured(BuildContext context) {
     return Builder(
       builder: (_) {
-        return RetriableFutureBuilder<List<Business>>(
-          futureCaller: (force) => BusinessX.i.getNearestBusinesses(
-            force: force,
+        return TapToReFetch<List<Business>>(
+          fetcher: () {
+            return BusinessX.i.getNearestBusinesses(
+              key: nearestFeaturedKey,
+            );
+          },
+          onTap: () => nearestFeaturedKey = ValueKey(
+            DateTime.now(),
           ),
-          builder: (_, snap) {
-            final data = snap.data ?? [];
+          onErrorBuilder: (_, e, s) {
+            return ErrorTile(message: "some error occured, tap to refresh");
+          },
+          onLoadBuilder: (_) {
+            return LoadingWidget();
+          },
+          onSucessBuilder: (_, businesses) {
+            final data = businesses ?? [];
             return LayoutBuilder(
               builder: (_, cons) {
-                if (snap.hasData && data.isNotEmpty) {
+                if (data.isNotEmpty) {
                   return SeeAllListTile(
                     seeAllLabel: "See all",
                     title: "Featured on Bapp",
@@ -225,7 +243,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
 
   Widget _getSearchBar() {
     return FutureBuilder<List<BusinessCategory>>(
-      future: CategoryX.i.getAllCategories(),
+      future: CategoryX.i.getAllCategories(key: getAllCategoriesKey),
       builder: (_, snap) {
         final data = snap.data ?? [];
         return Builder(
@@ -293,6 +311,29 @@ class _DiscoverTabState extends State<DiscoverTab> {
           ),
           ...HomeScreenFeaturedConfig.slides.map(
             (e) => GestureDetector(
+              onTap: () {
+                BappNavigator.push(
+                  context,
+                  BranchesResultScreen(
+                    categoryImage: "",
+                    categoryName: "",
+                    placeName: UserX.i.userNotPresent
+                        ? placeName(
+                              city: DefaultDataX.i.defaultData()?.city,
+                              locality: DefaultDataX.i.defaultData()?.locality,
+                            ) ??
+                            "no place, inform yadu"
+                        : placeName(
+                              city: UserX.i.user()?.city,
+                              locality: UserX.i.user()?.locality,
+                            ) ??
+                            "no place, inform yadu",
+                    title: e.title.split("\n").join(""),
+                    subTitle: "",
+                    futureBranchList: Future.value(<Business>[]),
+                  ),
+                );
+              },
               child: Container(
                 height: 125,
                 width: 142,
@@ -320,29 +361,6 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   ],
                 ),
               ),
-              onTap: () {
-                BappNavigator.push(
-                  context,
-                  BranchesResultScreen(
-                    categoryImage: "",
-                    categoryName: "",
-                    placeName: UserX.i.userNotPresent
-                        ? placeName(
-                              city: DefaultDataX.i.defaultData()?.city,
-                              locality: DefaultDataX.i.defaultData()?.locality,
-                            ) ??
-                            "no place, inform yadu"
-                        : placeName(
-                              city: UserX.i.user()?.city,
-                              locality: UserX.i.user()?.locality,
-                            ) ??
-                            "no place, inform yadu",
-                    title: e.title.split("\n").join(""),
-                    subTitle: "",
-                    futureBranchList: Future.value(<Business>[]),
-                  ),
-                );
-              },
             ),
           )
         ],
@@ -357,7 +375,9 @@ class _DiscoverTabState extends State<DiscoverTab> {
       ),
       scrollDirection: Axis.horizontal,
       child: FutureBuilder<List<BusinessCategory>>(
-        future: CategoryX.i.getAllCategories(),
+        future: CategoryX.i.getAllCategories(
+          key: getAllCategoriesKey,
+        ),
         builder: (_, snap) {
           final data = snap.data ?? [];
           return Builder(

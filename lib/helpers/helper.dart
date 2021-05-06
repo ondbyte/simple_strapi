@@ -15,9 +15,11 @@ import 'package:flutter/material.dart' hide Action;
 import 'package:geocoder/geocoder.dart' as g;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image/image.dart';
+import 'package:intl/intl.dart';
 import 'package:mobx/mobx.dart' show Action;
 import 'package:provider/provider.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
+import 'package:bapp/helpers/extensions.dart';
 
 class Helper {
   static stringifyAddresse(g.Address adr) {
@@ -29,7 +31,7 @@ class Helper {
   static Future<bool> isTablet() async {
     if (Platform.isIOS) {
       final deviceInfo = DeviceInfoPlugin();
-      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+      var iosInfo = await deviceInfo.iosInfo;
 
       return iosInfo.model.toLowerCase() == "ipad";
     } else {
@@ -244,4 +246,65 @@ class BappImpossibleException implements Exception {
   final String message;
 
   BappImpossibleException(this.message);
+}
+
+class DateFormatters {
+  static final dayName = DateFormat.EEEE();
+}
+
+String getNProductsSelectedString(List<Product> products) {
+  return "${products.length} products selected";
+}
+
+String getProductsDurationString(List<Product> products) {
+  final duration =
+      products.fold<int>(0, (pv, product) => pv + (product.duration ?? 0));
+  return "total duration of $duration minutes";
+}
+
+List<Timing> divideTimingIntoChunksOfDuration(Timing timing,
+    {Duration duration = const Duration(minutes: 5)}) {
+  final returnable = <Timing>[];
+  var start = timing.from, end = timing.from?.add(duration), max = timing.to;
+  while (max is DateTime &&
+      start is DateTime &&
+      end is DateTime &&
+      end.isBefore(max)) {
+    returnable.add(
+      Timing(from: start, to: end),
+    );
+  }
+  return returnable;
+}
+
+Map<String, List<Timing>> sortTimingsForPeriodOfTheDay(List<Timing> timings) {
+  final morning = <Timing>[];
+  final afterNoon = <Timing>[];
+  final evening = <Timing>[];
+
+  final compare = (DateTime date) {
+    final now = date.toTimeOfDay();
+    if (now.isAM()) {
+      return 0;
+    }
+    if (now.hour < 3 && now.minute <= 59) {
+      return 1;
+    }
+    return 2;
+  };
+  timings.forEach((timing) {
+    final compared = compare(timing.from!);
+    if (compared == 1) {
+      morning.add(timing);
+    } else if (compared == 2) {
+      afterNoon.add(timing);
+    } else {
+      evening.add(timing);
+    }
+  });
+  return {
+    "morning": morning,
+    "afterNoon": afterNoon,
+    "evening": evening,
+  };
 }

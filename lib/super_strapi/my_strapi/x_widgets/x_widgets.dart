@@ -1,150 +1,118 @@
+import 'package:bapp/config/constants.dart';
+import 'package:bapp/super_strapi/my_strapi/x_extensions/strapi_file.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
-class XFutureBuilder<T> extends StatefulWidget {
-  final Future<T> Function(bool) futureCaller;
-  final Function(BuildContext, AsyncSnapshot) builder;
-  final List<Rx>? observeList;
-  final Rx? observe;
-  XFutureBuilder({
+class TapToReFetch<T> extends StatefulWidget {
+  final Future<T> Function() fetcher;
+  final Function()? onTap;
+  final Function(BuildContext, T?) onSucessBuilder;
+  final Function(BuildContext, Object?, StackTrace?) onErrorBuilder;
+  final Function(BuildContext) onLoadBuilder;
+
+  TapToReFetch({
     Key? key,
-    required this.futureCaller,
-    required this.builder,
-    this.observeList,
-    this.observe,
+    required this.fetcher,
+    this.onTap,
+    required this.onSucessBuilder,
+    required this.onErrorBuilder,
+    required this.onLoadBuilder,
   }) : super(key: key);
 
   @override
-  _XFutureBuilderState<T> createState() => _XFutureBuilderState<T>();
+  _TapToReFetchState<T> createState() => _TapToReFetchState<T>();
 }
 
-class _XFutureBuilderState<T> extends State<XFutureBuilder<T>> {
-  var _force = false;
-  @override
-  void initState() {
-    super.initState();
-    final observeList = widget.observeList;
-    if (observeList is List<Rx>) {
-      everAll(observeList, (_) {
-        setState(() {
-          _force = true;
-        });
-      });
-    }
-    final observe = widget.observe;
-    if (observe is Rx) {
-      ever(observe, (_) {
-        setState(() {
-          _force = true;
-        });
-      });
-    }
-  }
-
+class _TapToReFetchState<T> extends State<TapToReFetch<T>> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<T>(
-      future: () {
-        _force = false;
-        return widget.futureCaller(_force);
-      }(),
+      key: ValueKey("xfbldr"),
+      future: widget.fetcher(),
       builder: (context, snap) {
-        return widget.builder(context, snap);
+        if (snap.connectionState == ConnectionState.done) {
+          if (snap.hasError) {
+            return GestureDetector(
+              key: ValueKey("xfbldrgd"),
+              onTap: () {
+                setState(() {
+                  widget.onTap?.call();
+                });
+              },
+              child: widget.onErrorBuilder(
+                context,
+                snap.error,
+                snap.stackTrace,
+              ),
+            );
+          } else {
+            return widget.onSucessBuilder(context, snap.data);
+          }
+        } else {
+          return widget.onLoadBuilder(context);
+        }
       },
     );
   }
 }
 
-class RetriableFutureBuilder<T> extends StatefulWidget {
-  final Future<T> Function(bool) futureCaller;
-  final String retryMessage;
-  final Function(BuildContext, AsyncSnapshot<T>) builder;
-  RetriableFutureBuilder({
-    Key? key,
-    required this.futureCaller,
-    required this.builder,
-    this.retryMessage = "Unable to reach, tap to retry",
-  }) : super(key: key);
+class StrapiImageWidget extends StatefulWidget {
+  final Widget? placeHolder;
+  final StrapiFile? file;
+  final StrapiFileFormat? format;
+  StrapiImageWidget(
+      {Key? key, required this.file, this.placeHolder, this.format})
+      : super(key: key);
 
   @override
-  _RetriableFutureBuilderState createState() =>
-      _RetriableFutureBuilderState<T>();
+  _StrapiImageWidgetState createState() => _StrapiImageWidgetState();
 }
 
-class _RetriableFutureBuilderState<T> extends State<RetriableFutureBuilder<T>> {
-  AsyncSnapshot<T> _snapShot = AsyncSnapshot.waiting();
-  var _retry = false;
-
+class _StrapiImageWidgetState extends State<StrapiImageWidget> {
+  String? url;
   @override
   void initState() {
+    url = widget.format?.url ?? widget.file?.url;
     super.initState();
-    _try(false);
-  }
-
-  void _try(bool tryy) async {
-    try {
-      final answer = await widget.futureCaller(tryy);
-      setState(() {
-        if (answer is T) {
-          _snapShot = AsyncSnapshot.withData(
-            ConnectionState.done,
-            answer,
-          );
-        } else {
-          _retry = true;
-        }
-      });
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _retry = true;
-        });
-      }
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return _retry
-        ? RetryWidget(
-            message: widget.retryMessage,
-            onRetry: () {
-              _try(true);
-            },
-          )
-        : widget.builder(
-            context,
-            _snapShot,
-          );
+    if (url is! String) {
+      return widget.placeHolder ?? SizedBox();
+    }
+    return CachedNetworkImage(
+      imageUrl: url,
+      placeholder: widget.placeHolder is Widget
+          ? (_, __) {
+              return widget.placeHolder ?? SizedBox();
+            }
+          : null,
+    );
   }
 }
 
-class RetryWidget extends StatelessWidget {
-  final String message;
-  final Function() onRetry;
-
-  const RetryWidget({
-    Key? key,
-    required this.message,
-    required this.onRetry,
-  }) : super(key: key);
+class StrapiListTileImageWidget extends StatefulWidget {
+  final StrapiFile? file;
+  final Widget? placeHolder;
+  StrapiListTileImageWidget({Key? key, required this.file, this.placeHolder})
+      : super(key: key);
 
   @override
+  _StrapiListTileImageWidgetState createState() =>
+      _StrapiListTileImageWidgetState();
+}
+
+class _StrapiListTileImageWidgetState extends State<StrapiListTileImageWidget> {
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onRetry,
-      child: Container(
-        color: Colors.red.shade100,
-        padding: EdgeInsets.all(16),
-        margin: EdgeInsets.all(16),
-        child: Text(
-          message,
-          style: TextStyle(
-            color: Colors.redAccent,
-          ),
-        ),
-      ),
+    return StrapiImageWidget(
+      file: widget.file,
+      format: widget.file?.thumbNail,
+      placeHolder: widget.placeHolder,
     );
   }
 }

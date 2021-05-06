@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x.dart';
+import 'package:flutter/foundation.dart';
 import 'package:get/state_manager.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
@@ -14,20 +15,21 @@ class PartnerX extends X {
   Future<Partner?> init() async {
     ever(UserX.i.user, (user) async {
       if (user != null) {
-        final p = await _getPartnerFromServer(true);
+        final p = await _getPartnerFromServer(key: ValueKey("1"));
         partner(p);
       } else {
         partner(null);
       }
     });
-    final p = await _getPartnerFromServer(true);
+    final p = await _getPartnerFromServer(key: ValueKey("12"));
     partner(p);
     return partner.value;
   }
 
-  Future<Partner?> _getPartnerFromServer(bool force) async {
+  Future<Partner?> _getPartnerFromServer(
+      {Key key = const ValueKey("_getPartnerFromServer")}) async {
     return memoize<Partner?>(
-      "_getPartnerFromServer",
+      key,
       () async {
         if (UserX.i.userPresent && UserX.i.user()?.partner != null) {
           final id = UserX.i.user()?.partner?.id ?? "";
@@ -37,7 +39,6 @@ class PartnerX extends X {
         }
         return null;
       },
-      force: force,
     );
   }
 

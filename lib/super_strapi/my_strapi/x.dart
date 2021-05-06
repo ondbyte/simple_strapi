@@ -1,4 +1,5 @@
 import 'package:async/async.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 
@@ -9,23 +10,22 @@ export "./x_extensions/all.dart";
 abstract class X {
   ///dispose all the data when closing the app
 
-  final _memoizers = <String, AsyncMemoizer>{};
+  final _memoizers = <Key, AsyncMemoizer>{};
 
-  final _workers = <String, Worker>{};
+  final _workers = <Key, Worker>{};
 
   Future<T> memoize<T>(
-    String method,
+    Key key,
     Future<T> Function() toReturn, {
-    required bool force,
     Rx? runWhenChanged,
   }) async {
-    final toRun = (bool f) async {
-      final m = _memoizers.remove(method);
-      final memoizer = (f || m == null) ? AsyncMemoizer<T>() : m;
-      _memoizers[method] = memoizer;
+    final toRun = () async {
+      final m = _memoizers.remove(key);
+      final memoizer = ((m == null)) ? AsyncMemoizer<T>() : m;
+      _memoizers[key] = memoizer;
       return memoizer.runOnce(() => toReturn());
     };
-    var _worker = _workers.remove("$method");
+    var _worker = _workers.remove(key);
     if (runWhenChanged != null) {
       _worker?.dispose();
       if (_worker != null) {
@@ -33,7 +33,7 @@ abstract class X {
           _worker = ever(
             runWhenChanged,
             (_) {
-              toRun(true);
+              toRun();
             },
           );
         }
@@ -41,13 +41,13 @@ abstract class X {
         _worker = ever(
           runWhenChanged,
           (_) {
-            toRun(true);
+            toRun();
           },
         );
       }
-      _workers["$method"] = _worker;
+      _workers[key] = _worker;
     }
-    return await toRun(force);
+    return await toRun();
   }
 
   @mustCallSuper

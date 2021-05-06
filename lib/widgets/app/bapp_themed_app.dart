@@ -1,5 +1,6 @@
 import 'package:bapp/config/theme_config.dart';
 import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
+import 'package:bapp/widgets/app/bapp_navigator_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
@@ -75,6 +76,8 @@ class _BappThemedAppState extends State<BappThemedApp> {
     _saveTheme(dark);
   }
 
+  final navKey = GlobalKey<NavigatorState>();
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -85,7 +88,12 @@ class _BappThemedAppState extends State<BappThemedApp> {
           : (brightness == Brightness.dark ? ThemeMode.dark : ThemeMode.light),
       theme: getLightThemeData(),
       darkTheme: getDarkThemeData(),
-      home: widget.child,
+      builder: (_, __) {
+        return BappNavigator(
+          navigatorKey: navKey,
+          rootScreen: widget.child,
+        );
+      },
     );
   }
 }

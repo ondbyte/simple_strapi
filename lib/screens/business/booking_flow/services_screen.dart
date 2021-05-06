@@ -1,22 +1,25 @@
-import 'package:bapp/helpers/extensions.dart';
-import 'package:bapp/screens/business/booking_flow/add_customer_details.dart';
-import 'package:bapp/screens/business/booking_flow/select_time_slot.dart';
 import 'package:bapp/screens/business/business_profile/tabs/services_tab.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
-import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/super_strapi/my_strapi/bookingX.dart';
-import 'package:bapp/super_strapi/my_strapi/x.dart';
-import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
+import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
+import 'package:bapp/widgets/loading.dart';
+import 'package:bapp/widgets/tiles/error.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:provider/provider.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
-class BusinessProfileServicesScreen extends StatelessWidget {
+class BusinessProfileServicesScreen extends StatefulWidget {
   final Business business;
-
-  const BusinessProfileServicesScreen({Key? key, required this.business})
+  BusinessProfileServicesScreen({Key? key, required this.business})
       : super(key: key);
+
+  @override
+  _BusinessProfileServicesScreenState createState() =>
+      _BusinessProfileServicesScreenState();
+}
+
+class _BusinessProfileServicesScreenState
+    extends State<BusinessProfileServicesScreen> {
+  var getCartKey = ValueKey("getCart");
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,13 +27,15 @@ class BusinessProfileServicesScreen extends StatelessWidget {
         title: Text(""),
         automaticallyImplyLeading: true,
       ),
-      bottomNavigationBar: FutureBuilder<Booking?>(
-          future: BookingX.i.getBookingInCart(),
-          builder: (_, snap) {
-            if (snap.connectionState != ConnectionState.done) {
-              return SizedBox();
-            }
-            final lastBooking = snap.data;
+      bottomNavigationBar: TapToReFetch<Booking?>(
+          fetcher: () {
+            return BookingX.i.getCart();
+          },
+          onTap: () => getCartKey = ValueKey("getCart"),
+          onLoadBuilder: (_) => LoadingWidget(),
+          onErrorBuilder: (_, e, s) => ErrorTile(message: "tap to refresh"),
+          onSucessBuilder: (_, booking) {
+            final lastBooking = booking;
             if (lastBooking is! Booking) {
               return SizedBox();
             }
@@ -41,7 +46,13 @@ class BusinessProfileServicesScreen extends StatelessWidget {
               onPressed: () async {},
             );
           }),
-      body: BusinessProfileServicesTab(business: business),
+      body:
+          SizedBox() /* BusinessProfileServicesTab(
+        business: widget.business,
+        onServicesSelected: (ss) {},
+        cart
+      ) */
+      ,
     );
   }
 }

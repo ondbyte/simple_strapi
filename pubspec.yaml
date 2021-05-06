@@ -35,12 +35,11 @@ dependencies:
 
 
   #own
-  the_country_number_widgets:
-    path: ./packages/the_country_number_widgets
-  the_country_number:
-    path: ./packages/the_country_number
+  the_country_number_widgets: any
+  the_country_number: any
   simple_strapi:
-    path: ./packages/simple_strapi
+    git:
+      url: https://github.com/ondbyte/simple_strapi.git
   super_strapi_generated:
     path: ./packages/super_strapi_generated
 
@@ -102,8 +101,9 @@ dev_dependencies:
   taste:
     git:
       url: https://github.com/ondbyte/taste.git
-  super_strapi:
-    path: ./packages/super_strapi
+  super_strapi: 
+    git:
+      url: https://github.com/ondbyte/super_strapi.git
 flutter_icons:
   android: "launcher_icon"
   ios: true

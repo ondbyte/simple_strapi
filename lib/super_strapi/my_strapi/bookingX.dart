@@ -2,6 +2,8 @@ import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x.dart';
 import 'package:enum_to_string/enum_to_string.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BookingX extends X {
@@ -10,16 +12,31 @@ class BookingX extends X {
 
   Future init() async {}
 
-  Future<Booking?> getBookingInCart() async {
-    final map = await DefaultDataX.i.getValue(
-      DefaultDataKeys.lastBooking,
-    );
-    if (map is Map<String, dynamic>) {
-      final booking = Booking.fromMap(map);
-      if (booking is Booking) {
-        return booking;
-      }
+  Future<Booking?> getCart({
+    Key key = const ValueKey("getCart"),
+  }) async {
+    final user = UserX.i.user();
+    if (user is! User) {
+      return null;
     }
+    var booking = user.cart;
+    if (booking is Booking) {
+      return booking;
+    }
+    return await memoize(key, () async {
+      final newBooking = await Bookings.create(
+        Booking.fresh(
+          bookingStatus: BookingStatus.halfWayThrough,
+          bookedByUser: user,
+        ),
+      );
+      if (newBooking is! Booking) {
+        return null;
+      }
+      final copied = user.copyWIth(cart: booking);
+      UserX.i.user(await Users.update(copied));
+      return booking;
+    });
   }
 
   Future<Booking> addBookingToCart(Booking booking) async {
