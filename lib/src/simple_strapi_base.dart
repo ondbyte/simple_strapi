@@ -605,8 +605,10 @@ class StrapiUtils {
   }
 
   static T? objFromMap<T>(dynamic data, T? Function(dynamic) returner) {
+    if (data == null) {
+      return null;
+    }
     return returner(data);
-    ;
   }
 }
 
