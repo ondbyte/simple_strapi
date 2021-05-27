@@ -11,10 +11,12 @@ import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/super_strapi/my_strapi/bookingX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x.dart';
+import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
 import 'package:bapp/widgets/firebase_image.dart';
 import 'package:bapp/widgets/loading_stack.dart';
 import 'package:bapp/widgets/padded_text.dart';
 import 'package:bapp/widgets/tiles/bapp_user_tile.dart';
+import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fba;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -82,7 +84,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
         );
         servicesChildren.add(
           PaddedText(
-            item.duration?.toString() ?? "0",
+            getProductsDurationString([item]),
             style: Theme.of(context).textTheme.caption,
           ),
         );
@@ -108,25 +110,27 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                       ? widget.isCustomerView
                           ? BottomPrimaryButton(
                               label: "Cancel booking",
-                              onPressed: () async {
-                                final confirm = await BappNavigator.dialog<
-                                    CancellationConfirm>(
-                                  context,
-                                  CancellationConfirmDialog(
-                                    title: "Cancel",
-                                    message: "Please specify a reason",
-                                    needReason: true,
-                                  ),
-                                );
-                                if (confirm is! CancellationConfirm) {
-                                  return;
-                                }
-                                if (!confirm.confirm) {
-                                  return;
-                                }
-                                await BookingX.i.cancel(widget.booking);
-                                BappNavigator.pop(context, null);
-                              },
+                              onPressed: isCancellableBooking(widget.booking)
+                                  ? () async {
+                                      final confirm = await BappNavigator
+                                          .dialog<CancellationConfirm>(
+                                        context,
+                                        CancellationConfirmDialog(
+                                          title: "Cancel",
+                                          message: "Please specify a reason",
+                                          needReason: true,
+                                        ),
+                                      );
+                                      if (confirm is! CancellationConfirm) {
+                                        return;
+                                      }
+                                      if (!confirm.confirm) {
+                                        return;
+                                      }
+                                      await BookingX.i.cancel(widget.booking);
+                                      BappNavigator.pop(context, null);
+                                    }
+                                  : null,
                             )
                           : widget.booking.bookingStatus ==
                                   BookingStatus.pendingApproval
@@ -199,7 +203,8 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                     padding: EdgeInsets.all(16),
                     children: [
                       TitledListTile(
-                        bottomTag: "inform yadu",
+                        bottomTag: EnumToString.convertToString(
+                            widget.booking.bookingStatus),
                         bottomTagColor: Colors.green,
                         primaryTile: widget.isCustomerView
                             ? ListTile(
@@ -234,10 +239,17 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                   "Your booking is with",
                                   style: Theme.of(context).textTheme.caption,
                                 ),
-                                subtitle: Text(
-                                  widget.booking.employee?.name ??
-                                      "no name, inform yadu",
-                                  style: Theme.of(context).textTheme.subtitle1,
+                                subtitle: TapToReFetch<Employee?>(
+                                  fetcher: () => Employees.findOne(
+                                    widget.booking.employee!.id!,
+                                  ),
+                                  onLoadBuilder: (_) =>
+                                      LinearProgressIndicator(),
+                                  onErrorBuilder: (_, e, s) {
+                                    return Text("error, tap here referesh");
+                                  },
+                                  onSucessBuilder: (_, employee) =>
+                                      Text(employee!.name!),
                                 ),
                               )
                             : FutureBuilder<User?>(
@@ -266,10 +278,11 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                           }
                           return TitledListTile(
                             title: "Schedule",
-                            secondaryTitle: "inform yadu",
-                            caption: (from?.toIso8601String() ?? "") +
-                                ", " +
-                                (to?.toIso8601String() ?? ""),
+                            caption:
+                                getOnForTime(widget.booking.bookingStartTime!) +
+                                    ", " +
+                                    getProductsDurationString(
+                                        widget.booking.products!),
                           );
                         },
                       ),

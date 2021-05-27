@@ -9,7 +9,7 @@ import 'package:super_strapi_generated/super_strapi_generated.dart';
 class TapToReFetch<T> extends StatefulWidget {
   final Future<T> Function() fetcher;
   final Function()? onTap;
-  final Function(BuildContext, T?) onSucessBuilder;
+  final Function(BuildContext, T) onSucessBuilder;
   final Function(BuildContext, Object?, StackTrace?) onErrorBuilder;
   final Function(BuildContext) onLoadBuilder;
 
@@ -35,21 +35,23 @@ class _TapToReFetchState<T> extends State<TapToReFetch<T>> {
       builder: (context, snap) {
         if (snap.connectionState == ConnectionState.done) {
           if (snap.hasError) {
-            return GestureDetector(
-              key: ValueKey("xfbldrgd"),
-              onTap: () {
-                setState(() {
-                  widget.onTap?.call();
-                });
-              },
-              child: widget.onErrorBuilder(
-                context,
-                snap.error,
-                snap.stackTrace,
+            return Material(
+              child: GestureDetector(
+                key: ValueKey("xfbldrgd"),
+                onTap: () {
+                  setState(() {
+                    widget.onTap?.call();
+                  });
+                },
+                child: widget.onErrorBuilder(
+                  context,
+                  snap.error,
+                  snap.stackTrace,
+                ),
               ),
             );
           } else {
-            return widget.onSucessBuilder(context, snap.data);
+            return widget.onSucessBuilder(context, snap.data!);
           }
         } else {
           return widget.onLoadBuilder(context);

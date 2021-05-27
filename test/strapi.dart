@@ -1,67 +1,32 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility that Flutter provides. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+import 'dart:io';
 
-Future<void> main() async {
-  /*test("countries", () async {
-    final i = StrapiSettings.i;
-    final cs = await LocalityX.i.getCountries();
-    if (cs.isNotEmpty) {
-      final c = cs.first;
-      Helper.bPrint((await LocalityX.i.getCitiesOfCountry(c)));
-    }
+import 'package:bapp/super_strapi/my_strapi/localityX.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:simple_strapi/simple_strapi.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
+
+Future main() async {
+  test('city_inLocality', () async {
+    final dd = await run();
+    print(dd);
   });
-  test("login and jwt", () async {
-    await StrapiSettings.i.init();
+}
 
-    await DefaultDataX.i.init();
-    final token = await DefaultDataX.i.getValue("token", defaultValue: "");
-    final user = await UserX.i.init();
-    sPrint(user);
-    expect(UserX.i.userPresent, token != "");
-    await UserX.i.loginWithFirebase(
-        "4aUW91LyzxYGyPHNocl4BqQWwXG2", "iam@iam.com", "yadu");
-    expect(UserX.i.userPresent, true);
-  });
-  final f = City.fields;
-
-  final list = await Bookings.executeQuery(
-    StrapiCollectionQuery(
-      collectionName: Locality.collectionName,
-      requiredFields: Locality.fields(),
-    )..whereField(
-        field: Locality.fields.name,
-        query: StrapiFieldQuery.equalTo,
-        value: "Al Barsha",
-      ),
-  ); */
-
-  /* test(
-    "graph query",
-    () async {
-      final q = StrapiCollectionQuery(
-        collectionName: City.collectionName,
-        requiredFields: City.fields(),
-      );
-
-      final response = await Cities.executeQuery(q);
-      print(response);
-    },
-  ); */
-  test(
-    "default data test",
-    () async {
-      await StrapiSettings.i.init();
-      final dd = await DefaultDatas.findOne("605ccfad19ddf7000e3ed9c0");
-      if (dd is DefaultData) {
-        final newDd = dd.copyWIth(
-          locality: Locality.fromID("5ffb4e8f7c2625000eb3b516"),
-        );
-        await DefaultDatas.update(newDd);
-      }
-    },
+Future<DefaultData?> run() async {
+  final id = "4dea2f6bb596d1c4";
+  Strapi.i.verbose = false;
+  final b = await Businesses.findOne("609e692b12ba77000ea67fd6");
+  final u = await Users.findOne("60715aabad8c81000eb38b11");
+  final e = await b!.employees!.first.sync();
+  final c = await Bookings.create(
+    Booking.fresh(
+        business: b,
+        bookedByUser: u,
+        bookingStatus: BookingStatus.pendingApproval,
+        employee: e,
+        products: [
+          b.catalogue!.first.catalogueItems!.first,
+        ]),
   );
+  print(c);
 }

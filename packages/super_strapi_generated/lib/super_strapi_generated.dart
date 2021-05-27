@@ -171,12 +171,22 @@ class City {
   Map<String, dynamic> _toMap({int level = 0}) {
     final toServer = level == 0;
     return {
-      if (!_emptyFields.name && name != null) "name": name,
-      if (!_emptyFields.enabled && enabled != null) "enabled": enabled,
-      if (!_emptyFields.country && country != null)
+      if (_emptyFields.name)
+        "name": null
+      else if (!_emptyFields.name && name != null)
+        "name": name,
+      if (_emptyFields.enabled)
+        "enabled": null
+      else if (!_emptyFields.enabled && enabled != null)
+        "enabled": enabled,
+      if (_emptyFields.country)
+        "country": null
+      else if (!_emptyFields.country && country != null)
         "country":
             toServer ? country?.id : country?._toMap(level: level + level),
-      if (!_emptyFields.localities && localities != null)
+      if (_emptyFields.localities)
+        "localities": []
+      else if (!_emptyFields.localities && localities != null)
         "localities": localities
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
@@ -288,6 +298,12 @@ class Cities {
       return City.fromID(idOrData);
     }
     if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return City.fromID(id);
+      }
       return City.fromSyncedMap(idOrData);
     }
     return null;
@@ -555,25 +571,43 @@ class Employee {
   Map<String, dynamic> _toMap({int level = 0}) {
     final toServer = level == 0;
     return {
-      if (!_emptyFields.name && name != null) "name": name,
-      if (!_emptyFields.image && image != null)
+      if (_emptyFields.name)
+        "name": null
+      else if (!_emptyFields.name && name != null)
+        "name": name,
+      if (_emptyFields.image)
+        "image": []
+      else if (!_emptyFields.image && image != null)
         "image": image
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
-      if (!_emptyFields.enabled && enabled != null) "enabled": enabled,
-      if (!_emptyFields.user && user != null)
+      if (_emptyFields.enabled)
+        "enabled": null
+      else if (!_emptyFields.enabled && enabled != null)
+        "enabled": enabled,
+      if (_emptyFields.user)
+        "user": null
+      else if (!_emptyFields.user && user != null)
         "user": toServer ? user?.id : user?._toMap(level: level + level),
-      if (!_emptyFields.bookings && bookings != null)
+      if (_emptyFields.bookings)
+        "bookings": []
+      else if (!_emptyFields.bookings && bookings != null)
         "bookings": bookings
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
-      if (!_emptyFields.holidays && holidays != null)
+      if (_emptyFields.holidays)
+        "holidays": []
+      else if (!_emptyFields.holidays && holidays != null)
         "holidays":
             holidays?.map((e) => e._toMap(level: level + level)).toList(),
-      if (!_emptyFields.business && business != null)
+      if (_emptyFields.business)
+        "business": null
+      else if (!_emptyFields.business && business != null)
         "business":
             toServer ? business?.id : business?._toMap(level: level + level),
-      if (!_emptyFields.starRating && starRating != null)
+      if (_emptyFields.starRating)
+        "starRating": null
+      else if (!_emptyFields.starRating && starRating != null)
         "starRating": starRating,
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
@@ -684,6 +718,12 @@ class Employees {
       return Employee.fromID(idOrData);
     }
     if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return Employee.fromID(id);
+      }
       return Employee.fromSyncedMap(idOrData);
     }
     return null;
@@ -836,6 +876,7 @@ class Booking {
         review = null,
         bookingStatus = null,
         bookedByUser = null,
+        bookingNote = null,
         createdAt = null,
         updatedAt = null;
 
@@ -850,7 +891,8 @@ class Booking {
       this.employee,
       this.review,
       this.bookingStatus,
-      this.bookedByUser})
+      this.bookedByUser,
+      this.bookingNote})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
@@ -868,6 +910,7 @@ class Booking {
       this.review,
       this.bookingStatus,
       this.bookedByUser,
+      this.bookingNote,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -885,6 +928,7 @@ class Booking {
       this.review,
       this.bookingStatus,
       this.bookedByUser,
+      this.bookingNote,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -914,6 +958,8 @@ class Booking {
 
   final User? bookedByUser;
 
+  final String? bookingNote;
+
   final DateTime? createdAt;
 
   final DateTime? updatedAt;
@@ -936,7 +982,8 @@ class Booking {
           Employee? employee,
           Review? review,
           BookingStatus? bookingStatus,
-          User? bookedByUser}) =>
+          User? bookedByUser,
+          String? bookingNote}) =>
       Booking._unsynced(
           business ?? this.business,
           bookedOn ?? this.bookedOn,
@@ -949,6 +996,7 @@ class Booking {
           review ?? this.review,
           bookingStatus ?? this.bookingStatus,
           bookedByUser ?? this.bookedByUser,
+          bookingNote ?? this.bookingNote,
           this.createdAt,
           this.updatedAt,
           this.id);
@@ -963,7 +1011,8 @@ class Booking {
       bool employee = false,
       bool review = false,
       bool bookingStatus = false,
-      bool bookedByUser = false}) {
+      bool bookedByUser = false,
+      bool bookingNote = false}) {
     return Booking._unsynced(
         business ? null : this.business,
         bookedOn ? null : this.bookedOn,
@@ -976,6 +1025,7 @@ class Booking {
         review ? null : this.review,
         bookingStatus ? null : this.bookingStatus,
         bookedByUser ? null : this.bookedByUser,
+        bookingNote ? null : this.bookingNote,
         this.createdAt,
         this.updatedAt,
         this.id)
@@ -989,7 +1039,8 @@ class Booking {
       .._emptyFields.employee = employee
       .._emptyFields.review = review
       .._emptyFields.bookingStatus = bookingStatus
-      .._emptyFields.bookedByUser = bookedByUser;
+      .._emptyFields.bookedByUser = bookedByUser
+      .._emptyFields.bookingNote = bookingNote;
   }
 
   static Booking fromSyncedMap(Map<dynamic, dynamic> map) => Booking._synced(
@@ -1011,6 +1062,7 @@ class Booking {
           BookingStatus.values, map["bookingStatus"]),
       StrapiUtils.objFromMap<User>(
           map["bookedByUser"], (e) => Users._fromIDorData(e)),
+      map["bookingNote"],
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -1033,6 +1085,7 @@ class Booking {
           BookingStatus.values, map["bookingStatus"]),
       StrapiUtils.objFromMap<User>(
           map["bookedByUser"], (e) => Users._fromIDorData(e)),
+      map["bookingNote"],
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -1040,34 +1093,60 @@ class Booking {
   Map<String, dynamic> _toMap({int level = 0}) {
     final toServer = level == 0;
     return {
-      if (!_emptyFields.business && business != null)
+      if (_emptyFields.business)
+        "business": null
+      else if (!_emptyFields.business && business != null)
         "business":
             toServer ? business?.id : business?._toMap(level: level + level),
-      if (!_emptyFields.bookedOn && bookedOn != null)
+      if (_emptyFields.bookedOn)
+        "bookedOn": null
+      else if (!_emptyFields.bookedOn && bookedOn != null)
         "bookedOn": bookedOn?.toIso8601String(),
-      if (!_emptyFields.bookingStartTime && bookingStartTime != null)
+      if (_emptyFields.bookingStartTime)
+        "bookingStartTime": null
+      else if (!_emptyFields.bookingStartTime && bookingStartTime != null)
         "bookingStartTime": bookingStartTime?.toIso8601String(),
-      if (!_emptyFields.bookingEndTime && bookingEndTime != null)
+      if (_emptyFields.bookingEndTime)
+        "bookingEndTime": null
+      else if (!_emptyFields.bookingEndTime && bookingEndTime != null)
         "bookingEndTime": bookingEndTime?.toIso8601String(),
-      if (!_emptyFields.bookingType && bookingType != null)
+      if (_emptyFields.bookingType)
+        "bookingType": null
+      else if (!_emptyFields.bookingType && bookingType != null)
         "bookingType": StrapiUtils.enumToString(bookingType),
-      if (!_emptyFields.packages && packages != null)
+      if (_emptyFields.packages)
+        "packages": []
+      else if (!_emptyFields.packages && packages != null)
         "packages":
             packages?.map((e) => e._toMap(level: level + level)).toList(),
-      if (!_emptyFields.products && products != null)
+      if (_emptyFields.products)
+        "products": []
+      else if (!_emptyFields.products && products != null)
         "products":
             products?.map((e) => e._toMap(level: level + level)).toList(),
-      if (!_emptyFields.employee && employee != null)
+      if (_emptyFields.employee)
+        "employee": null
+      else if (!_emptyFields.employee && employee != null)
         "employee":
             toServer ? employee?.id : employee?._toMap(level: level + level),
-      if (!_emptyFields.review && review != null)
+      if (_emptyFields.review)
+        "review": null
+      else if (!_emptyFields.review && review != null)
         "review": toServer ? review?.id : review?._toMap(level: level + level),
-      if (!_emptyFields.bookingStatus && bookingStatus != null)
+      if (_emptyFields.bookingStatus)
+        "bookingStatus": null
+      else if (!_emptyFields.bookingStatus && bookingStatus != null)
         "bookingStatus": StrapiUtils.enumToString(bookingStatus),
-      if (!_emptyFields.bookedByUser && bookedByUser != null)
+      if (_emptyFields.bookedByUser)
+        "bookedByUser": null
+      else if (!_emptyFields.bookedByUser && bookedByUser != null)
         "bookedByUser": toServer
             ? bookedByUser?.id
             : bookedByUser?._toMap(level: level + level),
+      if (_emptyFields.bookingNote)
+        "bookingNote": null
+      else if (!_emptyFields.bookingNote && bookingNote != null)
+        "bookingNote": bookingNote,
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
       "id": id
@@ -1177,6 +1256,12 @@ class Bookings {
       return Booking.fromID(idOrData);
     }
     if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return Booking.fromID(id);
+      }
       return Booking.fromSyncedMap(idOrData);
     }
     return null;
@@ -1264,6 +1349,8 @@ class _BookingFields {
 
   final bookedByUser = StrapiModelField("bookedByUser");
 
+  final bookingNote = StrapiLeafField("bookingNote");
+
   final createdAt = StrapiLeafField("createdAt");
 
   final updatedAt = StrapiLeafField("updatedAt");
@@ -1283,6 +1370,7 @@ class _BookingFields {
       review,
       bookingStatus,
       bookedByUser,
+      bookingNote,
       createdAt,
       updatedAt,
       id
@@ -1312,6 +1400,8 @@ class _BookingEmptyFields {
   bool bookingStatus = false;
 
   bool bookedByUser = false;
+
+  bool bookingNote = false;
 }
 
 class Locality {
@@ -1413,11 +1503,21 @@ class Locality {
   Map<String, dynamic> _toMap({int level = 0}) {
     final toServer = level == 0;
     return {
-      if (!_emptyFields.name && name != null) "name": name,
-      if (!_emptyFields.enabled && enabled != null) "enabled": enabled,
-      if (!_emptyFields.city && city != null)
+      if (_emptyFields.name)
+        "name": null
+      else if (!_emptyFields.name && name != null)
+        "name": name,
+      if (_emptyFields.enabled)
+        "enabled": null
+      else if (!_emptyFields.enabled && enabled != null)
+        "enabled": enabled,
+      if (_emptyFields.city)
+        "city": null
+      else if (!_emptyFields.city && city != null)
         "city": toServer ? city?.id : city?._toMap(level: level + level),
-      if (!_emptyFields.coordinates && coordinates != null)
+      if (_emptyFields.coordinates)
+        "coordinates": null
+      else if (!_emptyFields.coordinates && coordinates != null)
         "coordinates": coordinates?._toMap(level: level + level),
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
@@ -1528,6 +1628,12 @@ class Localities {
       return Locality.fromID(idOrData);
     }
     if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return Locality.fromID(id);
+      }
       return Locality.fromSyncedMap(idOrData);
     }
     return null;
@@ -1703,10 +1809,17 @@ class PushNotification {
   Map<String, dynamic> _toMap({int level = 0}) {
     final toServer = level == 0;
     return {
-      if (!_emptyFields.data && data != null) "data": data,
-      if (!_emptyFields.pushed_on && pushed_on != null)
+      if (_emptyFields.data)
+        "data": null
+      else if (!_emptyFields.data && data != null)
+        "data": data,
+      if (_emptyFields.pushed_on)
+        "pushed_on": null
+      else if (!_emptyFields.pushed_on && pushed_on != null)
         "pushed_on": pushed_on?.toIso8601String(),
-      if (!_emptyFields.user && user != null)
+      if (_emptyFields.user)
+        "user": null
+      else if (!_emptyFields.user && user != null)
         "user": toServer ? user?.id : user?._toMap(level: level + level),
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
@@ -1820,6 +1933,12 @@ class PushNotifications {
       return PushNotification.fromID(idOrData);
     }
     if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return PushNotification.fromID(id);
+      }
       return PushNotification.fromSyncedMap(idOrData);
     }
     return null;
@@ -2078,16 +2197,38 @@ class Country {
   Map<String, dynamic> _toMap({int level = 0}) {
     final toServer = level == 0;
     return {
-      if (!_emptyFields.name && name != null) "name": name,
-      if (!_emptyFields.iso2Code && iso2Code != null) "iso2Code": iso2Code,
-      if (!_emptyFields.englishCurrencySymbol && englishCurrencySymbol != null)
+      if (_emptyFields.name)
+        "name": null
+      else if (!_emptyFields.name && name != null)
+        "name": name,
+      if (_emptyFields.iso2Code)
+        "iso2Code": null
+      else if (!_emptyFields.iso2Code && iso2Code != null)
+        "iso2Code": iso2Code,
+      if (_emptyFields.englishCurrencySymbol)
+        "englishCurrencySymbol": null
+      else if (!_emptyFields.englishCurrencySymbol &&
+          englishCurrencySymbol != null)
         "englishCurrencySymbol": englishCurrencySymbol,
-      if (!_emptyFields.flagUrl && flagUrl != null) "flagUrl": flagUrl,
-      if (!_emptyFields.enabled && enabled != null) "enabled": enabled,
-      if (!_emptyFields.localCurrencySymbol && localCurrencySymbol != null)
+      if (_emptyFields.flagUrl)
+        "flagUrl": null
+      else if (!_emptyFields.flagUrl && flagUrl != null)
+        "flagUrl": flagUrl,
+      if (_emptyFields.enabled)
+        "enabled": null
+      else if (!_emptyFields.enabled && enabled != null)
+        "enabled": enabled,
+      if (_emptyFields.localCurrencySymbol)
+        "localCurrencySymbol": null
+      else if (!_emptyFields.localCurrencySymbol && localCurrencySymbol != null)
         "localCurrencySymbol": localCurrencySymbol,
-      if (!_emptyFields.localName && localName != null) "localName": localName,
-      if (!_emptyFields.cities && cities != null)
+      if (_emptyFields.localName)
+        "localName": null
+      else if (!_emptyFields.localName && localName != null)
+        "localName": localName,
+      if (_emptyFields.cities)
+        "cities": []
+      else if (!_emptyFields.cities && cities != null)
         "cities": cities
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
@@ -2200,6 +2341,12 @@ class Countries {
       return Country.fromID(idOrData);
     }
     if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return Country.fromID(id);
+      }
       return Country.fromSyncedMap(idOrData);
     }
     return null;
@@ -2596,40 +2743,74 @@ class Business {
   Map<String, dynamic> _toMap({int level = 0}) {
     final toServer = level == 0;
     return {
-      if (!_emptyFields.name && name != null) "name": name,
-      if (!_emptyFields.address && address != null)
+      if (_emptyFields.name)
+        "name": null
+      else if (!_emptyFields.name && name != null)
+        "name": name,
+      if (_emptyFields.address)
+        "address": null
+      else if (!_emptyFields.address && address != null)
         "address": address?._toMap(level: level + level),
-      if (!_emptyFields.enabled && enabled != null) "enabled": enabled,
-      if (!_emptyFields.partner && partner != null)
+      if (_emptyFields.enabled)
+        "enabled": null
+      else if (!_emptyFields.enabled && enabled != null)
+        "enabled": enabled,
+      if (_emptyFields.partner)
+        "partner": null
+      else if (!_emptyFields.partner && partner != null)
         "partner":
             toServer ? partner?.id : partner?._toMap(level: level + level),
-      if (!_emptyFields.packages && packages != null)
+      if (_emptyFields.packages)
+        "packages": []
+      else if (!_emptyFields.packages && packages != null)
         "packages":
             packages?.map((e) => e._toMap(level: level + level)).toList(),
-      if (!_emptyFields.businessFeatures && businessFeatures != null)
+      if (_emptyFields.businessFeatures)
+        "businessFeatures": []
+      else if (!_emptyFields.businessFeatures && businessFeatures != null)
         "businessFeatures": businessFeatures
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
-      if (!_emptyFields.business_category && business_category != null)
+      if (_emptyFields.business_category)
+        "business_category": null
+      else if (!_emptyFields.business_category && business_category != null)
         "business_category": toServer
             ? business_category?.id
             : business_category?._toMap(level: level + level),
-      if (!_emptyFields.starRating && starRating != null)
+      if (_emptyFields.starRating)
+        "starRating": null
+      else if (!_emptyFields.starRating && starRating != null)
         "starRating": starRating,
-      if (!_emptyFields.contactNumber && contactNumber != null)
+      if (_emptyFields.contactNumber)
+        "contactNumber": null
+      else if (!_emptyFields.contactNumber && contactNumber != null)
         "contactNumber": contactNumber,
-      if (!_emptyFields.email && email != null) "email": email,
-      if (!_emptyFields.about && about != null) "about": about,
-      if (!_emptyFields.catalogue && catalogue != null)
+      if (_emptyFields.email)
+        "email": null
+      else if (!_emptyFields.email && email != null)
+        "email": email,
+      if (_emptyFields.about)
+        "about": null
+      else if (!_emptyFields.about && about != null)
+        "about": about,
+      if (_emptyFields.catalogue)
+        "catalogue": []
+      else if (!_emptyFields.catalogue && catalogue != null)
         "catalogue":
             catalogue?.map((e) => e._toMap(level: level + level)).toList(),
-      if (!_emptyFields.dayTiming && dayTiming != null)
+      if (_emptyFields.dayTiming)
+        "dayTiming": []
+      else if (!_emptyFields.dayTiming && dayTiming != null)
         "dayTiming":
             dayTiming?.map((e) => e._toMap(level: level + level)).toList(),
-      if (!_emptyFields.holidays && holidays != null)
+      if (_emptyFields.holidays)
+        "holidays": []
+      else if (!_emptyFields.holidays && holidays != null)
         "holidays":
             holidays?.map((e) => e._toMap(level: level + level)).toList(),
-      if (!_emptyFields.employees && employees != null)
+      if (_emptyFields.employees)
+        "employees": []
+      else if (!_emptyFields.employees && employees != null)
         "employees": employees
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
@@ -2742,6 +2923,12 @@ class Businesses {
       return Business.fromID(idOrData);
     }
     if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return Business.fromID(id);
+      }
       return Business.fromSyncedMap(idOrData);
     }
     return null;
@@ -2988,12 +3175,19 @@ class BusinessCategory {
   Map<String, dynamic> _toMap({int level = 0}) {
     final toServer = level == 0;
     return {
-      if (!_emptyFields.name && name != null) "name": name,
-      if (!_emptyFields.businesses && businesses != null)
+      if (_emptyFields.name)
+        "name": null
+      else if (!_emptyFields.name && name != null)
+        "name": name,
+      if (_emptyFields.businesses)
+        "businesses": []
+      else if (!_emptyFields.businesses && businesses != null)
         "businesses": businesses
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
-      if (!_emptyFields.image && image != null)
+      if (_emptyFields.image)
+        "image": null
+      else if (!_emptyFields.image && image != null)
         "image": toServer ? image?.id : image?._toMap(level: level + level),
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
@@ -3107,6 +3301,12 @@ class BusinessCategories {
       return BusinessCategory.fromID(idOrData);
     }
     if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return BusinessCategory.fromID(id);
+      }
       return BusinessCategory.fromSyncedMap(idOrData);
     }
     return null;
@@ -3205,29 +3405,23 @@ class Partner {
         enabled = null,
         logo = null,
         businesses = null,
-        owner = null,
         about = null,
         createdAt = null,
         updatedAt = null;
 
   Partner.fresh(
-      {this.name,
-      this.enabled,
-      this.logo,
-      this.businesses,
-      this.owner,
-      this.about})
+      {this.name, this.enabled, this.logo, this.businesses, this.about})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
         id = null;
 
   Partner._synced(this.name, this.enabled, this.logo, this.businesses,
-      this.owner, this.about, this.createdAt, this.updatedAt, this.id)
+      this.about, this.createdAt, this.updatedAt, this.id)
       : _synced = true;
 
   Partner._unsynced(this.name, this.enabled, this.logo, this.businesses,
-      this.owner, this.about, this.createdAt, this.updatedAt, this.id)
+      this.about, this.createdAt, this.updatedAt, this.id)
       : _synced = false;
 
   final bool _synced;
@@ -3239,8 +3433,6 @@ class Partner {
   final List<StrapiFile>? logo;
 
   final List<Business>? businesses;
-
-  final User? owner;
 
   final String? about;
 
@@ -3260,14 +3452,12 @@ class Partner {
           bool? enabled,
           List<StrapiFile>? logo,
           List<Business>? businesses,
-          User? owner,
           String? about}) =>
       Partner._unsynced(
           name ?? this.name,
           enabled ?? this.enabled,
           logo ?? this.logo,
           businesses ?? this.businesses,
-          owner ?? this.owner,
           about ?? this.about,
           this.createdAt,
           this.updatedAt,
@@ -3277,14 +3467,12 @@ class Partner {
       bool enabled = false,
       bool logo = false,
       bool businesses = false,
-      bool owner = false,
       bool about = false}) {
     return Partner._unsynced(
         name ? null : this.name,
         enabled ? null : this.enabled,
         logo ? null : this.logo,
         businesses ? null : this.businesses,
-        owner ? null : this.owner,
         about ? null : this.about,
         this.createdAt,
         this.updatedAt,
@@ -3293,7 +3481,6 @@ class Partner {
       .._emptyFields.enabled = enabled
       .._emptyFields.logo = logo
       .._emptyFields.businesses = businesses
-      .._emptyFields.owner = owner
       .._emptyFields.about = about;
   }
 
@@ -3304,7 +3491,6 @@ class Partner {
           map["logo"], (e) => StrapiFiles._fromIDorData(e)),
       StrapiUtils.objFromListOfMap<Business>(
           map["businesses"], (e) => Businesses._fromIDorData(e)),
-      StrapiUtils.objFromMap<User>(map["owner"], (e) => Users._fromIDorData(e)),
       map["about"],
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
@@ -3316,7 +3502,6 @@ class Partner {
           map["logo"], (e) => StrapiFiles._fromIDorData(e)),
       StrapiUtils.objFromListOfMap<Business>(
           map["businesses"], (e) => Businesses._fromIDorData(e)),
-      StrapiUtils.objFromMap<User>(map["owner"], (e) => Users._fromIDorData(e)),
       map["about"],
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
@@ -3325,19 +3510,30 @@ class Partner {
   Map<String, dynamic> _toMap({int level = 0}) {
     final toServer = level == 0;
     return {
-      if (!_emptyFields.name && name != null) "name": name,
-      if (!_emptyFields.enabled && enabled != null) "enabled": enabled,
-      if (!_emptyFields.logo && logo != null)
+      if (_emptyFields.name)
+        "name": null
+      else if (!_emptyFields.name && name != null)
+        "name": name,
+      if (_emptyFields.enabled)
+        "enabled": null
+      else if (!_emptyFields.enabled && enabled != null)
+        "enabled": enabled,
+      if (_emptyFields.logo)
+        "logo": []
+      else if (!_emptyFields.logo && logo != null)
         "logo": logo
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
-      if (!_emptyFields.businesses && businesses != null)
+      if (_emptyFields.businesses)
+        "businesses": []
+      else if (!_emptyFields.businesses && businesses != null)
         "businesses": businesses
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
-      if (!_emptyFields.owner && owner != null)
-        "owner": toServer ? owner?.id : owner?._toMap(level: level + level),
-      if (!_emptyFields.about && about != null) "about": about,
+      if (_emptyFields.about)
+        "about": null
+      else if (!_emptyFields.about && about != null)
+        "about": about,
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
       "id": id
@@ -3447,6 +3643,12 @@ class Partners {
       return Partner.fromID(idOrData);
     }
     if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return Partner.fromID(id);
+      }
       return Partner.fromSyncedMap(idOrData);
     }
     return null;
@@ -3520,8 +3722,6 @@ class _PartnerFields {
 
   final businesses = StrapiCollectionField("businesses");
 
-  final owner = StrapiModelField("owner");
-
   final about = StrapiLeafField("about");
 
   final createdAt = StrapiLeafField("createdAt");
@@ -3531,17 +3731,7 @@ class _PartnerFields {
   final id = StrapiLeafField("id");
 
   List<StrapiField> call() {
-    return [
-      name,
-      enabled,
-      logo,
-      businesses,
-      owner,
-      about,
-      createdAt,
-      updatedAt,
-      id
-    ];
+    return [name, enabled, logo, businesses, about, createdAt, updatedAt, id];
   }
 }
 
@@ -3554,8 +3744,6 @@ class _PartnerEmptyFields {
 
   bool businesses = false;
 
-  bool owner = false;
-
   bool about = false;
 }
 
@@ -3564,21 +3752,21 @@ class DefaultData {
       : _synced = false,
         locality = null,
         city = null,
-        customID = null,
+        customId = null,
         createdAt = null,
         updatedAt = null;
 
-  DefaultData.fresh({this.locality, this.city, this.customID})
+  DefaultData.fresh({this.locality, this.city, this.customId})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
         id = null;
 
-  DefaultData._synced(this.locality, this.city, this.customID, this.createdAt,
+  DefaultData._synced(this.locality, this.city, this.customId, this.createdAt,
       this.updatedAt, this.id)
       : _synced = true;
 
-  DefaultData._unsynced(this.locality, this.city, this.customID, this.createdAt,
+  DefaultData._unsynced(this.locality, this.city, this.customId, this.createdAt,
       this.updatedAt, this.id)
       : _synced = false;
 
@@ -3588,7 +3776,7 @@ class DefaultData {
 
   final City? city;
 
-  final String? customID;
+  final String? customId;
 
   final DateTime? createdAt;
 
@@ -3601,21 +3789,21 @@ class DefaultData {
   _DefaultDataEmptyFields _emptyFields = _DefaultDataEmptyFields();
 
   bool get synced => _synced;
-  DefaultData copyWIth({Locality? locality, City? city, String? customID}) =>
+  DefaultData copyWIth({Locality? locality, City? city, String? customId}) =>
       DefaultData._unsynced(locality ?? this.locality, city ?? this.city,
-          customID ?? this.customID, this.createdAt, this.updatedAt, this.id);
+          customId ?? this.customId, this.createdAt, this.updatedAt, this.id);
   DefaultData setNull(
-      {bool locality = false, bool city = false, bool customID = false}) {
+      {bool locality = false, bool city = false, bool customId = false}) {
     return DefaultData._unsynced(
         locality ? null : this.locality,
         city ? null : this.city,
-        customID ? null : this.customID,
+        customId ? null : this.customId,
         this.createdAt,
         this.updatedAt,
         this.id)
       .._emptyFields.locality = locality
       .._emptyFields.city = city
-      .._emptyFields.customID = customID;
+      .._emptyFields.customId = customId;
   }
 
   static DefaultData fromSyncedMap(Map<dynamic, dynamic> map) =>
@@ -3624,7 +3812,7 @@ class DefaultData {
               map["locality"], (e) => Localities._fromIDorData(e)),
           StrapiUtils.objFromMap<City>(
               map["city"], (e) => Cities._fromIDorData(e)),
-          map["customID"],
+          map["customId"],
           StrapiUtils.parseDateTime(map["createdAt"]),
           StrapiUtils.parseDateTime(map["updatedAt"]),
           map["id"]);
@@ -3634,7 +3822,7 @@ class DefaultData {
               map["locality"], (e) => Localities._fromIDorData(e)),
           StrapiUtils.objFromMap<City>(
               map["city"], (e) => Cities._fromIDorData(e)),
-          map["customID"],
+          map["customId"],
           StrapiUtils.parseDateTime(map["createdAt"]),
           StrapiUtils.parseDateTime(map["updatedAt"]),
           map["id"]);
@@ -3642,12 +3830,19 @@ class DefaultData {
   Map<String, dynamic> _toMap({int level = 0}) {
     final toServer = level == 0;
     return {
-      if (!_emptyFields.locality && locality != null)
+      if (_emptyFields.locality)
+        "locality": null
+      else if (!_emptyFields.locality && locality != null)
         "locality":
             toServer ? locality?.id : locality?._toMap(level: level + level),
-      if (!_emptyFields.city && city != null)
+      if (_emptyFields.city)
+        "city": null
+      else if (!_emptyFields.city && city != null)
         "city": toServer ? city?.id : city?._toMap(level: level + level),
-      if (!_emptyFields.customID && customID != null) "customID": customID,
+      if (_emptyFields.customId)
+        "customId": null
+      else if (!_emptyFields.customId && customId != null)
+        "customId": customId,
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
       "id": id
@@ -3757,6 +3952,12 @@ class DefaultDatas {
       return DefaultData.fromID(idOrData);
     }
     if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return DefaultData.fromID(id);
+      }
       return DefaultData.fromSyncedMap(idOrData);
     }
     return null;
@@ -3826,7 +4027,7 @@ class _DefaultDataFields {
 
   final city = StrapiModelField("city");
 
-  final customID = StrapiLeafField("customID");
+  final customId = StrapiLeafField("customId");
 
   final createdAt = StrapiLeafField("createdAt");
 
@@ -3835,7 +4036,7 @@ class _DefaultDataFields {
   final id = StrapiLeafField("id");
 
   List<StrapiField> call() {
-    return [locality, city, customID, createdAt, updatedAt, id];
+    return [locality, city, customId, createdAt, updatedAt, id];
   }
 }
 
@@ -3844,7 +4045,7 @@ class _DefaultDataEmptyFields {
 
   bool city = false;
 
-  bool customID = false;
+  bool customId = false;
 }
 
 class MasterProduct {
@@ -3934,10 +4135,17 @@ class MasterProduct {
   Map<String, dynamic> _toMap({int level = 0}) {
     final toServer = level == 0;
     return {
-      if (!_emptyFields.name && name != null) "name": name,
-      if (!_emptyFields.description && description != null)
+      if (_emptyFields.name)
+        "name": null
+      else if (!_emptyFields.name && name != null)
+        "name": name,
+      if (_emptyFields.description)
+        "description": null
+      else if (!_emptyFields.description && description != null)
         "description": description,
-      if (!_emptyFields.image && image != null)
+      if (_emptyFields.image)
+        "image": null
+      else if (!_emptyFields.image && image != null)
         "image": toServer ? image?.id : image?._toMap(level: level + level),
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
@@ -4048,6 +4256,12 @@ class MasterProducts {
       return MasterProduct.fromID(idOrData);
     }
     if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return MasterProduct.fromID(id);
+      }
       return MasterProduct.fromSyncedMap(idOrData);
     }
     return null;
@@ -4242,13 +4456,21 @@ class BusinessFeature {
   Map<String, dynamic> _toMap({int level = 0}) {
     final toServer = level == 0;
     return {
-      if (!_emptyFields.feature && feature != null)
+      if (_emptyFields.feature)
+        "feature": null
+      else if (!_emptyFields.feature && feature != null)
         "feature": StrapiUtils.enumToString(feature),
-      if (!_emptyFields.startDate && startDate != null)
+      if (_emptyFields.startDate)
+        "startDate": null
+      else if (!_emptyFields.startDate && startDate != null)
         "startDate": startDate?.toIso8601String(),
-      if (!_emptyFields.endDate && endDate != null)
+      if (_emptyFields.endDate)
+        "endDate": null
+      else if (!_emptyFields.endDate && endDate != null)
         "endDate": endDate?.toIso8601String(),
-      if (!_emptyFields.business && business != null)
+      if (_emptyFields.business)
+        "business": null
+      else if (!_emptyFields.business && business != null)
         "business":
             toServer ? business?.id : business?._toMap(level: level + level),
       "createdAt": createdAt?.toIso8601String(),
@@ -4363,6 +4585,12 @@ class BusinessFeatures {
       return BusinessFeature.fromID(idOrData);
     }
     if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return BusinessFeature.fromID(id);
+      }
       return BusinessFeature.fromSyncedMap(idOrData);
     }
     return null;
@@ -4624,19 +4852,37 @@ class Review {
   Map<String, dynamic> _toMap({int level = 0}) {
     final toServer = level == 0;
     return {
-      if (!_emptyFields.reviewedOn && reviewedOn != null)
+      if (_emptyFields.reviewedOn)
+        "reviewedOn": null
+      else if (!_emptyFields.reviewedOn && reviewedOn != null)
         "reviewedOn": reviewedOn?.toIso8601String(),
-      if (!_emptyFields.rating && rating != null) "rating": rating,
-      if (!_emptyFields.review && review != null) "review": review,
-      if (!_emptyFields.emplyeeRating && emplyeeRating != null)
+      if (_emptyFields.rating)
+        "rating": null
+      else if (!_emptyFields.rating && rating != null)
+        "rating": rating,
+      if (_emptyFields.review)
+        "review": null
+      else if (!_emptyFields.review && review != null)
+        "review": review,
+      if (_emptyFields.emplyeeRating)
+        "emplyeeRating": null
+      else if (!_emptyFields.emplyeeRating && emplyeeRating != null)
         "emplyeeRating": emplyeeRating,
-      if (!_emptyFields.employeeReview && employeeReview != null)
+      if (_emptyFields.employeeReview)
+        "employeeReview": null
+      else if (!_emptyFields.employeeReview && employeeReview != null)
         "employeeReview": employeeReview,
-      if (!_emptyFields.facilityRating && facilityRating != null)
+      if (_emptyFields.facilityRating)
+        "facilityRating": null
+      else if (!_emptyFields.facilityRating && facilityRating != null)
         "facilityRating": facilityRating,
-      if (!_emptyFields.facilityReview && facilityReview != null)
+      if (_emptyFields.facilityReview)
+        "facilityReview": null
+      else if (!_emptyFields.facilityReview && facilityReview != null)
         "facilityReview": facilityReview,
-      if (!_emptyFields.booking && booking != null)
+      if (_emptyFields.booking)
+        "booking": null
+      else if (!_emptyFields.booking && booking != null)
         "booking":
             toServer ? booking?.id : booking?._toMap(level: level + level),
       "createdAt": createdAt?.toIso8601String(),
@@ -4748,6 +4994,12 @@ class Reviews {
       return Review.fromID(idOrData);
     }
     if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return Review.fromID(id);
+      }
       return Review.fromSyncedMap(idOrData);
     }
     return null;
@@ -4982,15 +5234,27 @@ class Role {
   Map<String, dynamic> _toMap({int level = 0}) {
     final toServer = level == 0;
     return {
-      if (!_emptyFields.name && name != null) "name": name,
-      if (!_emptyFields.description && description != null)
+      if (_emptyFields.name)
+        "name": null
+      else if (!_emptyFields.name && name != null)
+        "name": name,
+      if (_emptyFields.description)
+        "description": null
+      else if (!_emptyFields.description && description != null)
         "description": description,
-      if (!_emptyFields.type && type != null) "type": type,
-      if (!_emptyFields.permissions && permissions != null)
+      if (_emptyFields.type)
+        "type": null
+      else if (!_emptyFields.type && type != null)
+        "type": type,
+      if (_emptyFields.permissions)
+        "permissions": []
+      else if (!_emptyFields.permissions && permissions != null)
         "permissions": permissions
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
-      if (!_emptyFields.users && users != null)
+      if (_emptyFields.users)
+        "users": []
+      else if (!_emptyFields.users && users != null)
         "users": users
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
@@ -5102,6 +5366,12 @@ class Roles {
       return Role.fromID(idOrData);
     }
     if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return Role.fromID(id);
+      }
       return Role.fromSyncedMap(idOrData);
     }
     return null;
@@ -5229,6 +5499,8 @@ class User {
         city = null,
         bookings = null,
         cart = null,
+        alterEgoActivated = null,
+        business = null,
         createdAt = null,
         updatedAt = null;
 
@@ -5249,7 +5521,9 @@ class User {
       this.locality,
       this.city,
       this.bookings,
-      this.cart})
+      this.cart,
+      this.alterEgoActivated,
+      this.business})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
@@ -5273,6 +5547,8 @@ class User {
       this.city,
       this.bookings,
       this.cart,
+      this.alterEgoActivated,
+      this.business,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -5296,6 +5572,8 @@ class User {
       this.city,
       this.bookings,
       this.cart,
+      this.alterEgoActivated,
+      this.business,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -5337,6 +5615,10 @@ class User {
 
   final Booking? cart;
 
+  final bool? alterEgoActivated;
+
+  final Business? business;
+
   final DateTime? createdAt;
 
   final DateTime? updatedAt;
@@ -5365,7 +5647,9 @@ class User {
           Locality? locality,
           City? city,
           List<Booking>? bookings,
-          Booking? cart}) =>
+          Booking? cart,
+          bool? alterEgoActivated,
+          Business? business}) =>
       User._unsynced(
           username ?? this.username,
           email ?? this.email,
@@ -5384,6 +5668,8 @@ class User {
           city ?? this.city,
           bookings ?? this.bookings,
           cart ?? this.cart,
+          alterEgoActivated ?? this.alterEgoActivated,
+          business ?? this.business,
           this.createdAt,
           this.updatedAt,
           this.id);
@@ -5404,7 +5690,9 @@ class User {
       bool locality = false,
       bool city = false,
       bool bookings = false,
-      bool cart = false}) {
+      bool cart = false,
+      bool alterEgoActivated = false,
+      bool business = false}) {
     return User._unsynced(
         username ? null : this.username,
         email ? null : this.email,
@@ -5423,6 +5711,8 @@ class User {
         city ? null : this.city,
         bookings ? null : this.bookings,
         cart ? null : this.cart,
+        alterEgoActivated ? null : this.alterEgoActivated,
+        business ? null : this.business,
         this.createdAt,
         this.updatedAt,
         this.id)
@@ -5442,7 +5732,9 @@ class User {
       .._emptyFields.locality = locality
       .._emptyFields.city = city
       .._emptyFields.bookings = bookings
-      .._emptyFields.cart = cart;
+      .._emptyFields.cart = cart
+      .._emptyFields.alterEgoActivated = alterEgoActivated
+      .._emptyFields.business = business;
   }
 
   static User fromSyncedMap(Map<dynamic, dynamic> map) => User._synced(
@@ -5470,6 +5762,9 @@ class User {
           map["bookings"], (e) => Bookings._fromIDorData(e)),
       StrapiUtils.objFromMap<Booking>(
           map["cart"], (e) => Bookings._fromIDorData(e)),
+      StrapiUtils.parseBool(map["alterEgoActivated"]),
+      StrapiUtils.objFromMap<Business>(
+          map["business"], (e) => Businesses._fromIDorData(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -5498,6 +5793,9 @@ class User {
           map["bookings"], (e) => Bookings._fromIDorData(e)),
       StrapiUtils.objFromMap<Booking>(
           map["cart"], (e) => Bookings._fromIDorData(e)),
+      StrapiUtils.parseBool(map["alterEgoActivated"]),
+      StrapiUtils.objFromMap<Business>(
+          map["business"], (e) => Businesses._fromIDorData(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -5505,42 +5803,91 @@ class User {
   Map<String, dynamic> _toMap({int level = 0}) {
     final toServer = level == 0;
     return {
-      if (!_emptyFields.username && username != null) "username": username,
-      if (!_emptyFields.email && email != null) "email": email,
-      if (!_emptyFields.provider && provider != null) "provider": provider,
-      if (!_emptyFields.resetPasswordToken && resetPasswordToken != null)
+      if (_emptyFields.username)
+        "username": null
+      else if (!_emptyFields.username && username != null)
+        "username": username,
+      if (_emptyFields.email)
+        "email": null
+      else if (!_emptyFields.email && email != null)
+        "email": email,
+      if (_emptyFields.provider)
+        "provider": null
+      else if (!_emptyFields.provider && provider != null)
+        "provider": provider,
+      if (_emptyFields.resetPasswordToken)
+        "resetPasswordToken": null
+      else if (!_emptyFields.resetPasswordToken && resetPasswordToken != null)
         "resetPasswordToken": resetPasswordToken,
-      if (!_emptyFields.confirmationToken && confirmationToken != null)
+      if (_emptyFields.confirmationToken)
+        "confirmationToken": null
+      else if (!_emptyFields.confirmationToken && confirmationToken != null)
         "confirmationToken": confirmationToken,
-      if (!_emptyFields.confirmed && confirmed != null) "confirmed": confirmed,
-      if (!_emptyFields.blocked && blocked != null) "blocked": blocked,
-      if (!_emptyFields.role && role != null)
+      if (_emptyFields.confirmed)
+        "confirmed": null
+      else if (!_emptyFields.confirmed && confirmed != null)
+        "confirmed": confirmed,
+      if (_emptyFields.blocked)
+        "blocked": null
+      else if (!_emptyFields.blocked && blocked != null)
+        "blocked": blocked,
+      if (_emptyFields.role)
+        "role": null
+      else if (!_emptyFields.role && role != null)
         "role": toServer ? role?.id : role?._toMap(level: level + level),
-      if (!_emptyFields.favourites && favourites != null)
+      if (_emptyFields.favourites)
+        "favourites": []
+      else if (!_emptyFields.favourites && favourites != null)
         "favourites":
             favourites?.map((e) => e._toMap(level: level + level)).toList(),
-      if (!_emptyFields.name && name != null) "name": name,
-      if (!_emptyFields.pushNotifications && pushNotifications != null)
+      if (_emptyFields.name)
+        "name": null
+      else if (!_emptyFields.name && name != null)
+        "name": name,
+      if (_emptyFields.pushNotifications)
+        "pushNotifications": []
+      else if (!_emptyFields.pushNotifications && pushNotifications != null)
         "pushNotifications": pushNotifications
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
-      if (!_emptyFields.employee && employee != null)
+      if (_emptyFields.employee)
+        "employee": null
+      else if (!_emptyFields.employee && employee != null)
         "employee":
             toServer ? employee?.id : employee?._toMap(level: level + level),
-      if (!_emptyFields.partner && partner != null)
+      if (_emptyFields.partner)
+        "partner": null
+      else if (!_emptyFields.partner && partner != null)
         "partner":
             toServer ? partner?.id : partner?._toMap(level: level + level),
-      if (!_emptyFields.locality && locality != null)
+      if (_emptyFields.locality)
+        "locality": null
+      else if (!_emptyFields.locality && locality != null)
         "locality":
             toServer ? locality?.id : locality?._toMap(level: level + level),
-      if (!_emptyFields.city && city != null)
+      if (_emptyFields.city)
+        "city": null
+      else if (!_emptyFields.city && city != null)
         "city": toServer ? city?.id : city?._toMap(level: level + level),
-      if (!_emptyFields.bookings && bookings != null)
+      if (_emptyFields.bookings)
+        "bookings": []
+      else if (!_emptyFields.bookings && bookings != null)
         "bookings": bookings
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
-      if (!_emptyFields.cart && cart != null)
+      if (_emptyFields.cart)
+        "cart": null
+      else if (!_emptyFields.cart && cart != null)
         "cart": toServer ? cart?.id : cart?._toMap(level: level + level),
+      if (_emptyFields.alterEgoActivated)
+        "alterEgoActivated": null
+      else if (!_emptyFields.alterEgoActivated && alterEgoActivated != null)
+        "alterEgoActivated": alterEgoActivated,
+      if (_emptyFields.business)
+        "business": null
+      else if (!_emptyFields.business && business != null)
+        "business":
+            toServer ? business?.id : business?._toMap(level: level + level),
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
       "id": id
@@ -5649,6 +5996,12 @@ class Users {
       return User.fromID(idOrData);
     }
     if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return User.fromID(id);
+      }
       return User.fromSyncedMap(idOrData);
     }
     return null;
@@ -5771,6 +6124,10 @@ class _UserFields {
 
   final cart = StrapiModelField("cart");
 
+  final alterEgoActivated = StrapiLeafField("alterEgoActivated");
+
+  final business = StrapiModelField("business");
+
   final createdAt = StrapiLeafField("createdAt");
 
   final updatedAt = StrapiLeafField("updatedAt");
@@ -5796,6 +6153,8 @@ class _UserFields {
       city,
       bookings,
       cart,
+      alterEgoActivated,
+      business,
       createdAt,
       updatedAt,
       id
@@ -5837,6 +6196,10 @@ class _UserEmptyFields {
   bool bookings = false;
 
   bool cart = false;
+
+  bool alterEgoActivated = false;
+
+  bool business = false;
 }
 
 class Permission {
@@ -5965,13 +6328,29 @@ class Permission {
   Map<String, dynamic> _toMap({int level = 0}) {
     final toServer = level == 0;
     return {
-      if (!_emptyFields.type && type != null) "type": type,
-      if (!_emptyFields.controller && controller != null)
+      if (_emptyFields.type)
+        "type": null
+      else if (!_emptyFields.type && type != null)
+        "type": type,
+      if (_emptyFields.controller)
+        "controller": null
+      else if (!_emptyFields.controller && controller != null)
         "controller": controller,
-      if (!_emptyFields.action && action != null) "action": action,
-      if (!_emptyFields.enabled && enabled != null) "enabled": enabled,
-      if (!_emptyFields.policy && policy != null) "policy": policy,
-      if (!_emptyFields.role && role != null)
+      if (_emptyFields.action)
+        "action": null
+      else if (!_emptyFields.action && action != null)
+        "action": action,
+      if (_emptyFields.enabled)
+        "enabled": null
+      else if (!_emptyFields.enabled && enabled != null)
+        "enabled": enabled,
+      if (_emptyFields.policy)
+        "policy": null
+      else if (!_emptyFields.policy && policy != null)
+        "policy": policy,
+      if (_emptyFields.role)
+        "role": null
+      else if (!_emptyFields.role && role != null)
         "role": toServer ? role?.id : role?._toMap(level: level + level),
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
@@ -6082,6 +6461,12 @@ class Permissions {
       return Permission.fromID(idOrData);
     }
     if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return Permission.fromID(id);
+      }
       return Permission.fromSyncedMap(idOrData);
     }
     return null;
@@ -6451,24 +6836,66 @@ class StrapiFile {
   Map<String, dynamic> _toMap({int level = 0}) {
     final toServer = level == 0;
     return {
-      if (!_emptyFields.name && name != null) "name": name,
-      if (!_emptyFields.alternativeText && alternativeText != null)
+      if (_emptyFields.name)
+        "name": null
+      else if (!_emptyFields.name && name != null)
+        "name": name,
+      if (_emptyFields.alternativeText)
+        "alternativeText": null
+      else if (!_emptyFields.alternativeText && alternativeText != null)
         "alternativeText": alternativeText,
-      if (!_emptyFields.caption && caption != null) "caption": caption,
-      if (!_emptyFields.width && width != null) "width": width,
-      if (!_emptyFields.height && height != null) "height": height,
-      if (!_emptyFields.formats && formats != null) "formats": formats,
-      if (!_emptyFields.hash && hash != null) "hash": hash,
-      if (!_emptyFields.ext && ext != null) "ext": ext,
-      if (!_emptyFields.mime && mime != null) "mime": mime,
-      if (!_emptyFields.size && size != null) "size": size,
-      if (!_emptyFields.url && url != null) "url": url,
-      if (!_emptyFields.previewUrl && previewUrl != null)
+      if (_emptyFields.caption)
+        "caption": null
+      else if (!_emptyFields.caption && caption != null)
+        "caption": caption,
+      if (_emptyFields.width)
+        "width": null
+      else if (!_emptyFields.width && width != null)
+        "width": width,
+      if (_emptyFields.height)
+        "height": null
+      else if (!_emptyFields.height && height != null)
+        "height": height,
+      if (_emptyFields.formats)
+        "formats": null
+      else if (!_emptyFields.formats && formats != null)
+        "formats": formats,
+      if (_emptyFields.hash)
+        "hash": null
+      else if (!_emptyFields.hash && hash != null)
+        "hash": hash,
+      if (_emptyFields.ext)
+        "ext": null
+      else if (!_emptyFields.ext && ext != null)
+        "ext": ext,
+      if (_emptyFields.mime)
+        "mime": null
+      else if (!_emptyFields.mime && mime != null)
+        "mime": mime,
+      if (_emptyFields.size)
+        "size": null
+      else if (!_emptyFields.size && size != null)
+        "size": size,
+      if (_emptyFields.url)
+        "url": null
+      else if (!_emptyFields.url && url != null)
+        "url": url,
+      if (_emptyFields.previewUrl)
+        "previewUrl": null
+      else if (!_emptyFields.previewUrl && previewUrl != null)
         "previewUrl": previewUrl,
-      if (!_emptyFields.provider && provider != null) "provider": provider,
-      if (!_emptyFields.provider_metadata && provider_metadata != null)
+      if (_emptyFields.provider)
+        "provider": null
+      else if (!_emptyFields.provider && provider != null)
+        "provider": provider,
+      if (_emptyFields.provider_metadata)
+        "provider_metadata": null
+      else if (!_emptyFields.provider_metadata && provider_metadata != null)
         "provider_metadata": provider_metadata,
-      if (!_emptyFields.related && related != null) "related": related,
+      if (_emptyFields.related)
+        "related": []
+      else if (!_emptyFields.related && related != null)
+        "related": related,
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
       "id": id
@@ -6578,6 +7005,12 @@ class StrapiFiles {
       return StrapiFile.fromID(idOrData);
     }
     if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return StrapiFile.fromID(id);
+      }
       return StrapiFile.fromSyncedMap(idOrData);
     }
     return null;

@@ -5,9 +5,11 @@ import 'package:bapp/screens/business/branch_chooser.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
+import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 import '../../helpers/helper.dart';
 
@@ -19,17 +21,16 @@ class BusinessBranchSwitchWidget extends StatelessWidget {
         return GestureDetector(
           child: Row(
             children: [
-              FutureBuilder(
-                future: DefaultDataX.i.getValue("selectedBarnch"),
-                builder: (_, snap) {
-                  final data = snap.data;
-                  if (snap.connectionState == ConnectionState.done) {
-                    if (data is String) {
-                      return Text(
-                        data,
-                        style: Theme.of(context).textTheme.subtitle1,
-                      );
-                    }
+              Builder(
+                builder: (
+                  _,
+                ) {
+                  final business = UserX.i.user()?.business;
+                  if (business is Business) {
+                    return Text(
+                      business.name!,
+                      style: Theme.of(context).textTheme.subtitle1,
+                    );
                   }
                   return Text(
                     "Select a branch",
@@ -40,7 +41,10 @@ class BusinessBranchSwitchWidget extends StatelessWidget {
               SizedBox(
                 width: 4,
               ),
-              if (_branchChangeAllowed()) Icon(Icons.keyboard_arrow_down),
+              if (_branchChangeAllowed())
+                Icon(
+                  Icons.keyboard_arrow_down,
+                ),
             ],
           ),
         );

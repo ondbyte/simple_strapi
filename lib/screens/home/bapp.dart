@@ -13,6 +13,7 @@ import 'package:bapp/widgets/loading.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:get/get.dart';
 
 import 'business_home.dart';
 import 'customer_home.dart';
@@ -27,28 +28,18 @@ class _BappState extends State<Bapp> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Builder(
-          builder: (_) {
+        Obx(
+          () {
+            final alterEgoActivated =
+                UserX.i.user()?.alterEgoActivated ?? false;
             final role = EnumToString.fromString(
-                  UserRole.values,
-                  UserX.i.user()?.role?.name ?? "",
-                ) ??
-                UserRole.public;
-            switch (role) {
-              case UserRole.customer:
-              case UserRole.public:
-                return CustomerHome();
-              case UserRole.partner:
-              case UserRole.manager:
-              case UserRole.facilitator:
-              case UserRole.staff:
-                return BusinessHome(
-                  forRole: role,
-                );
-              default:
-                return Container(
-                  color: Colors.blue,
-                );
+                UserRole.values, UserX.i.user()?.role?.name ?? "");
+            if (alterEgoActivated) {
+              return BusinessHome(
+                forRole: role!,
+              );
+            } else {
+              return CustomerHome();
             }
           },
         ),

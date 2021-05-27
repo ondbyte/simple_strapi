@@ -35,14 +35,12 @@ class _BusinessProfileServicesTabState extends State<BusinessProfileServicesTab>
       return Text("ProductCategory  is empty");
     }
     return ListView.builder(
-      key: ValueKey("lvbldr"),
       padding: EdgeInsets.only(top: 15),
       physics: const NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       itemCount: catalogs.length,
       itemBuilder: (_, i) {
         return CatlogueWidget(
-          key: ValueKey("ctlgw"),
           cart: widget.cart,
           catalogue: catalogs[i],
           onServicesSelected: widget.onServicesSelected,
@@ -75,10 +73,8 @@ class _CatlogueWidgetState extends State<CatlogueWidget> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      key: ValueKey("bpstpad"),
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
-        key: ValueKey("bpstcol"),
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -104,10 +100,8 @@ class _CatlogueWidgetState extends State<CatlogueWidget> {
       (s) {
         list.add(
           Builder(
-            key: ValueKey(s.nameOverride),
             builder: (_) {
               return CatalogueItemWidget(
-                key: ValueKey("bfsscfld"),
                 item: s,
                 selected: widget.cart?.products?.any(
                         (element) => element.nameOverride == s.nameOverride) ??

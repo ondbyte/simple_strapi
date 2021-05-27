@@ -5,13 +5,19 @@ import 'package:bapp/screens/business/booking_flow/see_all_booking.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/stores/cloud_store.dart';
+import 'package:bapp/super_strapi/my_strapi/bookingX.dart';
+import 'package:bapp/super_strapi/my_strapi/userX.dart';
+import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
+import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/padded_text.dart';
 import 'package:bapp/widgets/tiles/colored_tile_box.dart';
+import 'package:bapp/widgets/tiles/error.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:intl/intl.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 import 'package:the_country_number/the_country_number.dart';
 
 class BusinessDashboardTab extends StatefulWidget {
@@ -24,160 +30,191 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox();
-    /* return Consumer3<CloudStore, BusinessStore, BookingFlow>(
-      builder: (_, cloudStore, businessStore, flow, __) {
-        return SafeArea(
-          child: CustomScrollView(
-            shrinkWrap: true,
-            slivers: [
-              SliverList(
-                delegate: SliverChildListDelegate(
-                  [
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(
-                                  height: 16,
-                                ),
-                                Consumer<CloudStore>(
-                                  builder: (_, authStore, __) {
-                                    return Text(
-                                      "Hello " + authStore.user.displayName,
-                                      style:
-                                          Theme.of(context).textTheme.headline1,
-                                    );
-                                  },
-                                ),
-                                Text(
-                                  "Here\'s your business highlights",
-                                  style: Theme.of(context).textTheme.subtitle1,
-                                ),
-                                if (_shouldShowHighlights())
-                                  Consumer<BusinessStore>(
-                                    builder: (_, businessStore, __) {
-                                      return Observer(
-                                        builder: (_) {
-                                          return Text(
-                                            "For " +
-                                                DateFormat("MMMM dd, yyyy")
-                                                    .format(
-                                                  _selectedDate.value,
-                                                ),
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyText1,
-                                          );
-                                        },
-                                      );
-                                    },
+    final user = UserX.i.user()!;
+    return Users.listenerWidget(
+      strapiObject: user,
+      builder: (_, user, userLoading) {
+        return Partners.listenerWidget(
+            strapiObject: user.partner!,
+            builder: (context, partner, partnerLoading) {
+              return Businesses.listenerWidget(
+                  strapiObject: user.business ?? partner.businesses!.first,
+                  builder: (context, selectedBusiness, loading) {
+                    return SafeArea(
+                      child: CustomScrollView(
+                        shrinkWrap: true,
+                        slivers: [
+                          SliverList(
+                            delegate: SliverChildListDelegate(
+                              [
+                                Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 16),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const SizedBox(
+                                              height: 16,
+                                            ),
+                                            Builder(
+                                              builder: (
+                                                _,
+                                              ) {
+                                                return Text(
+                                                  "Hello " + user.name!,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .headline1,
+                                                );
+                                              },
+                                            ),
+                                            Text(
+                                              "Here\'s your business highlights",
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .subtitle1,
+                                            ),
+                                            if (_shouldShowHighlights())
+                                              Builder(
+                                                builder: (
+                                                  _,
+                                                ) {
+                                                  return Observer(
+                                                    builder: (_) {
+                                                      return Text(
+                                                        "For " +
+                                                            DateFormat(
+                                                                    "MMMM dd, yyyy")
+                                                                .format(
+                                                              _selectedDate
+                                                                  .value,
+                                                            ),
+                                                        style: Theme.of(context)
+                                                            .textTheme
+                                                            .bodyText1,
+                                                      );
+                                                    },
+                                                  );
+                                                },
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                      if (_shouldShowHighlights())
+                                        IconButton(
+                                          icon: const Icon(
+                                              Icons.calendar_today_outlined),
+                                          onPressed: () async {
+                                            final selectedDate =
+                                                await showDatePicker(
+                                                    context: context,
+                                                    initialDate:
+                                                        _selectedDate.value,
+                                                    firstDate: DateTime.now()
+                                                        .subtract(
+                                                            const Duration(
+                                                                days: 365)),
+                                                    lastDate: DateTime.now());
+                                            act(() {
+                                              _selectedDate.value =
+                                                  selectedDate ??
+                                                      _selectedDate.value;
+                                            });
+                                          },
+                                        )
+                                    ],
                                   ),
+                                ),
+                                const SizedBox(
+                                  height: 20,
+                                ),
                               ],
                             ),
                           ),
                           if (_shouldShowHighlights())
-                            IconButton(
-                              icon: const Icon(Icons.calendar_today_outlined),
-                              onPressed: () async {
-                                final selectedDate = await showDatePicker(
-                                    context: context,
-                                    initialDate: _selectedDate.value,
-                                    firstDate: DateTime.now()
-                                        .subtract(const Duration(days: 365)),
-                                    lastDate: DateTime.now());
-                                act(() {
-                                  _selectedDate.value =
-                                      selectedDate ?? _selectedDate.value;
-                                });
-                              },
-                            )
+                            SliverList(
+                              delegate: SliverChildListDelegate(
+                                [
+                                  _getBusinessHighlights(),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          SliverList(
+                            delegate: SliverChildListDelegate(
+                              [
+                                PaddedText(
+                                  "Things that need your attention ",
+                                  style: Theme.of(context).textTheme.subtitle1,
+                                ),
+                                PaddedText(
+                                  "Action on below to get your business run smoothly ",
+                                  style: Theme.of(context).textTheme.bodyText1,
+                                ),
+                              ],
+                            ),
+                          ),
+                          SliverList(
+                            delegate: SliverChildListDelegate(
+                              [
+                                TapToReFetch<List<Booking>>(
+                                  fetcher: () => BookingX.i
+                                      .getUpcomingBookingsToBeAccepted(
+                                          selectedBusiness),
+                                  onLoadBuilder: (_) => LoadingWidget(),
+                                  onErrorBuilder: (_, e, s) {
+                                    return ErrorTile(message: "$e");
+                                  },
+                                  onSucessBuilder: (_, bookings) {
+                                    return BookingsSeeAllTile(
+                                      title: "New Bookings",
+                                      bookings: bookings,
+                                      titlePadding: const EdgeInsets.symmetric(
+                                          horizontal: 16),
+                                      childPadding: const EdgeInsets.symmetric(
+                                          horizontal: 8),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          SliverList(
+                            delegate: SliverChildListDelegate(
+                              [
+                                TapToReFetch<List<Booking>>(
+                                  fetcher: () => BookingX.i
+                                      .getUpcomingBookings(selectedBusiness),
+                                  onLoadBuilder: (_) => LoadingWidget(),
+                                  onErrorBuilder: (_, e, s) {
+                                    return ErrorTile(message: "$e");
+                                  },
+                                  onSucessBuilder: (_, bookings) {
+                                    return BookingsSeeAllTile(
+                                      title: "Upcoming Bookings",
+                                      bookings: bookings,
+                                      titlePadding: const EdgeInsets.symmetric(
+                                          horizontal: 16),
+                                      childPadding: const EdgeInsets.symmetric(
+                                          horizontal: 8),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                  ],
-                ),
-              ),
-              if (_shouldShowHighlights())
-                SliverList(
-                  delegate: SliverChildListDelegate(
-                    [
-                      _getBusinessHighlights(),
-                      SizedBox(
-                        height: 20,
-                      ),
-                    ],
-                  ),
-                ),
-              SliverList(
-                delegate: SliverChildListDelegate(
-                  [
-                    PaddedText(
-                      "Things that need your attention ",
-                      style: Theme.of(context).textTheme.subtitle1,
-                    ),
-                    PaddedText(
-                      "Action on below to get your business run smoothly ",
-                      style: Theme.of(context).textTheme.bodyText1,
-                    ),
-                  ],
-                ),
-              ),
-              SliverList(
-                delegate: SliverChildListDelegate(
-                  [
-                    Observer(
-                      builder: (_) {
-                        if (flow.branchBookings.isEmpty) {
-                          return const SizedBox();
-                        }
-                        return BookingsSeeAllTile(
-                          title: "New Bookings",
-                          bookings: flow.getNewBookings(),
-                          titlePadding:
-                              const EdgeInsets.symmetric(horizontal: 16),
-                          childPadding:
-                              const EdgeInsets.symmetric(horizontal: 8),
-                        );
-                      },
-                    )
-                  ],
-                ),
-              ),
-              SliverList(
-                delegate: SliverChildListDelegate(
-                  [
-                    Observer(
-                      builder: (_) {
-                        if (flow.branchBookings.isEmpty) {
-                          return const SizedBox();
-                        }
-                        return BookingsSeeAllTile(
-                          title: "Upcoming Bookings",
-                          bookings: flow.getUpcomingBookings(),
-                          titlePadding:
-                              const EdgeInsets.symmetric(horizontal: 16),
-                          childPadding:
-                              const EdgeInsets.symmetric(horizontal: 8),
-                        );
-                      },
-                    )
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
+                    );
+                  });
+            });
       },
     );
-  */
   }
 
   bool _shouldShowHighlights() {
@@ -239,5 +276,6 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
         );
       },
     );
-   */}
+   */
+  }
 }

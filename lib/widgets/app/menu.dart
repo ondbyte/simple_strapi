@@ -10,12 +10,15 @@ import 'package:bapp/screens/settings/settings.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/widgets/tiles/theme_switcher.dart';
+import 'package:enum_to_string/enum_to_string.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:get/state_manager.dart';
 import 'package:provider/provider.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 import 'bapp_navigator_widget.dart';
 
@@ -53,7 +56,7 @@ class _MenuState extends State<Menu> {
                     const SizedBox(
                       height: 20,
                     ),
-                    ..._getMenuItems(context, []),
+                    _getSwitchRoleMenuItem(context),
                     ThemeSwitcherTile(),
                   ],
                 );
@@ -65,31 +68,45 @@ class _MenuState extends State<Menu> {
     );
   }
 
-  List<Widget> _getMenuItems(BuildContext context, List<List<MenuItem>> items) {
-    var ws = <Widget>[];
-    items.forEach(
-      (element) {
-        element.forEach(
-          (e) {
-            ws.add(
-              ListTile(
-                title: Text(
-                  e.name,
-                  style: Theme.of(context).textTheme.subtitle2,
-                ),
-                trailing: Icon(e.icon),
-                onTap: () {
-                  _menuItemSelected(e.kind, context);
-                },
-              ),
+  Widget _getSwitchRoleMenuItem(
+    BuildContext context,
+  ) {
+    return Obx(
+      () {
+        var onTap;
+        String title;
+        final user = UserX.i.user();
+        if (user is! User) {
+          bPrint("noo user");
+          return SizedBox();
+        }
+        if (user.alterEgoActivated ?? false) {
+          onTap = () async {
+            final updated = user.copyWIth(alterEgoActivated: false);
+            final saved = await Users.update(updated);
+            UserX.i.user(saved);
+          };
+          title = "Switch to customer";
+        } else {
+          onTap = () async {
+            final updated = user.copyWIth(alterEgoActivated: true);
+            final saved = await Users.update(updated);
+            UserX.i.user(saved);
+          };
+          title = "Switch to business";
+        }
+        return Users.listenerWidget(
+          strapiObject: user,
+          builder: (_, user, loading) {
+            return ListTile(
+              title: Text(title),
+              subtitle: loading ? LinearProgressIndicator() : null,
+              onTap: onTap,
             );
           },
         );
-        ws.add(Divider());
       },
     );
-    if (ws.isNotEmpty) ws.removeLast();
-    return ws;
   }
 
   void _menuItemSelected(MenuItemKind kind, BuildContext context) {
@@ -126,7 +143,7 @@ class _MenuState extends State<Menu> {
       case MenuItemKind.logOut:
         {
           () async {
-            await FirebaseAuth.instance.signOut();
+            await fb.FirebaseAuth.instance.signOut();
             kBus.fire(AppEvents.reboot);
           }();
           break;

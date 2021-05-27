@@ -98,54 +98,59 @@ class BusinessX extends X {
   }
 
   Future<List<Timing>> getAvailableSlots(
-    Business business,
-    Employee employee,
-    DateTime date,
-  ) async {
-    final businessId = business.id;
-    final employeeId = employee.id;
-    final dayName = DateFormatters.dayName.format(date).toLowerCase();
-    if (businessId is! String && employeeId is String) {
-      throw BappImpossibleException("businessId or employeeId is null");
+      Business business, Employee employee, DateTime date,
+      {Key key = const ValueKey("getAvailableSlots")}) async {
+    ///check whether date is of now/today
+    final difference = DateTime.now().difference(date);
+    if (difference.inSeconds > 7) {
+      return [];
     }
-    final response = await StrapiCollection.customEndpoint(
-      collection: "businesses",
-      endPoint: "availableTimeSlots",
-      params: {
-        "businessId": "$businessId",
-        "employeeId": "$employeeId",
-        "date": "$date",
-        "dayName": "$dayName",
-      },
-    );
-    final data = response.isNotEmpty ? response.first : {};
-    if (data is Map) {
-      final String? error = data["error"];
-      if (error is String) {
-        throw throwExceptionForStrapiResponse(error, data);
+    return memoize(key, () async {
+      final businessId = business.id;
+      final employeeId = employee.id;
+      final dayName = DateFormatters.dayName.format(date).toLowerCase();
+      if (businessId is! String && employeeId is String) {
+        throw BappImpossibleException("businessId or employeeId is null");
       }
+      final response = await StrapiCollection.customEndpoint(
+        collection: "businesses",
+        endPoint: "availableTimeSlots",
+        params: {
+          "businessId": "$businessId",
+          "employeeId": "$employeeId",
+          "date": "$date",
+          "dayName": "$dayName",
+        },
+      );
+      final data = response.isNotEmpty ? response.first : {};
+      if (data is Map) {
+        final String? error = data["error"];
+        if (error is String) {
+          throw throwExceptionForStrapiResponse(error, data);
+        }
 
-      final freeTime = data["freeTime"];
+        final freeTime = data["freeTime"];
 
-      if (freeTime is List) {
-        final returnable = <Timing>[];
-        freeTime.forEach(
-          (e) {
-            final start = DateTime.tryParse(e["start"]);
-            final end = DateTime.tryParse(e["end"]);
-            if (start is DateTime && end is DateTime) {
-              returnable.add(
-                Timing(from: start, to: end),
-              );
-            } else {
-              bPrint("NOOOOOOOOOOOOOOOO");
-            }
-          },
-        );
-        return returnable;
+        if (freeTime is List) {
+          final returnable = <Timing>[];
+          freeTime.forEach(
+            (e) {
+              final start = DateTime.tryParse(e["start"])?.toLocal();
+              final end = DateTime.tryParse(e["end"])?.toLocal();
+              if (start is DateTime && end is DateTime) {
+                returnable.add(
+                  Timing(from: start, to: end),
+                );
+              } else {
+                bPrint("NOOOOOOOOOOOOOOOO");
+              }
+            },
+          );
+          return returnable;
+        }
       }
-    }
-    throw EmptyResponseException();
+      throw EmptyResponseException();
+    });
   }
 
   Future<Map<String, List<Employee>>> availableEmployees(

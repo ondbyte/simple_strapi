@@ -1,9 +1,11 @@
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
+import 'package:simple_strapi/simple_strapi.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BookingX extends X {
@@ -33,10 +35,53 @@ class BookingX extends X {
       if (newBooking is! Booking) {
         return null;
       }
-      final copied = user.copyWIth(cart: booking);
+      final copied = user.copyWIth(cart: newBooking);
       UserX.i.user(await Users.update(copied));
       return booking;
     });
+  }
+
+  Future<Booking?> clearCart() async {
+    var booking = UserX.i.user()?.cart;
+    if (booking is Booking) {
+      booking = booking.setNull(products: true, packages: true, business: true);
+      final cleared = await Bookings.update(booking);
+      final user = await Users.me(asFindOne: true);
+      UserX.i.user(user);
+      bPrint("booking");
+      print(booking);
+      print(cleared);
+      return booking;
+    }
+  }
+
+  Future<Booking?> placeBooking({
+    required Booking booking,
+    required Business business,
+    required User user,
+    required Employee employee,
+    required Timing timeSlot,
+    BookingStatus? status,
+  }) async {
+    final fromTime = timeSlot.from!;
+    final duration =
+        booking.products!.fold<int>(0, (pv, e) => pv + e.duration!);
+    final endTime = fromTime.add(Duration(minutes: duration));
+    booking = booking.copyWIth(
+      bookedOn: DateTime.now(),
+      business: business,
+      bookingStartTime: fromTime,
+      bookingEndTime: endTime,
+      bookingStatus: status ?? BookingStatus.pendingApproval,
+      employee: employee,
+    );
+    final newBooking = (await Bookings.create(booking));
+    if (newBooking is Booking) {
+      final newUser =
+          user.copyWIth(bookings: [...user.bookings ?? [], newBooking]);
+      await Users.update(newUser);
+    }
+    return newBooking;
   }
 
   Future<Booking> addBookingToCart(Booking booking) async {
@@ -45,16 +90,6 @@ class BookingX extends X {
       booking.toMap(),
     );
     return booking;
-  }
-
-  Future<Booking?> clearCart() async {
-    final map = await DefaultDataX.i.delete(DefaultDataKeys.lastBooking);
-    if (map is Map<String, dynamic>) {
-      final booking = Booking.fromMap(map);
-      if (booking is Booking) {
-        return booking;
-      }
-    }
   }
 
   bool isActive(Booking booking) {
@@ -156,5 +191,52 @@ class BookingX extends X {
       return updated;
     }
     return booking;
+  }
+
+  Future<List<Booking>> getUpcomingBookings(Business business) {
+    return _getUpcomingBookingsOfStatus(business, [
+      BookingStatus.accepted,
+      BookingStatus.walkin,
+    ]);
+  }
+
+  Future<List<Booking>> getUpcomingBookingsToBeAccepted(Business business) {
+    return _getUpcomingBookingsOfStatus(
+      business,
+      [
+        BookingStatus.pendingApproval,
+      ],
+    );
+  }
+
+  Future<List<Booking>> _getUpcomingBookingsOfStatus(
+      Business business, List<BookingStatus> statuses) async {
+    final q = StrapiCollectionQuery(
+      collectionName: Booking.collectionName,
+      requiredFields: Booking.fields(),
+    )
+      ..whereModelField(
+        field: Booking.fields.business,
+        query: StrapiModelQuery(
+          requiredFields: Business.fields(),
+        )..whereField(
+            field: Business.fields.id,
+            query: StrapiFieldQuery.equalTo,
+            value: business.id,
+          ),
+      )
+      ..whereField(
+        field: Booking.fields.bookingStartTime,
+        query: StrapiFieldQuery.greaterThan,
+        value: DateTime.now(),
+      )
+      ..whereField(
+        field: Booking.fields.bookingStatus,
+        query: StrapiFieldQuery.includesInAnArray,
+        value: [
+          ...statuses.map((e) => EnumToString.convertToString(e)).toList()
+        ],
+      );
+    return await Bookings.executeQuery(q);
   }
 }

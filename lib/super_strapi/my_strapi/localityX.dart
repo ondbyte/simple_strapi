@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:bapp/helpers/exceptions.dart';
 import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x.dart';
@@ -65,20 +66,27 @@ class LocalityX extends X {
       key ?? ValueKey("getCountryFor"),
       () async {
         final targetCity = city ?? locality?.city;
-        final query = StrapiCollectionQuery(
-          collectionName: Country.collectionName,
-          requiredFields: Country.fields(),
-        )..whereCollectionField(
-            field: Country.fields.cities,
-            query: StrapiCollectionQuery(
-              collectionName: City.collectionName,
-              requiredFields: City.fields(),
-            )..whereField(
-                field: City.fields.id,
-                query: StrapiFieldQuery.equalTo,
-                value: targetCity?.id,
-              ),
-          );
+        final id = targetCity?.id;
+        late final query;
+        if (id is String) {
+          final subQuery = StrapiCollectionQuery(
+            collectionName: City.collectionName,
+            requiredFields: City.fields(),
+          )..whereField(
+              field: City.fields.id,
+              query: StrapiFieldQuery.equalTo,
+              value: id,
+            );
+          query = StrapiCollectionQuery(
+            collectionName: Country.collectionName,
+            requiredFields: Country.fields(),
+          )..whereCollectionField(
+              field: Country.fields.cities,
+              query: subQuery,
+            );
+        } else {
+          throw BappException(msg: "target city id is null");
+        }
         final all = await Countries.executeQuery(query);
         if (all.isNotEmpty) {
           print(all);

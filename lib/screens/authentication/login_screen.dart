@@ -39,6 +39,14 @@ class _LoginScreenState extends State<LoginScreen> {
   Rx<bool> _askOTP = false.obs, _loading = false.obs;
   List<Completer<String>>? _otpFutureCompleters = [];
 
+  late ValueKey _getCountryKey;
+
+  @override
+  void initState() {
+    super.initState();
+    _getCountryKey = ValueKey(DateTime.now());
+  }
+
   @override
   void dispose() {
     _otpFutureCompleters = null;
@@ -57,17 +65,21 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
       body: TapToReFetch<Country?>(
+        onTap: () => _getCountryKey = ValueKey(DateTime.now()),
         fetcher: () {
           return LocalityX.i.getCountryFor(
+            key: _getCountryKey,
             city: UserX.i.user()?.city ?? DefaultDataX.i.defaultData()?.city,
             locality: UserX.i.user()?.locality ??
-                DefaultDataX.i.defaultData()?.locality,
+                DefaultDataX.i.defaultData()!.locality,
           );
         },
         onLoadBuilder: (_) {
           return LoadingWidget();
         },
         onErrorBuilder: (_, e, s) {
+          bPrint(e);
+          bPrint(s);
           return ErrorTile(message: "Some error occured tap to refresh");
         },
         onSucessBuilder: (_, country) {

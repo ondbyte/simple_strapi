@@ -4,6 +4,11 @@ class BappException implements Exception {
   final String msg;
   final String whatHappened;
   const BappException({this.msg = "", this.whatHappened = ""});
+
+  @override
+  String toString() {
+    return "$msg\n$whatHappened";
+  }
 }
 
 class BappDataBaseError extends BappException {

@@ -1,12 +1,6 @@
-import 'dart:io';
-
-import 'package:bapp/fcm.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
-import 'package:bapp/screens/home/bapp.dart';
-import 'package:bapp/screens/misc/contextual_message.dart';
-import 'package:bapp/super_strapi/my_strapi/bookingX.dart';
 import 'package:bapp/super_strapi/my_strapi/businessX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
@@ -17,12 +11,8 @@ import 'package:bapp/widgets/tiles/error.dart';
 import 'package:bapp/widgets/tiles/rr_list_tile.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:mobx/mobx.dart';
-import 'package:provider/provider.dart';
-import 'package:simple_strapi/simple_strapi.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -38,8 +28,7 @@ class SelectTimeSlotScreen extends StatefulWidget {
 }
 
 class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
-  var _holiday = Observable(false);
-  var _controller = CalendarController();
+  final _controller = CalendarController();
 
   DateTime? _selectedDay;
   Timing? _selected;
@@ -59,7 +48,7 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
             }
             return BottomPrimaryButton(
                 label: "Confirm booking",
-                onPressed: (_selected is! DayTiming)
+                onPressed: (_selected is! Timing)
                     ? null
                     : () async {
                         BappNavigator.pop(context, _selected as Timing);
@@ -140,11 +129,8 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
                 )
               ];
             },
-            body: Observer(
+            body: Builder(
               builder: (_) {
-                if (_holiday.value) {
-                  return const Text("Its holiday");
-                }
                 return _getTimeSlotTabs();
               },
             ),
@@ -156,22 +142,25 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
 
   int _getInitialIndexForPeriodOfTheDay() {
     final now = DateTime.now().toTimeOfDay();
-    if (now.isAM()) {
+    if (now.hour <= 11 && now.minute <= 59) {
       return 0;
     }
-    if (now.hour < 3 && now.minute <= 59) {
+    if (now.hour < 15 && now.minute <= 59) {
       return 1;
     }
     return 2;
   }
 
+  var getAvailableSlotsKey = ValueKey(DateTime.now());
   Widget _getTimeSlotTabs() {
     return TapToReFetch<List<Timing>>(
       fetcher: () => BusinessX.i.getAvailableSlots(
         widget.business,
         widget.employee,
         _selectedDay ?? DateTime.now(),
+        key: getAvailableSlotsKey,
       ),
+      onTap: () => getAvailableSlotsKey = ValueKey(DateTime.now()),
       onLoadBuilder: (_) => LoadingWidget(),
       onErrorBuilder: (_, e, s) => ErrorTile(message: "$e"),
       onSucessBuilder: (_, timingsList) {
@@ -185,14 +174,32 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
             TimeSlotsWidget(
               key: UniqueKey(),
               fromToTimings: sorted["morning"]!,
+              selected: _selected,
+              onATimeSlotSelected: (timeSlot) {
+                setState(() {
+                  _selected = timeSlot;
+                });
+              },
             ),
             TimeSlotsWidget(
               key: UniqueKey(),
               fromToTimings: sorted["afterNoon"]!,
+              selected: _selected,
+              onATimeSlotSelected: (timeSlot) {
+                setState(() {
+                  _selected = timeSlot;
+                });
+              },
             ),
             TimeSlotsWidget(
               key: UniqueKey(),
               fromToTimings: sorted["evening"]!,
+              selected: _selected,
+              onATimeSlotSelected: (timeSlot) {
+                setState(() {
+                  _selected = timeSlot;
+                });
+              },
             ),
           ],
         );
@@ -202,15 +209,28 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
 }
 
 class TimeSlotsWidget extends StatefulWidget {
+  final Function(Timing?) onATimeSlotSelected;
+  final Timing? selected;
   final List<Timing> fromToTimings;
 
-  const TimeSlotsWidget({Key? key, required this.fromToTimings})
-      : super(key: key);
+  const TimeSlotsWidget({
+    Key? key,
+    required this.fromToTimings,
+    required this.onATimeSlotSelected,
+    required this.selected,
+  }) : super(key: key);
   @override
   _TimeSlotsWidgetState createState() => _TimeSlotsWidgetState();
 }
 
 class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
+  Timing? selectedTiming;
+  @override
+  void initState() {
+    super.initState();
+    selectedTiming = widget.selected;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Builder(builder: (_) {
@@ -232,7 +252,14 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
           }
           return TimeSlot(
             label: label,
-            onClicked: (b) {},
+            selected: widget.fromToTimings[i] == selectedTiming,
+            onClicked: (b) {
+              setState(() {
+                print("yoooolo$b");
+                selectedTiming = b ? widget.fromToTimings[i] : null;
+                widget.onATimeSlotSelected(selectedTiming);
+              });
+            },
           );
         },
       );
@@ -254,35 +281,27 @@ class TimeSlot extends StatefulWidget {
 
 class _TimeSlotState extends State<TimeSlot> {
   final format = DateFormat("hh:mm a");
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
-      setState(() {});
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return RRShape(
-      child: Observer(
+      child: Builder(
         builder: (_) {
-          final _selected = widget.selected;
           return GestureDetector(
             onTap: () {
-              widget.onClicked?.call(!_selected);
+              widget.onClicked?.call(!widget.selected);
             },
             child: Container(
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                  color: _selected
+                  color: widget.selected
                       ? Theme.of(context).primaryColor
                       : Theme.of(context).cardColor,
                   borderRadius: BorderRadius.all(Radius.circular(4))),
               margin: EdgeInsets.all(8),
               child: DefaultTextStyle(
                 style: Theme.of(context).textTheme.bodyText1?.apply(
-                        color: _selected ? Colors.white : Colors.black) ??
+                        color: widget.selected ? Colors.white : Colors.black) ??
                     TextStyle(),
                 child: Text(format.format(widget.label.toDateAndTime())),
               ),

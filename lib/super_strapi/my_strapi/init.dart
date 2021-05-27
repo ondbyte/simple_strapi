@@ -8,10 +8,10 @@ class StrapiSettings {
 
   Future init() async {
     Strapi.i.shouldUseHttps = false;
-    Strapi.i.host = "192.168.43.212:1337";
-    Strapi.i.verbose = true;
+    Strapi.i.host = "192.168.29.212:1337";
+    Strapi.i.verbose = false;
     Strapi.i.maxListenersForAnObject = 8;
-    Strapi.i.maxTimeOutInMillis = 30000;
+    Strapi.i.maxTimeOutInMillis = 60000;
     sPrint(
       "${Strapi.i.host} as host, using ${Strapi.i.shouldUseHttps ? "HTTPS" : "HTTP"} ${Strapi.i.verbose ? ", and is being verbose" : ""}",
     );

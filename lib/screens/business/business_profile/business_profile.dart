@@ -6,6 +6,8 @@ import 'package:bapp/screens/business/booking_flow/select_time_slot.dart';
 import 'package:bapp/screens/business/business_profile/tabs/about_tab.dart';
 import 'package:bapp/screens/business/business_profile/tabs/services_tab.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
+import 'package:bapp/screens/home/bapp.dart';
+import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/super_strapi/my_strapi/bookingX.dart';
 import 'package:bapp/super_strapi/my_strapi/reviewX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
@@ -28,9 +30,11 @@ class BusinessProfileScreen extends StatefulWidget {
 }
 
 class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
+  var _getCartKey = ValueKey(DateTime.now());
+
   Future _saveScreenData() async {
     final user = UserX.i.user();
-    final booking = user?.cart;
+    final booking = user?.cart?.copyWIth(business: widget.business);
     if (user is User && booking is Booking) {
       Bookings.update(booking);
       Users.update(user);
@@ -54,10 +58,18 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
             }
             var _showReviews = false;
             return TapToReFetch<Booking?>(
-              fetcher: () => BookingX.i.getCart(),
+              fetcher: () => BookingX.i.getCart(key: _getCartKey),
+              onTap: () => _getCartKey = ValueKey(DateTime.now()),
+              onErrorBuilder: (_, e, s) {
+                bPrint(e);
+                bPrint(s);
+                return ErrorTile(message: "Tap to refresh");
+              },
+              onLoadBuilder: (_) => LoadingWidget(),
               onSucessBuilder: (_, booking) => Scaffold(
                 bottomNavigationBar: Obx(
                   () {
+                    bPrint("booking is null: ${booking is Booking}");
                     final user = UserX.i.user();
                     if (user is User) {
                       final booking = user.cart;
@@ -71,11 +83,12 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                           return SizedBox();
                         }
                         final products = booking.products;
-                        if (products is! List) {
+                        if (products is! List || (products?.isEmpty ?? true)) {
                           return SizedBox();
                         }
                         final title = getNProductsSelectedString(
-                            products as List<Product>);
+                          products as List<Product>,
+                        );
                         final subTitle = getProductsDurationString(products);
                         return BottomPrimaryButton(
                           label: "Book an Appointment",
@@ -101,6 +114,30 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                   employee: employee,
                                 ),
                               );
+                              if (timeSlot is Timing) {
+                                BappNavigator.pushAndRemoveAll(
+                                  context,
+                                  ContextualMessageScreen(
+                                    buttonText: "Back to Home",
+                                    init: () async {
+                                      await BookingX.i.placeBooking(
+                                        user: user,
+                                        business: business,
+                                        booking: booking,
+                                        employee: employee,
+                                        timeSlot: timeSlot,
+                                      );
+                                      await BookingX.i.clearCart();
+                                    },
+                                    onButtonPressed: (context) {
+                                      BappNavigator.pushAndRemoveAll(
+                                          context, Bapp());
+                                    },
+                                    message:
+                                        "Your booking has been placed, waiting to be accepted by the business, track it the bookings tab",
+                                  ),
+                                );
+                              }
                             }
                           },
                         );
@@ -201,11 +238,9 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                           ),
                         ),
                         SliverList(
-                          key: ValueKey("bfsscfldsl"),
                           delegate: SliverChildListDelegate(
                             [
                               BusinessTileWidget(
-                                key: ValueKey("bfsscfldbtw"),
                                 titleStyle:
                                     Theme.of(context).textTheme.headline1,
                                 branch: business,
@@ -214,31 +249,27 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                     horizontal: 16, vertical: 10),
                                 onTrailingTapped: () {},
                               ),
-                              Builder(
-                                  key: ValueKey("bfsscfldblr3"),
-                                  builder: (_) {
-                                    return !_showReviews
-                                        ? getBappTabBar(
-                                            context,
-                                            [
-                                              const Text("Services"),
-                                              const Text("About"),
-                                              /* if (false) const Text("Offers"),
+                              Builder(builder: (_) {
+                                return !_showReviews
+                                    ? getBappTabBar(
+                                        context,
+                                        [
+                                          const Text("Services"),
+                                          const Text("About"),
+                                          /* if (false) const Text("Offers"),
                                   if (false) const Text("Packages"), */
-                                            ],
-                                          )
-                                        : SizedBox();
-                                  })
+                                        ],
+                                      )
+                                    : SizedBox();
+                              })
                             ],
                           ),
                         ),
                       ];
                     },
                     body: Stack(
-                      key: ValueKey("bfsscfldstck"),
                       children: [
                         Builder(
-                          key: ValueKey("bfsscfldblr4"),
                           builder: (_) {
                             if (_showReviews) {
                               return Container(
@@ -282,10 +313,8 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                               );
                             }
                             return TabBarView(
-                              key: ValueKey("bfsscfldtbv"),
                               children: [
                                 BusinessProfileServicesTab(
-                                  key: ValueKey("bfsscflbpstd"),
                                   keepAlive: () => mounted,
                                   business: business,
                                   cart: UserX.i.user()?.cart,
@@ -293,10 +322,16 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                     bPrint(products);
                                     final user = UserX.i.user();
                                     if (user is! User) {
+                                      bPrint(
+                                        "User is null at business profile",
+                                      );
                                       return;
                                     }
                                     ;
                                     if (booking is! Booking) {
+                                      bPrint(
+                                        "booking is null at business profile",
+                                      );
                                       return;
                                     }
                                     final copied =
@@ -309,7 +344,6 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                   },
                                 ),
                                 BusinessProfileAboutTab(
-                                  key: ValueKey("bfsscfld"),
                                   business: business,
                                 ),
                               ],
@@ -321,8 +355,6 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                   ),
                 ),
               ),
-              onErrorBuilder: (_, e, s) => ErrorTile(message: "Tap to refresh"),
-              onLoadBuilder: (_) => SizedBox(),
             );
           },
         ),

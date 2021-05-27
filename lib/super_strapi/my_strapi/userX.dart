@@ -17,13 +17,21 @@ class UserX {
   bool get userNotPresent => !userPresent;
 
   Future<User?> init() async {
-    final token = await DefaultDataX.i.getValue("token", defaultValue: "");
-    if (token.isEmpty) {
-      return null;
+    try {
+      final token = await DefaultDataX.i.getValue("token", defaultValue: "");
+      if (token.isEmpty) {
+        return null;
+      }
+      Strapi.i.strapiToken = token;
+      var newUser = await Users.me(asFindOne: true);
+      user(newUser);
+      return user.value;
+    } on StrapiResponseException catch (e) {
+      if (e.response.statusCode == 401) {
+        ///needs relogin
+        await DefaultDataX.i.saveValue("token", "");
+      }
     }
-    Strapi.i.strapiToken = token;
-    user(await Users.me(asFindOne: true));
-    return user.value;
   }
 
   Future<User?> loginWithFirebase(

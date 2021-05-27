@@ -48,7 +48,7 @@ class _PickAPlaceScreenState extends State<PickAPlaceScreen> {
         return ErrorTile(message: "tap to refresh");
       },
       onSucessBuilder: (_, countries) {
-        final data = countries ?? [];
+        final data = countries;
         return Scaffold(
           appBar: AppBar(
             automaticallyImplyLeading: true,

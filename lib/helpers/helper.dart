@@ -8,7 +8,6 @@ import 'package:bapp/config/constants.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:device_info/device_info.dart';
 import 'package:enum_to_string/enum_to_string.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart' hide Action;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Action;
@@ -250,6 +249,34 @@ class BappImpossibleException implements Exception {
 
 class DateFormatters {
   static final dayName = DateFormat.EEEE();
+  static final at = DateFormat.EEEE();
+}
+
+bool isCancellableBooking(Booking booking) {
+  switch (booking.bookingStatus) {
+    case BookingStatus.cancelledByUser:
+    case BookingStatus.cancelledByStaff:
+    case BookingStatus.cancelledByReceptionist:
+    case BookingStatus.cancelledByManager:
+    case BookingStatus.cancelledByOwner:
+    case BookingStatus.walkin:
+    case BookingStatus.ongoing:
+    case BookingStatus.finished:
+    case BookingStatus.noShow:
+    case BookingStatus.halfWayThrough:
+      return false;
+    case BookingStatus.pendingApproval:
+    case BookingStatus.accepted:
+      return true;
+    default:
+      return false;
+  }
+}
+
+List<Booking> getBookingsForDay(List<Booking> bookings, DateTime day) {
+  return bookings
+      .where((element) => element.bookingStartTime!.isDay(day))
+      .toList();
 }
 
 String getNProductsSelectedString(List<Product> products) {
@@ -262,6 +289,16 @@ String getProductsDurationString(List<Product> products) {
   return "total duration of $duration minutes";
 }
 
+String getProductsCostString(List<Product> products) {
+  final duration =
+      products.fold<double>(0, (pv, product) => pv + (product.price ?? 0.0));
+  return "total of $duration AED";
+}
+
+String getOnForTime(DateTime date) {
+  return "On ${DateFormat("MMM d, h:mm a").format(date)}";
+}
+
 List<Timing> divideTimingIntoChunksOfDuration(Timing timing,
     {Duration duration = const Duration(minutes: 5)}) {
   final returnable = <Timing>[];
@@ -269,10 +306,12 @@ List<Timing> divideTimingIntoChunksOfDuration(Timing timing,
   while (max is DateTime &&
       start is DateTime &&
       end is DateTime &&
-      end.isBefore(max)) {
+      (end.isBefore(max) || end.isAtSameMomentAs(max))) {
     returnable.add(
       Timing(from: start, to: end),
     );
+    start = end;
+    end = start.add(duration);
   }
   return returnable;
 }
@@ -284,19 +323,19 @@ Map<String, List<Timing>> sortTimingsForPeriodOfTheDay(List<Timing> timings) {
 
   final compare = (DateTime date) {
     final now = date.toTimeOfDay();
-    if (now.isAM()) {
+    if (now.hour <= 11 && now.minute <= 59) {
       return 0;
     }
-    if (now.hour < 3 && now.minute <= 59) {
+    if (now.hour <= 14 && now.minute <= 59) {
       return 1;
     }
     return 2;
   };
   timings.forEach((timing) {
     final compared = compare(timing.from!);
-    if (compared == 1) {
+    if (compared == 0) {
       morning.add(timing);
-    } else if (compared == 2) {
+    } else if (compared == 1) {
       afterNoon.add(timing);
     } else {
       evening.add(timing);

@@ -2,6 +2,7 @@ import 'package:bapp/classes/firebase_structures/business_branch.dart';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/helpers/exceptions.dart';
 import 'package:bapp/helpers/extensions.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/addbusiness/choose_category.dart';
 import 'package:bapp/screens/business/booking_flow/review.dart';
 import 'package:bapp/screens/business/business_profile/business_profile.dart';
@@ -102,12 +103,12 @@ class _DiscoverTabState extends State<DiscoverTab> {
                       height: 20,
                     ),
                     _getCategoriesScroller(context),
-                    if (false)
+                    if (UserX.i.userPresent)
                       // ignore: dead_code
                       const SizedBox(
                         height: 30,
                       ),
-                    if (false)
+                    if (UserX.i.userPresent)
                       CompleteYourBookingTile(
                         padding: EdgeInsets.symmetric(horizontal: 16),
                       ),
@@ -126,7 +127,6 @@ class _DiscoverTabState extends State<DiscoverTab> {
                 sliver: SliverList(
                   delegate: SliverChildListDelegate(
                     [
-                      if (UserX.i.userPresent) _getCompleteOrder(context),
                       if (UserX.i.userPresent)
                         _getHowWasYourExperience(context),
                       const SizedBox(
@@ -167,13 +167,15 @@ class _DiscoverTabState extends State<DiscoverTab> {
             DateTime.now(),
           ),
           onErrorBuilder: (_, e, s) {
+            bPrint(e);
+            bPrint(s);
             return ErrorTile(message: "some error occured, tap to refresh");
           },
           onLoadBuilder: (_) {
             return LoadingWidget();
           },
           onSucessBuilder: (_, businesses) {
-            final data = businesses ?? [];
+            final data = businesses;
             return LayoutBuilder(
               builder: (_, cons) {
                 if (data.isNotEmpty) {
@@ -295,10 +297,6 @@ class _DiscoverTabState extends State<DiscoverTab> {
         ); */
       },
     );
-  }
-
-  Widget _getCompleteOrder(BuildContext context) {
-    return SizedBox();
   }
 
   Widget _getFeaturedScroller(context) {

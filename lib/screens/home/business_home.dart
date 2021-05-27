@@ -14,15 +14,16 @@ import 'package:bapp/widgets/business/business_branch_switch.dart';
 import 'package:bapp/widgets/app/menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:get/state_manager.dart';
 import 'package:provider/provider.dart';
 
 import '../../stores/business_store.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BusinessHome extends StatefulWidget {
-  final UserRole? forRole;
+  final UserRole forRole;
 
-  const BusinessHome({Key? key, this.forRole}) : super(key: key);
+  const BusinessHome({Key? key, required this.forRole}) : super(key: key);
   @override
   _BusinessHomeState createState() => _BusinessHomeState();
 }
@@ -33,56 +34,60 @@ class _BusinessHomeState extends State<BusinessHome> {
 
   @override
   Widget build(BuildContext context) {
-    _tabs.clear();
-    _tabs.addAll([
-      BusinessDashboardTab(),
-      BusinessBookingsTab(),
-      if (_shouldShowToolkit) BusinessToolkitTab(),
-      UpdatesTab(),
-    ]);
-    return Builder(builder: (_) {
-      return Scaffold(
-        appBar: _selectedPage != _tabs.length - 1
-            ? AppBar(
-                automaticallyImplyLeading: false,
-                title: BusinessBranchSwitchWidget(),
-              )
-            : null,
-        endDrawer: Menu(),
-        body: Builder(
-          builder: (_) {
-            return FutureBuilder(
-              future: DefaultDataX.i.getValue("selectedBusiness"),
-              builder: (_, snap) {
-                final id = snap.data ?? "";
-                final business = UserX.i
-                    .user()
-                    ?.partner
-                    ?.businesses
-                    ?.firstWhere((element) => element.id == id);
-                if (business is! Business) {
-                  return Center(
-                    child: Text(
-                      "No business is selected",
-                      textAlign: TextAlign.center,
-                    ),
-                  );
-                }
-                return IndexedStack(
-                  children: _tabs,
-                  index: _selectedPage,
+    return Obx(() {
+      final user = UserX.i.user();
+      if (user is! User) {
+        return Text("No user present");
+      }
+      _tabs.clear();
+      _tabs.addAll([
+        BusinessDashboardTab(),
+        BusinessBookingsTab(),
+        if (_shouldShowToolkit) BusinessToolkitTab(),
+        UpdatesTab(),
+      ]);
+      return Builder(
+        builder: (_) {
+          return Scaffold(
+            appBar: _selectedPage != _tabs.length - 1
+                ? AppBar(
+                    automaticallyImplyLeading: false,
+                    title: BusinessBranchSwitchWidget(),
+                  )
+                : null,
+            endDrawer: Menu(),
+            body: Builder(
+              builder: (_) {
+                return Builder(
+                  builder: (
+                    _,
+                  ) {
+                    final business = user.business;
+                    if (business is! Business) {
+                      return Center(
+                        child: Text(
+                          "No business is selected",
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    }
+                    return IndexedStack(
+                      index: _selectedPage,
+                      children: _tabs,
+                    );
+                  },
                 );
               },
-            );
-          },
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          // selectedFontSize: 14,
-          onTap: (i) {},
-          currentIndex: _selectedPage,
-          items: [..._filterBottomNavigations()],
-        ),
+            ),
+            bottomNavigationBar: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              // selectedFontSize: 14,
+              onTap: (i) {},
+              currentIndex: _selectedPage,
+              items: [..._filterBottomNavigations()],
+            ),
+          );
+        },
       );
     });
   }

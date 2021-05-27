@@ -45,11 +45,11 @@ class BookingsSeeAllTile extends StatelessWidget {
         return BookingTile(
           booking: bookings[i],
           isCustomerView: false,
-          onTap: () {
+          onTap: (booking) {
             BappNavigator.push(
               context,
               BookingDetailsScreen(
-                booking: bookings[i],
+                booking: booking,
                 isCustomerView: false,
               ),
             );
@@ -82,11 +82,11 @@ class _AllBookingsScreenState extends State<AllBookingsScreen> {
           return BookingTile(
             booking: widget.bookings[i],
             isCustomerView: false,
-            onTap: () {
+            onTap: (booking) {
               BappNavigator.push(
                 context,
                 BookingDetailsScreen(
-                  booking: widget.bookings[i],
+                  booking: booking,
                   isCustomerView: false,
                 ),
               );

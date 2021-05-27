@@ -26,7 +26,7 @@ class FirebaseX extends X {
     final completer = Completer<fba.User>();
     _userChangesSubscription =
         fba.FirebaseAuth.instance.userChanges().listen((newUser) async {
-      if (newUser is User) {
+      if (newUser is fba.User) {
         _newFirebaseUser(newUser);
       }
       completer.cautiousComplete(newUser);
@@ -48,6 +48,7 @@ class FirebaseX extends X {
       return;
     }
     final u = await UserX.i.loginWithFirebase(uid, email, name);
+    print(u);
     print("USERRRR");
     print(u);
   }

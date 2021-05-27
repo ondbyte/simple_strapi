@@ -35,8 +35,7 @@ class _CancellationConfirmDialogState extends State<CancellationConfirmDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox();
-    /* return WillPopScope(
+    return WillPopScope(
       onWillPop: () async {
         BappNavigator.pop(context, CancellationConfirm());
         return false;
@@ -50,12 +49,14 @@ class _CancellationConfirmDialogState extends State<CancellationConfirmDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(widget.message),
-              SizedBox(height: 20,),
+              SizedBox(
+                height: 20,
+              ),
               if (widget.needReason)
                 TextFormField(
                   decoration: InputDecoration(labelText: "Reason"),
                   validator: (s) {
-                    if (s.isEmpty) {
+                    if (s?.isEmpty ?? true) {
                       return "Enter a reason";
                     }
                     return null;
@@ -65,10 +66,9 @@ class _CancellationConfirmDialogState extends State<CancellationConfirmDialog> {
           ),
         ),
         actions: [
-          FlatButton(
-            child: Text("Yes"),
+          TextButton(
             onPressed: () {
-              if (!_formKey.currentState.validate()) {
+              if (!(_formKey.currentState?.validate() ?? false)) {
                 return;
               }
               BappNavigator.pop(
@@ -79,19 +79,19 @@ class _CancellationConfirmDialogState extends State<CancellationConfirmDialog> {
                 ),
               );
             },
+            child: Text("Yes"),
           ),
-          FlatButton(
-            child: Text("No"),
+          TextButton(
             onPressed: () {
               BappNavigator.pop(
                 context,
                 CancellationConfirm(),
               );
             },
+            child: Text("No"),
           ),
         ],
       ),
     );
-   */
   }
 }

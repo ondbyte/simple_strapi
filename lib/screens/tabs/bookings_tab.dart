@@ -1,12 +1,15 @@
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/screens/business/booking_flow/booking_details.dart';
+import 'package:bapp/super_strapi/my_strapi/bookingX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
+import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
 import 'package:bapp/widgets/bapp_calendar.dart';
 import 'package:bapp/widgets/login_widget.dart';
 import 'package:bapp/widgets/tiles/customer_booking_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import '../../classes/firebase_structures/business_timings.dart';
@@ -39,7 +42,7 @@ class _BookingsTabState extends State<BookingsTab> {
           builder: (_, o) {
             return Builder(
               builder: (_) {
-                return UserX.i.userPresent
+                return UserX.i.userNotPresent
                     ? AskToLoginWidget(
                         loginReason: LoginConfig.bookingTabLoginReason.primary,
                         secondaryReason:
@@ -51,7 +54,7 @@ class _BookingsTabState extends State<BookingsTab> {
                           SliverList(
                             delegate: SliverChildListDelegate(
                               [
-                                _getBookingsScroll(),
+                                _getBookingsScroll(UserX.i.user()!),
                               ],
                             ),
                           )
@@ -65,7 +68,7 @@ class _BookingsTabState extends State<BookingsTab> {
     );
   }
 
-  Widget _getLandscape() {
+  Widget _getLandscape(User user) {
     return LayoutBuilder(builder: (_, cons) {
       return Row(
         children: [
@@ -76,7 +79,7 @@ class _BookingsTabState extends State<BookingsTab> {
               headerSliverBuilder: (_, __) {
                 return [_getCalender()];
               },
-              body: _getBookingsScroll(),
+              body: _getBookingsScroll(user),
             ),
           ),
         ],
@@ -84,15 +87,20 @@ class _BookingsTabState extends State<BookingsTab> {
     });
   }
 
-  Widget _getBookingsScroll() {
+  Widget _getBookingsScroll(User user) {
     return SafeArea(
       child: Builder(
-        builder: (_) {
-          final list = [];
+        builder: (
+          _,
+        ) {
+          final list = getBookingsForDay(
+              user.bookings ?? [], _calendarController.selectedDay);
           if (list.isEmpty) {
             return const SizedBox(
               child: Center(
-                child: Text("No bookings"),
+                child: Text(
+                  "No bookings",
+                ),
               ),
             );
           }
@@ -103,11 +111,11 @@ class _BookingsTabState extends State<BookingsTab> {
             itemCount: list.length,
             itemBuilder: (_, i) {
               return BookingTile(
-                onTap: () {
+                onTap: (booking) {
                   BappNavigator.push(
                     context,
                     BookingDetailsScreen(
-                      booking: list[i],
+                      booking: booking,
                     ),
                   );
                 },
@@ -139,7 +147,11 @@ class _BookingsTabState extends State<BookingsTab> {
         },
         initialDate: DateTime.now(),
         controller: _calendarController,
-        onDayChanged: (day, _, __) {},
+        onDayChanged: (day, _, __) {
+          setState(() {
+            _calendarController.setSelectedDay(day);
+          });
+        },
       ),
     );
   }
