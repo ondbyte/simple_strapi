@@ -282,7 +282,7 @@ abstract class StrapiField {
       return "$value";
     }
     if (value is DateTime) {
-      return value.toIso8601String();
+      return "\"${value.toIso8601String()}\"";
     }
     if (value is String) {
       return '''"$value"''';
