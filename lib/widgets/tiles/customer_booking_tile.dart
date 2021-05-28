@@ -5,10 +5,6 @@ import 'package:bapp/widgets/tiles/error.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-
-import '../../classes/firebase_structures/business_booking.dart';
-import '../../stores/cloud_store.dart';
 import '../size_provider.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
