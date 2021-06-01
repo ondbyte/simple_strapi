@@ -118,10 +118,16 @@ class StrapiListTileImageWidget extends StatefulWidget {
 class _StrapiListTileImageWidgetState extends State<StrapiListTileImageWidget> {
   @override
   Widget build(BuildContext context) {
-    return StrapiImageWidget(
-      file: widget.file,
-      format: widget.file?.thumbNail,
-      placeHolder: widget.placeHolder,
+    return SizedBox(
+      width: MediaQuery.of(context).size.width * 0.2,
+      height: MediaQuery.of(context).size.width * 0.2,
+      child: SizedBox.expand(
+        child: StrapiImageWidget(
+          file: widget.file,
+          format: widget.file?.thumbNail,
+          placeHolder: widget.placeHolder,
+        ),
+      ),
     );
   }
 }

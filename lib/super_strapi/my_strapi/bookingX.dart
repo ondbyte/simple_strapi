@@ -16,6 +16,7 @@ class BookingX extends X {
 
   Future<Booking?> getCart({
     Key key = const ValueKey("getCart"),
+    required Business? forBusiness,
   }) async {
     final user = UserX.i.user();
     if (user is! User) {
@@ -23,6 +24,16 @@ class BookingX extends X {
     }
     var booking = user.cart;
     if (booking is Booking) {
+      if (booking.business?.id != forBusiness?.id) {
+        final nulled = booking.copyWIth(
+          business: forBusiness,
+          products: [],
+        );
+        booking = await Bookings.update(
+          nulled,
+        );
+        return booking;
+      }
       return booking;
     }
     return await memoize(key, () async {
@@ -30,6 +41,7 @@ class BookingX extends X {
         Booking.fresh(
           bookingStatus: BookingStatus.halfWayThrough,
           bookedByUser: user,
+          business: forBusiness,
         ),
       );
       if (newBooking is! Booking) {
@@ -37,7 +49,7 @@ class BookingX extends X {
       }
       final copied = user.copyWIth(cart: newBooking);
       UserX.i.user(await Users.update(copied));
-      return booking;
+      return newBooking;
     });
   }
 

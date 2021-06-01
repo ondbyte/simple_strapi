@@ -2501,6 +2501,7 @@ class Business {
         dayTiming = null,
         holidays = null,
         employees = null,
+        images = null,
         createdAt = null,
         updatedAt = null;
 
@@ -2519,7 +2520,8 @@ class Business {
       this.catalogue,
       this.dayTiming,
       this.holidays,
-      this.employees})
+      this.employees,
+      this.images})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
@@ -2541,6 +2543,7 @@ class Business {
       this.dayTiming,
       this.holidays,
       this.employees,
+      this.images,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -2562,6 +2565,7 @@ class Business {
       this.dayTiming,
       this.holidays,
       this.employees,
+      this.images,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -2599,6 +2603,8 @@ class Business {
 
   final List<Employee>? employees;
 
+  final List<StrapiFile>? images;
+
   final DateTime? createdAt;
 
   final DateTime? updatedAt;
@@ -2625,7 +2631,8 @@ class Business {
           List<ProductCategory>? catalogue,
           List<DayTiming>? dayTiming,
           List<Holiday>? holidays,
-          List<Employee>? employees}) =>
+          List<Employee>? employees,
+          List<StrapiFile>? images}) =>
       Business._unsynced(
           name ?? this.name,
           address ?? this.address,
@@ -2642,6 +2649,7 @@ class Business {
           dayTiming ?? this.dayTiming,
           holidays ?? this.holidays,
           employees ?? this.employees,
+          images ?? this.images,
           this.createdAt,
           this.updatedAt,
           this.id);
@@ -2660,7 +2668,8 @@ class Business {
       bool catalogue = false,
       bool dayTiming = false,
       bool holidays = false,
-      bool employees = false}) {
+      bool employees = false,
+      bool images = false}) {
     return Business._unsynced(
         name ? null : this.name,
         address ? null : this.address,
@@ -2677,6 +2686,7 @@ class Business {
         dayTiming ? null : this.dayTiming,
         holidays ? null : this.holidays,
         employees ? null : this.employees,
+        images ? null : this.images,
         this.createdAt,
         this.updatedAt,
         this.id)
@@ -2694,7 +2704,8 @@ class Business {
       .._emptyFields.catalogue = catalogue
       .._emptyFields.dayTiming = dayTiming
       .._emptyFields.holidays = holidays
-      .._emptyFields.employees = employees;
+      .._emptyFields.employees = employees
+      .._emptyFields.images = images;
   }
 
   static Business fromSyncedMap(Map<dynamic, dynamic> map) => Business._synced(
@@ -2722,6 +2733,8 @@ class Business {
           map["holidays"], (e) => Holiday.fromMap(e)),
       StrapiUtils.objFromListOfMap<Employee>(
           map["employees"], (e) => Employees._fromIDorData(e)),
+      StrapiUtils.objFromListOfMap<StrapiFile>(
+          map["images"], (e) => StrapiFiles._fromIDorData(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -2750,6 +2763,8 @@ class Business {
           map["holidays"], (e) => Holiday.fromMap(e)),
       StrapiUtils.objFromListOfMap<Employee>(
           map["employees"], (e) => Employees._fromIDorData(e)),
+      StrapiUtils.objFromListOfMap<StrapiFile>(
+          map["images"], (e) => StrapiFiles._fromIDorData(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -2826,6 +2841,12 @@ class Business {
         "employees": []
       else if (!_emptyFields.employees && employees != null)
         "employees": employees
+            ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
+            .toList(),
+      if (_emptyFields.images)
+        "images": []
+      else if (!_emptyFields.images && images != null)
+        "images": images
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
       "createdAt": createdAt?.toIso8601String(),
@@ -3038,6 +3059,8 @@ class _BusinessFields {
 
   final employees = StrapiCollectionField("employees");
 
+  final images = StrapiCollectionField("images");
+
   final createdAt = StrapiLeafField("createdAt");
 
   final updatedAt = StrapiLeafField("updatedAt");
@@ -3061,6 +3084,7 @@ class _BusinessFields {
       dayTiming,
       holidays,
       employees,
+      images,
       createdAt,
       updatedAt,
       id
@@ -3098,6 +3122,8 @@ class _BusinessEmptyFields {
   bool holidays = false;
 
   bool employees = false;
+
+  bool images = false;
 }
 
 class BusinessCategory {

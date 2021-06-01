@@ -2,6 +2,7 @@ import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/screens/business/business_profile/business_profile.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
+import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/tiles/rr_list_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -33,6 +34,9 @@ class CompleteYourBookingTile extends StatelessWidget {
           sync: true,
           builder: (context, booking, loading) {
             final business = booking.business!;
+            if (loading) {
+              return LoadingWidget();
+            }
             return ListTile(
               onTap: () {
                 BappNavigator.push(

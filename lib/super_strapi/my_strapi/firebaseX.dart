@@ -19,7 +19,7 @@ class FirebaseX extends X {
 
   fba.User? _user;
   fba.User? get firebaseUser => _user;
-  late final StreamSubscription _userChangesSubscription;
+  late StreamSubscription _userChangesSubscription;
 
   Future<fba.User?> init() async {
     await Firebase.initializeApp();

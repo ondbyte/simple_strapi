@@ -1,8 +1,13 @@
 import 'dart:async';
 
+import 'package:bapp/app.dart';
+import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
 import 'package:bapp/super_strapi/my_strapi/firebaseX.dart';
 import 'package:bapp/super_strapi/my_strapi/persistenceX.dart';
+import 'package:bapp/widgets/app/bapp_navigator_widget.dart';
+import 'package:bapp/widgets/app/bapp_themed_app.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:simple_strapi/simple_strapi.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
@@ -35,6 +40,12 @@ class UserX {
     }
   }
 
+  Future logout() async {
+    await FirebaseX.i.logOut();
+    await PersistenceX.i.saveValue("token", "");
+    kBus.fire(AppEvents.reboot);
+  }
+
   Future<User?> loginWithFirebase(
     String firebaseToken,
     String email,
@@ -63,6 +74,7 @@ class UserX {
         PersistenceX.i.saveValue("token", "$token");
       }
       _listenForUserObject();
+      await _copyDataFromDefault();
       return user.value;
     } on StrapiResponseException catch (_) {
       print("Unable to Authenticate with firebase for strapi");
@@ -70,6 +82,19 @@ class UserX {
     } on StrapiException catch (_) {
       print("user logout");
       await FirebaseX.i.logOut();
+    }
+  }
+
+  Future _copyDataFromDefault() async {
+    final city = DefaultDataX.i.defaultData()?.city;
+    final locality = DefaultDataX.i.defaultData()?.locality;
+
+    final copied = user.value?.copyWIth(city: city, locality: locality);
+    if (copied is User) {
+      final updated = await Users.update(copied);
+      user(updated);
+    } else {
+      bPrint("cannot _copyDataFromDefault");
     }
   }
 

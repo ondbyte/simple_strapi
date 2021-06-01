@@ -1,3 +1,4 @@
+import 'package:bapp/helpers/exceptions.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
@@ -113,6 +114,9 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
                     onDayChanged: (day, _, holidays) {
                       setState(() {
                         _selectedDay = day;
+                        getAvailableSlotsKey = ValueKey(
+                          DateTime.now(),
+                        );
                       });
                     },
                   ),
@@ -162,7 +166,15 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
       ),
       onTap: () => getAvailableSlotsKey = ValueKey(DateTime.now()),
       onLoadBuilder: (_) => LoadingWidget(),
-      onErrorBuilder: (_, e, s) => ErrorTile(message: "$e"),
+      onErrorBuilder: (_, e, s) {
+        if (e is EmployeeHolidayException) {
+          return ErrorTile(message: "The selected employee is on holiday");
+        }
+        if (e is BusinessHolidayException) {
+          return ErrorTile(message: "The Business is on holiday for the day");
+        }
+        return ErrorTile(message: "Something went wrong, tap to refresh");
+      },
       onSucessBuilder: (_, timingsList) {
         final timings = <Timing>[];
         timingsList?.forEach((e) {

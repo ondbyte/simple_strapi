@@ -152,17 +152,20 @@ class _CatalogueItemWidgetState extends State<CatalogueItemWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final images = widget.item.imageOverride ?? [];
+    final image = images.isNotEmpty ? images.first : null;
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(vertical: 8),
       title: Text(widget.item.nameOverride ?? "no name, inform yadu"),
       subtitle: _makeSubTitle(context),
       trailing: _selected ? cancelBookingButton() : bookButton(),
-      leading: widget.item.imageOverride is StrapiFile
+      leading: image is StrapiFile
           ? StrapiListTileImageWidget(
               placeHolder: Initial(
                 forName: widget.item.nameOverride ?? "no name, inform yadu",
               ),
-              file: widget.item.imageOverride as StrapiFile)
+              file: image,
+            )
           : SizedBox(),
     );
   }

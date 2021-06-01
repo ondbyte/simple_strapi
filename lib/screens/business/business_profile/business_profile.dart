@@ -58,7 +58,8 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
             }
             var _showReviews = false;
             return TapToReFetch<Booking?>(
-              fetcher: () => BookingX.i.getCart(key: _getCartKey),
+              fetcher: () =>
+                  BookingX.i.getCart(key: _getCartKey, forBusiness: business),
               onTap: () => _getCartKey = ValueKey(DateTime.now()),
               onErrorBuilder: (_, e, s) {
                 bPrint(e);
@@ -69,20 +70,23 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
               onSucessBuilder: (_, booking) => Scaffold(
                 bottomNavigationBar: Obx(
                   () {
-                    bPrint("booking is null: ${booking is Booking}");
                     final user = UserX.i.user();
+                    booking = user?.cart;
+                    if (booking is! Booking) {
+                      return SizedBox();
+                    }
+                    if (booking?.business?.id != business.id) {
+                      booking =
+                          booking?.copyWIth(business: business, products: []);
+                    }
                     if (user is User) {
-                      final booking = user.cart;
                       if (booking is! Booking) {
                         return SizedBox();
                       }
                       return Builder(builder: (
                         _,
                       ) {
-                        if (booking is! Booking) {
-                          return SizedBox();
-                        }
-                        final products = booking.products;
+                        final products = booking?.products;
                         if (products is! List || (products?.isEmpty ?? true)) {
                           return SizedBox();
                         }
@@ -123,7 +127,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                       await BookingX.i.placeBooking(
                                         user: user,
                                         business: business,
-                                        booking: booking,
+                                        booking: booking!,
                                         employee: employee,
                                         timeSlot: timeSlot,
                                       );
@@ -317,9 +321,8 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                 BusinessProfileServicesTab(
                                   keepAlive: () => mounted,
                                   business: business,
-                                  cart: UserX.i.user()?.cart,
+                                  cart: booking,
                                   onServicesSelected: (products) {
-                                    bPrint(products);
                                     final user = UserX.i.user();
                                     if (user is! User) {
                                       bPrint(
@@ -335,7 +338,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                       return;
                                     }
                                     final copied =
-                                        booking.copyWIth(products: products);
+                                        booking?.copyWIth(products: products);
                                     UserX.i.user(
                                       user.copyWIth(
                                         cart: copied,

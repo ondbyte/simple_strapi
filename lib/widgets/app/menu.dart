@@ -58,6 +58,7 @@ class _MenuState extends State<Menu> {
                     ),
                     _getSwitchRoleMenuItem(context),
                     ThemeSwitcherTile(),
+                    _getLogoutTile(context),
                   ],
                 );
               },
@@ -68,6 +69,27 @@ class _MenuState extends State<Menu> {
     );
   }
 
+  Widget _getLogoutTile(BuildContext context) {
+    return Obx(() {
+      final user = UserX.i.user();
+      if (user is! User) {
+        return ListTile(
+          title: Text("Login"),
+          onTap: () {
+            BappNavigator.push(context, LoginScreen());
+          },
+        );
+      } else {
+        return ListTile(
+          title: Text("Logout"),
+          onTap: () async {
+            await UserX.i.logout();
+          },
+        );
+      }
+    });
+  }
+
   Widget _getSwitchRoleMenuItem(
     BuildContext context,
   ) {
@@ -76,7 +98,8 @@ class _MenuState extends State<Menu> {
         var onTap;
         String title;
         final user = UserX.i.user();
-        if (user is! User) {
+        final partner = user?.partner;
+        if (user is! User || partner is! Partner) {
           bPrint("noo user");
           return SizedBox();
         }

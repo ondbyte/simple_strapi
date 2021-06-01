@@ -35,7 +35,7 @@ class _BusinessProfileServicesScreenState
       ),
       bottomNavigationBar: TapToReFetch<Booking?>(
           fetcher: () {
-            return BookingX.i.getCart();
+            return BookingX.i.getCart(forBusiness: widget.business);
           },
           onTap: () => getCartKey = ValueKey("getCart"),
           onLoadBuilder: (_) => LoadingWidget(),

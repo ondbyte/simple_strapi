@@ -44,7 +44,14 @@ class BusinessNotFoundException extends BappException {
   });
 }
 
-class EmptyResponseException {}
+class EmptyResponseException extends BappException {
+  EmptyResponseException({response})
+      : super(msg: "empty-response", whatHappened: "the response is $response");
+  @override
+  String toString() {
+    return super.toString();
+  }
+}
 
 const parametersNotCorrect = "parameters-are-not-correct";
 const businessNotFoundForId = "business-not-found-for-id";
