@@ -10,10 +10,12 @@ import 'package:super_strapi_generated/super_strapi_generated.dart';
 class EmployeeTile extends StatelessWidget {
   final bool enabled;
   final Employee employee;
+  final Function()? onTap;
   const EmployeeTile({
     Key? key,
     required this.employee,
     required this.enabled,
+    this.onTap,
   }) : super(key: key);
 
   @override
@@ -21,11 +23,7 @@ class EmployeeTile extends StatelessWidget {
     return Opacity(
       opacity: enabled ? 1 : 0.5,
       child: ListTile(
-        onTap: enabled
-            ? () {
-                BappNavigator.pop(context, employee);
-              }
-            : null,
+        onTap: enabled ? onTap : null,
         contentPadding: EdgeInsets.symmetric(vertical: 8),
         title: Text(employee.name!),
         trailing: Icon(Icons.arrow_forward_rounded),

@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:bapp/config/config.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/helpers/exceptions.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:device_info/device_info.dart';
 import 'package:enum_to_string/enum_to_string.dart';
@@ -346,4 +347,28 @@ Map<String, List<Timing>> sortTimingsForPeriodOfTheDay(List<Timing> timings) {
     "afterNoon": afterNoon,
     "evening": evening,
   };
+}
+
+T? getOfIdFromList<T>(String id, List<dynamic> list) {
+  bPrint("getOfIdFromList ${list.runtimeType}");
+  bPrint("id: $id");
+  bPrint(list);
+  return list.firstWhere((element) => element.id == id, orElse: () => null);
+}
+
+MapEntry<DateTime, DateTime> startAndEndOfTheDayOf(DateTime day) {
+  return MapEntry(
+    DateTime(day.year, day.month, day.day, 0, 0, 0),
+    DateTime(day.year, day.month, day.day, 23, 59, 0),
+  );
+}
+
+Map<DateTime, List> bookingsAsCalendarEvents(List<Booking> bookings) {
+  return Map.fromEntries(bookings
+      .map((e) => MapEntry(e.bookingStartTime!, [e.bookedByUser?.name ?? ""])));
+}
+
+Map<DateTime, List> holidaysAsCalendarEvents(List<Holiday> holidays) {
+  return Map.fromEntries(
+      holidays.map((e) => MapEntry(e.date!, [e.nameOfTheHoliday ?? ""])));
 }

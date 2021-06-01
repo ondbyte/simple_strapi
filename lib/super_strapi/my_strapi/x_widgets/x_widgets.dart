@@ -37,7 +37,6 @@ class _TapToReFetchState<T> extends State<TapToReFetch<T>> {
           if (snap.hasError) {
             return Material(
               child: GestureDetector(
-                key: ValueKey("xfbldrgd"),
                 onTap: () {
                   setState(() {
                     widget.onTap?.call();
@@ -51,7 +50,15 @@ class _TapToReFetchState<T> extends State<TapToReFetch<T>> {
               ),
             );
           } else {
-            return widget.onSucessBuilder(context, snap.data!);
+            final data = snap.data;
+            if (data is T) {
+              return widget.onSucessBuilder(context, data);
+            }
+            return widget.onErrorBuilder(
+              context,
+              "null",
+              StackTrace.current,
+            );
           }
         } else {
           return widget.onLoadBuilder(context);

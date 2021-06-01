@@ -51,8 +51,8 @@ class _BusinessManageStaffScreenState extends State<BusinessManageStaffScreen> {
                     [
                       ...List.generate(
                         staffs.length,
-                        (index) => BusinessStaffListTile(
-                          staff: staffs[index],
+                        (index) => BusinessEmployeeListTile(
+                          employee: staffs[index],
                           trailing: Builder(
                             builder: (_) {
                               return Switch(
@@ -79,19 +79,19 @@ class _BusinessManageStaffScreenState extends State<BusinessManageStaffScreen> {
   }
 }
 
-class BusinessStaffListTile extends StatelessWidget {
-  final Employee staff;
+class BusinessEmployeeListTile extends StatelessWidget {
+  final Employee employee;
   final Widget trailing;
 
-  const BusinessStaffListTile(
-      {Key? key, required this.staff, required this.trailing})
+  const BusinessEmployeeListTile(
+      {Key? key, required this.employee, required this.trailing})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
     final me = true;
     return ListTile(
       title: Text(
-        me ? "Me" : staff.name ?? "",
+        me ? "Me" : employee.name ?? "",
       ),
       subtitle: Text(
         "role name",
@@ -99,7 +99,7 @@ class BusinessStaffListTile extends StatelessWidget {
       trailing: trailing,
       leading: ListTileFirebaseImage(
         ifEmpty: Initial(
-          forName: staff.name ?? "zz",
+          forName: employee.name ?? "zz",
         ),
         storagePathOrURL: null,
       ),

@@ -84,14 +84,6 @@ class BookingX extends X {
     return newBooking;
   }
 
-  Future<Booking> addBookingToCart(Booking booking) async {
-    await DefaultDataX.i.saveValue(
-      DefaultDataKeys.lastBooking,
-      booking.toMap(),
-    );
-    return booking;
-  }
-
   bool isActive(Booking booking) {
     final status = booking.bookingStatus;
     if (status is! BookingStatus) {
@@ -194,27 +186,72 @@ class BookingX extends X {
   }
 
   Future<List<Booking>> getUpcomingBookings(Business business) {
-    return _getUpcomingBookingsOfStatus(business, [
-      BookingStatus.accepted,
-      BookingStatus.walkin,
-    ]);
-  }
-
-  Future<List<Booking>> getUpcomingBookingsToBeAccepted(Business business) {
-    return _getUpcomingBookingsOfStatus(
-      business,
-      [
-        BookingStatus.pendingApproval,
-      ],
+    return Bookings.executeQuery(
+      _getUpcomingBookingsOfStatusQuery(
+        business,
+        [
+          BookingStatus.accepted,
+          BookingStatus.walkin,
+        ],
+      )..whereField(
+          field: Booking.fields.bookingStartTime,
+          query: StrapiFieldQuery.greaterThan,
+          value: DateTime.now(),
+        ),
     );
   }
 
-  Future<List<Booking>> _getUpcomingBookingsOfStatus(
-      Business business, List<BookingStatus> statuses) async {
-    final q = StrapiCollectionQuery(
+  Future<List<Booking>> getUpcomingBookingsToBeAccepted(Business business) {
+    return Bookings.executeQuery(
+      _getUpcomingBookingsOfStatusQuery(
+        business,
+        [
+          BookingStatus.pendingApproval,
+        ],
+      )..whereField(
+          field: Booking.fields.bookingStartTime,
+          query: StrapiFieldQuery.greaterThan,
+          value: DateTime.now(),
+        ),
+    );
+  }
+
+  Future<List<Booking>> getAllBookingsForDay(
+    Business business,
+    DateTime day,
+  ) {
+    final startEnd = startAndEndOfTheDayOf(day);
+    return Bookings.executeQuery(
+      _getUpcomingBookingsOfStatusQuery(
+        business,
+        [
+          BookingStatus.accepted,
+          BookingStatus.walkin,
+        ],
+      )
+        ..whereField(
+          field: Booking.fields.bookingStartTime,
+          query: StrapiFieldQuery.greaterThanOrEqualTo,
+          value: startEnd.key,
+        )
+        ..whereField(
+          field: Booking.fields.bookingStartTime,
+          query: StrapiFieldQuery.lowerThanOrEqualTo,
+          value: startEnd.value,
+        ),
+    );
+  }
+
+  StrapiCollectionQuery _businessQuery(Business business) {
+    return StrapiCollectionQuery(
       collectionName: Booking.collectionName,
       requiredFields: Booking.fields(),
-    )
+    );
+  }
+
+  StrapiCollectionQuery _getUpcomingBookingsOfStatusQuery(
+      Business business, List<BookingStatus> statuses) {
+    final q = _businessQuery(business)
       ..whereModelField(
         field: Booking.fields.business,
         query: StrapiModelQuery(
@@ -226,17 +263,12 @@ class BookingX extends X {
           ),
       )
       ..whereField(
-        field: Booking.fields.bookingStartTime,
-        query: StrapiFieldQuery.greaterThan,
-        value: DateTime.now(),
-      )
-      ..whereField(
         field: Booking.fields.bookingStatus,
         query: StrapiFieldQuery.includesInAnArray,
         value: [
           ...statuses.map((e) => EnumToString.convertToString(e)).toList()
         ],
       );
-    return await Bookings.executeQuery(q);
+    return q;
   }
 }

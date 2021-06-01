@@ -1,3 +1,4 @@
+import 'package:flutter/scheduler.dart';
 import 'package:simple_strapi/simple_strapi.dart';
 import 'dart:convert';
 import 'package:flutter/widgets.dart';
@@ -32,6 +33,20 @@ class _StrapiListenerWidgetState<T> extends State<_StrapiListenerWidget<T>> {
     _postInit();
   }
 
+  Future<bool> rebuild() async {
+    if (!mounted) return false;
+
+    // if there's a current frame,
+    if (SchedulerBinding.instance?.schedulerPhase != SchedulerPhase.idle) {
+      // wait for the end of that frame.
+      await SchedulerBinding.instance?.endOfFrame;
+      if (!mounted) return false;
+    }
+
+    setState(() {});
+    return true;
+  }
+
   void _postInit() {
     WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
       final id = (_strapiObject as dynamic).id;
@@ -41,11 +56,10 @@ class _StrapiListenerWidgetState<T> extends State<_StrapiListenerWidget<T>> {
           initailData: (_strapiObject as dynamic).toMap(),
           listener: (map, loading) {
             final updated = widget.generator(map);
-            if (updated is T) {
-              setState(() {
-                _strapiObject = updated;
-                _loading = loading;
-              });
+            if (updated is T && mounted) {
+              _strapiObject = updated;
+              _loading = loading;
+              rebuild();
             }
           },
         );
@@ -5500,7 +5514,8 @@ class User {
         bookings = null,
         cart = null,
         alterEgoActivated = null,
-        business = null,
+        pickedBusiness = null,
+        pickedEmployee = null,
         createdAt = null,
         updatedAt = null;
 
@@ -5523,7 +5538,8 @@ class User {
       this.bookings,
       this.cart,
       this.alterEgoActivated,
-      this.business})
+      this.pickedBusiness,
+      this.pickedEmployee})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
@@ -5548,7 +5564,8 @@ class User {
       this.bookings,
       this.cart,
       this.alterEgoActivated,
-      this.business,
+      this.pickedBusiness,
+      this.pickedEmployee,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -5573,7 +5590,8 @@ class User {
       this.bookings,
       this.cart,
       this.alterEgoActivated,
-      this.business,
+      this.pickedBusiness,
+      this.pickedEmployee,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -5617,7 +5635,9 @@ class User {
 
   final bool? alterEgoActivated;
 
-  final Business? business;
+  final Business? pickedBusiness;
+
+  final Employee? pickedEmployee;
 
   final DateTime? createdAt;
 
@@ -5649,7 +5669,8 @@ class User {
           List<Booking>? bookings,
           Booking? cart,
           bool? alterEgoActivated,
-          Business? business}) =>
+          Business? pickedBusiness,
+          Employee? pickedEmployee}) =>
       User._unsynced(
           username ?? this.username,
           email ?? this.email,
@@ -5669,7 +5690,8 @@ class User {
           bookings ?? this.bookings,
           cart ?? this.cart,
           alterEgoActivated ?? this.alterEgoActivated,
-          business ?? this.business,
+          pickedBusiness ?? this.pickedBusiness,
+          pickedEmployee ?? this.pickedEmployee,
           this.createdAt,
           this.updatedAt,
           this.id);
@@ -5692,7 +5714,8 @@ class User {
       bool bookings = false,
       bool cart = false,
       bool alterEgoActivated = false,
-      bool business = false}) {
+      bool pickedBusiness = false,
+      bool pickedEmployee = false}) {
     return User._unsynced(
         username ? null : this.username,
         email ? null : this.email,
@@ -5712,7 +5735,8 @@ class User {
         bookings ? null : this.bookings,
         cart ? null : this.cart,
         alterEgoActivated ? null : this.alterEgoActivated,
-        business ? null : this.business,
+        pickedBusiness ? null : this.pickedBusiness,
+        pickedEmployee ? null : this.pickedEmployee,
         this.createdAt,
         this.updatedAt,
         this.id)
@@ -5734,7 +5758,8 @@ class User {
       .._emptyFields.bookings = bookings
       .._emptyFields.cart = cart
       .._emptyFields.alterEgoActivated = alterEgoActivated
-      .._emptyFields.business = business;
+      .._emptyFields.pickedBusiness = pickedBusiness
+      .._emptyFields.pickedEmployee = pickedEmployee;
   }
 
   static User fromSyncedMap(Map<dynamic, dynamic> map) => User._synced(
@@ -5764,7 +5789,9 @@ class User {
           map["cart"], (e) => Bookings._fromIDorData(e)),
       StrapiUtils.parseBool(map["alterEgoActivated"]),
       StrapiUtils.objFromMap<Business>(
-          map["business"], (e) => Businesses._fromIDorData(e)),
+          map["pickedBusiness"], (e) => Businesses._fromIDorData(e)),
+      StrapiUtils.objFromMap<Employee>(
+          map["pickedEmployee"], (e) => Employees._fromIDorData(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -5795,7 +5822,9 @@ class User {
           map["cart"], (e) => Bookings._fromIDorData(e)),
       StrapiUtils.parseBool(map["alterEgoActivated"]),
       StrapiUtils.objFromMap<Business>(
-          map["business"], (e) => Businesses._fromIDorData(e)),
+          map["pickedBusiness"], (e) => Businesses._fromIDorData(e)),
+      StrapiUtils.objFromMap<Employee>(
+          map["pickedEmployee"], (e) => Employees._fromIDorData(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -5883,11 +5912,18 @@ class User {
         "alterEgoActivated": null
       else if (!_emptyFields.alterEgoActivated && alterEgoActivated != null)
         "alterEgoActivated": alterEgoActivated,
-      if (_emptyFields.business)
-        "business": null
-      else if (!_emptyFields.business && business != null)
-        "business":
-            toServer ? business?.id : business?._toMap(level: level + level),
+      if (_emptyFields.pickedBusiness)
+        "pickedBusiness": null
+      else if (!_emptyFields.pickedBusiness && pickedBusiness != null)
+        "pickedBusiness": toServer
+            ? pickedBusiness?.id
+            : pickedBusiness?._toMap(level: level + level),
+      if (_emptyFields.pickedEmployee)
+        "pickedEmployee": null
+      else if (!_emptyFields.pickedEmployee && pickedEmployee != null)
+        "pickedEmployee": toServer
+            ? pickedEmployee?.id
+            : pickedEmployee?._toMap(level: level + level),
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
       "id": id
@@ -6126,7 +6162,9 @@ class _UserFields {
 
   final alterEgoActivated = StrapiLeafField("alterEgoActivated");
 
-  final business = StrapiModelField("business");
+  final pickedBusiness = StrapiModelField("pickedBusiness");
+
+  final pickedEmployee = StrapiModelField("pickedEmployee");
 
   final createdAt = StrapiLeafField("createdAt");
 
@@ -6154,7 +6192,8 @@ class _UserFields {
       bookings,
       cart,
       alterEgoActivated,
-      business,
+      pickedBusiness,
+      pickedEmployee,
       createdAt,
       updatedAt,
       id
@@ -6199,7 +6238,9 @@ class _UserEmptyFields {
 
   bool alterEgoActivated = false;
 
-  bool business = false;
+  bool pickedBusiness = false;
+
+  bool pickedEmployee = false;
 }
 
 class Permission {

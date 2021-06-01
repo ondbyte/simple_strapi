@@ -20,39 +20,12 @@ class DefaultDataX extends X {
 
   Rx<DefaultData?> defaultData = Rx<DefaultData?>(null);
 
-  LazyBox? _hiveBox;
-
-  bool isFirstTimeOnDevice = true;
-
   late final StrapiObjectListener _updateListener;
 
   Future<DefaultData?> init() async {
-    final path = (isMobile)
-        ? (await getApplicationSupportDirectory()).path
-        : Directory.current.path;
-    Hive.init(path);
-    _hiveBox = await Hive.openLazyBox("default_data");
-
     defaultData.value = await getDefaultDataFromServer();
-
-    if ((defaultData()?.synced ?? false)) {
-      _hiveBox?.put(DefaultDataKeys.defaultdata, defaultData()?.toMap() ?? {});
-    }
-    await _doOtherStorageStuffs();
     _updateListener = _listenForUpdate();
-    print(defaultData());
     return defaultData.value;
-  }
-
-  Future _doOtherStorageStuffs() async {
-    isFirstTimeOnDevice =
-        await getValue(DefaultDataKeys.isFirstTimeOnDevice, defaultValue: true);
-    if (isFirstTimeOnDevice) {
-      await saveValue(
-        DefaultDataKeys.isFirstTimeOnDevice,
-        false,
-      );
-    }
   }
 
   StrapiObjectListener _listenForUpdate() {
@@ -64,7 +37,6 @@ class DefaultDataX extends X {
         initailData: data as Map<String, dynamic>,
         listener: (map, losding) {
           final newDefaultData = DefaultData.fromSyncedMap(map);
-          _hiveBox?.put(DefaultDataKeys.defaultdata, newDefaultData.toMap());
           defaultData(newDefaultData);
         },
       );
@@ -107,41 +79,9 @@ class DefaultDataX extends X {
     }
   }
 
-  Future saveValue(String key, value) async {
-    if (_hiveBox is! LazyBox) {
-      await wait50();
-      return saveValue(key, value);
-    }
-    await _hiveBox?.put(key, value);
-  }
-
-  Future getValue(String key, {defaultValue}) async {
-    if (_hiveBox is! LazyBox) {
-      await wait50();
-      return getValue(key, defaultValue: defaultData);
-    }
-    return await _hiveBox?.get(key, defaultValue: defaultValue);
-  }
-
-  Future delete(String key, {defaultValue}) async {
-    final value = await _hiveBox?.get(key, defaultValue: defaultValue);
-    await _hiveBox?.delete(key);
-    return value;
-  }
-
-  Future wait50() async {
-    await Future.delayed(Duration(milliseconds: 50));
-  }
-
   @override
   Future dispose() async {
     _updateListener.stopListening();
     super.dispose();
   }
-}
-
-class DefaultDataKeys {
-  static String get lastBooking => "lastBooking";
-  static String get defaultdata => "defaultdata1";
-  static String get isFirstTimeOnDevice => "isFirstTimeOnDevice6";
 }

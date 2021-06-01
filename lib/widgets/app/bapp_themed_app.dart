@@ -1,5 +1,6 @@
 import 'package:bapp/config/theme_config.dart';
 import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
+import 'package:bapp/super_strapi/my_strapi/persistenceX.dart';
 import 'package:bapp/widgets/app/bapp_navigator_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
@@ -49,7 +50,7 @@ class _BappThemedAppState extends State<BappThemedApp> {
   }
 
   Future _init() async {
-    final dark = await DefaultDataX.i
+    final dark = await PersistenceX.i
         .getValue("dark", defaultValue: brightness == Brightness.dark);
     if (dark is bool) {
       setState(() {
@@ -59,8 +60,7 @@ class _BappThemedAppState extends State<BappThemedApp> {
   }
 
   Future _saveTheme(bool dark) async {
-    final box = await Hive.openLazyBox("brightness.box");
-    box.put("dark", dark);
+    return await PersistenceX.i.saveValue("dark", dark);
   }
 
   void _updateTheme({required bool dark}) {

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
 import 'package:bapp/super_strapi/my_strapi/firebaseX.dart';
+import 'package:bapp/super_strapi/my_strapi/persistenceX.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:simple_strapi/simple_strapi.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
@@ -18,7 +19,7 @@ class UserX {
 
   Future<User?> init() async {
     try {
-      final token = await DefaultDataX.i.getValue("token", defaultValue: "");
+      final token = await PersistenceX.i.getValue("token", defaultValue: "");
       if (token.isEmpty) {
         return null;
       }
@@ -29,7 +30,7 @@ class UserX {
     } on StrapiResponseException catch (e) {
       if (e.response.statusCode == 401) {
         ///needs relogin
-        await DefaultDataX.i.saveValue("token", "");
+        await PersistenceX.i.saveValue("token", "");
       }
     }
   }
@@ -59,7 +60,7 @@ class UserX {
       user(me);
       final token = Strapi.i.strapiToken;
       if (token.isNotEmpty) {
-        DefaultDataX.i.saveValue("token", "$token");
+        PersistenceX.i.saveValue("token", "$token");
       }
       _listenForUserObject();
       return user.value;

@@ -3,19 +3,29 @@ import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/booking_flow/select_a_professional.dart';
+import 'package:bapp/screens/business/booking_flow/services_screen.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/screens/business/toolkit/manage_staff/manage_staff.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/business_store.dart';
+import 'package:bapp/super_strapi/my_strapi/bookingX.dart';
+import 'package:bapp/super_strapi/my_strapi/persistenceX.dart';
+import 'package:bapp/super_strapi/my_strapi/userX.dart';
+import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
 import 'package:bapp/widgets/bapp_calendar.dart';
 import 'package:bapp/widgets/booking_timeline.dart';
+import 'package:bapp/widgets/loading.dart';
+import 'package:bapp/widgets/tiles/employee_tile.dart';
+import 'package:bapp/widgets/tiles/error.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class BusinessBookingsTab extends StatefulWidget {
@@ -35,117 +45,148 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox();
-    /* return Scaffold(
-      floatingActionButton: Observer(builder: (_) {
-        return flow.professional.value == null
-            ? SizedBox()
-            : FloatingActionButton(
-                onPressed: () {
-                  BappNavigator.dialog(
-                    context,
-                    BookingsTabAddOptions(),
-                  );
-                },
-                child: Icon(FeatherIcons.plus),
-              );
-      }),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            elevation: 0,
-            pinned: true,
-            automaticallyImplyLeading: false,
-            expandedHeight: 225,
-            collapsedHeight: 225,
-            actions: [SizedBox()],
-            flexibleSpace: Observer(
-              builder: (_) {
-                return Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (flow.professional.value != null)
-                      BusinessStaffListTile(
-                        staff: flow.professional.value.staff,
-                        trailing: IconButton(
-                          icon: Icon(FeatherIcons.refreshCcw),
-                          onPressed: () async {
-                            BappNavigator.push(
-                              context,
-                              SelectAProfessionalScreen(
-                                onSelected: (proffesional) {
-                                  act(() {
-                                    flow.professional.value = proffesional;
-                                  });
-                                },
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-                    if (flow.professional.value == null)
-                      ListTile(
-                        onTap: () async {
-                          BappNavigator.push(
-                            context,
-                            SelectAProfessionalScreen(
-                              onSelected: (proffesional) {
-                                act(() async {
-                                  flow.professional.value = proffesional;
-                                });
-                              },
-                            ),
-                          );
-                        },
-                        title: Text("Staff"),
-                        subtitle: Text("Select a staff"),
-                        trailing: Icon(FeatherIcons.arrowRight),
-                      ),
-                    BappRowCalender(
-                      bookings: flow.myBookingsAsCalendarEvents(),
-                      initialDate: DateTime.now(),
-                      holidays: flow.holidays,
-                      controller: _calendarController,
-                      onDayChanged: (day, _, __) {
-                        act(() {
-                          _selectedDay.value = day;
-                        });
-                      },
-                    )
-                  ],
-                );
-              },
-            ),
-          ),
-          SliverList(
-            delegate: SliverChildListDelegate(
-              [
-                SizedBox(
-                  height: 0,
-                ),
-                Observer(
-                  builder: (_) {
-                    return flow.professional.value == null
+    return Obx(() {
+      final user = UserX.i.user();
+      if (user is! User) {
+        return Text("no user");
+      }
+      final partner = user.partner;
+      if (partner is! Partner) {
+        return Text("No partner");
+      }
+      return Partners.listenerWidget(
+          strapiObject: partner,
+          sync: true,
+          builder: (_, partner, loading) {
+            if (loading) {
+              return LoadingWidget();
+            }
+            final pickedBusiness = user.pickedBusiness;
+            if (pickedBusiness is! Business) {
+              return Text("No business selected");
+            }
+            final pickedEmployee = user.pickedEmployee;
+            return Businesses.listenerWidget(
+                strapiObject: pickedBusiness,
+                sync: true,
+                builder: (context, business, loading) {
+                  return Scaffold(
+                    floatingActionButton: pickedEmployee is! Employee
                         ? SizedBox()
-                        : BookingTimeLineWidget(
-                            date: _selectedDay.value,
-                            list:
-                                flow.getStaffBookingsForDay(_selectedDay.value),
-                          );
-                  },
-                )
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-   */
+                        : FloatingActionButton(
+                            onPressed: () {
+                              BappNavigator.dialog(
+                                context,
+                                BookingsTabAddOptions(
+                                  business: business,
+                                ),
+                              );
+                            },
+                            child: Icon(FeatherIcons.plus),
+                          ),
+                    floatingActionButtonLocation:
+                        FloatingActionButtonLocation.centerFloat,
+                    body: Builder(builder: (_) {
+                      final employeeSelector = () async {
+                        final e = await BappNavigator.push(
+                          context,
+                          SelectAProfessionalScreen(
+                            forDay: DateTime.now(),
+                            business: business,
+                          ),
+                        );
+                        if (e is Employee) {
+                          final user = UserX.i.user();
+                          if (user is User) {
+                            final copied = user.copyWIth(pickedEmployee: e);
+                            final updated = await Users.update(copied);
+                            UserX.i.user(updated);
+                          }
+                        }
+                      };
+                      return CustomScrollView(
+                        slivers: [
+                          SliverList(
+                            delegate: SliverChildListDelegate(
+                              [
+                                if (pickedEmployee is Employee)
+                                  EmployeeTile(
+                                    employee: pickedEmployee,
+                                    enabled: true,
+                                    onTap: employeeSelector,
+                                  ),
+                                if (pickedEmployee is! Employee)
+                                  ListTile(
+                                    onTap: employeeSelector,
+                                    title: Text("Staff"),
+                                    subtitle: Text("Select a staff"),
+                                    trailing: Icon(FeatherIcons.arrowRight),
+                                  ),
+                                TapToReFetch<List<Booking>>(
+                                    fetcher: () => BookingX.i
+                                        .getAllBookingsForDay(
+                                            business, _selectedDay.value),
+                                    onLoadBuilder: (_) => LoadingWidget(),
+                                    onErrorBuilder: (_, e, s) =>
+                                        ErrorTile(message: e.toString()),
+                                    onSucessBuilder: (
+                                      context,
+                                      list,
+                                    ) {
+                                      return BappRowCalender(
+                                        bookings:
+                                            bookingsAsCalendarEvents(list),
+                                        initialDate: DateTime.now(),
+                                        holidays: holidaysAsCalendarEvents(
+                                            business.holidays ?? []),
+                                        controller: _calendarController,
+                                        onDayChanged: (day, _, __) {
+                                          act(() {
+                                            _selectedDay.value = day;
+                                          });
+                                        },
+                                      );
+                                    })
+                              ],
+                            ),
+                          ),
+                          SliverList(
+                            delegate: SliverChildListDelegate(
+                              [
+                                SizedBox(
+                                  height: 0,
+                                ),
+                                Builder(
+                                  builder: (_) {
+                                    return pickedEmployee is! Employee
+                                        ? Align(
+                                            alignment: Alignment.center,
+                                            child: Text("Select a enployee"),
+                                          )
+                                        : BookingTimeLineWidget(
+                                            date: _selectedDay.value,
+                                            list: pickedEmployee.bookings ?? [],
+                                          );
+                                  },
+                                )
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
+                  );
+                });
+          });
+    });
   }
 }
 
 class BookingsTabAddOptions extends StatefulWidget {
+  final Business business;
+
+  const BookingsTabAddOptions({Key? key, required this.business})
+      : super(key: key);
   @override
   _BookingsTabAddOptionsState createState() => _BookingsTabAddOptionsState();
 }
@@ -156,20 +197,37 @@ class _BookingsTabAddOptionsState extends State<BookingsTabAddOptions> {
     return AlertDialog(
       content: Column(
         mainAxisSize: MainAxisSize.min,
-        children: BookingsTabAddOptionConfig.options
-            .map<Widget>(
-              (e) => ListTile(
-                onTap: () {
-                  BappNavigator.pushReplacement(context, e.widgetToPush);
-                },
-                title: Text(
-                  e.name,
-                  style: Theme.of(context).textTheme.subtitle1,
+        children: [
+          ListTile(
+            title: Text("Add Walk-In"),
+            trailing: Icon(Icons.arrow_forward),
+            onTap: () {
+              BappNavigator.push(
+                context,
+                BusinessProfileServicesScreen(
+                  business: widget.business,
                 ),
-                trailing: Icon(Icons.arrow_forward),
-              ),
-            )
-            .toList(),
+              );
+            },
+          ),
+          ListTile(
+            title: Text("Add Booking"),
+            trailing: Icon(Icons.arrow_forward),
+            onTap: () {},
+          ),
+          ListTile(
+            title: Text("Block time"),
+            trailing: Icon(Icons.arrow_forward),
+            enabled: false,
+            onTap: null,
+          ),
+          ListTile(
+            title: Text("Time off"),
+            trailing: Icon(Icons.arrow_forward),
+            enabled: false,
+            onTap: null,
+          ),
+        ],
       ),
     );
   }
@@ -329,8 +387,8 @@ class _FromToDatePickerState extends State<FromToDatePicker> {
 
   @override
   void initState() {
-    if (widget.from != null) fromTime = widget.from;
-    if (widget.to != null) toTime = widget.to;
+    fromTime = widget.from;
+    toTime = widget.to;
     fromCtrl.text = timeFormatter.format(fromTime);
     toCtrl.text = timeFormatter.format(toTime);
     super.initState();

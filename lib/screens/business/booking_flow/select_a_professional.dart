@@ -100,6 +100,12 @@ class _SelectAProfessionalScreenState extends State<SelectAProfessionalScreen> {
                 (index) => EmployeeTile(
                   employee: availableEmplyees[index],
                   enabled: true,
+                  onTap: () {
+                    BappNavigator.pop(
+                      context,
+                      availableEmplyees[index],
+                    );
+                  },
                 ),
               ),
             );

@@ -1,10 +1,14 @@
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/business_profile/tabs/services_tab.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
+import 'package:bapp/screens/business/toolkit/manage_services/manage_services.dart';
 import 'package:bapp/super_strapi/my_strapi/bookingX.dart';
+import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
 import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/tiles/error.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BusinessProfileServicesScreen extends StatefulWidget {
@@ -20,6 +24,8 @@ class BusinessProfileServicesScreen extends StatefulWidget {
 class _BusinessProfileServicesScreenState
     extends State<BusinessProfileServicesScreen> {
   var getCartKey = ValueKey("getCart");
+  var _selected = <Product>[].obs;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,20 +45,28 @@ class _BusinessProfileServicesScreenState
             if (lastBooking is! Booking) {
               return SizedBox();
             }
-            return BottomPrimaryButton(
-              title: "nothing",
-              subTitle: "still nothing",
-              label: "Add",
-              onPressed: () async {},
-            );
+            return Obx(() {
+              return BottomPrimaryButton(
+                title: _selected.isNotEmpty
+                    ? getProductsDurationString(_selected)
+                    : null,
+                subTitle: _selected.isNotEmpty
+                    ? getProductsCostString(_selected)
+                    : null,
+                label: "Add",
+                onPressed: _selected.isNotEmpty ? () async {} : null,
+              );
+            });
           }),
-      body:
-          SizedBox() /* BusinessProfileServicesTab(
+      body: BusinessProfileServicesTab(
+        keepAlive: () => false,
         business: widget.business,
-        onServicesSelected: (ss) {},
-        cart
-      ) */
-      ,
+        cart: null,
+        onServicesSelected: (services) {
+          _selected.clear();
+          _selected.addAll(services);
+        },
+      ),
     );
   }
 }

@@ -12,6 +12,7 @@ class BookingsSeeAllTile extends StatelessWidget {
   final String title;
   final EdgeInsets? padding, titlePadding, childPadding;
   final List<Booking> bookings;
+  final Function(Booking) onSelected;
 
   const BookingsSeeAllTile({
     Key? key,
@@ -20,6 +21,7 @@ class BookingsSeeAllTile extends StatelessWidget {
     this.padding,
     this.titlePadding,
     this.childPadding,
+    required this.onSelected,
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -45,15 +47,7 @@ class BookingsSeeAllTile extends StatelessWidget {
         return BookingTile(
           booking: bookings[i],
           isCustomerView: false,
-          onTap: (booking) {
-            BappNavigator.push(
-              context,
-              BookingDetailsScreen(
-                booking: booking,
-                isCustomerView: false,
-              ),
-            );
-          },
+          onTap: onSelected,
         );
       },
     );

@@ -2,6 +2,7 @@ import 'package:bapp/screens/home/bapp.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/screens/init/splash_screen.dart';
 import 'package:bapp/screens/onboarding/onboardingscreen.dart';
+import 'package:bapp/super_strapi/my_strapi/persistenceX.dart';
 import 'package:bapp/widgets/app/bapp_navigator_widget.dart';
 import 'package:bapp/widgets/app/bapp_provider_initializer.dart';
 import 'package:bapp/widgets/app/bapp_themed_app.dart';
@@ -34,7 +35,7 @@ class _AppState extends State<App> {
             await StrapiSettings.i.init();
             final defaultData = await DefaultDataX.i.init();
             final user = await UserX.i.init();
-            if (DefaultDataX.i.isFirstTimeOnDevice) {
+            if (PersistenceX.i.isFirstTimeOnDevice) {
               firstScreen(OnBoardingScreen());
             } else {
               firstScreen(Bapp());
