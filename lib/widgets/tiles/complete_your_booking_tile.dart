@@ -33,9 +33,12 @@ class CompleteYourBookingTile extends StatelessWidget {
           strapiObject: cart,
           sync: true,
           builder: (context, booking, loading) {
-            final business = booking.business!;
+            final business = booking.business;
             if (loading) {
               return LoadingWidget();
+            }
+            if (business is! Business) {
+              return SizedBox();
             }
             return ListTile(
               onTap: () {

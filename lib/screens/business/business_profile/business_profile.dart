@@ -12,6 +12,7 @@ import 'package:bapp/super_strapi/my_strapi/bookingX.dart';
 import 'package:bapp/super_strapi/my_strapi/reviewX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
+import 'package:bapp/widgets/gallery.dart';
 import 'package:bapp/widgets/image/strapi_image.dart';
 import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
@@ -174,41 +175,45 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                               builder: (_) {
                                 return Builder(
                                   builder: (_) {
-                                    final hearted = UserX.i
-                                            .user()
-                                            ?.favourites
-                                            ?.any(
-                                              (e) =>
-                                                  e.business?.id == business.id,
-                                            ) ??
-                                        false;
-                                    return IconButton(
-                                      icon: Icon(
-                                        hearted
-                                            ? Icons.favorite
-                                            : Icons.favorite_border_outlined,
-                                        color: Colors.white,
-                                      ),
-                                      onPressed: () async {
-                                        final user = UserX.i.user();
-                                        !hearted
-                                            ? user?.favourites?.add(
-                                                Favourites(
+                                    final hearted =
+                                        (UserX.i.user()?.favourites?.any(
+                                                      (e) =>
+                                                          e.business?.id ==
+                                                          business.id,
+                                                    ) ??
+                                                false)
+                                            .obs;
+                                    return Obx(() {
+                                      return IconButton(
+                                        icon: Icon(
+                                          hearted()
+                                              ? Icons.favorite
+                                              : Icons.favorite_border_outlined,
+                                          color: Colors.white,
+                                        ),
+                                        onPressed: () async {
+                                          final user = UserX.i.user();
+                                          !hearted()
+                                              ? user?.favourites?.add(
+                                                  Favourites(
                                                     addedOn: DateTime.now(),
-                                                    business: business),
-                                              )
-                                            : user?.favourites?.removeWhere(
-                                                (f) =>
-                                                    f.business?.name ==
-                                                    business.name,
-                                              );
-                                        UserX.i.user(user);
-                                        if (user is User) {
-                                          UserX.i
-                                              .user(await Users.update(user));
-                                        }
-                                      },
-                                    );
+                                                    business: business,
+                                                  ),
+                                                )
+                                              : user?.favourites?.removeWhere(
+                                                  (f) =>
+                                                      f.business?.name ==
+                                                      business.name,
+                                                );
+                                          hearted(!hearted());
+                                          UserX.i.user(user);
+                                          if (user is User) {
+                                            UserX.i
+                                                .user(await Users.update(user));
+                                          }
+                                        },
+                                      );
+                                    });
                                   },
                                 );
                               },
@@ -222,23 +227,33 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                             ),
                           ],
                           flexibleSpace: FlexibleSpaceBar(
-                            background: business.partner is Partner
-                                ? Partners.listenerWidget(
-                                    strapiObject: business.partner as Partner,
-                                    sync: true,
-                                    builder: (_, partner, loading) {
-                                      if (loading) {
-                                        return LoadingWidget();
-                                      }
-                                      final files = partner.logo ?? [];
-                                      final image =
-                                          files.isNotEmpty ? files.first : null;
-                                      return StrapiImage(
-                                        file: image,
+                            background: business.images is List &&
+                                    business.images!.isNotEmpty
+                                ? GestureDetector(
+                                    onTap: () {
+                                      BappNavigator.push(
+                                        context,
+                                        Gallery(images: business.images!),
                                       );
                                     },
+                                    child: Stack(
+                                      alignment: Alignment.bottomRight,
+                                      children: [
+                                        StrapiImage(
+                                          file: business.images!.first,
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.all(16),
+                                          child: Chip(
+                                              label: Text(
+                                                  "${business.images!.length} more images")),
+                                        )
+                                      ],
+                                    ),
                                   )
-                                : SizedBox(),
+                                : StrapiImage(
+                                    file: business.partner!.logo!.first,
+                                  ),
                           ),
                         ),
                         SliverList(
