@@ -33,350 +33,362 @@ class BusinessProfileScreen extends StatefulWidget {
 class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
   var _getCartKey = ValueKey(DateTime.now());
 
-  Future _saveScreenData() async {
+  Future _saveScreenData(Booking booking) async {
     final user = UserX.i.user();
-    final booking = user?.cart?.copyWIth(business: widget.business);
-    if (user is User && booking is Booking) {
-      Bookings.update(booking);
-      Users.update(user);
+    if (user is User) {
+      await Bookings.update(booking);
+      final u = await Users.me(asFindOne: true);
+      UserX.i.user(u);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        _saveScreenData();
-        return true;
-      },
-      child: Material(
-        child: Businesses.listenerWidget(
-          strapiObject: widget.business,
-          sync: true,
-          builder: (_, business, loading) {
-            if (loading) {
-              return LoadingWidget();
-            }
-            var _showReviews = false;
-            return TapToReFetch<Booking?>(
-              fetcher: () =>
-                  BookingX.i.getCart(key: _getCartKey, forBusiness: business),
-              onTap: () => _getCartKey = ValueKey(DateTime.now()),
-              onErrorBuilder: (_, e, s) {
-                bPrint(e);
-                bPrint(s);
-                return ErrorTile(message: "Tap to refresh");
-              },
-              onLoadBuilder: (_) => LoadingWidget(),
-              onSucessBuilder: (_, booking) => Scaffold(
-                bottomNavigationBar: Obx(
-                  () {
+    final screenLoading = false.obs;
+    return Obx(() {
+      if (screenLoading()) {
+        return LoadingWidget();
+      }
+      return SizedBox(
+        child: Material(
+          child: Businesses.listenerWidget(
+            strapiObject: widget.business,
+            sync: true,
+            builder: (_, business, loading) {
+              if (loading) {
+                return LoadingWidget();
+              }
+              var _showReviews = false;
+              return TapToReFetch<Booking?>(
+                  fetcher: () => BookingX.i
+                      .getCart(key: _getCartKey, forBusiness: business),
+                  onTap: () => _getCartKey = ValueKey(DateTime.now()),
+                  onErrorBuilder: (_, e, s) {
+                    bPrint(e);
+                    bPrint(s);
+                    return ErrorTile(message: "Tap to refresh");
+                  },
+                  onLoadBuilder: (_) => LoadingWidget(),
+                  onSucessBuilder: (_, b) {
                     final user = UserX.i.user();
-                    booking = user?.cart;
-                    if (booking is! Booking) {
+                    if (b is! Booking) {
                       return SizedBox();
                     }
-                    if (booking?.business?.id != business.id) {
-                      booking =
-                          booking?.copyWIth(business: business, products: []);
-                    }
-                    if (user is User) {
-                      if (booking is! Booking) {
-                        return SizedBox();
-                      }
-                      return Builder(builder: (
-                        _,
-                      ) {
-                        final products = booking?.products;
-                        if (products is! List || (products?.isEmpty ?? true)) {
-                          return SizedBox();
-                        }
-                        final title = getNProductsSelectedString(
-                          products as List<Product>,
-                        );
-                        final subTitle = getProductsDurationString(products);
-                        return BottomPrimaryButton(
-                          label: "Book an Appointment",
-                          title: title,
-                          subTitle: subTitle,
-                          onPressed: () async {
-                            bPrint("loaaaaaad");
-                            await _saveScreenData();
-                            final employee = await BappNavigator.push(
-                              context,
-                              SelectAProfessionalScreen(
-                                business: business,
-                                forDay: DateTime.now(),
-                                title: title,
-                                subTitle: subTitle,
-                              ),
-                            );
-                            if (employee is Employee) {
-                              final timeSlot = await BappNavigator.push(
-                                context,
-                                SelectTimeSlotScreen(
-                                  business: widget.business,
-                                  employee: employee,
-                                ),
-                              );
-                              if (timeSlot is Timing) {
-                                BappNavigator.pushAndRemoveAll(
-                                  context,
-                                  ContextualMessageScreen(
-                                    buttonText: "Back to Home",
-                                    init: () async {
-                                      await BookingX.i.placeBooking(
-                                        user: user,
-                                        business: business,
-                                        booking: booking!,
-                                        employee: employee,
-                                        timeSlot: timeSlot,
-                                      );
-                                      await BookingX.i.clearCart();
-                                    },
-                                    onButtonPressed: (context) {
-                                      BappNavigator.pushAndRemoveAll(
-                                          context, Bapp());
-                                    },
-                                    message:
-                                        "Your booking has been placed, waiting to be accepted by the business, track it the bookings tab",
-                                  ),
-                                );
+                    final booking = Rx<Booking>(b);
+                    return WillPopScope(
+                      onWillPop: () async {
+                        screenLoading(true);
+                        await _saveScreenData(booking());
+                        return true;
+                      },
+                      child: Scaffold(
+                        bottomNavigationBar: Obx(
+                          () {
+                            if (user is User) {
+                              if (booking() is! Booking) {
+                                return SizedBox();
                               }
-                            }
-                          },
-                        );
-                      });
-                    } else {
-                      return BottomPrimaryButton(
-                        label: "Sign in to Book",
-                        title: null,
-                        subTitle: null,
-                        onPressed: () async {
-                          BappNavigator.push(
-                            context,
-                            LoginScreen(),
-                          );
-                        },
-                      );
-                    }
-                  },
-                ),
-                body: DefaultTabController(
-                  length: 2 + (true ? 0 : 1) + (true ? 0 : 1),
-                  initialIndex: 0,
-                  child: NestedScrollView(
-                    headerSliverBuilder: (_, __) {
-                      return <Widget>[
-                        SliverAppBar(
-                          expandedHeight: 256,
-                          actions: [
-                            Builder(
-                              builder: (_) {
-                                return Builder(
-                                  builder: (_) {
-                                    final hearted =
-                                        (UserX.i.user()?.favourites?.any(
-                                                      (e) =>
-                                                          e.business?.id ==
-                                                          business.id,
-                                                    ) ??
-                                                false)
-                                            .obs;
-                                    return Obx(() {
-                                      return IconButton(
-                                        icon: Icon(
-                                          hearted()
-                                              ? Icons.favorite
-                                              : Icons.favorite_border_outlined,
-                                          color: Colors.white,
-                                        ),
-                                        onPressed: () async {
-                                          final user = UserX.i.user();
-                                          !hearted()
-                                              ? user?.favourites?.add(
-                                                  Favourites(
-                                                    addedOn: DateTime.now(),
-                                                    business: business,
-                                                  ),
-                                                )
-                                              : user?.favourites?.removeWhere(
-                                                  (f) =>
-                                                      f.business?.name ==
-                                                      business.name,
-                                                );
-                                          hearted(!hearted());
-                                          UserX.i.user(user);
-                                          if (user is User) {
-                                            UserX.i
-                                                .user(await Users.update(user));
-                                          }
-                                        },
-                                      );
-                                    });
-                                  },
+                              return Builder(builder: (
+                                _,
+                              ) {
+                                final products = booking().products;
+                                if (products is! List ||
+                                    (products?.isEmpty ?? true)) {
+                                  return SizedBox();
+                                }
+                                final title = getNProductsSelectedString(
+                                  products as List<Product>,
                                 );
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                FeatherIcons.share2,
-                                color: Colors.white,
-                              ),
-                              onPressed: () {},
-                            ),
-                          ],
-                          flexibleSpace: FlexibleSpaceBar(
-                            background: business.images is List &&
-                                    business.images!.isNotEmpty
-                                ? GestureDetector(
-                                    onTap: () {
-                                      BappNavigator.push(
+                                final subTitle =
+                                    getProductsDurationString(products);
+                                return BottomPrimaryButton(
+                                  label: "Book an Appointment",
+                                  title: title,
+                                  subTitle: subTitle,
+                                  onPressed: () async {
+                                    screenLoading(true);
+                                    await _saveScreenData(booking());
+                                    final employee = await BappNavigator.push(
+                                      context,
+                                      SelectAProfessionalScreen(
+                                        business: business,
+                                        forDay: DateTime.now(),
+                                        title: title,
+                                        subTitle: subTitle,
+                                      ),
+                                    );
+                                    if (employee is Employee) {
+                                      final timeSlot = await BappNavigator.push(
                                         context,
-                                        Gallery(images: business.images!),
-                                      );
-                                    },
-                                    child: Stack(
-                                      alignment: Alignment.bottomRight,
-                                      children: [
-                                        StrapiImage(
-                                          file: business.images!.first,
+                                        SelectTimeSlotScreen(
+                                          business: widget.business,
+                                          employee: employee,
                                         ),
-                                        Padding(
-                                          padding: EdgeInsets.all(16),
-                                          child: Chip(
-                                              label: Text(
-                                                  "${business.images!.length} more images")),
-                                        )
-                                      ],
-                                    ),
-                                  )
-                                : StrapiImage(
-                                    file: business.partner!.logo!.first,
-                                  ),
-                          ),
-                        ),
-                        SliverList(
-                          delegate: SliverChildListDelegate(
-                            [
-                              BusinessTileWidget(
-                                titleStyle:
-                                    Theme.of(context).textTheme.headline1,
-                                branch: business,
-                                onTap: null,
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 10),
-                                onTrailingTapped: () {},
-                              ),
-                              Builder(builder: (_) {
-                                return !_showReviews
-                                    ? getBappTabBar(
-                                        context,
-                                        [
-                                          const Text("Services"),
-                                          const Text("About"),
-                                          /* if (false) const Text("Offers"),
-                                  if (false) const Text("Packages"), */
-                                        ],
-                                      )
-                                    : SizedBox();
-                              })
-                            ],
-                          ),
-                        ),
-                      ];
-                    },
-                    body: Stack(
-                      children: [
-                        Builder(
-                          builder: (_) {
-                            if (_showReviews) {
-                              return Container(
-                                color:
-                                    Theme.of(context).scaffoldBackgroundColor,
-                                child: SingleChildScrollView(
-                                  physics: NeverScrollableScrollPhysics(),
-                                  child: FutureBuilder<List<Review>>(
-                                    future: ReviewX.i
-                                        .getReviewsForBusiness(business),
-                                    builder: (_, snap) {
-                                      if (snap.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return LinearProgressIndicator();
-                                      }
-                                      //flow.ratedBookings.isNotEmpty
-                                      final data = snap.data ?? [];
-                                      if (_showReviews) {
-                                        return Column(
-                                          children: data
-                                              .map(
-                                                (review) => ViewableRating(
-                                                  padding: EdgeInsets.only(
-                                                    left: 16,
-                                                    right: 16,
-                                                    bottom: 16,
-                                                    top: 16,
-                                                  ),
-                                                  review: review,
-                                                ),
-                                              )
-                                              .toList(),
+                                      );
+                                      if (timeSlot is Timing) {
+                                        BappNavigator.pushAndRemoveAll(
+                                          context,
+                                          ContextualMessageScreen(
+                                            buttonText: "Back to Home",
+                                            init: () async {
+                                              await BookingX.i.placeBooking(
+                                                user: user,
+                                                business: business,
+                                                booking: booking(),
+                                                employee: employee,
+                                                timeSlot: timeSlot,
+                                              );
+                                              await BookingX.i.clearCart();
+                                            },
+                                            onButtonPressed: (context) {
+                                              BappNavigator.pushAndRemoveAll(
+                                                  context, Bapp());
+                                            },
+                                            message:
+                                                "Your booking has been placed, waiting to be accepted by the business, track it the bookings tab",
+                                          ),
                                         );
                                       }
-                                      return Center(
-                                        child: Text("No ratings yet"),
-                                      );
-                                    },
-                                  ),
-                                ),
+                                    }
+                                  },
+                                );
+                              });
+                            } else {
+                              return BottomPrimaryButton(
+                                label: "Sign in to Book",
+                                title: null,
+                                subTitle: null,
+                                onPressed: () async {
+                                  BappNavigator.push(
+                                    context,
+                                    LoginScreen(),
+                                  );
+                                },
                               );
                             }
-                            return TabBarView(
-                              children: [
-                                BusinessProfileServicesTab(
-                                  keepAlive: () => mounted,
-                                  business: business,
-                                  cart: booking,
-                                  onServicesSelected: (products) {
-                                    final user = UserX.i.user();
-                                    if (user is! User) {
-                                      bPrint(
-                                        "User is null at business profile",
-                                      );
-                                      return;
-                                    }
-                                    ;
-                                    if (booking is! Booking) {
-                                      bPrint(
-                                        "booking is null at business profile",
-                                      );
-                                      return;
-                                    }
-                                    final copied =
-                                        booking?.copyWIth(products: products);
-                                    UserX.i.user(
-                                      user.copyWIth(
-                                        cart: copied,
+                          },
+                        ),
+                        body: DefaultTabController(
+                          length: 2 + (true ? 0 : 1) + (true ? 0 : 1),
+                          initialIndex: 0,
+                          child: NestedScrollView(
+                            headerSliverBuilder: (_, __) {
+                              return <Widget>[
+                                SliverAppBar(
+                                  expandedHeight: 256,
+                                  actions: [
+                                    Builder(
+                                      builder: (_) {
+                                        return Builder(
+                                          builder: (_) {
+                                            final hearted = (UserX.i
+                                                        .user()
+                                                        ?.favourites
+                                                        ?.any(
+                                                          (e) =>
+                                                              e.business?.id ==
+                                                              business.id,
+                                                        ) ??
+                                                    false)
+                                                .obs;
+                                            return Obx(() {
+                                              return IconButton(
+                                                icon: Icon(
+                                                  hearted()
+                                                      ? Icons.favorite
+                                                      : Icons
+                                                          .favorite_border_outlined,
+                                                  color: Colors.white,
+                                                ),
+                                                onPressed: () async {
+                                                  final user = UserX.i.user();
+                                                  !hearted()
+                                                      ? user?.favourites?.add(
+                                                          Favourites(
+                                                            addedOn:
+                                                                DateTime.now(),
+                                                            business: business,
+                                                          ),
+                                                        )
+                                                      : user?.favourites
+                                                          ?.removeWhere(
+                                                          (f) =>
+                                                              f.business
+                                                                  ?.name ==
+                                                              business.name,
+                                                        );
+                                                  hearted(!hearted());
+                                                  UserX.i.user(user);
+                                                  if (user is User) {
+                                                    UserX.i.user(
+                                                        await Users.update(
+                                                            user));
+                                                  }
+                                                },
+                                              );
+                                            });
+                                          },
+                                        );
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(
+                                        FeatherIcons.share2,
+                                        color: Colors.white,
                                       ),
+                                      onPressed: () {},
+                                    ),
+                                  ],
+                                  flexibleSpace: FlexibleSpaceBar(
+                                    background: business.images is List &&
+                                            business.images!.isNotEmpty
+                                        ? GestureDetector(
+                                            onTap: () {
+                                              BappNavigator.push(
+                                                context,
+                                                Gallery(
+                                                    images: business.images!),
+                                              );
+                                            },
+                                            child: Stack(
+                                              alignment: Alignment.bottomRight,
+                                              children: [
+                                                StrapiImage(
+                                                  file: business.images!.first,
+                                                ),
+                                                Padding(
+                                                  padding: EdgeInsets.all(16),
+                                                  child: Chip(
+                                                      label: Text(
+                                                          "${business.images!.length} more images")),
+                                                )
+                                              ],
+                                            ),
+                                          )
+                                        : StrapiImage(
+                                            file: business.partner!.logo!.first,
+                                          ),
+                                  ),
+                                ),
+                                SliverList(
+                                  delegate: SliverChildListDelegate(
+                                    [
+                                      BusinessTileWidget(
+                                        titleStyle: Theme.of(context)
+                                            .textTheme
+                                            .headline1,
+                                        branch: business,
+                                        onTap: null,
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 16, vertical: 10),
+                                        onTrailingTapped: () {},
+                                      ),
+                                      Builder(builder: (_) {
+                                        return !_showReviews
+                                            ? getBappTabBar(
+                                                context,
+                                                [
+                                                  const Text("Services"),
+                                                  const Text("About"),
+                                                  /* if (false) const Text("Offers"),
+                                        if (false) const Text("Packages"), */
+                                                ],
+                                              )
+                                            : SizedBox();
+                                      })
+                                    ],
+                                  ),
+                                ),
+                              ];
+                            },
+                            body: Stack(
+                              children: [
+                                Builder(
+                                  builder: (_) {
+                                    if (_showReviews) {
+                                      return Container(
+                                        color: Theme.of(context)
+                                            .scaffoldBackgroundColor,
+                                        child: SingleChildScrollView(
+                                          physics:
+                                              NeverScrollableScrollPhysics(),
+                                          child: FutureBuilder<List<Review>>(
+                                            future: ReviewX.i
+                                                .getReviewsForBusiness(
+                                                    business),
+                                            builder: (_, snap) {
+                                              if (snap.connectionState ==
+                                                  ConnectionState.waiting) {
+                                                return LinearProgressIndicator();
+                                              }
+                                              //flow.ratedBookings.isNotEmpty
+                                              final data = snap.data ?? [];
+                                              if (_showReviews) {
+                                                return Column(
+                                                  children: data
+                                                      .map(
+                                                        (review) =>
+                                                            ViewableRating(
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                            left: 16,
+                                                            right: 16,
+                                                            bottom: 16,
+                                                            top: 16,
+                                                          ),
+                                                          review: review,
+                                                        ),
+                                                      )
+                                                      .toList(),
+                                                );
+                                              }
+                                              return Center(
+                                                child: Text("No ratings yet"),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                    return TabBarView(
+                                      children: [
+                                        BusinessProfileServicesTab(
+                                          keepAlive: () => mounted,
+                                          business: business,
+                                          cart: booking(),
+                                          onServicesSelected: (products) {
+                                            final user = UserX.i.user();
+                                            if (user is! User) {
+                                              bPrint(
+                                                "User is null at business profile",
+                                              );
+                                              return;
+                                            }
+                                            ;
+                                            final copied = booking().copyWIth(
+                                              products: products,
+                                            );
+                                            booking(copied);
+                                          },
+                                        ),
+                                        BusinessProfileAboutTab(
+                                          business: business,
+                                        ),
+                                      ],
                                     );
                                   },
                                 ),
-                                BusinessProfileAboutTab(
-                                  business: business,
-                                ),
                               ],
-                            );
-                          },
+                            ),
+                          ),
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
+                      ),
+                    );
+                  });
+            },
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 }

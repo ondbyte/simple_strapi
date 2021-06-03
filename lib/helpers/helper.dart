@@ -296,9 +296,15 @@ String getOnForTime(DateTime date) {
 }
 
 List<Timing> divideTimingIntoChunksOfDuration(Timing timing,
-    {Duration duration = const Duration(minutes: 5)}) {
+    {Duration duration = const Duration(minutes: 15)}) {
   final returnable = <Timing>[];
-  var start = timing.from, end = timing.from?.add(duration), max = timing.to;
+  var _startX =
+      duration.inMinutes - (timing.from?.minute ?? 0).remainder(duration.inMinutes) - 15;
+  var frm = timing.from!;
+  var start = DateTime(
+          frm.year, frm.month, frm.day, frm.hour, frm.minute + _startX),
+      end = timing.from?.add(duration),
+      max = timing.to;
   while (max is DateTime &&
       start is DateTime &&
       end is DateTime &&

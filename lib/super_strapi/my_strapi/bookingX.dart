@@ -23,34 +23,38 @@ class BookingX extends X {
       return null;
     }
     var booking = user.cart;
-    if (booking is Booking) {
-      if (booking.business?.id != forBusiness?.id) {
-        final nulled = booking.copyWIth(
-          business: forBusiness,
-          products: [],
-        );
-        booking = await Bookings.update(
-          nulled,
-        );
-        return booking;
-      }
-      return booking;
+    if (booking is! Booking) {
+      booking = await _createCart();
     }
-    return await memoize(key, () async {
-      final newBooking = await Bookings.create(
-        Booking.fresh(
-          bookingStatus: BookingStatus.halfWayThrough,
-          bookedByUser: user,
-          business: forBusiness,
-        ),
+    if (booking.business?.id != forBusiness?.id) {
+      final nulled = booking.copyWIth(
+        business: forBusiness,
+        products: [],
       );
-      if (newBooking is! Booking) {
-        return null;
-      }
-      final copied = user.copyWIth(cart: newBooking);
-      UserX.i.user(await Users.update(copied));
-      return newBooking;
-    });
+      booking = await Bookings.update(
+        nulled,
+      );
+    }
+    return booking;
+  }
+
+  Future<Booking> _createCart() async {
+    final user = UserX.i.user();
+    if (user is! User) {
+      throw BappImpossibleException("No user");
+    }
+    final cart = await Bookings.create(
+      Booking.fresh(
+        bookingStatus: BookingStatus.halfWayThrough,
+        bookedByUser: user,
+      ),
+    );
+    if (cart is! Booking) {
+      throw BappImpossibleException("Unable to create cart");
+    }
+    final copied = user.copyWIth(cart: cart);
+    UserX.i.user(await Users.update(copied));
+    return cart;
   }
 
   Future<Booking?> clearCart() async {

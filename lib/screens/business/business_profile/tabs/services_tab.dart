@@ -147,6 +147,11 @@ class _CatalogueItemWidgetState extends State<CatalogueItemWidget> {
   @override
   void initState() {
     _selected = widget.selected;
+    WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
+      if (_selected) {
+        widget.onSelected(widget.item);
+      }
+    });
     super.initState();
   }
 

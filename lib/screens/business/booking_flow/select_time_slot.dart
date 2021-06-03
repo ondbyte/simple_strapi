@@ -177,7 +177,7 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
       },
       onSucessBuilder: (_, timingsList) {
         final timings = <Timing>[];
-        timingsList?.forEach((e) {
+        timingsList.forEach((e) {
           timings.addAll(divideTimingIntoChunksOfDuration(e));
         });
         final sorted = sortTimingsForPeriodOfTheDay(timings);
@@ -264,10 +264,9 @@ class _TimeSlotsWidgetState extends State<TimeSlotsWidget> {
           }
           return TimeSlot(
             label: label,
-            selected: widget.fromToTimings[i] == selectedTiming,
+            selected: widget.fromToTimings[i].from == selectedTiming?.from,
             onClicked: (b) {
               setState(() {
-                print("yoooolo$b");
                 selectedTiming = b ? widget.fromToTimings[i] : null;
                 widget.onATimeSlotSelected(selectedTiming);
               });
