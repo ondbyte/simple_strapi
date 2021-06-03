@@ -1,6 +1,8 @@
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/helpers/third_party_launcher.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/widgets/padded_text.dart';
+import 'package:enum_to_string/enum_to_string.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -11,10 +13,16 @@ class BusinessProfileAboutTab extends StatelessWidget {
   BusinessProfileAboutTab({Key? key, required this.business}) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    final dayName = DateFormatters.dayName.format(DateTime.now()).toLowerCase();
+    final dayTiming = business.dayTiming?.firstWhere(
+      (e) =>
+          EnumToString.convertToString(DayName.values[e.dayName!.index]) ==
+          dayName,
+    );
     final latlong = business.address?.coordinates;
-    final timingsString = "no timings string, inform yadu";
-    final tagString = "no tagString string, inform yadu";
-    final typeString = "no typeString string, inform yadu";
+    final timingsString = getAboutTabTimingString(dayTiming?.timings ?? []);
+    final tagString = business.tag ?? "";
+    final typeString = business.type ?? "";
     final contactNumber = business.contactNumber ?? "";
     final about = business.partner?.about ?? business.about ?? "";
 

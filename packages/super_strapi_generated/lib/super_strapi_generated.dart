@@ -891,6 +891,7 @@ class Booking {
         bookingStatus = null,
         bookedByUser = null,
         bookingNote = null,
+        images = null,
         createdAt = null,
         updatedAt = null;
 
@@ -906,7 +907,8 @@ class Booking {
       this.review,
       this.bookingStatus,
       this.bookedByUser,
-      this.bookingNote})
+      this.bookingNote,
+      this.images})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
@@ -925,6 +927,7 @@ class Booking {
       this.bookingStatus,
       this.bookedByUser,
       this.bookingNote,
+      this.images,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -943,6 +946,7 @@ class Booking {
       this.bookingStatus,
       this.bookedByUser,
       this.bookingNote,
+      this.images,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -974,6 +978,8 @@ class Booking {
 
   final String? bookingNote;
 
+  final List<StrapiFile>? images;
+
   final DateTime? createdAt;
 
   final DateTime? updatedAt;
@@ -997,7 +1003,8 @@ class Booking {
           Review? review,
           BookingStatus? bookingStatus,
           User? bookedByUser,
-          String? bookingNote}) =>
+          String? bookingNote,
+          List<StrapiFile>? images}) =>
       Booking._unsynced(
           business ?? this.business,
           bookedOn ?? this.bookedOn,
@@ -1011,6 +1018,7 @@ class Booking {
           bookingStatus ?? this.bookingStatus,
           bookedByUser ?? this.bookedByUser,
           bookingNote ?? this.bookingNote,
+          images ?? this.images,
           this.createdAt,
           this.updatedAt,
           this.id);
@@ -1026,7 +1034,8 @@ class Booking {
       bool review = false,
       bool bookingStatus = false,
       bool bookedByUser = false,
-      bool bookingNote = false}) {
+      bool bookingNote = false,
+      bool images = false}) {
     return Booking._unsynced(
         business ? null : this.business,
         bookedOn ? null : this.bookedOn,
@@ -1040,6 +1049,7 @@ class Booking {
         bookingStatus ? null : this.bookingStatus,
         bookedByUser ? null : this.bookedByUser,
         bookingNote ? null : this.bookingNote,
+        images ? null : this.images,
         this.createdAt,
         this.updatedAt,
         this.id)
@@ -1054,7 +1064,8 @@ class Booking {
       .._emptyFields.review = review
       .._emptyFields.bookingStatus = bookingStatus
       .._emptyFields.bookedByUser = bookedByUser
-      .._emptyFields.bookingNote = bookingNote;
+      .._emptyFields.bookingNote = bookingNote
+      .._emptyFields.images = images;
   }
 
   static Booking fromSyncedMap(Map<dynamic, dynamic> map) => Booking._synced(
@@ -1077,6 +1088,8 @@ class Booking {
       StrapiUtils.objFromMap<User>(
           map["bookedByUser"], (e) => Users._fromIDorData(e)),
       map["bookingNote"],
+      StrapiUtils.objFromListOfMap<StrapiFile>(
+          map["images"], (e) => StrapiFiles._fromIDorData(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -1100,6 +1113,8 @@ class Booking {
       StrapiUtils.objFromMap<User>(
           map["bookedByUser"], (e) => Users._fromIDorData(e)),
       map["bookingNote"],
+      StrapiUtils.objFromListOfMap<StrapiFile>(
+          map["images"], (e) => StrapiFiles._fromIDorData(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -1161,6 +1176,12 @@ class Booking {
         "bookingNote": null
       else if (!_emptyFields.bookingNote && bookingNote != null)
         "bookingNote": bookingNote,
+      if (_emptyFields.images)
+        "images": []
+      else if (!_emptyFields.images && images != null)
+        "images": images
+            ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
+            .toList(),
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
       "id": id
@@ -1365,6 +1386,8 @@ class _BookingFields {
 
   final bookingNote = StrapiLeafField("bookingNote");
 
+  final images = StrapiCollectionField("images");
+
   final createdAt = StrapiLeafField("createdAt");
 
   final updatedAt = StrapiLeafField("updatedAt");
@@ -1385,6 +1408,7 @@ class _BookingFields {
       bookingStatus,
       bookedByUser,
       bookingNote,
+      images,
       createdAt,
       updatedAt,
       id
@@ -1416,6 +1440,8 @@ class _BookingEmptyFields {
   bool bookedByUser = false;
 
   bool bookingNote = false;
+
+  bool images = false;
 }
 
 class Locality {
@@ -2502,6 +2528,8 @@ class Business {
         holidays = null,
         employees = null,
         images = null,
+        tag = null,
+        type = null,
         createdAt = null,
         updatedAt = null;
 
@@ -2521,7 +2549,9 @@ class Business {
       this.dayTiming,
       this.holidays,
       this.employees,
-      this.images})
+      this.images,
+      this.tag,
+      this.type})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
@@ -2544,6 +2574,8 @@ class Business {
       this.holidays,
       this.employees,
       this.images,
+      this.tag,
+      this.type,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -2566,6 +2598,8 @@ class Business {
       this.holidays,
       this.employees,
       this.images,
+      this.tag,
+      this.type,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -2605,6 +2639,10 @@ class Business {
 
   final List<StrapiFile>? images;
 
+  final String? tag;
+
+  final String? type;
+
   final DateTime? createdAt;
 
   final DateTime? updatedAt;
@@ -2632,7 +2670,9 @@ class Business {
           List<DayTiming>? dayTiming,
           List<Holiday>? holidays,
           List<Employee>? employees,
-          List<StrapiFile>? images}) =>
+          List<StrapiFile>? images,
+          String? tag,
+          String? type}) =>
       Business._unsynced(
           name ?? this.name,
           address ?? this.address,
@@ -2650,6 +2690,8 @@ class Business {
           holidays ?? this.holidays,
           employees ?? this.employees,
           images ?? this.images,
+          tag ?? this.tag,
+          type ?? this.type,
           this.createdAt,
           this.updatedAt,
           this.id);
@@ -2669,7 +2711,9 @@ class Business {
       bool dayTiming = false,
       bool holidays = false,
       bool employees = false,
-      bool images = false}) {
+      bool images = false,
+      bool tag = false,
+      bool type = false}) {
     return Business._unsynced(
         name ? null : this.name,
         address ? null : this.address,
@@ -2687,6 +2731,8 @@ class Business {
         holidays ? null : this.holidays,
         employees ? null : this.employees,
         images ? null : this.images,
+        tag ? null : this.tag,
+        type ? null : this.type,
         this.createdAt,
         this.updatedAt,
         this.id)
@@ -2705,7 +2751,9 @@ class Business {
       .._emptyFields.dayTiming = dayTiming
       .._emptyFields.holidays = holidays
       .._emptyFields.employees = employees
-      .._emptyFields.images = images;
+      .._emptyFields.images = images
+      .._emptyFields.tag = tag
+      .._emptyFields.type = type;
   }
 
   static Business fromSyncedMap(Map<dynamic, dynamic> map) => Business._synced(
@@ -2735,6 +2783,8 @@ class Business {
           map["employees"], (e) => Employees._fromIDorData(e)),
       StrapiUtils.objFromListOfMap<StrapiFile>(
           map["images"], (e) => StrapiFiles._fromIDorData(e)),
+      map["tag"],
+      map["type"],
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -2765,6 +2815,8 @@ class Business {
           map["employees"], (e) => Employees._fromIDorData(e)),
       StrapiUtils.objFromListOfMap<StrapiFile>(
           map["images"], (e) => StrapiFiles._fromIDorData(e)),
+      map["tag"],
+      map["type"],
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -2849,6 +2901,14 @@ class Business {
         "images": images
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
+      if (_emptyFields.tag)
+        "tag": null
+      else if (!_emptyFields.tag && tag != null)
+        "tag": tag,
+      if (_emptyFields.type)
+        "type": null
+      else if (!_emptyFields.type && type != null)
+        "type": type,
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
       "id": id
@@ -3061,6 +3121,10 @@ class _BusinessFields {
 
   final images = StrapiCollectionField("images");
 
+  final tag = StrapiLeafField("tag");
+
+  final type = StrapiLeafField("type");
+
   final createdAt = StrapiLeafField("createdAt");
 
   final updatedAt = StrapiLeafField("updatedAt");
@@ -3085,6 +3149,8 @@ class _BusinessFields {
       holidays,
       employees,
       images,
+      tag,
+      type,
       createdAt,
       updatedAt,
       id
@@ -3124,6 +3190,10 @@ class _BusinessEmptyFields {
   bool employees = false;
 
   bool images = false;
+
+  bool tag = false;
+
+  bool type = false;
 }
 
 class BusinessCategory {

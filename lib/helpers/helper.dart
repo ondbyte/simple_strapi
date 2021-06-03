@@ -248,11 +248,6 @@ class BappImpossibleException implements Exception {
   BappImpossibleException(this.message);
 }
 
-class DateFormatters {
-  static final dayName = DateFormat.EEEE();
-  static final at = DateFormat.EEEE();
-}
-
 bool isCancellableBooking(Booking booking) {
   switch (booking.bookingStatus) {
     case BookingStatus.cancelledByUser:
@@ -371,4 +366,23 @@ Map<DateTime, List> bookingsAsCalendarEvents(List<Booking> bookings) {
 Map<DateTime, List> holidaysAsCalendarEvents(List<Holiday> holidays) {
   return Map.fromEntries(
       holidays.map((e) => MapEntry(e.date!, [e.nameOfTheHoliday ?? ""])));
+}
+
+String getAboutTabTimingString(List<Timing> timings) {
+  var returnable = "";
+  timings.forEach((e) {
+    final from = e.from;
+    final to = e.to;
+    if (from is DateTime && to is DateTime) {
+      returnable = returnable +
+          "${DateFormatters.aboutTab.format(from)} to ${DateFormatters.aboutTab.format(to)},";
+    }
+  });
+  return returnable;
+}
+
+class DateFormatters {
+  static final dayName = DateFormat.EEEE();
+  static final at = DateFormat.EEEE();
+  static final aboutTab = DateFormat("h:mm a");
 }
