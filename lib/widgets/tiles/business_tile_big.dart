@@ -80,46 +80,51 @@ class BusinessTileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(branch);
-    return ListTile(
-      onTap: onTap,
-      dense: true,
-      contentPadding: padding ?? EdgeInsets.zero,
-      title: Text(
-        branch.name ?? "",
-        style: titleStyle,
-        maxLines: 1,
-      ),
-      subtitle: Text(
-        branch.address?.address ?? "",
-        maxLines: 1,
-      ),
-      leading: withImage
-          ? ListTileFirebaseImage(
-              ifEmpty: Initial(
+    return Businesses.listenerWidget(
+        strapiObject: branch,
+        sync: true,
+        builder: (_, branch, loading) {
+          if (loading) {
+            return LoadingWidget();
+          }
+          final images = branch.images ?? [];
+          final image = images.isNotEmpty ? images.first : null;
+          return ListTile(
+            onTap: onTap,
+            dense: true,
+            contentPadding: padding ?? EdgeInsets.zero,
+            title: Text(
+              branch.name ?? "",
+              style: titleStyle,
+              maxLines: 1,
+            ),
+            subtitle: Text(
+              branch.address?.address ?? "",
+              maxLines: 1,
+            ),
+            leading: StrapiListTileImageWidget(
+              placeHolder: Initial(
                 forName: branch.name ?? "",
               ),
-              storagePathOrURL: branch.partner?.logo?.isNotEmpty ?? false
-                  ? branch.partner?.logo?.first.url
-                  : null,
-            )
-          : null,
-      trailing: GestureDetector(
-        onTap: onTrailingTapped,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.star, color: Colors.amber),
-            const SizedBox(
-              height: 2,
+              file: image,
             ),
-            Text(
-              (branch.starRating ?? 0).toString(),
-              style: Theme.of(context).textTheme.caption,
-            )
-          ],
-        ),
-      ),
-    );
+            trailing: GestureDetector(
+              onTap: onTrailingTapped,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.star, color: Colors.amber),
+                  const SizedBox(
+                    height: 2,
+                  ),
+                  Text(
+                    (branch.starRating ?? 0).toString(),
+                    style: Theme.of(context).textTheme.caption,
+                  )
+                ],
+              ),
+            ),
+          );
+        });
   }
 }

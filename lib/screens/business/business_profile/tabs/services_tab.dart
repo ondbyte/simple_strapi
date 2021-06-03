@@ -153,7 +153,9 @@ class _CatalogueItemWidgetState extends State<CatalogueItemWidget> {
   @override
   Widget build(BuildContext context) {
     final images = widget.item.imageOverride ?? [];
-    final image = images.isNotEmpty ? images.first : null;
+
+    final image =
+        images.isNotEmpty ? images.first : widget.item.productReference?.image;
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(vertical: 8),
       title: Text(widget.item.nameOverride ?? "no name, inform yadu"),

@@ -189,6 +189,11 @@ class BusinessX extends X {
         if (error is String) {
           throw throwExceptionForStrapiResponse(error, data);
         }
+        final isHoliday = data["isHoliday"] ?? false;
+        if (isHoliday) {
+          throw BusinessHolidayException(
+              holiday: Holiday.fromMap(data["holiday"]));
+        }
         final availableEmployees = data["availableEmployees"] ?? {};
         final unAvailableEmployees = data["unAvailableEmployees"] ?? {};
         if (availableEmployees is List && unAvailableEmployees is List) {

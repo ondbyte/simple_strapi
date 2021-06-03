@@ -1,3 +1,4 @@
+import 'package:bapp/helpers/exceptions.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/booking_flow/select_time_slot.dart';
@@ -78,6 +79,9 @@ class _SelectAProfessionalScreenState extends State<SelectAProfessionalScreen> {
         onErrorBuilder: (_, e, s) {
           bPrint(e);
           bPrint(s);
+          if (e is BusinessHolidayException) {
+            return ErrorTile(message: "The business is holiday today");
+          }
           return ErrorTile(message: "$e");
         },
         onSucessBuilder: (_, employeesMap) {
