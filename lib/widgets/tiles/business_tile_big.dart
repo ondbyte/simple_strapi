@@ -37,7 +37,10 @@ class BusinessTileBigWidget extends StatelessWidget {
                       builder: (_, partner, loading) {
                         final files = partner.logo ?? [];
                         final logo = files.isNotEmpty ? files.first : null;
-                        return StrapiImage(file: logo);
+                        return ClipRRect(
+                          borderRadius: BorderRadius.all(Radius.circular(6)),
+                          child: StrapiImage(file: logo)
+                        );
                       },
                     ),
                   Padding(

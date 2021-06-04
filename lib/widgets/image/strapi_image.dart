@@ -21,9 +21,9 @@ class StrapiImage extends StatelessWidget {
           final height = file?.height ?? 0;
           print("$width$height");
           if (height > width) {
-            return BoxFit.fitHeight;
+            return BoxFit.cover;
           } else if (width > height) {
-            return BoxFit.fitWidth;
+            return BoxFit.cover;
           }
           return BoxFit.fitWidth;
         }();

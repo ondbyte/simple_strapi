@@ -94,6 +94,7 @@ class _StrapiImageWidgetState extends State<StrapiImageWidget> {
       return widget.placeHolder ?? SizedBox();
     }
     return CachedNetworkImage(
+      fit:BoxFit.cover,
       imageUrl: url,
       placeholder: widget.placeHolder is Widget
           ? (_, __) {
@@ -118,16 +119,19 @@ class StrapiListTileImageWidget extends StatefulWidget {
 class _StrapiListTileImageWidgetState extends State<StrapiListTileImageWidget> {
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width * 0.2,
-      height: MediaQuery.of(context).size.width * 0.2,
-      child: SizedBox.expand(
-        child: StrapiImageWidget(
-          file: widget.file,
-          format: widget.file?.thumbNail,
-          placeHolder: widget.placeHolder,
-        ),
-      ),
+    return 
+       AspectRatio(aspectRatio: 3.5/3,
+
+          child: ClipRRect(
+            borderRadius: BorderRadius.all(Radius.circular(6)),
+            child: StrapiImageWidget(
+              file: widget.file,
+              format: widget.file?.thumbNail,
+              placeHolder: widget.placeHolder,
+            ),
+          ),
+        
+      
     );
   }
 }

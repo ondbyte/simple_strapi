@@ -4,6 +4,7 @@ import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/tiles/rr_list_tile.dart';
+import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
@@ -40,14 +41,23 @@ class CompleteYourBookingTile extends StatelessWidget {
             if (business is! Business) {
               return SizedBox();
             }
-            return ListTile(
-              onTap: () {
-                BappNavigator.push(
-                  context,
-                  BusinessProfileScreen(business: business),
-                );
-              },
-              title: Text("Continue booking for ${business.name}"),
+            return Container(
+              margin: EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(6)),
+                color: Theme.of(context).accentColor.withAlpha(30)
+              ),
+              child: ListTile(
+                contentPadding: EdgeInsets.symmetric( horizontal: 15, vertical: 5),
+                onTap: () {
+                  BappNavigator.push(
+                    context,
+                    BusinessProfileScreen(business: business),
+                  );
+                },
+                title: Text("Complete your booking at ${business.name}", style: Theme.of(context).textTheme.subtitle2),
+                trailing: Icon(FeatherIcons.arrowRight),
+              ),
             );
           },
         );
