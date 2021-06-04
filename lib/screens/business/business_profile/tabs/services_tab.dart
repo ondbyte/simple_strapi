@@ -85,6 +85,14 @@ class _CatlogueWidgetState extends State<CatlogueWidget> {
             widget.catalogue.name ?? "no catalogue name,inform yadu",
             style: Theme.of(context).textTheme.headline1,
           ),
+          Text(widget.catalogue.description ?? "",
+          style: Theme.of(context).textTheme.bodyText1,
+          ),
+          const SizedBox(
+            height: 10,
+          ),
+          
+          
           ..._getServicesTiles(),
           const SizedBox(
             height: 20,

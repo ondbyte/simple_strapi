@@ -18,6 +18,8 @@ class _GalleryState extends State<Gallery> {
     return Scaffold(
       appBar: AppBar(),
       body: PhotoViewGallery.builder(
+        backgroundDecoration: BoxDecoration(color:Theme.of(context).backgroundColor),
+        scrollDirection: Axis.horizontal,
         itemCount: widget.images.length,
         loadingBuilder: (context, event) => Center(
           child: Container(
@@ -36,7 +38,7 @@ class _GalleryState extends State<Gallery> {
             imageProvider: CachedNetworkImageProvider(
               widget.images[i].url,
             ),
-            initialScale: PhotoViewComputedScale.contained * 0.8,
+            initialScale: PhotoViewComputedScale.contained * 1,
             heroAttributes: PhotoViewHeroAttributes(
               tag: widget.images[i].id!,
             ),

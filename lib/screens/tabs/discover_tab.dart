@@ -36,124 +36,8 @@ class DiscoverTab extends StatefulWidget {
 
 class _DiscoverTabState extends State<DiscoverTab> {
   var getAllCategoriesKey = ValueKey(DateTime.now());
-
-  @override
-  Widget build(BuildContext context) {
-    return RefreshIndicator(onRefresh: () async {
-      getAllCategoriesKey = ValueKey(DateTime.now());
-    }, child: Builder(
-      builder: (
-        _,
-      ) {
-        return Builder(builder: (_) {
-          return CustomScrollView(
-            slivers: <Widget>[
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate(
-                    [
-                      Builder(
-                        builder: (
-                          _,
-                        ) {
-                          return UserX.i.userNotPresent
-                              ? const SizedBox()
-                              : Text(
-                                  "Hey, " + (UserX.i.user()?.name ?? ""),
-                                );
-                        },
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Text(
-                        'What can we help you book?',
-                        style: Theme.of(context).textTheme.headline1,
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      _getSearchBar(),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SliverList(
-                delegate: SliverChildListDelegate(
-                  [
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    _getFeaturedScroller(context),
-                    const SizedBox(
-                      height: 30,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        "Top services",
-                        style: Theme.of(context).textTheme.headline6,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 20,
-                    ),
-                    _getCategoriesScroller(context),
-                    if (UserX.i.userPresent)
-                      // ignore: dead_code
-                      const SizedBox(
-                        height: 30,
-                      ),
-                    if (UserX.i.userPresent)
-                      CompleteYourBookingTile(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
-                      ),
-                  ],
-                ),
-              ),
-              SliverList(
-                delegate: SliverChildListDelegate(
-                  [
-                    _getNearestFeatured(context),
-                  ],
-                ),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-                sliver: SliverList(
-                  delegate: SliverChildListDelegate(
-                    [
-                      if (UserX.i.userPresent)
-                        _getHowWasYourExperience(context),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Builder(
-                        builder: (
-                          _,
-                        ) {
-                          return (UserX.i.userNotPresent ||
-                                  UserX.i.user()?.partner != null)
-                              ? const SizedBox() //_getOwnABusiness(context)
-                              : const SizedBox();
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          );
-        });
-      },
-    ));
-  }
-
   var nearestFeaturedKey = ValueKey(DateTime.now());
+
   Widget _getNearestFeatured(BuildContext context) {
     return Builder(
       builder: (_) {
@@ -456,5 +340,121 @@ class _DiscoverTabState extends State<DiscoverTab> {
         ),
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(onRefresh: () async {
+      getAllCategoriesKey = ValueKey(DateTime.now());
+    }, child: Builder(
+      builder: (
+        _,
+      ) {
+        return Builder(builder: (_) {
+          return CustomScrollView(
+            slivers: <Widget>[
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate(
+                    [
+                      Builder(
+                        builder: (
+                          _,
+                        ) {
+                          return UserX.i.userNotPresent
+                              ? const SizedBox()
+                              : Text(
+                                  "Hey, " + (UserX.i.user()?.name ?? ""),
+                                );
+                        },
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        'What can we help you book?',
+                        style: Theme.of(context).textTheme.headline1,
+                      ),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                      _getSearchBar(),
+                      const SizedBox(
+                        height: 20,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    _getFeaturedScroller(context),
+                    const SizedBox(
+                      height: 30,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text(
+                        "Top services",
+                        style: Theme.of(context).textTheme.headline6,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    _getCategoriesScroller(context),
+                    if (UserX.i.userPresent)
+                      // ignore: dead_code
+                      const SizedBox(
+                        height: 30,
+                      ),
+                    if (UserX.i.userPresent)
+                      CompleteYourBookingTile(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                      ),
+                  ],
+                ),
+              ),
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    _getNearestFeatured(context),
+                  ],
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate(
+                    [
+                      if (UserX.i.userPresent)
+                        _getHowWasYourExperience(context),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Builder(
+                        builder: (
+                          _,
+                        ) {
+                          return (UserX.i.userNotPresent ||
+                                  UserX.i.user()?.partner != null)
+                              ? const SizedBox() //_getOwnABusiness(context)
+                              : const SizedBox();
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        });
+      },
+    ));
   }
 }

@@ -82,6 +82,8 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                         return true;
                       },
                       child: Scaffold(
+                       
+                        extendBodyBehindAppBar: true,
                         bottomNavigationBar: Obx(
                           () {
                             if (user is User) {
@@ -172,6 +174,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                           length: 2 + (true ? 0 : 1) + (true ? 0 : 1),
                           initialIndex: 0,
                           child: NestedScrollView(
+                            
                             headerSliverBuilder: (_, __) {
                               return <Widget>[
                                 SliverAppBar(
@@ -240,6 +243,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                     ),
                                   ],
                                   flexibleSpace: FlexibleSpaceBar(
+                                   
                                     background: business.images is List &&
                                             business.images!.isNotEmpty
                                         ? GestureDetector(
