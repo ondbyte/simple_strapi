@@ -45,6 +45,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final screenLoading = false.obs;
+    final user = UserX.i.user();
     return Obx(() {
       if (screenLoading()) {
         return LoadingWidget();
@@ -70,7 +71,6 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                   },
                   onLoadBuilder: (_) => LoadingWidget(),
                   onSucessBuilder: (_, b) {
-                    final user = UserX.i.user();
                     if (b is! Booking) {
                       return SizedBox();
                     }

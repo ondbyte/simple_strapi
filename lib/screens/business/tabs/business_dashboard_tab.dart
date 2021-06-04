@@ -34,9 +34,9 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
 
   @override
   Widget build(BuildContext context) {
-    final user = UserX.i.user()!;
+    final u = UserX.i.user;
     return Users.listenerWidget(
-      strapiObject: user,
+      strapiObject: u()!,
       builder: (_, user, userLoading) {
         return Partners.listenerWidget(
             strapiObject: user.partner!,
@@ -46,6 +46,7 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
                 return Text("no businesses");
               }
               return Obx(() {
+                final usr = u();
                 final pickedBusiness = user.pickedBusiness;
                 if (pickedBusiness is! Business) {
                   return Text("No business selected");
