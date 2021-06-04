@@ -34,6 +34,9 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
   var _getCartKey = ValueKey(DateTime.now());
 
   Future _saveScreenData(Booking booking) async {
+    if (booking.products?.isEmpty ?? true) {
+      return;
+    }
     final user = UserX.i.user();
     if (user is User) {
       await Bookings.update(booking);
@@ -82,7 +85,6 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                         return true;
                       },
                       child: Scaffold(
-                       
                         extendBodyBehindAppBar: true,
                         bottomNavigationBar: Obx(
                           () {
@@ -174,7 +176,6 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                           length: 2 + (true ? 0 : 1) + (true ? 0 : 1),
                           initialIndex: 0,
                           child: NestedScrollView(
-                            
                             headerSliverBuilder: (_, __) {
                               return <Widget>[
                                 SliverAppBar(
@@ -243,7 +244,6 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                     ),
                                   ],
                                   flexibleSpace: FlexibleSpaceBar(
-                                   
                                     background: business.images is List &&
                                             business.images!.isNotEmpty
                                         ? GestureDetector(

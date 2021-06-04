@@ -9,8 +9,14 @@ import 'package:simple_strapi/simple_strapi.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BookingX extends X {
-  static final i = BookingX._x();
-  BookingX._x();
+  static late BookingX i;
+  BookingX._i();
+
+  factory BookingX() {
+    final i = BookingX._i();
+    BookingX.i = i;
+    return i;
+  }
 
   Future init() async {}
 

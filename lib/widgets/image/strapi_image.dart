@@ -1,4 +1,5 @@
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/widgets/loading.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
@@ -14,7 +15,7 @@ class StrapiImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final url = file?.url ?? "$kLogo";
+    final url = file?.url;
     final myFit = fit ??
         () {
           final width = file?.width ?? 0;
@@ -27,6 +28,9 @@ class StrapiImage extends StatelessWidget {
           }
           return BoxFit.fitWidth;
         }();
+    if (url is! String) {
+      return LoadingWidget();
+    }
     return SizedBox(
       width: double.maxFinite,
       height: double.maxFinite,

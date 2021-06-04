@@ -39,7 +39,7 @@ class BusinessTileBigWidget extends StatelessWidget {
                         final logo = files.isNotEmpty ? files.first : null;
                         return ClipRRect(
                           borderRadius: BorderRadius.all(Radius.circular(6)),
-                          child: StrapiImage(file: logo)
+                          child: StrapiImage(file: logo),
                         );
                       },
                     ),
@@ -88,7 +88,7 @@ class BusinessTileWidget extends StatelessWidget {
         sync: true,
         builder: (_, branch, loading) {
           if (loading) {
-            return LoadingWidget();
+            return SizedBox();
           }
           final images = branch.images ?? [];
           final image = images.isNotEmpty ? images.first : null;
@@ -105,12 +105,14 @@ class BusinessTileWidget extends StatelessWidget {
               branch.address?.address ?? "",
               maxLines: 1,
             ),
-            leading: StrapiListTileImageWidget(
-              placeHolder: Initial(
-                forName: branch.name ?? "",
-              ),
-              file: image,
-            ),
+            leading: withImage
+                ? StrapiListTileImageWidget(
+                    placeHolder: Initial(
+                      forName: branch.name ?? "",
+                    ),
+                    file: image,
+                  )
+                : null,
             trailing: GestureDetector(
               onTap: onTrailingTapped,
               child: Column(

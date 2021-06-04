@@ -41,21 +41,25 @@ class CompleteYourBookingTile extends StatelessWidget {
             if (business is! Business) {
               return SizedBox();
             }
+            if (booking.products?.isEmpty ?? true) {
+              return SizedBox();
+            }
             return Container(
               margin: EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(6)),
-                color: Theme.of(context).accentColor.withAlpha(30)
-              ),
+                  borderRadius: BorderRadius.all(Radius.circular(6)),
+                  color: Theme.of(context).accentColor.withAlpha(30)),
               child: ListTile(
-                contentPadding: EdgeInsets.symmetric( horizontal: 15, vertical: 5),
+                contentPadding:
+                    EdgeInsets.symmetric(horizontal: 15, vertical: 5),
                 onTap: () {
                   BappNavigator.push(
                     context,
                     BusinessProfileScreen(business: business),
                   );
                 },
-                title: Text("Complete your booking at ${business.name}", style: Theme.of(context).textTheme.subtitle2),
+                title: Text("Complete your booking at ${business.name}",
+                    style: Theme.of(context).textTheme.subtitle2),
                 trailing: Icon(FeatherIcons.arrowRight),
               ),
             );

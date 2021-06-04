@@ -12,9 +12,14 @@ import 'package:simple_strapi/simple_strapi.dart'
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class LocalityX extends X {
-  static final i = LocalityX._x();
+  static late LocalityX i;
+  LocalityX._i();
 
-  LocalityX._x();
+  factory LocalityX() {
+    final i = LocalityX._i();
+    LocalityX.i = i;
+    return i;
+  }
 
   Future<List<Country>> getCountries(
       {Key key = const ValueKey("getCountries")}) async {

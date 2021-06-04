@@ -7,8 +7,14 @@ import 'package:get/state_manager.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class PartnerX extends X {
-  static final i = PartnerX._x();
-  PartnerX._x();
+  static late PartnerX i;
+  PartnerX._i();
+
+  factory PartnerX() {
+    final i = PartnerX._i();
+    PartnerX.i = i;
+    return i;
+  }
 
   final partner = Rx<Partner?>(null);
 

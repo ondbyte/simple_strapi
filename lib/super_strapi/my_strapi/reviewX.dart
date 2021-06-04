@@ -7,9 +7,14 @@ import 'package:simple_strapi/simple_strapi.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class ReviewX extends X {
-  static final i = ReviewX._i();
-
+  static late ReviewX i;
   ReviewX._i();
+
+  factory ReviewX() {
+    final i = ReviewX._i();
+    ReviewX.i = i;
+    return i;
+  }
 
   Future init() async {}
 

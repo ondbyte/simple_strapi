@@ -13,9 +13,14 @@ import 'package:simple_strapi/simple_strapi.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class UserX {
-  static final i = UserX._x();
+  static late UserX i;
+  UserX._i();
 
-  UserX._x();
+  factory UserX() {
+    final i = UserX._i();
+    UserX.i = i;
+    return i;
+  }
 
   final user = Rx<User?>(null);
   StrapiObjectListener? _userListener;

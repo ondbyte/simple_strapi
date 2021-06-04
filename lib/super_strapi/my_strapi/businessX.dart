@@ -9,8 +9,14 @@ import 'package:simple_strapi/simple_strapi.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BusinessX extends X {
-  static final i = BusinessX._x();
-  BusinessX._x();
+  static late BusinessX i;
+  BusinessX._i();
+
+  factory BusinessX() {
+    final i = BusinessX._i();
+    BusinessX.i = i;
+    return i;
+  }
 
   final businesses = <Business>[].obs;
 

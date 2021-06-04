@@ -3,6 +3,7 @@ import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/screens/business/business_profile/business_profile.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/stores/booking_flow.dart';
+import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -10,17 +11,18 @@ import 'package:provider/provider.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BranchesResultScreen extends StatefulWidget {
-  final Future<List<Business>> futureBranchList;
-  final String title, subTitle, placeName, categoryName, categoryImage;
+  final Future<List<Business>>? futureBranchList;
+  final List<Business>? branchList;
+  final String title, placeName;
+  final StrapiFile? background;
 
   const BranchesResultScreen({
     Key? key,
-    required this.futureBranchList,
+    this.futureBranchList,
     required this.title,
-    required this.subTitle,
     required this.placeName,
-    required this.categoryName,
-    required this.categoryImage,
+    this.background,
+    this.branchList,
   }) : super(key: key);
   @override
   _BranchesResultScreenState createState() => _BranchesResultScreenState();
@@ -40,10 +42,11 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
               background: Container(
                 height: 100,
                 decoration: BoxDecoration(
-                    image: widget.categoryImage != null
+                    image: widget.background is StrapiFile
                         ? DecorationImage(
                             image: CachedNetworkImageProvider(
-                                widget.categoryImage),
+                              widget.background!.url,
+                            ),
                             fit: BoxFit.cover,
                             colorFilter: ColorFilter.mode(
                                 Colors.black54, BlendMode.multiply))
@@ -60,7 +63,7 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
                           ),
                     ),
                     Text(
-                      widget.subTitle,
+                      widget.placeName,
                       style: Theme.of(context)
                           .textTheme
                           .bodyText1
@@ -79,9 +82,11 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
               [
                 FutureBuilder<List<Business>>(
                   future: widget.futureBranchList,
+                  initialData: widget.branchList,
                   builder: (_, snap) {
-                    if (!snap.hasData) {
-                      return const LinearProgressIndicator();
+                    if (snap.data == null ||
+                        snap.connectionState == ConnectionState.waiting) {
+                      return LoadingWidget();
                     }
                     final data = snap.data ?? [];
                     return data.isNotEmpty
@@ -111,10 +116,7 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
                         : ContextualMessageScreen(
                             interactive: false,
                             svgAssetToDisplay: "assets/svg/empty-list.svg",
-                            message: "There are no " +
-                                (widget.categoryName.isNotEmpty
-                                    ? widget.categoryName
-                                    : widget.title) +
+                            message: "There are no ${widget.title}" +
                                 " in " +
                                 widget.placeName +
                                 ", We are adding more local businesses to serve you better.",

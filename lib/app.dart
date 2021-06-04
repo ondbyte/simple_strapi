@@ -2,7 +2,14 @@ import 'package:bapp/screens/home/bapp.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/screens/init/splash_screen.dart';
 import 'package:bapp/screens/onboarding/onboardingscreen.dart';
+import 'package:bapp/super_strapi/my_strapi/bookingX.dart';
+import 'package:bapp/super_strapi/my_strapi/businessX.dart';
+import 'package:bapp/super_strapi/my_strapi/categoryX.dart';
+import 'package:bapp/super_strapi/my_strapi/handPickedX.dart';
+import 'package:bapp/super_strapi/my_strapi/localityX.dart';
+import 'package:bapp/super_strapi/my_strapi/partnerX.dart';
 import 'package:bapp/super_strapi/my_strapi/persistenceX.dart';
+import 'package:bapp/super_strapi/my_strapi/reviewX.dart';
 import 'package:bapp/widgets/app/bapp_navigator_widget.dart';
 import 'package:bapp/widgets/app/bapp_provider_initializer.dart';
 import 'package:bapp/widgets/app/bapp_themed_app.dart';
@@ -33,7 +40,7 @@ class _AppState extends State<App> {
           initializer: () async {
             final fbUser = await FirebaseX.i.init();
             await StrapiSettings.i.init();
-            final defaultData = await DefaultDataX.i.init();
+            await DefaultDataX.i.init();
             final user = await UserX.i.init();
             if (PersistenceX.i.isFirstTimeOnDevice) {
               firstScreen(OnBoardingScreen());

@@ -22,6 +22,17 @@ class CustomerHome extends StatefulWidget {
 
 class _CustomerHomeState extends State<CustomerHome> {
   int _selectedPage = 0;
+  late final tabs = [
+    DiscoverTab(),
+    BookingsTab(),
+    FavoritesTab(),
+    UpdatesTab(),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,12 +47,7 @@ class _CustomerHomeState extends State<CustomerHome> {
         padding: EdgeInsets.symmetric(horizontal: 0),
         child: IndexedStack(
           index: _selectedPage,
-          children: [
-            DiscoverTab(),
-            BookingsTab(),
-            FavoritesTab(),
-            UpdatesTab(),
-          ],
+          children: tabs,
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(

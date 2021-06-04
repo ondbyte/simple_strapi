@@ -18,8 +18,10 @@ class _GalleryState extends State<Gallery> {
     return Scaffold(
       appBar: AppBar(),
       body: PhotoViewGallery.builder(
-        backgroundDecoration: BoxDecoration(color:Theme.of(context).backgroundColor),
-        scrollDirection: Axis.horizontal,
+        gaplessPlayback: true,
+        backgroundDecoration:
+            BoxDecoration(color: Theme.of(context).backgroundColor),
+        scrollDirection: Axis.vertical,
         itemCount: widget.images.length,
         loadingBuilder: (context, event) => Center(
           child: Container(
@@ -35,6 +37,7 @@ class _GalleryState extends State<Gallery> {
         ),
         builder: (_, i) {
           return PhotoViewGalleryPageOptions(
+            tightMode: true,
             imageProvider: CachedNetworkImageProvider(
               widget.images[i].url,
             ),

@@ -14,15 +14,23 @@ import 'package:simple_strapi/simple_strapi.dart'
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class DefaultDataX extends X {
-  static final i = DefaultDataX._x();
+  static late DefaultDataX i;
+  DefaultDataX._i();
 
-  DefaultDataX._x();
+  factory DefaultDataX() {
+    final i = DefaultDataX._i();
+    DefaultDataX.i = i;
+    return i;
+  }
 
   Rx<DefaultData?> defaultData = Rx<DefaultData?>(null);
 
-  late final StrapiObjectListener _updateListener;
+  StrapiObjectListener? _updateListener;
 
   Future<DefaultData?> init() async {
+    if (_updateListener is StrapiObjectListener) {
+      _updateListener?.dispose();
+    }
     defaultData.value = await getDefaultDataFromServer();
     _updateListener = _listenForUpdate();
     return defaultData.value;
@@ -81,7 +89,7 @@ class DefaultDataX extends X {
 
   @override
   Future dispose() async {
-    _updateListener.stopListening();
+    _updateListener?.stopListening();
     super.dispose();
   }
 }

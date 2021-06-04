@@ -11,8 +11,14 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:the_country_number/the_country_number.dart';
 
 class FirebaseX extends X {
-  static final i = FirebaseX._x();
-  FirebaseX._x();
+  static late FirebaseX i;
+  FirebaseX._i();
+
+  factory FirebaseX() {
+    final i = FirebaseX._i();
+    FirebaseX.i = i;
+    return i;
+  }
 
   bool get userPresent => _user != null;
   bool get userNotPresent => !userPresent;

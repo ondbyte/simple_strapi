@@ -111,32 +111,6 @@ class BusinessHomeScreenTabsConfig {
   ];
 }
 
-///add home screen featured cards to show
-class HomeScreenFeaturedConfig {
-  static List<Featured> slides = [
-    Featured(
-        title: "New On Bapp",
-        icon: FeatherIcons.package,
-        ref: "",
-        cardColor: CardsColor.next(uid: "New On Bapp")),
-    Featured(
-        title: "Best in \nSavings",
-        icon: FeatherIcons.package,
-        ref: "",
-        cardColor: CardsColor.next(uid: "Best in \nSavings")),
-    Featured(
-        title: "Top \n Rated",
-        icon: FeatherIcons.package,
-        ref: "",
-        cardColor: CardsColor.next(uid: "Top \n Rated")),
-    Featured(
-        title: "Only On Bapp",
-        icon: FeatherIcons.package,
-        ref: "",
-        cardColor: CardsColor.next(uid: "Only On Bapp")),
-  ];
-}
-
 class LoginConfig {
   static Reasons bookingTabLoginReason = Reasons(
     primary: "Login to view your bookings",

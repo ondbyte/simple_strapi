@@ -8,8 +8,14 @@ import 'package:path_provider/path_provider.dart';
 import 'defaultDataX.dart';
 
 class PersistenceX {
-  static final i = PersistenceX._x();
-  PersistenceX._x();
+  static late PersistenceX i;
+  PersistenceX._i();
+
+  factory PersistenceX() {
+    final i = PersistenceX._i();
+    PersistenceX.i = i;
+    return i;
+  }
 
   late final LazyBox _hiveBox;
 

@@ -4,9 +4,14 @@ import 'package:get/get.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class CategoryX extends X {
-  static final i = CategoryX._i();
-
+  static late CategoryX i;
   CategoryX._i();
+
+  factory CategoryX() {
+    final i = CategoryX._i();
+    CategoryX.i = i;
+    return i;
+  }
 
   Future<List<BusinessCategory>> getAllCategories(
       {Key? key, Rx? observe}) async {

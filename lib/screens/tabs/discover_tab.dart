@@ -17,6 +17,7 @@ import 'package:bapp/super_strapi/my_strapi/localityX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x_helpers.dart';
 import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
+import 'package:bapp/widgets/hand_picked.dart';
 import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/search_bar.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
@@ -71,11 +72,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
                       BappNavigator.push(
                         context,
                         BranchesResultScreen(
-                          categoryImage: "",
                           title: "Featured Service",
-                          subTitle: "in ",
-                          categoryName: "featured",
-                          futureBranchList: Future.value([...data]),
+                          branchList: data,
                           placeName: UserX.i.userNotPresent
                               ? placeName(
                                     city: DefaultDataX.i.defaultData()?.city,
@@ -183,73 +181,6 @@ class _DiscoverTabState extends State<DiscoverTab> {
     );
   }
 
-  Widget _getFeaturedScroller(context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          const SizedBox(
-            width: 16,
-          ),
-          ...HomeScreenFeaturedConfig.slides.map(
-            (e) => GestureDetector(
-              onTap: () {
-                BappNavigator.push(
-                  context,
-                  BranchesResultScreen(
-                    categoryImage: "",
-                    categoryName: "",
-                    placeName: UserX.i.userNotPresent
-                        ? placeName(
-                              city: DefaultDataX.i.defaultData()?.city,
-                              locality: DefaultDataX.i.defaultData()?.locality,
-                            ) ??
-                            "no place, inform yadu"
-                        : placeName(
-                              city: UserX.i.user()?.city,
-                              locality: UserX.i.user()?.locality,
-                            ) ??
-                            "no place, inform yadu",
-                    title: e.title.split("\n").join(""),
-                    subTitle: "",
-                    futureBranchList: Future.value(<Business>[]),
-                  ),
-                );
-              },
-              child: Container(
-                height: 125,
-                width: 142,
-                margin: const EdgeInsets.only(right: 20),
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                    color: e.cardColor, borderRadius: BorderRadius.circular(6)),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      e.icon,
-                      color: Colors.white,
-                    ),
-                    const SizedBox(
-                      height: 6,
-                    ),
-                    Text(
-                      e.title,
-                      style: Theme.of(context).textTheme.headline3?.apply(
-                            color: Colors.white,
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-
   Widget _getCategoriesScroller(BuildContext context) {
     return SingleChildScrollView(
       padding: EdgeInsets.only(
@@ -300,11 +231,9 @@ class _DiscoverTabState extends State<DiscoverTab> {
           BappNavigator.push(
             context,
             BranchesResultScreen(
-              categoryImage: c.image?.url ?? "",
-              categoryName: c.name ?? "",
               placeName: place,
-              title: "Top " + (c.name ?? "no cat name, inform yadu"),
-              subTitle: "In " + place,
+              title: c.name ?? "",
+              background: c.image,
               futureBranchList: BusinessX.i.getNearestBusinesses(),
             ),
           );
@@ -393,7 +322,14 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     const SizedBox(
                       height: 10,
                     ),
-                    _getFeaturedScroller(context),
+                    HandPickedScroller(
+                      city: UserX.i.userNotPresent
+                          ? DefaultDataX.i.defaultData()?.city
+                          : UserX.i.user()?.city,
+                      locality: UserX.i.userNotPresent
+                          ? DefaultDataX.i.defaultData()?.locality
+                          : UserX.i.user()?.locality,
+                    ),
                     const SizedBox(
                       height: 30,
                     ),
