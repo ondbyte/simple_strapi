@@ -3,10 +3,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:bapp/config/config.dart';
-import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/config/constants.dart';
-import 'package:bapp/helpers/exceptions.dart';
-import 'package:bapp/stores/cloud_store.dart';
 import 'package:device_info/device_info.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/cupertino.dart' hide Action;
@@ -14,12 +11,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Action;
 import 'package:geocoder/geocoder.dart' as g;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:image/image.dart';
+import 'package:image/image.dart' hide Color;
 import 'package:intl/intl.dart';
 import 'package:mobx/mobx.dart' show Action;
 import 'package:provider/provider.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 import 'package:bapp/helpers/extensions.dart';
+import 'package:recase/recase.dart';
 
 class Helper {
   static stringifyAddresse(g.Address adr) {
@@ -221,10 +219,6 @@ Future sendUpdatesForBooking(Booking booking) async {
   }
 }
 
-String readableEnum(dynamic value) {
-  return EnumToString.convertToString(value).split(r"(?=[A-Z])").join(" ");
-}
-
 void documentIntegrityError(e, s, data) {
   Helper.bPrint(kDocumenIntegrityError);
   Helper.bPrint("Document data/snap is");
@@ -298,8 +292,9 @@ String getOnForTime(DateTime date) {
 List<Timing> divideTimingIntoChunksOfDuration(Timing timing,
     {Duration duration = const Duration(minutes: 15)}) {
   final returnable = <Timing>[];
-  var _startX =
-      duration.inMinutes - (timing.from?.minute ?? 0).remainder(duration.inMinutes) - 15;
+  var _startX = duration.inMinutes -
+      (timing.from?.minute ?? 0).remainder(duration.inMinutes) -
+      15;
   var frm = timing.from!;
   var start = DateTime(
           frm.year, frm.month, frm.day, frm.hour, frm.minute + _startX),
@@ -391,4 +386,41 @@ class DateFormatters {
   static final dayName = DateFormat.EEEE();
   static final at = DateFormat.EEEE();
   static final aboutTab = DateFormat("h:mm a");
+}
+
+Color getColorForBooking(BookingStatus? status) {
+  switch (status) {
+    case BookingStatus.accepted:
+    case BookingStatus.ongoing:
+      {
+        return CardsColor.colors["teal"] ?? Colors.teal;
+      }
+    case BookingStatus.walkin:
+    case BookingStatus.pendingApproval:
+      {
+        return CardsColor.colors["purple"] ?? Colors.purple;
+      }
+    case BookingStatus.cancelledByUser:
+      {
+        return CardsColor.colors["orange"] ?? Colors.orange;
+      }
+    case BookingStatus.cancelledByManager:
+    case BookingStatus.cancelledByReceptionist:
+    case BookingStatus.cancelledByStaff:
+    case BookingStatus.noShow:
+      {
+        return Colors.redAccent;
+      }
+    case BookingStatus.finished:
+      {
+        return Colors.grey.shade400;
+      }
+    default:
+      return Colors.grey.shade300;
+  }
+}
+
+String readableEnum(enumerator) {
+  final s = EnumToString.convertToString(enumerator);
+  return ReCase("$s").sentenceCase;
 }

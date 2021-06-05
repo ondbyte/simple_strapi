@@ -154,6 +154,8 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                         );
                                       }
                                     }
+
+                                    screenLoading(false);
                                   },
                                 );
                               });

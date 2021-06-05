@@ -293,8 +293,10 @@ class _DiscoverTabState extends State<DiscoverTab> {
                         ) {
                           return UserX.i.userNotPresent
                               ? const SizedBox()
-                              : Text(
-                                  "Hey, " + (UserX.i.user()?.name ?? ""),
+                              : Obx(
+                                  () => Text(
+                                    "Hey, " + (UserX.i.user()?.name ?? ""),
+                                  ),
                                 );
                         },
                       ),

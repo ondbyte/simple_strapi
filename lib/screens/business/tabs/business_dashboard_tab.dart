@@ -43,7 +43,14 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab> {
             sync: true,
             builder: (context, partner, partnerLoading) {
               if (partner.businesses?.isEmpty ?? true) {
-                return Text("no businesses");
+                return SizedBox(
+                  height: 280,
+                  width: MediaQuery.of(context).size.width,
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Text("no businesses"),
+                  ),
+                );
               }
               return Obx(() {
                 final usr = u();

@@ -114,7 +114,7 @@ class _SelectAProfessionalScreenState extends State<SelectAProfessionalScreen> {
               ),
             );
           }
-          if (unAvailableEmplyees is List) {
+          /* if (unAvailableEmplyees is List) {
             unAvailableEmplyeesWidget.addAll(
               List.generate(
                 unAvailableEmplyees.length,
@@ -124,7 +124,7 @@ class _SelectAProfessionalScreenState extends State<SelectAProfessionalScreen> {
                 ),
               ),
             );
-          }
+          } */
           return Column(
             mainAxisSize: MainAxisSize.min,
             children: [

@@ -17,6 +17,7 @@ import 'package:bapp/widgets/booking_timeline.dart';
 import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/tiles/employee_tile.dart';
 import 'package:bapp/widgets/tiles/error.dart';
+import 'package:enum_to_string/enum_to_string.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +36,7 @@ class BusinessBookingsTab extends StatefulWidget {
 
 class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
   final _calendarController = CalendarController();
-  final _selectedDay = Observable(DateTime.now());
+  final _selectedDay = Rx(DateTime.now());
 
   @override
   void dispose() {
@@ -163,10 +164,14 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
                                             alignment: Alignment.center,
                                             child: Text("Select a enployee"),
                                           )
-                                        : BookingTimeLineWidget(
-                                            date: _selectedDay.value,
-                                            list: pickedEmployee.bookings ?? [],
-                                          );
+                                        : Obx(() => BookingTimeLineWidget(
+                                              timing: _beginingOfTheDay(
+                                                  _selectedDay.value,
+                                                  business.dayTiming ?? []),
+                                              date: _selectedDay.value,
+                                              list:
+                                                  pickedEmployee.bookings ?? [],
+                                            ));
                                   },
                                 )
                               ],
@@ -179,6 +184,28 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
                 });
           });
     });
+  }
+
+  Timing? _beginingOfTheDay(DateTime day, List<DayTiming> dayTimings) {
+    if (dayTimings.isEmpty) {
+      return null;
+    }
+    final dayName = DateFormatters.dayName.format(day).toLowerCase();
+    try {
+      final timing = dayTimings.firstWhere(
+        (element) => EnumToString.convertToString(element.dayName) == dayName,
+      );
+      final f = timing.timings?.first.from;
+      final t = timing.timings?.last.to;
+      if (f is DateTime && t is DateTime) {
+        return Timing(enabled: false, from: f.toLocal(), to: t.toLocal());
+      }
+    } catch (e, s) {
+      bPrint(
+        e,
+      );
+      bPrint(s);
+    }
   }
 }
 

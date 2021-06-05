@@ -9,11 +9,15 @@ import 'package:provider/provider.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BookingTimeLineWidget extends StatefulWidget {
+  final Timing? timing;
   final DateTime date;
   final List<Booking> list;
 
   const BookingTimeLineWidget(
-      {Key? key, required this.date, this.list = const []})
+      {Key? key,
+      required this.date,
+      this.list = const [],
+      required this.timing})
       : super(key: key);
   @override
   _BookingTimeLineWidgetState createState() => _BookingTimeLineWidgetState();
@@ -30,6 +34,12 @@ class _BookingTimeLineWidgetState extends State<BookingTimeLineWidget> {
   @override
   Widget build(BuildContext context) {
     final list = widget.list;
+    final timing = widget.timing;
+    if (timing is! Timing) {
+      return Center(
+        child: Text("No timings for the day"),
+      );
+    }
     return DayView(
       hoursColumnStyle: HoursColumnStyle(
         color: Theme.of(context).scaffoldBackgroundColor,
@@ -42,6 +52,12 @@ class _BookingTimeLineWidgetState extends State<BookingTimeLineWidget> {
           hourRowHeight: 120,
           backgroundColor: Theme.of(context).scaffoldBackgroundColor),
       date: widget.date,
+      minimumTime: HourMinute(
+          hour: widget.timing?.from?.hour ?? 0,
+          minute: widget.timing?.from?.minute ?? 0),
+      maximumTime: HourMinute(
+          hour: widget.timing?.to?.hour ?? 0,
+          minute: widget.timing?.to?.minute ?? 0),
       inScrollableWidget: true,
       userZoomable: false,
       controller: _c,

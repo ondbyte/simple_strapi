@@ -38,6 +38,16 @@ class _AppState extends State<App> {
       child: BappThemedApp(
         child: InitWidget(
           initializer: () async {
+            final h = HandPickedX();
+            final b = BookingX();
+            final bb = BusinessX();
+            final c = CategoryX();
+            final d = DefaultDataX();
+            final fb = FirebaseX();
+            final l = LocalityX();
+            final px = PartnerX();
+            final rx = ReviewX();
+            final u = UserX();
             final fbUser = await FirebaseX.i.init();
             await StrapiSettings.i.init();
             await DefaultDataX.i.init();

@@ -48,6 +48,7 @@ class UserX {
   Future logout() async {
     await FirebaseX.i.logOut();
     await PersistenceX.i.saveValue("token", "");
+    Strapi.i.strapiToken = "";
     kBus.fire(AppEvents.reboot);
   }
 

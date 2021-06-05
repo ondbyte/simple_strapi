@@ -13,6 +13,7 @@ import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x.dart';
 import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
 import 'package:bapp/widgets/firebase_image.dart';
+import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/loading_stack.dart';
 import 'package:bapp/widgets/padded_text.dart';
 import 'package:bapp/widgets/tiles/bapp_user_tile.dart';
@@ -102,6 +103,9 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
           return Bookings.listenerWidget(
             strapiObject: widget.booking,
             builder: (_, booking, loading) {
+              if (loading) {
+                return LoadingWidget();
+              }
               return Scaffold(
                 appBar: AppBar(
                   title: Text("Booking Details"),
@@ -127,7 +131,8 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                     if (!confirm.confirm) {
                                       return;
                                     }
-                                    await BookingX.i.cancel(booking);
+                                    await BookingX.i.cancel(booking,
+                                        status: BookingStatus.cancelledByUser);
                                     BappNavigator.pop(context, null);
                                   }
                                 : null,
@@ -201,9 +206,8 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                   padding: EdgeInsets.all(16),
                   children: [
                     TitledListTile(
-                      bottomTag:
-                          EnumToString.convertToString(booking.bookingStatus),
-                      bottomTagColor: Colors.green,
+                      bottomTag: readableEnum(booking.bookingStatus),
+                      bottomTagColor: getColorForBooking(booking.bookingStatus),
                       primaryTile: widget.isCustomerView
                           ? ListTile(
                               contentPadding:

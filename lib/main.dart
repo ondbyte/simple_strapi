@@ -12,6 +12,7 @@ import 'package:bapp/super_strapi/my_strapi/reviewX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'app.dart';
 
@@ -23,17 +24,11 @@ void main() async {
     FlutterError.dumpErrorToConsole(e);
   };
 
-  final h = HandPickedX();
-  final b = BookingX();
-  final bb = BusinessX();
-  final c = CategoryX();
-  final d = DefaultDataX();
-  final fb = FirebaseX();
-  final l = LocalityX();
-  final px = PartnerX();
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitDown,
+    DeviceOrientation.portraitUp,
+  ]);
   final ppx = PersistenceX();
-  final rx = ReviewX();
-  final u = UserX();
   await PersistenceX.i.init();
   runApp(App());
 }
