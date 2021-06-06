@@ -6,15 +6,21 @@ import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/screens/home/bapp.dart';
 import 'package:bapp/screens/misc/contextual_message.dart';
+import 'package:bapp/super_strapi/my_strapi/bookingX.dart';
+import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x.dart';
+import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
+import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/loading_stack.dart';
+import 'package:bapp/widgets/tiles/error.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:get/get.dart';
 import 'package:google_place/google_place.dart' hide Review;
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class RateTheBookingScreen extends StatefulWidget {
-  final Review booking;
+  final Booking booking;
 
   const RateTheBookingScreen({Key? key, required this.booking})
       : super(key: key);
@@ -23,10 +29,11 @@ class RateTheBookingScreen extends StatefulWidget {
 }
 
 class _RateTheBookingScreenState extends State<RateTheBookingScreen> {
-  Booking? booking;
+  late Booking _booking;
   @override
   void initState() {
     super.initState();
+    _booking = widget.booking;
     /*WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       act(() {
         kLoading.value = true;
@@ -48,102 +55,114 @@ class _RateTheBookingScreenState extends State<RateTheBookingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox();
-    /* if (booking == null) {
-      return SizedBox();
-    }
-    return WillPopScope(
-        onWillPop: () async {
-          widget.booking.rating.updatePhase(BookingRatingPhase.overallRated);
-          widget.booking.saveRating();
-          return true;
-        },
-        child: LoadingStackWidget(
-          child: Scaffold(
-            bottomNavigationBar: BottomPrimaryButton(
-              label: "Send feedback",
-              onPressed: booking.rating.isEdited()
-                  ? () async {
+    return Bookings.listenerWidget(
+        strapiObject: widget.booking,
+        sync: true,
+        builder: (context, booking, loading) {
+          if (loading) {
+            return LoadingWidget();
+          }
+          var review = booking.review;
+          if (review is! Review) {
+            return SizedBox();
+          }
+          _booking = _booking.copyWIth(review: review);
+          return WillPopScope(
+              onWillPop: () async {
+                return true;
+              },
+              child: LoadingStackWidget(
+                  child: Scaffold(
+                bottomNavigationBar: BottomPrimaryButton(
+                  label: "Send feedback",
+                  onPressed: () async {
+                    if (review is Review) {
                       BappNavigator.pushAndRemoveAll(
                         context,
                         ContextualMessageScreen(
-                          message:
-                              RatingConfig.getThankYouForTheReviewForBooking(
-                                  booking),
+                          message: "Thank you for your rating",
                           buttonText: "Go to Home",
                           onButtonPressed: (context) {
                             BappNavigator.pushAndRemoveAll(context, Bapp());
                           },
                           init: () async {
-                            booking.rating
-                                .updatePhase(BookingRatingPhase.fullyRated);
-                            await booking.saveRating();
+                            await Reviews.update(review!);
                           },
                         ),
                       );
                     }
-                  : null,
-            ),
-            appBar: AppBar(),
-            body: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: ListView(
-                  shrinkWrap: true,
-                  children: [
-                    ...List.generate(
-                      booking.rating.all.length,
-                      (i) {
-                        final r = booking.rating.all.values.elementAt(i);
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 20),
-                          child: RatingTile(
-                            firstSentence:
-                                RatingConfig.getFirstSentenceForRating(r),
-                            secondSentence: RatingConfig
-                                    .getSecondSentenceForRatingWithBooking(
-                                        r, booking) +
-                                "?",
-                            rating: r,
-                            onRatingUpdated: (newR) {
-                              booking.rating.update(newR);
-                              setState(() {});
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                    TextFormField(
-                      initialValue: booking.rating.review,
-                      onChanged: (s) {
-                        booking.rating.review = s;
-                      },
-                      decoration: const InputDecoration(
-                        labelText: RatingConfig.reviewLabel,
-                        hintText: RatingConfig.reviewHint,
-                      ),
-                    )
-                  ],
+                  },
                 ),
-              ),
-            ),
-          ),
-        ));
-   */
+                appBar: AppBar(),
+                body: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: [
+                        RatingTile(
+                          firstSentence: "Review employee",
+                          rating: review.emplyeeRating ?? 0,
+                          review: review.employeeReview ?? "",
+                          onRatingUpdated: (r) {
+                            review = review!.copyWIth(emplyeeRating: r);
+                            _booking = _booking.copyWIth(review: review);
+                          },
+                          onReviewUpdated: (s) {
+                            review = review!.copyWIth(employeeReview: s);
+                            _booking = _booking.copyWIth(review: review);
+                          },
+                        ),
+                        RatingTile(
+                          firstSentence: "Review facility",
+                          rating: review!.facilityRating ?? 0,
+                          review: review!.facilityReview ?? "",
+                          onRatingUpdated: (r) {
+                            review = review!.copyWIth(facilityRating: r);
+                            _booking = _booking.copyWIth(review: review);
+                          },
+                          onReviewUpdated: (s) {
+                            review = review!.copyWIth(facilityReview: s);
+                            _booking = _booking.copyWIth(review: review);
+                          },
+                        ),
+                        RatingTile(
+                          firstSentence: "Review Overall experience",
+                          rating: review!.rating ?? 0,
+                          review: review!.review ?? "",
+                          onRatingUpdated: (r) {
+                            review = review!.copyWIth(rating: r);
+                            _booking = _booking.copyWIth(review: review);
+                          },
+                          onReviewUpdated: (s) {
+                            review = review!.copyWIth(review: s);
+                            _booking = _booking.copyWIth(review: review);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )));
+        });
   }
 }
 
 class RatingTile extends StatelessWidget {
   final String? firstSentence, secondSentence;
-  final Review rating;
-  final Function(Review)? onRatingUpdated;
+  final double rating;
+  final String review;
+  final Function(double) onRatingUpdated;
+  final Function(String) onReviewUpdated;
 
   const RatingTile({
     Key? key,
     this.firstSentence,
     this.secondSentence,
     required this.rating,
-    this.onRatingUpdated,
+    required this.onRatingUpdated,
+    required this.review,
+    required this.onReviewUpdated,
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -167,12 +186,20 @@ class RatingTile extends StatelessWidget {
           ),
           BappRatingBar(
             ignoreGesture: false,
-            initialRating: rating.rating ?? 0,
-            unratedColor: Theme.of(context).indicatorColor,
+            initialRating: rating,
             onRatingUpdated: (r) {
-              onRatingUpdated?.call(rating.copyWIth(rating: r));
+              onRatingUpdated.call(r);
             },
           ),
+          const SizedBox(
+            height: 20,
+          ),
+          TextField(
+            decoration: InputDecoration(labelText: "say something"),
+            onChanged: (s) {
+              onReviewUpdated.call(s);
+            },
+          )
         ],
       ),
     );
@@ -219,56 +246,94 @@ class BappRatingBar extends StatelessWidget {
 }
 
 class HowWasYourExperienceTile extends StatelessWidget {
-  final Booking booking;
   final BorderRadius? borderRadius;
   final EdgeInsets? padding;
+  final Rx<bool> done = false.obs;
 
-  const HowWasYourExperienceTile(
-      {Key? key, required this.booking, this.borderRadius, this.padding})
-      : super(key: key);
+  HowWasYourExperienceTile({
+    Key? key,
+    this.borderRadius,
+    this.padding,
+  }) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: borderRadius ?? BorderRadius.circular(6),
-      child: ListTile(
-        tileColor: CardsColor.colors["lightGreen"],
-        contentPadding: padding ?? const EdgeInsets.all(16),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              "How was your experience at",
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyText1
-                  ?.apply(color: Colors.white),
+    final user = UserX.i.user();
+    if (user is! User) {
+      return SizedBox();
+    }
+    return TapToReFetch<List<Booking>>(
+        fetcher: () => BookingX.i.getNonReviewedBookingsForUser(user),
+        onLoadBuilder: (_) => SizedBox(),
+        onErrorBuilder: (_, e, s) {
+          bPrint(e);
+          bPrint(s);
+          return ErrorTile(message: "Something went wrong, tap to retry");
+        },
+        onSucessBuilder: (context, bookings) {
+          if (bookings.isEmpty) {
+            return SizedBox();
+          }
+          final booking = bookings.first;
+          return ClipRRect(
+            borderRadius: borderRadius ?? BorderRadius.circular(6),
+            child: ListTile(
+              tileColor: CardsColor.colors["lightGreen"],
+              contentPadding: padding ?? const EdgeInsets.all(16),
+              title: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "How was your experience at",
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyText1
+                        ?.apply(color: Colors.white),
+                  ),
+                  Text(
+                    booking.business?.name ?? "no business name inform yadu",
+                    style: Theme.of(context)
+                        .textTheme
+                        .subtitle1
+                        ?.apply(color: Colors.white),
+                  ),
+                  Obx(() {
+                    return AnimatedSwitcher(
+                      duration: const Duration(seconds: 1),
+                      child: !done()
+                          ? BappRatingBar(
+                              onRatingUpdated: (r) async {
+                                final newReview = Review.fresh(
+                                    rating: r, reviewedOn: DateTime.now());
+                                final updated = await Reviews.create(newReview);
+                                await Bookings.update(
+                                    booking.copyWIth(review: updated!));
+                                done(true);
+                              },
+                              ignoreGesture: done(),
+                            )
+                          : GestureDetector(
+                              onTap: () {
+                                BappNavigator.push(
+                                  context,
+                                  RateTheBookingScreen(
+                                    booking: booking,
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                "Thank you, Click here to fully review your experience",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                    );
+                  }),
+                ],
+              ),
             ),
-            Text(
-              booking.business?.name ?? "no business name inform yadu",
-              style: Theme.of(context)
-                  .textTheme
-                  .subtitle1
-                  ?.apply(color: Colors.white),
-            ),
-            BappRatingBar(
-              onRatingUpdated: (r) {
-                final newReview = booking.review?.copyWIth(rating: r);
-                if (newReview is Review) {
-                  Reviews.update(newReview);
-                  BappNavigator.push(
-                    context,
-                    RateTheBookingScreen(
-                      booking: newReview,
-                    ),
-                  );
-                }
-              },
-              ignoreGesture: false,
-            )
-          ],
-        ),
-      ),
-    );
+          );
+        });
   }
 }

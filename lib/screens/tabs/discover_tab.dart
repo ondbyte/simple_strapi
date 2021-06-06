@@ -164,19 +164,13 @@ class _DiscoverTabState extends State<DiscoverTab> {
   }
 
   Widget _getHowWasYourExperience(BuildContext context) {
+    final user = UserX.i.user();
     return Builder(
       builder: (_) {
-        return SizedBox();
-        /* if (flow.myBookings.isEmpty) {
+        if (user?.bookings?.isEmpty ?? true) {
           return SizedBox();
         }
-        final bs = flow.getUnratedBookings();
-        if (bs.isEmpty) {
-          return SizedBox();
-        }
-        return HowWasYourExperienceTile(
-          booking: bs.first,
-        ); */
+        return HowWasYourExperienceTile();
       },
     );
   }
@@ -234,7 +228,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
               placeName: place,
               title: c.name ?? "",
               background: c.image,
-              futureBranchList: BusinessX.i.getNearestBusinesses(),
+              futureBranchList:
+                  BusinessX.i.getNearestBusinesses(forCategory: c),
             ),
           );
         } else {

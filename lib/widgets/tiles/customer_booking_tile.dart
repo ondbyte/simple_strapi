@@ -31,7 +31,6 @@ class BookingTile extends StatefulWidget {
 }
 
 class _BookingTileState extends State<BookingTile> {
-  final dateFormatter = DateFormat.yMd();
   @override
   Widget build(BuildContext context) {
     return Padding(

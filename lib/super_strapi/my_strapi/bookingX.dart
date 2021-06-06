@@ -293,4 +293,44 @@ class BookingX extends X {
       );
     return q;
   }
+
+  Future<List<Booking>> getNonReviewedBookingsForUser(User user) async {
+    final q = StrapiCollectionQuery(
+      collectionName: Booking.collectionName,
+      requiredFields: Booking.fields(),
+    )
+      ..whereField(
+        field: Booking.fields.bookingStatus,
+        query: StrapiFieldQuery.equalTo,
+        value: EnumToString.convertToString(
+          BookingStatus.finished,
+        ),
+      )
+      ..whereModelField(
+        field: Booking.fields.business,
+        query: StrapiModelQuery(
+          requiredFields: Business.fields(),
+        ),
+      )
+      ..whereModelField(
+        field: Booking.fields.review,
+        query: StrapiModelQuery(
+          requiredFields: Review.fields(),
+        ),
+      )
+      ..whereModelField(
+        field: Booking.fields.bookedByUser,
+        query: StrapiModelQuery(
+            requiredFields: User.fields()
+              ..remove(User.fields.resetPasswordToken)
+              ..remove(User.fields.confirmationToken))
+          ..whereField(
+            field: User.fields.id,
+            query: StrapiFieldQuery.equalTo,
+            value: user.id,
+          ),
+      );
+    final list = await Bookings.executeQuery(q);
+    return list.where((e) => e.review is! Review).toList();
+  }
 }

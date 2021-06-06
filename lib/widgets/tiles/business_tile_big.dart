@@ -85,7 +85,7 @@ class BusinessTileWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Businesses.listenerWidget(
         strapiObject: branch,
-        sync: true,
+        sync: !branch.synced,
         builder: (_, branch, loading) {
           if (loading) {
             return SizedBox();

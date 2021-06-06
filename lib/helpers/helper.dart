@@ -286,7 +286,7 @@ String getProductsCostString(List<Product> products) {
 }
 
 String getOnForTime(DateTime date) {
-  return "On ${DateFormat("MMM d, h:mm a").format(date)}";
+  return "On ${DateFormat("MMM d, h:mm a").format(date.toLocal())}";
 }
 
 List<Timing> divideTimingIntoChunksOfDuration(Timing timing,

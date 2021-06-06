@@ -66,26 +66,21 @@ class BusinessX extends X {
       Business.fields.address,
       Address.fields(),
     );
-    return memoize(
-      key,
-      () async {
-        if (forCategory is BusinessCategory) {
-          q.whereModelField(
-            field: Business.fields.business_category,
-            query: StrapiModelQuery(
-              requiredFields: BusinessCategory.fields(),
-            )..whereField(
-                field: BusinessCategory.fields.name,
-                query: StrapiFieldQuery.equalTo,
-                value: forCategory.name,
-              ),
-          );
-        }
-        final found = await Businesses.executeQuery(q);
-        return found;
-      },
-      runWhenChanged: observe,
-    );
+
+    if (forCategory is BusinessCategory) {
+      q.whereModelField(
+        field: Business.fields.business_category,
+        query: StrapiModelQuery(
+          requiredFields: BusinessCategory.fields(),
+        )..whereField(
+            field: BusinessCategory.fields.name,
+            query: StrapiFieldQuery.equalTo,
+            value: forCategory.name,
+          ),
+      );
+    }
+    final found = await Businesses.executeQuery(q);
+    return found;
   }
 
   Map<DateTime, List> getHolidaysOfBusiness(Business business) {
