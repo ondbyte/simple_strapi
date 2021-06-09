@@ -1,6 +1,6 @@
-
 import 'package:bapp/widgets/app/bapp_themed_app.dart';
 import 'package:flutter/material.dart';
+import 'package:yadunandans_flutter_helpers/themed_app.dart';
 
 class ThemeSwitcherTile extends StatefulWidget {
   @override
@@ -13,10 +13,14 @@ class _ThemeSwitcherTileState extends State<ThemeSwitcherTile> {
     return ListTile(
       title: Text("Dark mode"),
       trailing: Switch(
-        value: BappThemedApp.isDarkTheme(context),
+        value: ThemedApp.isDark(context),
         onChanged: (b) {
           setState(() {
-            BappThemedApp.switchTheme(context);
+            if (b) {
+              ThemedApp.darken(context);
+            } else {
+              ThemedApp.lighten(context);
+            }
           });
         },
       ),

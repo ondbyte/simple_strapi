@@ -1247,6 +1247,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "5.1.1"
+  yadunandans_flutter_helpers:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "6175e5b5a4c9ddf72c9fb12da6f6465834769040"
+      url: "https://github.com/ondbyte/yadunandans_flutter_helpers.git"
+    source: git
+    version: "0.0.1+1"
   yaml:
     dependency: transitive
     description:

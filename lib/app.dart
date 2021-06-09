@@ -1,3 +1,4 @@
+import 'package:bapp/config/theme_config.dart';
 import 'package:bapp/screens/home/bapp.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/screens/init/splash_screen.dart';
@@ -16,6 +17,8 @@ import 'package:bapp/widgets/app/bapp_themed_app.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:package_info/package_info.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:yadunandans_flutter_helpers/themed_app.dart';
 
 import 'config/constants.dart';
 import 'super_strapi/my_strapi/defaultDataX.dart';
@@ -35,36 +38,39 @@ class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
     return BappReboot(
-      child: BappThemedApp(
-        child: InitWidget(
-          initializer: () async {
-            final h = HandPickedX();
-            final b = BookingX();
-            final bb = BusinessX();
-            final c = CategoryX();
-            final d = DefaultDataX();
-            final fb = FirebaseX();
-            final l = LocalityX();
-            final px = PartnerX();
-            final rx = ReviewX();
-            final u = UserX();
-            final fbUser = await FirebaseX.i.init();
-            await StrapiSettings.i.init();
-            await DefaultDataX.i.init();
-            final user = await UserX.i.init();
-            if (PersistenceX.i.isFirstTimeOnDevice) {
-              firstScreen(OnBoardingScreen());
-            } else {
-              firstScreen(Bapp());
-            }
-          },
-          showWhileInit: Splash(),
-          child: PackageInfoCheck(
-            child: Obx(
-              () => firstScreen(),
-            ),
-          ),
-        ),
+      child: ThemedApp(
+        lightTheme: getLightThemeData(),
+        darkTheme: getDarkThemeData(),
+        initializer: () async {
+          final h = HandPickedX();
+          final b = BookingX();
+          final bb = BusinessX();
+          final c = CategoryX();
+          final d = DefaultDataX();
+          final fb = FirebaseX();
+          final l = LocalityX();
+          final px = PartnerX();
+          final rx = ReviewX();
+          final u = UserX();
+          final fbUser = await FirebaseX.i.init();
+          await StrapiSettings.i.init();
+          await DefaultDataX.i.init();
+          final user = await UserX.i.init();
+          if (PersistenceX.i.isFirstTimeOnDevice) {
+            firstScreen(OnBoardingScreen());
+          } else {
+            firstScreen(Bapp());
+          }
+        },
+        builder: (context, initialized) {
+          if (initialized) {
+            return firstScreen();
+          }
+          return Splash();
+        },
+        directoryToPersistData: () {
+          return getApplicationSupportDirectory();
+        },
       ),
     );
   }
