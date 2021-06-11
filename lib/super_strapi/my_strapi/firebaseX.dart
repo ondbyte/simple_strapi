@@ -8,6 +8,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fba;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:the_country_number/the_country_number.dart';
 
 class FirebaseX extends X {
@@ -53,10 +54,11 @@ class FirebaseX extends X {
     if (uid.isEmpty) {
       return;
     }
-    final u = await UserX.i.loginWithFirebase(uid, email, name);
-    print(u);
-    print("USERRRR");
-    print(u);
+    final fcmToken = await FirebaseMessaging.instance.getToken();
+    final u = await UserX.i.loginWithFirebase(uid, email, name, fcmToken!);
+    if (u is! User) {
+      bPrint("Unable to login with firebase");
+    }
   }
 
   Future updateProfile(

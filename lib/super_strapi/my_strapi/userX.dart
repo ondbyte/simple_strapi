@@ -56,6 +56,7 @@ class UserX {
     String firebaseToken,
     String email,
     String name,
+    String fcmToken,
   ) async {
     if (userPresent) {
       print("user present");
@@ -74,7 +75,9 @@ class UserX {
         );
       }
       final me = await Users.me(asFindOne: true);
-      user(me);
+      final copied = me?.copyWIth(fcmToken: fcmToken);
+      final updated = await Users.update(copied!);
+      user(updated);
       final token = Strapi.i.strapiToken;
       if (token.isNotEmpty) {
         PersistenceX.i.saveValue("token", "$token");

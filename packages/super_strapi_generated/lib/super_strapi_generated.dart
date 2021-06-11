@@ -1,6 +1,5 @@
 import 'package:flutter/scheduler.dart';
 import 'package:simple_strapi/simple_strapi.dart';
-import 'dart:convert';
 import 'package:flutter/widgets.dart';
 
 class _StrapiListenerWidget<T> extends StatefulWidget {
@@ -6033,6 +6032,7 @@ class User {
         alterEgoActivated = null,
         pickedBusiness = null,
         pickedEmployee = null,
+        fcmToken = null,
         createdAt = null,
         updatedAt = null;
 
@@ -6056,7 +6056,8 @@ class User {
       this.cart,
       this.alterEgoActivated,
       this.pickedBusiness,
-      this.pickedEmployee})
+      this.pickedEmployee,
+      this.fcmToken})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
@@ -6083,6 +6084,7 @@ class User {
       this.alterEgoActivated,
       this.pickedBusiness,
       this.pickedEmployee,
+      this.fcmToken,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -6109,6 +6111,7 @@ class User {
       this.alterEgoActivated,
       this.pickedBusiness,
       this.pickedEmployee,
+      this.fcmToken,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -6156,6 +6159,8 @@ class User {
 
   final Employee? pickedEmployee;
 
+  final String? fcmToken;
+
   final DateTime? createdAt;
 
   final DateTime? updatedAt;
@@ -6187,7 +6192,8 @@ class User {
           Booking? cart,
           bool? alterEgoActivated,
           Business? pickedBusiness,
-          Employee? pickedEmployee}) =>
+          Employee? pickedEmployee,
+          String? fcmToken}) =>
       User._unsynced(
           username ?? this.username,
           email ?? this.email,
@@ -6209,6 +6215,7 @@ class User {
           alterEgoActivated ?? this.alterEgoActivated,
           pickedBusiness ?? this.pickedBusiness,
           pickedEmployee ?? this.pickedEmployee,
+          fcmToken ?? this.fcmToken,
           this.createdAt,
           this.updatedAt,
           this.id);
@@ -6232,7 +6239,8 @@ class User {
       bool cart = false,
       bool alterEgoActivated = false,
       bool pickedBusiness = false,
-      bool pickedEmployee = false}) {
+      bool pickedEmployee = false,
+      bool fcmToken = false}) {
     return User._unsynced(
         username ? null : this.username,
         email ? null : this.email,
@@ -6254,6 +6262,7 @@ class User {
         alterEgoActivated ? null : this.alterEgoActivated,
         pickedBusiness ? null : this.pickedBusiness,
         pickedEmployee ? null : this.pickedEmployee,
+        fcmToken ? null : this.fcmToken,
         this.createdAt,
         this.updatedAt,
         this.id)
@@ -6276,7 +6285,8 @@ class User {
       .._emptyFields.cart = cart
       .._emptyFields.alterEgoActivated = alterEgoActivated
       .._emptyFields.pickedBusiness = pickedBusiness
-      .._emptyFields.pickedEmployee = pickedEmployee;
+      .._emptyFields.pickedEmployee = pickedEmployee
+      .._emptyFields.fcmToken = fcmToken;
   }
 
   static User fromSyncedMap(Map<dynamic, dynamic> map) => User._synced(
@@ -6309,6 +6319,7 @@ class User {
           map["pickedBusiness"], (e) => Businesses._fromIDorData(e)),
       StrapiUtils.objFromMap<Employee>(
           map["pickedEmployee"], (e) => Employees._fromIDorData(e)),
+      map["fcmToken"],
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -6342,6 +6353,7 @@ class User {
           map["pickedBusiness"], (e) => Businesses._fromIDorData(e)),
       StrapiUtils.objFromMap<Employee>(
           map["pickedEmployee"], (e) => Employees._fromIDorData(e)),
+      map["fcmToken"],
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -6441,6 +6453,10 @@ class User {
         "pickedEmployee": toServer
             ? pickedEmployee?.id
             : pickedEmployee?._toMap(level: level + level),
+      if (_emptyFields.fcmToken)
+        "fcmToken": null
+      else if (!_emptyFields.fcmToken && fcmToken != null)
+        "fcmToken": fcmToken,
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
       "id": id
@@ -6683,6 +6699,8 @@ class _UserFields {
 
   final pickedEmployee = StrapiModelField("pickedEmployee");
 
+  final fcmToken = StrapiLeafField("fcmToken");
+
   final createdAt = StrapiLeafField("createdAt");
 
   final updatedAt = StrapiLeafField("updatedAt");
@@ -6711,6 +6729,7 @@ class _UserFields {
       alterEgoActivated,
       pickedBusiness,
       pickedEmployee,
+      fcmToken,
       createdAt,
       updatedAt,
       id
@@ -6758,6 +6777,8 @@ class _UserEmptyFields {
   bool pickedBusiness = false;
 
   bool pickedEmployee = false;
+
+  bool fcmToken = false;
 }
 
 class Permission {
