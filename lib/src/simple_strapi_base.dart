@@ -595,9 +595,20 @@ class StrapiUtils {
     final list = <T>[];
     if (data is List && data.isNotEmpty) {
       data.forEach((e) {
-        final o = forEach(e);
-        if (o is T) {
-          list.add(o);
+        try {
+          final o = forEach(e);
+          if (o is T) {
+            list.add(o);
+          }
+        } catch (e, s) {
+          if (Strapi.i.verbose) {
+            sPrint("error while parsing strapi object");
+            sPrint(e);
+            sPrint(s);
+          } else {
+            sPrint(
+                "ignoring a error while parsing a strapi object, set verbose to true to see the error");
+          }
         }
       });
     }
@@ -608,7 +619,18 @@ class StrapiUtils {
     if (data == null) {
       return null;
     }
-    return returner(data);
+    try {
+      return returner(data);
+    } catch (e, s) {
+      if (Strapi.i.verbose) {
+        sPrint("error while parsing strapi object");
+        sPrint(e);
+        sPrint(s);
+      } else {
+        sPrint(
+            "ignoring a error while parsing a strapi object, set verbose to true to see the error");
+      }
+    }
   }
 }
 
