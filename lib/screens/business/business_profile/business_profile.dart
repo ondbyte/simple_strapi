@@ -48,7 +48,6 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final screenLoading = false.obs;
-    final user = UserX.i.user();
     return Obx(() {
       if (screenLoading()) {
         return LoadingWidget();
@@ -74,7 +73,8 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                   },
                   onLoadBuilder: (_) => LoadingWidget(),
                   onSucessBuilder: (_, b) {
-                    final booking = Rx<Booking?>(b);
+                    final booking =
+                        Rx<Booking?>(b ?? Booking.fresh(business: business));
                     return WillPopScope(
                       onWillPop: () async {
                         if (booking() is Booking) {
@@ -87,22 +87,26 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                         extendBodyBehindAppBar: true,
                         bottomNavigationBar: Obx(
                           () {
+                            var user = UserX.i.user();
                             final products = booking()?.products;
+                            if (products is! List ||
+                                (products?.isEmpty ?? true)) {
+                              return SizedBox();
+                            }
+                            final title = getNProductsSelectedString(
+                              products as List<Product>,
+                            );
+                            final subTitle =
+                                getProductsDurationString(products);
                             if (user is User) {
-                              if (products is! List ||
-                                  (products?.isEmpty ?? true)) {
-                                return SizedBox();
-                              }
-                              final title = getNProductsSelectedString(
-                                products as List<Product>,
-                              );
-                              final subTitle =
-                                  getProductsDurationString(products);
                               return BottomPrimaryButton(
                                 label: "Book an Appointment",
                                 title: title,
                                 subTitle: subTitle,
                                 onPressed: () async {
+                                  if (user is! User) {
+                                    return;
+                                  }
                                   screenLoading(true);
                                   await _saveScreenData(booking()!);
                                   final employee = await BappNavigator.push(
@@ -129,7 +133,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                           buttonText: "Back to Home",
                                           init: () async {
                                             await BookingX.i.placeBooking(
-                                              user: user,
+                                              user: user!,
                                               business: business,
                                               booking: booking()!,
                                               employee: employee,
@@ -154,13 +158,63 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                             } else {
                               return BottomPrimaryButton(
                                 label: "Sign in to Book",
-                                title: null,
-                                subTitle: null,
+                                title: title,
+                                subTitle: subTitle,
                                 onPressed: () async {
-                                  BappNavigator.push(
+                                  await BappNavigator.push(
                                     context,
                                     LoginScreen(),
                                   );
+                                  user = UserX.i.user();
+                                  if (user is! User) {
+                                    return;
+                                  }
+                                  screenLoading(true);
+                                  await _saveScreenData(booking()!);
+                                  final employee = await BappNavigator.push(
+                                    context,
+                                    SelectAProfessionalScreen(
+                                      business: business,
+                                      forDay: DateTime.now(),
+                                      title: title,
+                                      subTitle: subTitle,
+                                    ),
+                                  );
+                                  if (employee is Employee) {
+                                    final timeSlot = await BappNavigator.push(
+                                      context,
+                                      SelectTimeSlotScreen(
+                                        business: widget.business,
+                                        employee: employee,
+                                      ),
+                                    );
+                                    if (timeSlot is Timing) {
+                                      BappNavigator.pushAndRemoveAll(
+                                        context,
+                                        ContextualMessageScreen(
+                                          buttonText: "Back to Home",
+                                          init: () async {
+                                            await BookingX.i.placeBooking(
+                                              user: user!,
+                                              business: business,
+                                              booking: booking()!,
+                                              employee: employee,
+                                              timeSlot: timeSlot,
+                                            );
+                                            await BookingX.i.clearCart();
+                                          },
+                                          onButtonPressed: (context) {
+                                            BappNavigator.pushAndRemoveAll(
+                                                context, Bapp());
+                                          },
+                                          message:
+                                              "Your booking has been placed, waiting to be accepted by the business, track it the bookings tab",
+                                        ),
+                                      );
+                                    }
+                                  }
+
+                                  screenLoading(false);
                                 },
                               );
                             }
@@ -355,14 +409,6 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                           business: business,
                                           cart: booking(),
                                           onServicesSelected: (products) {
-                                            final user = UserX.i.user();
-                                            if (user is! User) {
-                                              bPrint(
-                                                "User is null at business profile",
-                                              );
-                                              return;
-                                            }
-                                            ;
                                             final copied = booking()?.copyWIth(
                                               products: products,
                                             );

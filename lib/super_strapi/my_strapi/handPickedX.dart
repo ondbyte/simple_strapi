@@ -23,7 +23,7 @@ class HandPickedX {
         query: StrapiCollectionQuery(
           collectionName: Business.collectionName,
           requiredFields: Business.fields(),
-        ),
+        )..requireCompenentField(Business.fields.address, "{address}"),
       );
     if (locality is Locality) {
       q.whereModelField(

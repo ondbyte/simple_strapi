@@ -8,6 +8,7 @@ import 'package:bapp/widgets/login_widget.dart';
 import 'package:bapp/widgets/tiles/customer_booking_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -34,10 +35,9 @@ class _BookingsTabState extends State<BookingsTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Builder(
-      builder: (
-        _,
-      ) {
+    return Obx(
+      () {
+        final user = UserX.i.user();
         return OrientationBuilder(
           builder: (_, o) {
             return Builder(

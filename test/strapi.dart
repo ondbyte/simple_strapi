@@ -10,7 +10,7 @@ Future main() async {
 
 Future run() async {
   Strapi.i.verbose = true;
-  final i = BookingX();
+  final i = UserX();
   //final r = await i.getNonReviewedBookingsForUser();
   //print(r);
 }

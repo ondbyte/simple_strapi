@@ -265,7 +265,7 @@ bool isCancellableBooking(Booking booking) {
 
 List<Booking> getBookingsForDay(List<Booking> bookings, DateTime day) {
   return bookings
-      .where((element) => element.bookingStartTime!.isDay(day))
+      .where((element) => element.bookingStartTime?.isDay(day) ?? false)
       .toList();
 }
 

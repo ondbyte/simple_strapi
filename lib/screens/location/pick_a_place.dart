@@ -12,6 +12,7 @@ import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/tiles/error.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:get/state_manager.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class PickAPlaceScreen extends StatefulWidget {
@@ -25,15 +26,22 @@ class PickAPlaceScreen extends StatefulWidget {
 class _PickAPlaceScreenState extends State<PickAPlaceScreen> {
   ValueKey getCountriesKey = ValueKey(DateTime.now());
 
+  final loading = Rx(false);
+
   @override
   Widget build(BuildContext context) {
-    if (widget.country == null) {
-      return _showCountries(context);
-    }
-    if (widget.country != null) {
-      return _showLocations(context);
-    }
-    throw FlutterError("only countries and location screen supported");
+    return Obx(() {
+      if (loading()) {
+        return LoadingWidget();
+      }
+      if (widget.country == null) {
+        return _showCountries(context);
+      }
+      if (widget.country != null) {
+        return _showLocations(context);
+      }
+      throw FlutterError("only countries and location screen supported");
+    });
   }
 
   Widget _showCountries(BuildContext context) {
@@ -125,6 +133,7 @@ class _PickAPlaceScreenState extends State<PickAPlaceScreen> {
                   style: Theme.of(context).textTheme.subtitle1,
                 ),
                 onTap: () async {
+                  loading(true);
                   if (UserX.i.userPresent) {
                     final copied = UserX.i.user()?.copyWIth(city: city);
                     if (copied is User) {
@@ -148,6 +157,7 @@ class _PickAPlaceScreenState extends State<PickAPlaceScreen> {
                   title: Text(city.localities?[index].name ?? "",
                       style: Theme.of(context).textTheme.subtitle2),
                   onTap: () async {
+                    loading(true);
                     if (UserX.i.userPresent) {
                       final copied = UserX.i
                           .user()

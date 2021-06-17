@@ -5,7 +5,7 @@ import 'package:super_strapi_generated/super_strapi_generated.dart';
 String? placeName({Locality? locality, City? city}) {
   print("placeName: $locality\n$city");
 
-  return locality?.name ?? city?.name;
+  return city?.name ?? locality?.name;
 }
 
 g.Coordinates geocoderCordinates(Coordinates coordinates) {

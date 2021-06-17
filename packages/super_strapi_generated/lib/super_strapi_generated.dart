@@ -1,5 +1,6 @@
 import 'package:flutter/scheduler.dart';
 import 'package:simple_strapi/simple_strapi.dart';
+import 'dart:convert';
 import 'package:flutter/widgets.dart';
 
 class _StrapiListenerWidget<T> extends StatefulWidget {
@@ -1946,7 +1947,9 @@ class Locality {
       StrapiUtils.parseBool(map["enabled"]),
       StrapiUtils.objFromMap<City>(map["city"], (e) => Cities._fromIDorData(e)),
       StrapiUtils.objFromMap<Coordinates>(
-          map["coordinates"], (e) => Coordinates.fromMap(e)),
+        map["coordinates"],
+        (e) => Coordinates.fromMap(e),
+      ),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);

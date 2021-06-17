@@ -53,6 +53,17 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  Future _popOnUser() async {
+    await Future.doWhile(() async {
+      await Future.delayed(const Duration(milliseconds: 400));
+      return UserX.i.userNotPresent;
+    });
+    BappNavigator.pop(
+      context,
+      true,
+    );
+  }
+
   final _key = GlobalKey();
   @override
   Widget build(BuildContext context) {
@@ -174,14 +185,14 @@ class _LoginScreenState extends State<LoginScreen> {
                             ).show(context);
                             _loading(false);
                           },
-                          onVerified: () {
+                          onVerified: () async {
                             if (FirebaseX.i.userPresent &&
                                 (isNullOrEmpty(
                                         FirebaseX.i.firebaseUser?.email) ||
                                     isNullOrEmpty(
                                       FirebaseX.i.firebaseUser?.displayName,
                                     ))) {
-                              BappNavigator.pushReplacement(
+                              await BappNavigator.pushReplacement(
                                 context,
                                 CreateYourProfileScreen(
                                   shouldPop: () async {
@@ -189,11 +200,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                   },
                                 ),
                               );
+                              _popOnUser();
                             } else {
-                              BappNavigator.pop(
-                                context,
-                                true,
-                              );
+                              _popOnUser();
                             }
                           },
                         );
