@@ -8,6 +8,8 @@ class LoadingWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Center(
             child: CircularProgressIndicator(),
