@@ -42,7 +42,7 @@ class HandPickedX {
       q.whereModelField(
         field: HandPicked.fields.city,
         query: StrapiModelQuery(
-          requiredFields: Locality.fields(),
+          requiredFields: City.fields(),
         )..whereField(
             field: City.fields.id,
             query: StrapiFieldQuery.equalTo,
