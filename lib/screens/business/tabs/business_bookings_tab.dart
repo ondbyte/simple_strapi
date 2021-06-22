@@ -42,6 +42,7 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab>
     with AutomaticKeepAliveClientMixin {
   final _calendarController = CalendarController();
   final _selectedDay = Rx(DateTime.now());
+  final _pickedEmployee = Rx<Employee?>(null);
 
   @override
   void dispose() {
@@ -50,151 +51,151 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab>
   }
 
   @override
+  void initState() {
+    final user = UserX.i.user();
+    _pickedEmployee.value = user?.pickedEmployee;
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      final user = UserX.i.user();
-      if (user is! User) {
-        return Text("no user");
-      }
-      final partner = user.partner;
-      if (partner is! Partner) {
-        return Text("No partner");
-      }
-      return Partners.listenerWidget(
-          strapiObject: partner,
-          sync: true,
-          builder: (_, partner, loading) {
-            if (loading) {
-              return LoadingWidget();
-            }
-            var pickedBusiness = user.pickedBusiness;
-            if (pickedBusiness is! Business) {
-              return Text("No business selected");
-            }
-            var pickedEmployee = user.pickedEmployee;
-            return Businesses.listenerWidget(
-                strapiObject: pickedBusiness,
-                sync: true,
-                builder: (context, business, loading) {
-                  return Scaffold(
-                    floatingActionButton: pickedEmployee is! Employee
-                        ? SizedBox()
-                        : FloatingActionButton(
-                            onPressed: () {
-                              BappNavigator.dialog(
-                                context,
-                                BookingsTabAddOptions(
-                                  business: business,
-                                ),
-                              );
-                            },
-                            child: Icon(FeatherIcons.plus),
+    final user = UserX.i.user();
+    if (user is! User) {
+      return Text("no user");
+    }
+    final partner = user.partner;
+    if (partner is! Partner) {
+      return Text("No partner");
+    }
+
+    var pickedBusiness = user.pickedBusiness;
+    if (pickedBusiness is! Business) {
+      return Text("No business selected");
+    }
+    return Businesses.listenerWidget(
+        strapiObject: pickedBusiness,
+        sync: true,
+        builder: (context, business, loading) {
+          return Scaffold(
+            floatingActionButton: Obx(
+              () {
+                return _pickedEmployee() is! Employee
+                    ? SizedBox()
+                    : FloatingActionButton(
+                        onPressed: () {
+                          BappNavigator.dialog(
+                            context,
+                            BookingsTabAddOptions(
+                              business: business,
+                            ),
+                          );
+                        },
+                        child: Icon(FeatherIcons.plus),
+                      );
+              },
+            ),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
+            body: Builder(builder: (_) {
+              final employeeSelector = () async {
+                final e = await BappNavigator.push(
+                  context,
+                  SelectAProfessionalScreen(
+                    forDay: DateTime.now(),
+                    business: business,
+                  ),
+                );
+                if (e is Employee) {
+                  _pickedEmployee.value = e;
+                  final user = UserX.i.user();
+                  if (user is User) {
+                    final copied = user.copyWIth(pickedEmployee: e);
+                    final updated = await Users.update(copied);
+                    UserX.i.user(updated);
+                  }
+                }
+              };
+              return TapToReFetch<List<Booking>>(
+                  fetcher: () => BookingX.i
+                      .getAllBookingsForDay(business, _selectedDay.value),
+                  onLoadBuilder: (_) => LoadingWidget(),
+                  onErrorBuilder: (_, e, s) => ErrorTile(message: e.toString()),
+                  onSucessBuilder: (context, list) {
+                    return CustomScrollView(
+                      slivers: [
+                        SliverList(
+                          delegate: SliverChildListDelegate(
+                            [
+                              Obx(() {
+                                if (_pickedEmployee() is Employee) {
+                                  return EmployeeTile(
+                                    employee: _pickedEmployee()!,
+                                    enabled: true,
+                                    onTap: employeeSelector,
+                                  );
+                                }
+                                return SizedBox();
+                              }),
+                              Obx(() {
+                                if (_pickedEmployee() is! Employee) {
+                                  ListTile(
+                                    onTap: employeeSelector,
+                                    title: Text("Staff"),
+                                    subtitle: Text("Select a staff"),
+                                    trailing: Icon(FeatherIcons.arrowRight),
+                                  );
+                                }
+                                return SizedBox();
+                              }),
+                              BappRowCalender(
+                                bookings: bookingsAsCalendarEvents(list),
+                                initialDate: DateTime.now(),
+                                holidays: holidaysAsCalendarEvents(
+                                    business.holidays ?? []),
+                                controller: _calendarController,
+                                onDayChanged: (day, _, __) {
+                                  _selectedDay.value = day;
+                                },
+                              ),
+                            ],
                           ),
-                    floatingActionButtonLocation:
-                        FloatingActionButtonLocation.centerFloat,
-                    body: Builder(builder: (_) {
-                      final employeeSelector = () async {
-                        final e = await BappNavigator.push(
-                          context,
-                          SelectAProfessionalScreen(
-                            forDay: DateTime.now(),
-                            business: business,
+                        ),
+                        SliverList(
+                          delegate: SliverChildListDelegate(
+                            [
+                              SizedBox(
+                                height: 0,
+                              ),
+                              Obx(
+                                () {
+                                  return _pickedEmployee() is! Employee
+                                      ? Align(
+                                          alignment: Alignment.center,
+                                          child: Text("Select a employee"),
+                                        )
+                                      : Obx(() => BookingTimeLineWidget(
+                                            timing: _beginingOfTheDay(
+                                                _selectedDay.value,
+                                                business.dayTiming ?? []),
+                                            date: _selectedDay.value,
+                                            list: list
+                                                .where((e) =>
+                                                    e.bookingStartTime?.isDay(
+                                                        _selectedDay.value) ??
+                                                    false)
+                                                .toList(),
+                                          ));
+                                },
+                              )
+                            ],
                           ),
-                        );
-                        if (e is Employee) {
-                          pickedEmployee = e;
-                          final user = UserX.i.user();
-                          if (user is User) {
-                            final copied = user.copyWIth(pickedEmployee: e);
-                            final updated = await Users.update(copied);
-                            UserX.i.user(updated);
-                          }
-                        }
-                      };
-                      return TapToReFetch<List<Booking>>(
-                          fetcher: () => BookingX.i.getAllBookingsForDay(
-                              business, _selectedDay.value),
-                          onLoadBuilder: (_) => LoadingWidget(),
-                          onErrorBuilder: (_, e, s) =>
-                              ErrorTile(message: e.toString()),
-                          onSucessBuilder: (context, list) {
-                            return CustomScrollView(
-                              slivers: [
-                                SliverList(
-                                  delegate: SliverChildListDelegate(
-                                    [
-                                      if (pickedEmployee is Employee)
-                                        EmployeeTile(
-                                          employee: pickedEmployee!,
-                                          enabled: true,
-                                          onTap: employeeSelector,
-                                        ),
-                                      if (pickedEmployee is! Employee)
-                                        ListTile(
-                                          onTap: employeeSelector,
-                                          title: Text("Staff"),
-                                          subtitle: Text("Select a staff"),
-                                          trailing:
-                                              Icon(FeatherIcons.arrowRight),
-                                        ),
-                                      BappRowCalender(
-                                        bookings:
-                                            bookingsAsCalendarEvents(list),
-                                        initialDate: DateTime.now(),
-                                        holidays: holidaysAsCalendarEvents(
-                                            business.holidays ?? []),
-                                        controller: _calendarController,
-                                        onDayChanged: (day, _, __) {
-                                          act(() {
-                                            _selectedDay.value = day;
-                                          });
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SliverList(
-                                  delegate: SliverChildListDelegate(
-                                    [
-                                      SizedBox(
-                                        height: 0,
-                                      ),
-                                      Builder(
-                                        builder: (_) {
-                                          return pickedEmployee is! Employee
-                                              ? Align(
-                                                  alignment: Alignment.center,
-                                                  child:
-                                                      Text("Select a employee"),
-                                                )
-                                              : Obx(() => BookingTimeLineWidget(
-                                                    timing: _beginingOfTheDay(
-                                                        _selectedDay.value,
-                                                        business.dayTiming ??
-                                                            []),
-                                                    date: _selectedDay.value,
-                                                    list: list
-                                                        .where((e) =>
-                                                            e.bookingStartTime
-                                                                ?.isDay(
-                                                                    _selectedDay
-                                                                        .value) ??
-                                                            false)
-                                                        .toList(),
-                                                  ));
-                                        },
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            );
-                          });
-                    }),
-                  );
-                });
-          });
-    });
+                        ),
+                      ],
+                    );
+                  });
+            }),
+          );
+        });
   }
 
   Timing? _beginingOfTheDay(DateTime day, List<DayTiming> dayTimings) {

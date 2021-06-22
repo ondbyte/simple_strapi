@@ -135,14 +135,20 @@ class _PickAPlaceScreenState extends State<PickAPlaceScreen> {
                 onTap: () async {
                   loading(true);
                   if (UserX.i.userPresent) {
-                    final copied = UserX.i.user()?.copyWIth(city: city);
+                    final copied = UserX.i
+                        .user()
+                        ?.copyWIth(city: city)
+                        .setNull(locality: true);
                     if (copied is User) {
                       await Users.update(copied);
                     }
                   } else {
-                    final copied = DefaultDataX.i.defaultData()?.copyWIth(
+                    final copied = DefaultDataX.i
+                        .defaultData()
+                        ?.copyWIth(
                           city: city,
-                        );
+                        )
+                        .setNull(locality: true);
                     if (copied is DefaultData) {
                       await DefaultDatas.update(copied);
                     }
@@ -161,14 +167,20 @@ class _PickAPlaceScreenState extends State<PickAPlaceScreen> {
                     if (UserX.i.userPresent) {
                       final copied = UserX.i
                           .user()
-                          ?.copyWIth(locality: city.localities?[index]);
+                          ?.copyWIth(
+                            locality: city.localities?[index],
+                          )
+                          .setNull(city: true);
                       if (copied is User) {
                         await Users.update(copied);
                       }
                     } else {
-                      final copied = DefaultDataX.i.defaultData()?.copyWIth(
+                      final copied = DefaultDataX.i
+                          .defaultData()
+                          ?.copyWIth(
                             locality: city.localities?[index],
-                          );
+                          )
+                          .setNull(city: true);
                       if (copied is DefaultData) {
                         await DefaultDatas.update(copied);
                       } else {
