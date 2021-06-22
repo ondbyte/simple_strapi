@@ -251,6 +251,11 @@ class BookingX extends X {
           BookingStatus.walkin,
         ],
       )
+        ..whereModelField(
+          field: Booking.fields.bookedByUser,
+          query: StrapiModelQuery(
+              requiredFields: [User.fields.name, User.fields.id]),
+        )
         ..whereField(
           field: Booking.fields.bookingStartTime,
           query: StrapiFieldQuery.greaterThanOrEqualTo,

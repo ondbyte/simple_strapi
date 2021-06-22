@@ -20,9 +20,13 @@ import 'package:table_calendar/table_calendar.dart';
 class SelectTimeSlotScreen extends StatefulWidget {
   final Business business;
   final Employee employee;
+  final Duration durationOfServices;
 
   const SelectTimeSlotScreen(
-      {Key? key, required this.business, required this.employee})
+      {Key? key,
+      required this.business,
+      required this.employee,
+      required this.durationOfServices})
       : super(key: key);
   @override
   _SelectTimeSlotScreenState createState() => _SelectTimeSlotScreenState();
@@ -32,7 +36,7 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
   final _controller = CalendarController();
 
   DateTime? _selectedDay;
-  Timing? _selected;
+  final _selected = Rx<Timing?>(null);
 
   @override
   Widget build(BuildContext context) {
@@ -49,10 +53,10 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
             }
             return BottomPrimaryButton(
                 label: "Confirm booking",
-                onPressed: (_selected is! Timing)
+                onPressed: (_selected() is! Timing)
                     ? null
                     : () async {
-                        BappNavigator.pop(context, _selected as Timing);
+                        BappNavigator.pop(context, _selected() as Timing);
                       }
                 /* () async {
                       await BappNavigator.pushAndRemoveAll(
@@ -159,11 +163,9 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
   Widget _getTimeSlotTabs() {
     return TapToReFetch<List<Timing>>(
       fetcher: () => BusinessX.i.getAvailableSlots(
-        widget.business,
-        widget.employee,
-        _selectedDay ?? DateTime.now(),
-        key: getAvailableSlotsKey,
-      ),
+          widget.business, widget.employee, _selectedDay ?? DateTime.now(),
+          key: getAvailableSlotsKey,
+          durationOfServices: widget.durationOfServices),
       onTap: () => getAvailableSlotsKey = ValueKey(DateTime.now()),
       onLoadBuilder: (_) => LoadingWidget(),
       onErrorBuilder: (_, e, s) {
@@ -171,48 +173,50 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
           return ErrorTile(message: "The selected employee is on holiday");
         }
         if (e is BusinessHolidayException) {
-          return ErrorTile(message: "The Business is on holiday for the day");
+          return ErrorTile(
+              message: "The Business is durationon holiday for the day");
         }
         return ErrorTile(message: "Something went wrong, tap to refresh");
       },
       onSucessBuilder: (_, timingsList) {
         final timings = <Timing>[];
+
         timingsList.forEach((e) {
           timings.addAll(divideTimingIntoChunksOfDuration(e));
         });
         final sorted = sortTimingsForPeriodOfTheDay(timings);
         return TabBarView(
           children: [
-            TimeSlotsWidget(
-              key: UniqueKey(),
-              fromToTimings: sorted["morning"]!,
-              selected: _selected,
-              onATimeSlotSelected: (timeSlot) {
-                setState(() {
-                  _selected = timeSlot;
-                });
-              },
-            ),
-            TimeSlotsWidget(
-              key: UniqueKey(),
-              fromToTimings: sorted["afterNoon"]!,
-              selected: _selected,
-              onATimeSlotSelected: (timeSlot) {
-                setState(() {
-                  _selected = timeSlot;
-                });
-              },
-            ),
-            TimeSlotsWidget(
-              key: UniqueKey(),
-              fromToTimings: sorted["evening"]!,
-              selected: _selected,
-              onATimeSlotSelected: (timeSlot) {
-                setState(() {
-                  _selected = timeSlot;
-                });
-              },
-            ),
+            Obx(() {
+              return TimeSlotsWidget(
+                key: UniqueKey(),
+                fromToTimings: sorted["morning"]!,
+                selected: _selected(),
+                onATimeSlotSelected: (timeSlot) {
+                  _selected.value = timeSlot;
+                },
+              );
+            }),
+            Obx(() {
+              return TimeSlotsWidget(
+                key: UniqueKey(),
+                fromToTimings: sorted["afterNoon"]!,
+                selected: _selected(),
+                onATimeSlotSelected: (timeSlot) {
+                  _selected.value = timeSlot;
+                },
+              );
+            }),
+            Obx(() {
+              return TimeSlotsWidget(
+                key: UniqueKey(),
+                fromToTimings: sorted["evening"]!,
+                selected: _selected(),
+                onATimeSlotSelected: (timeSlot) {
+                  _selected.value = timeSlot;
+                },
+              );
+            }),
           ],
         );
       },

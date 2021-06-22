@@ -100,7 +100,8 @@ class BusinessX extends X {
 
   Future<List<Timing>> getAvailableSlots(
       Business business, Employee employee, DateTime date,
-      {Key key = const ValueKey("getAvailableSlots")}) async {
+      {Key key = const ValueKey("getAvailableSlots"),
+      Duration durationOfServices = Duration.zero}) async {
     ///check whether date is of now/today
     final difference = DateTime.now().difference(date);
     if (difference.inSeconds > 7) {
@@ -137,13 +138,16 @@ class BusinessX extends X {
           freeTime.forEach(
             (e) {
               final start = DateTime.tryParse(e["start"])?.toLocal();
-              final end = DateTime.tryParse(e["end"])?.toLocal();
+              final end = DateTime.tryParse(e["end"])
+                  ?.toLocal()
+                  .subtract(durationOfServices);
               if (start is DateTime && end is DateTime) {
                 returnable.add(
                   Timing(from: start, to: end),
                 );
               } else {
-                bPrint("NOOOOOOOOOOOOOOOO");
+                throw BappException(msg: "Empty dates from strapi server");
+                //bPrint("NOOOOOOOOOOOOOOOO");
               }
             },
           );

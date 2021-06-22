@@ -14,6 +14,7 @@ import 'package:bapp/super_strapi/my_strapi/persistenceX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/widgets/business/business_branch_switch.dart';
 import 'package:bapp/widgets/app/menu.dart';
+import 'package:bapp/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:get/state_manager.dart';
 import 'package:provider/provider.dart';
@@ -30,79 +31,97 @@ class BusinessHome extends StatefulWidget {
 }
 
 class _BusinessHomeState extends State<BusinessHome> {
-  int _selectedPage = 0;
+  final _selectedPage = 0.obs;
   final _tabs = <Widget>[];
+  final bucket = PageStorageBucket();
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      child: Obx(() {
-        final user = UserX.i.user();
-        if (user is! User) {
-          return Text("No user present");
-        }
-        final partner = user.partner;
-        if (partner is! Partner) {
-          return Text("No partner present");
-        }
-        _tabs.clear();
-        _tabs.addAll([
-          BusinessDashboardTab(),
-          BusinessBookingsTab(),
-          if (_shouldShowToolkit) BusinessToolkitTab(),
-          UpdatesTab(),
-        ]);
-        return Partners.listenerWidget(
-          strapiObject: partner,
-          sync: true,
-          builder: (_, partner, loading) {
-            return Scaffold(
-              appBar: _selectedPage != _tabs.length - 1
-                  ? AppBar(
-                      automaticallyImplyLeading: false,
-                      title: BusinessBranchSwitchWidget(
-                        partner: partner,
-                        business: user.pickedBusiness,
-                      ),
-                    )
-                  : null,
-              endDrawer: Menu(),
-              body: Builder(
-                builder: (_) {
-                  return Builder(
-                    builder: (_) {
-                      final pickedBusiness = user.pickedBusiness;
-                      if (pickedBusiness is! Business) {
-                        return Center(
-                          child: Text(
-                            "No business is selected",
-                            textAlign: TextAlign.center,
-                          ),
-                        );
-                      }
-                      return IndexedStack(
-                        index: _selectedPage,
-                        children: _tabs,
-                      );
-                    },
-                  );
-                },
-              ),
-              bottomNavigationBar: BottomNavigationBar(
-                type: BottomNavigationBarType.fixed,
-                // selectedFontSize: 14,
-                onTap: (i) {
-                  setState(() {
-                    _selectedPage = i;
-                  });
-                },
-                currentIndex: _selectedPage,
-                items: [..._filterBottomNavigations()],
-              ),
-            );
-          },
-        );
-      }),
+    final user = UserX.i.user();
+    if (user is! User) {
+      return Text("No user present");
+    }
+    final partner = user.partner;
+    if (partner is! Partner) {
+      return Text("No partner present");
+    }
+    return PageStorage(
+      bucket: bucket,
+      child: Material(
+        child: Partners.listenerWidget(
+            strapiObject: partner,
+            sync: true,
+            builder: (_, partner, loading) {
+              if (loading) {
+                return LoadingWidget(
+                  message: "Loading partner",
+                );
+              }
+              _tabs.clear();
+              _tabs.addAll([
+                BusinessDashboardTab(
+                  key: PageStorageKey(partner.name),
+                  partner: partner,
+                  keepAlive: () => mounted,
+                ),
+                BusinessBookingsTab(
+                  key: PageStorageKey("business booking tab"),
+                  keepAlive: () => mounted,
+                ),
+                if (_shouldShowToolkit)
+                  BusinessToolkitTab(
+                    keepAlive: () => mounted,
+                  ),
+                UpdatesTab(
+                  keepAlive: () => mounted,
+                ),
+              ]);
+              return Scaffold(
+                appBar: _selectedPage != _tabs.length - 1
+                    ? AppBar(
+                        automaticallyImplyLeading: false,
+                        title: BusinessBranchSwitchWidget(
+                          partner: partner,
+                          business: user.pickedBusiness,
+                        ),
+                      )
+                    : null,
+                endDrawer: Menu(),
+                body: Builder(
+                  builder: (_) {
+                    return Builder(
+                      builder: (_) {
+                        final pickedBusiness = user.pickedBusiness;
+                        if (pickedBusiness is! Business) {
+                          return Center(
+                            child: Text(
+                              "No business is selected",
+                              textAlign: TextAlign.center,
+                            ),
+                          );
+                        }
+                        return Obx(() {
+                          return IndexedStack(
+                            index: _selectedPage(),
+                            children: _tabs,
+                          );
+                        });
+                      },
+                    );
+                  },
+                ),
+                bottomNavigationBar: BottomNavigationBar(
+                  type: BottomNavigationBarType.fixed,
+                  // selectedFontSize: 14,
+                  onTap: (i) {
+                    _selectedPage.value = i;
+                  },
+                  currentIndex: _selectedPage(),
+                  items: [..._filterBottomNavigations()],
+                ),
+              );
+            }),
+      ),
     );
   }
 

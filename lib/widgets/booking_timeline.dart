@@ -65,8 +65,9 @@ class _BookingTimeLineWidgetState extends State<BookingTimeLineWidget> {
         ...List.generate(
           list.length,
           (index) {
-            final start = list[index].bookingStartTime ?? DateTime.now();
-            final end = list[index].bookingEndTime ?? DateTime.now();
+            final start =
+                list[index].bookingStartTime?.toLocal() ?? DateTime.now();
+            final end = list[index].bookingEndTime?.toLocal() ?? DateTime.now();
             return FlutterWeekViewEvent(
               eventTextBuilder: (event, _, dayView, a, b) {
                 return Text(event.title);

@@ -20,7 +20,7 @@ final kPrivacy = "https://www.thebapp.app/privacy-policy.html";
 
 ///maps key
 ///currently uses the one from bapp not bapp-dev
-final kMapsKey = "AIzaSyDp-XSgu-pZdyYRgyLdasTR1FEid_Lh_dA";
+final kMapsKey = "AIzaSyBVb0W4j8kC4yP_9DHlsMTWWXIUMY1YrB8";
 
 //final kTemporaryPlaceHolderImage = "assets/svg/ico-spa.svg";
 

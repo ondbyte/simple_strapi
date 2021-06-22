@@ -34,9 +34,12 @@ class _BappState extends State<Bapp> {
                 UserX.i.user()?.alterEgoActivated ?? false;
             final role = EnumToString.fromString(
                 UserRole.values, UserX.i.user()?.role?.name ?? "");
+            if (role is! UserRole) {
+              return SizedBox();
+            }
             if (alterEgoActivated) {
               return BusinessHome(
-                forRole: role!,
+                forRole: role,
               );
             } else {
               return CustomerHome();

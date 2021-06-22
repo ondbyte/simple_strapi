@@ -30,11 +30,16 @@ import 'package:super_strapi_generated/super_strapi_generated.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class BusinessBookingsTab extends StatefulWidget {
+  final Function() keepAlive;
+
+  const BusinessBookingsTab({Key? key, required this.keepAlive})
+      : super(key: key);
   @override
   _BusinessBookingsTabState createState() => _BusinessBookingsTabState();
 }
 
-class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
+class _BusinessBookingsTabState extends State<BusinessBookingsTab>
+    with AutomaticKeepAliveClientMixin {
   final _calendarController = CalendarController();
   final _selectedDay = Rx(DateTime.now());
 
@@ -62,11 +67,11 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
             if (loading) {
               return LoadingWidget();
             }
-            final pickedBusiness = user.pickedBusiness;
+            var pickedBusiness = user.pickedBusiness;
             if (pickedBusiness is! Business) {
               return Text("No business selected");
             }
-            final pickedEmployee = user.pickedEmployee;
+            var pickedEmployee = user.pickedEmployee;
             return Businesses.listenerWidget(
                 strapiObject: pickedBusiness,
                 sync: true,
@@ -97,6 +102,7 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
                           ),
                         );
                         if (e is Employee) {
+                          pickedEmployee = e;
                           final user = UserX.i.user();
                           if (user is User) {
                             final copied = user.copyWIth(pickedEmployee: e);
@@ -105,36 +111,33 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
                           }
                         }
                       };
-                      return CustomScrollView(
-                        slivers: [
-                          SliverList(
-                            delegate: SliverChildListDelegate(
-                              [
-                                if (pickedEmployee is Employee)
-                                  EmployeeTile(
-                                    employee: pickedEmployee,
-                                    enabled: true,
-                                    onTap: employeeSelector,
-                                  ),
-                                if (pickedEmployee is! Employee)
-                                  ListTile(
-                                    onTap: employeeSelector,
-                                    title: Text("Staff"),
-                                    subtitle: Text("Select a staff"),
-                                    trailing: Icon(FeatherIcons.arrowRight),
-                                  ),
-                                TapToReFetch<List<Booking>>(
-                                    fetcher: () => BookingX.i
-                                        .getAllBookingsForDay(
-                                            business, _selectedDay.value),
-                                    onLoadBuilder: (_) => LoadingWidget(),
-                                    onErrorBuilder: (_, e, s) =>
-                                        ErrorTile(message: e.toString()),
-                                    onSucessBuilder: (
-                                      context,
-                                      list,
-                                    ) {
-                                      return BappRowCalender(
+                      return TapToReFetch<List<Booking>>(
+                          fetcher: () => BookingX.i.getAllBookingsForDay(
+                              business, _selectedDay.value),
+                          onLoadBuilder: (_) => LoadingWidget(),
+                          onErrorBuilder: (_, e, s) =>
+                              ErrorTile(message: e.toString()),
+                          onSucessBuilder: (context, list) {
+                            return CustomScrollView(
+                              slivers: [
+                                SliverList(
+                                  delegate: SliverChildListDelegate(
+                                    [
+                                      if (pickedEmployee is Employee)
+                                        EmployeeTile(
+                                          employee: pickedEmployee!,
+                                          enabled: true,
+                                          onTap: employeeSelector,
+                                        ),
+                                      if (pickedEmployee is! Employee)
+                                        ListTile(
+                                          onTap: employeeSelector,
+                                          title: Text("Staff"),
+                                          subtitle: Text("Select a staff"),
+                                          trailing:
+                                              Icon(FeatherIcons.arrowRight),
+                                        ),
+                                      BappRowCalender(
                                         bookings:
                                             bookingsAsCalendarEvents(list),
                                         initialDate: DateTime.now(),
@@ -146,39 +149,47 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
                                             _selectedDay.value = day;
                                           });
                                         },
-                                      );
-                                    })
-                              ],
-                            ),
-                          ),
-                          SliverList(
-                            delegate: SliverChildListDelegate(
-                              [
-                                SizedBox(
-                                  height: 0,
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                Builder(
-                                  builder: (_) {
-                                    return pickedEmployee is! Employee
-                                        ? Align(
-                                            alignment: Alignment.center,
-                                            child: Text("Select a enployee"),
-                                          )
-                                        : Obx(() => BookingTimeLineWidget(
-                                              timing: _beginingOfTheDay(
-                                                  _selectedDay.value,
-                                                  business.dayTiming ?? []),
-                                              date: _selectedDay.value,
-                                              list:
-                                                  pickedEmployee.bookings ?? [],
-                                            ));
-                                  },
-                                )
+                                SliverList(
+                                  delegate: SliverChildListDelegate(
+                                    [
+                                      SizedBox(
+                                        height: 0,
+                                      ),
+                                      Builder(
+                                        builder: (_) {
+                                          return pickedEmployee is! Employee
+                                              ? Align(
+                                                  alignment: Alignment.center,
+                                                  child:
+                                                      Text("Select a employee"),
+                                                )
+                                              : Obx(() => BookingTimeLineWidget(
+                                                    timing: _beginingOfTheDay(
+                                                        _selectedDay.value,
+                                                        business.dayTiming ??
+                                                            []),
+                                                    date: _selectedDay.value,
+                                                    list: list
+                                                        .where((e) =>
+                                                            e.bookingStartTime
+                                                                ?.isDay(
+                                                                    _selectedDay
+                                                                        .value) ??
+                                                            false)
+                                                        .toList(),
+                                                  ));
+                                        },
+                                      )
+                                    ],
+                                  ),
+                                ),
                               ],
-                            ),
-                          ),
-                        ],
-                      );
+                            );
+                          });
                     }),
                   );
                 });
@@ -207,6 +218,9 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab> {
       bPrint(s);
     }
   }
+
+  @override
+  bool get wantKeepAlive => widget.keepAlive();
 }
 
 class BookingsTabAddOptions extends StatefulWidget {

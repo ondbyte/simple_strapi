@@ -14,11 +14,16 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 class BusinessToolkitTab extends StatefulWidget {
+  final Function() keepAlive;
+
+  const BusinessToolkitTab({Key? key, required this.keepAlive})
+      : super(key: key);
   @override
   _BusinessToolkitTabState createState() => _BusinessToolkitTabState();
 }
 
-class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
+class _BusinessToolkitTabState extends State<BusinessToolkitTab>
+    with AutomaticKeepAliveClientMixin {
   int _expandedPanel = -1;
   @override
   Widget build(BuildContext context) {
@@ -255,4 +260,8 @@ class _BusinessToolkitTabState extends State<BusinessToolkitTab> {
     );
    */
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => widget.keepAlive();
 }

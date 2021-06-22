@@ -124,6 +124,17 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                       SelectTimeSlotScreen(
                                         business: widget.business,
                                         employee: employee,
+                                        durationOfServices: Duration(
+                                            minutes: booking()
+                                                    ?.products
+                                                    ?.fold<int>(
+                                                        0,
+                                                        (previousValue,
+                                                                element) =>
+                                                            previousValue +
+                                                            (element.duration ??
+                                                                0)) ??
+                                                0),
                                       ),
                                     );
                                     if (timeSlot is Timing) {
@@ -186,6 +197,17 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                       SelectTimeSlotScreen(
                                         business: widget.business,
                                         employee: employee,
+                                        durationOfServices: Duration(
+                                            minutes: booking()
+                                                    ?.products
+                                                    ?.fold<int>(
+                                                        0,
+                                                        (previousValue,
+                                                                element) =>
+                                                            previousValue +
+                                                            (element.duration ??
+                                                                0)) ??
+                                                0),
                                       ),
                                     );
                                     if (timeSlot is Timing) {

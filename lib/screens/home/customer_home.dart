@@ -26,7 +26,9 @@ class _CustomerHomeState extends State<CustomerHome> {
     DiscoverTab(),
     BookingsTab(),
     FavoritesTab(),
-    UpdatesTab(),
+    UpdatesTab(
+      keepAlive: () => mounted,
+    ),
   ];
 
   @override

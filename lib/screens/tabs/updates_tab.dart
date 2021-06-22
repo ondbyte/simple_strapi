@@ -9,11 +9,15 @@ import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
 class UpdatesTab extends StatefulWidget {
+  final Function() keepAlive;
+
+  const UpdatesTab({Key? key, required this.keepAlive}) : super(key: key);
   @override
   _UpdatesTabState createState() => _UpdatesTabState();
 }
 
-class _UpdatesTabState extends State<UpdatesTab> {
+class _UpdatesTabState extends State<UpdatesTab>
+    with AutomaticKeepAliveClientMixin {
   int _selectedUpdateTab = 0;
   @override
   Widget build(BuildContext context) {
@@ -167,6 +171,9 @@ class _UpdatesTabState extends State<UpdatesTab> {
     if (ws.isNotEmpty) ws.removeLast();
     return ws;
   }
+
+  @override
+  bool get wantKeepAlive => widget.keepAlive();
 }
 
 class NotificationUpdateTileWidget extends StatelessWidget {
