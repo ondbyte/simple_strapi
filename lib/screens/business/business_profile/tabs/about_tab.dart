@@ -27,11 +27,12 @@ class BusinessProfileAboutTab extends StatelessWidget {
     final about = business.partner?.about ?? business.about ?? "";
 
     return ListView(
+      padding: EdgeInsets.only(top:20),
       shrinkWrap: true,
       children: [
-        const SizedBox(
-          height: 20,
-        ),
+        // const SizedBox(
+          // height: 20,
+        // ),
         PaddedText(
           "Important information",
           style: Theme.of(context).textTheme.headline3,

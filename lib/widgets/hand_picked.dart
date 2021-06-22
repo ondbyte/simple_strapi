@@ -40,6 +40,8 @@ class _HandPickedScrollerState extends State<HandPickedScroller> {
           child: GridView.builder(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 1,
+              // crossAxisSpacing: 5,
+              mainAxisSpacing: 15
             ),
             shrinkWrap: true,
             scrollDirection: Axis.horizontal,
@@ -81,34 +83,37 @@ class HandPickedBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onPicked,
-      child: Container(
-        height: 125,
-        width: 142,
-        margin: const EdgeInsets.only(right: 20),
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: CardsColor.next(),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              FeatherIcons.package,
-              color: Colors.white,
-            ),
-            const SizedBox(
-              height: 6,
-            ),
-            Text(
-              handPicked.name ?? "",
-              style: Theme.of(context).textTheme.subtitle1?.apply(
-                    color: Colors.white,
-                  ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.all(Radius.circular(6)),
+        child: Container(
+          height: 125,
+          width: 142,
+          // margin: const EdgeInsets.only(right: 20),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: CardsColor.next(),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Icon(
+                // FeatherIcons.package,
+                // color: Colors.white,
+              // ),
+              const SizedBox(
+                height: 6,
+              ),
+              Text(
+                handPicked.name ?? "",
+                style: Theme.of(context).textTheme.headline3?.apply(
+                      color: Theme.of(context).primaryColorLight
+                    ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ),
     );
