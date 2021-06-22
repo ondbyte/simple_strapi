@@ -45,7 +45,7 @@ class CompleteYourBookingTile extends StatelessWidget {
               return SizedBox();
             }
             return Container(
-              margin: EdgeInsets.symmetric(horizontal: 16),
+              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(6)),
                   color: Theme.of(context).accentColor.withAlpha(30)),

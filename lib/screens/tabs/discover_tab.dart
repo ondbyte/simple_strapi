@@ -65,6 +65,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
               builder: (_, cons) {
                 if (data.isNotEmpty) {
                   return SeeAllListTile(
+                    padding: EdgeInsets.all(0),
                     seeAllLabel: "See all",
                     title: "Featured on Bapp",
                     childPadding: EdgeInsets.symmetric(horizontal: 16),
@@ -338,13 +339,13 @@ class _DiscoverTabState extends State<DiscoverTab> {
                       ),
                     ),
                     const SizedBox(
-                      height: 20,
+                      height: 15,
                     ),
                     _getCategoriesScroller(context),
                     if (UserX.i.userPresent)
                       // ignore: dead_code
                       const SizedBox(
-                        height: 30,
+                        height: 10,
                       ),
                     if (UserX.i.userPresent)
                       CompleteYourBookingTile(
@@ -353,23 +354,13 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   ],
                 ),
               ),
-              SliverList(
-                delegate: SliverChildListDelegate(
-                  [
-                    _getNearestFeatured(context),
-                  ],
-                ),
-              ),
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate(
                     [
                       if (UserX.i.userPresent)
                         _getHowWasYourExperience(context),
-                      const SizedBox(
-                        height: 10,
-                      ),
                       Builder(
                         builder: (
                           _,
@@ -382,6 +373,13 @@ class _DiscoverTabState extends State<DiscoverTab> {
                       ),
                     ],
                   ),
+                ),
+              ),
+              SliverList(
+                delegate: SliverChildListDelegate(
+                  [
+                    _getNearestFeatured(context),
+                  ],
                 ),
               ),
             ],

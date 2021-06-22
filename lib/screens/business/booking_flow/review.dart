@@ -96,12 +96,12 @@ class _RateTheBookingScreenState extends State<RateTheBookingScreen> {
                 appBar: AppBar(),
                 body: SingleChildScrollView(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.all(0),
                     child: ListView(
                       shrinkWrap: true,
                       children: [
                         RatingTile(
-                          firstSentence: "Review employee",
+                          firstSentence: "Rate our staff",
                           rating: review.emplyeeRating ?? 0,
                           review: review.employeeReview ?? "",
                           onRatingUpdated: (r) {
@@ -113,8 +113,11 @@ class _RateTheBookingScreenState extends State<RateTheBookingScreen> {
                             _booking = _booking.copyWIth(review: review);
                           },
                         ),
+                        Divider(
+                          height: 40,
+                        ),
                         RatingTile(
-                          firstSentence: "Review facility",
+                          firstSentence: "Rate our facilities",
                           rating: review!.facilityRating ?? 0,
                           review: review!.facilityReview ?? "",
                           onRatingUpdated: (r) {
@@ -126,8 +129,11 @@ class _RateTheBookingScreenState extends State<RateTheBookingScreen> {
                             _booking = _booking.copyWIth(review: review);
                           },
                         ),
+                        Divider(
+                          height: 40,
+                        ),
                         RatingTile(
-                          firstSentence: "Review Overall experience",
+                          firstSentence: "Your overall feedback",
                           rating: review!.rating ?? 0,
                           review: review!.review ?? "",
                           onRatingUpdated: (r) {
@@ -174,7 +180,7 @@ class RatingTile extends StatelessWidget {
           if (firstSentence is String)
             Text(
               firstSentence as String,
-              style: Theme.of(context).textTheme.bodyText1,
+              style: Theme.of(context).textTheme.subtitle1,
             ),
           if (secondSentence is String)
             Text(
@@ -195,7 +201,7 @@ class RatingTile extends StatelessWidget {
             height: 20,
           ),
           TextField(
-            decoration: InputDecoration(labelText: "say something"),
+            decoration: InputDecoration(labelText: "Enter your feedback"),
             onChanged: (s) {
               onReviewUpdated.call(s);
             },
@@ -274,28 +280,22 @@ class HowWasYourExperienceTile extends StatelessWidget {
             return SizedBox();
           }
           final booking = bookings.first;
-          return ClipRRect(
-            borderRadius: borderRadius ?? BorderRadius.circular(6),
+          return Container(
+            decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.all(Radius.circular(6))),
+            padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
             child: ListTile(
-              tileColor: CardsColor.colors["lightGreen"],
-              contentPadding: padding ?? const EdgeInsets.all(16),
+              contentPadding: padding ?? const EdgeInsets.all(0),
               title: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    "How was your experience at",
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyText1
-                        ?.apply(color: Colors.white),
-                  ),
-                  Text(
-                    booking.business?.name ?? "no business name inform yadu",
-                    style: Theme.of(context)
-                        .textTheme
-                        .subtitle1
-                        ?.apply(color: Colors.white),
+                      "Rate your experience at ${booking.business?.name ?? "no business name inform yadu"}",
+                      style: Theme.of(context).textTheme.bodyText1),
+                  SizedBox(
+                    height: 10,
                   ),
                   Obx(() {
                     return AnimatedSwitcher(
@@ -322,11 +322,8 @@ class HowWasYourExperienceTile extends StatelessWidget {
                                 );
                               },
                               child: Text(
-                                "Thank you, Click here to fully review your experience",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                ),
-                              ),
+                                  "Thanks. Would you like to give us your detailed feedback?",
+                                  style: Theme.of(context).textTheme.subtitle1),
                             ),
                     );
                   }),
@@ -337,4 +334,3 @@ class HowWasYourExperienceTile extends StatelessWidget {
         });
   }
 }
-
