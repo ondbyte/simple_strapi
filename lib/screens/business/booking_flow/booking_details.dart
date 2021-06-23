@@ -17,11 +17,13 @@ import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/loading_stack.dart';
 import 'package:bapp/widgets/padded_text.dart';
 import 'package:bapp/widgets/tiles/bapp_user_tile.dart';
+import 'package:bapp/widgets/tiles/error.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fba;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
@@ -39,7 +41,7 @@ class BookingDetailsScreen extends StatefulWidget {
 }
 
 class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
-  var canBeginJob = false;
+  final canBeginJob = Rx(false);
   Timer? _timer;
   @override
   void initState() {
@@ -51,21 +53,20 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
     WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
       final now = DateTime.now();
       final shouldWaitToStartJob =
-          widget.booking.bookingStartTime?.isAfter(now) ?? false;
+          widget.booking.bookingStartTime?.toLocal().isAfter(now) ?? false;
       if (shouldWaitToStartJob) {
         final difference =
-            widget.booking.bookingEndTime?.difference(now) ?? Duration.zero;
+            widget.booking.bookingStartTime?.toLocal().difference(now) ??
+                Duration.zero;
         Helper.bPrint(difference);
         _timer = Timer(difference, () {
           if (mounted) {
-            setState(() {
-              canBeginJob = true;
-            });
+            canBeginJob.value = true;
           }
         });
       } else {
         setState(() {
-          canBeginJob = true;
+          canBeginJob.value = true;
         });
       }
     });
@@ -73,108 +74,99 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final map = widget.booking.products ?? [];
-    final servicesChildren = <Widget>[];
-    map.forEach(
-      (item) {
-        servicesChildren.add(
-          PaddedText(
-            item.nameOverride ?? "",
-            style: Theme.of(context).textTheme.subtitle1,
-          ),
-        );
-        servicesChildren.add(
-          PaddedText(
-            getProductsDurationString([item]),
-            style: Theme.of(context).textTheme.caption,
-          ),
-        );
+    return TapToReFetch<Booking>(
+      fetcher: () async {
+        final booking = await Bookings.findOne(widget.booking.id!);
+        return booking!;
       },
-    );
-    return WillPopScope(
-      onWillPop: () async {
-        if (_timer != null) {
-          _timer?.cancel();
-        }
-        return true;
+      onLoadBuilder: (_) => LoadingWidget(),
+      onErrorBuilder: (_, e, s) {
+        print(e);
+        print(s);
+        return ErrorTile(message: "Error occured,Tap to refresh");
       },
-      child: Builder(
-        builder: (_) {
-          return Bookings.listenerWidget(
-            strapiObject: widget.booking,
-            builder: (_, booking, loading) {
-              if (loading) {
-                return LoadingWidget();
-              }
-              return Scaffold(
-                appBar: AppBar(
-                  title: Text("Booking Details"),
-                ),
-                bottomNavigationBar: BookingX.i.isActive(booking)
-                    ? widget.isCustomerView
-                        ? BottomPrimaryButton(
-                            label: "Cancel booking",
-                            onPressed: isCancellableBooking(booking)
-                                ? () async {
-                                    final confirm = await BappNavigator.dialog<
-                                        CancellationConfirm>(
-                                      context,
-                                      CancellationConfirmDialog(
-                                        title: "Cancel",
-                                        message: "Please specify a reason",
-                                        needReason: true,
-                                      ),
-                                    );
-                                    if (confirm is! CancellationConfirm) {
-                                      return;
-                                    }
-                                    if (!confirm.confirm) {
-                                      return;
-                                    }
-                                    await BookingX.i.cancel(booking,
-                                        status: BookingStatus.cancelledByUser);
-                                    BappNavigator.pop(context, null);
-                                  }
-                                : null,
-                          )
-                        : booking.bookingStatus == BookingStatus.pendingApproval
-                            ? AcceptOrRejectButton(
-                                confirmLabel: "Confirm Booking",
-                                rejectLabel: "Reject",
-                                onConfirm: () async {
-                                  await BookingX.i.accept(booking);
-                                  BappNavigator.pop(context, null);
-                                },
-                                onReject: () async {
-                                  final confirm = await BappNavigator.dialog<
-                                      CancellationConfirm>(
-                                    context,
-                                    CancellationConfirmDialog(
-                                      title: "Reject",
-                                      message: "Please specify a reason",
-                                    ),
-                                  );
-                                  if (confirm is! CancellationConfirm) {
-                                    return;
-                                  }
-                                  if (!confirm.confirm) {
-                                    return;
-                                  }
-                                  await BookingX.i.cancel(booking);
-                                  BappNavigator.pop(context, null);
-                                },
+      onSucessBuilder: (_, booking) {
+        final map = booking.products ?? [];
+        final servicesChildren = <Widget>[];
+        map.forEach(
+          (item) {
+            servicesChildren.add(
+              PaddedText(
+                item.nameOverride ?? "",
+                style: Theme.of(context).textTheme.subtitle1,
+              ),
+            );
+            servicesChildren.add(
+              PaddedText(
+                getProductsDurationString([item]),
+                style: Theme.of(context).textTheme.caption,
+              ),
+            );
+          },
+        );
+        return WillPopScope(
+          onWillPop: () async {
+            if (_timer != null) {
+              _timer?.cancel();
+            }
+            return true;
+          },
+          child: Builder(
+            builder: (_) {
+              return Bookings.listenerWidget(
+                strapiObject: widget.booking,
+                builder: (_, booking, loading) {
+                  if (loading) {
+                    return LoadingWidget();
+                  }
+                  return Scaffold(
+                    appBar: AppBar(
+                      title: Text("Booking Details"),
+                    ),
+                    bottomNavigationBar: BookingX.i.isActive(booking)
+                        ? widget.isCustomerView
+                            ? BottomPrimaryButton(
+                                label: "Cancel booking",
+                                onPressed: isCancellableBooking(booking)
+                                    ? () async {
+                                        final confirm = await BappNavigator
+                                            .dialog<CancellationConfirm>(
+                                          context,
+                                          CancellationConfirmDialog(
+                                            title: "Cancel",
+                                            message: "Please specify a reason",
+                                            needReason: true,
+                                          ),
+                                        );
+                                        if (confirm is! CancellationConfirm) {
+                                          return;
+                                        }
+                                        if (!confirm.confirm) {
+                                          return;
+                                        }
+                                        await BookingX.i.cancel(booking,
+                                            status:
+                                                BookingStatus.cancelledByUser);
+                                        BappNavigator.pop(context, null);
+                                      }
+                                    : null,
                               )
-                            : booking.bookingStatus == BookingStatus.accepted
-                                ? StartJobOrNoShowButton(
-                                    noShowLabel: "No Show",
-                                    startJobLabel: "Start Job",
-                                    onNoShow: () async {
+                            : booking.bookingStatus ==
+                                    BookingStatus.pendingApproval
+                                ? AcceptOrRejectButton(
+                                    confirmLabel: "Confirm Booking",
+                                    rejectLabel: "Reject",
+                                    onConfirm: () async {
+                                      await BookingX.i.accept(booking);
+                                      BappNavigator.pop(context, null);
+                                    },
+                                    onReject: () async {
                                       final confirm = await BappNavigator
                                           .dialog<CancellationConfirm>(
                                         context,
                                         CancellationConfirmDialog(
-                                          title: "No show",
-                                          message: "Mark this as no show?",
+                                          title: "Reject",
+                                          message: "Please specify a reason",
                                         ),
                                       );
                                       if (confirm is! CancellationConfirm) {
@@ -183,104 +175,135 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                       if (!confirm.confirm) {
                                         return;
                                       }
-                                      act(() {
-                                        kLoading.value = true;
-                                      });
-                                      await BookingX.i.cancel(booking,
-                                          status: BookingStatus.noShow);
+                                      await BookingX.i.cancel(booking);
                                       BappNavigator.pop(context, null);
                                     },
-                                    onStart: canBeginJob
-                                        ? () async {
-                                            await BookingX.i.startJob(
-                                              booking,
-                                            );
-                                            BappNavigator.pop(context, null);
-                                          }
-                                        : null,
                                   )
-                                : null
-                    : null,
-                body: ListView(
-                  shrinkWrap: true,
-                  padding: EdgeInsets.all(16),
-                  children: [
-                    TitledListTile(
-                      bottomTag: readableEnum(booking.bookingStatus),
-                      bottomTagColor: getColorForBooking(booking.bookingStatus),
-                      primaryTile: widget.isCustomerView
-                          ? ListTile(
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 16),
-                              title: Text(
-                                booking.business?.name ??
-                                    "no business name inform yadu",
-                                style: Theme.of(context).textTheme.headline1,
-                              ),
-                              subtitle: Text(
-                                booking.business?.address?.locality?.name ??
-                                    "no locality inform yadu",
-                              ),
-                            )
-                          : null,
-                      title: widget.isCustomerView ? null : "Customer",
-                      secondaryTile: widget.isCustomerView
-                          ? ListTile(
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 16),
-                              leading: ListTileFirebaseImage(
-                                ifEmpty: Initial(
-                                  forName: booking.employee?.name ?? "zz",
+                                : booking.bookingStatus ==
+                                        BookingStatus.accepted
+                                    ? Obx(() => StartJobOrNoShowButton(
+                                          noShowLabel: "No Show",
+                                          startJobLabel: "Start Job",
+                                          onNoShow: () async {
+                                            final confirm = await BappNavigator
+                                                .dialog<CancellationConfirm>(
+                                              context,
+                                              CancellationConfirmDialog(
+                                                title: "No show",
+                                                message:
+                                                    "Mark this as no show?",
+                                              ),
+                                            );
+                                            if (confirm
+                                                is! CancellationConfirm) {
+                                              return;
+                                            }
+                                            if (!confirm.confirm) {
+                                              return;
+                                            }
+                                            act(() {
+                                              kLoading.value = true;
+                                            });
+                                            await BookingX.i.cancel(booking,
+                                                status: BookingStatus.noShow);
+                                            BappNavigator.pop(context, null);
+                                          },
+                                          onStart: canBeginJob()
+                                              ? () async {
+                                                  await BookingX.i.startJob(
+                                                    booking,
+                                                  );
+                                                  BappNavigator.pop(
+                                                      context, null);
+                                                }
+                                              : null,
+                                        ))
+                                    : null
+                        : null,
+                    body: ListView(
+                      shrinkWrap: true,
+                      padding: EdgeInsets.all(16),
+                      children: [
+                        TitledListTile(
+                          bottomTag: readableEnum(booking.bookingStatus),
+                          bottomTagColor:
+                              getColorForBooking(booking.bookingStatus),
+                          primaryTile: widget.isCustomerView
+                              ? ListTile(
+                                  contentPadding:
+                                      EdgeInsets.symmetric(horizontal: 16),
+                                  title: Text(
+                                    booking.business?.name ??
+                                        "no business name inform yadu",
+                                    style:
+                                        Theme.of(context).textTheme.headline1,
+                                  ),
+                                  subtitle: Text(
+                                    booking.business?.address?.locality?.name ??
+                                        "no locality inform yadu",
+                                  ),
+                                )
+                              : null,
+                          title: widget.isCustomerView ? null : "Customer",
+                          secondaryTile: widget.isCustomerView
+                              ? ListTile(
+                                  contentPadding:
+                                      EdgeInsets.symmetric(horizontal: 16),
+                                  leading: ListTileFirebaseImage(
+                                    ifEmpty: Initial(
+                                      forName: booking.employee?.name ?? "zz",
+                                    ),
+                                    storagePathOrURL:
+                                        booking.employee?.image?.first.url,
+                                  ),
+                                  title: Text(
+                                    "Your booking is with",
+                                    style: Theme.of(context).textTheme.caption,
+                                  ),
+                                  subtitle: Text(booking.employee!.name!),
+                                )
+                              : BappUserTile(
+                                  user: booking.bookedByUser!,
                                 ),
-                                storagePathOrURL:
-                                    booking.employee?.image?.first.url,
-                              ),
-                              title: Text(
-                                "Your booking is with",
-                                style: Theme.of(context).textTheme.caption,
-                              ),
-                              subtitle: Text(booking.employee!.name!),
-                            )
-                          : BappUserTile(
-                              user: booking.bookedByUser!,
-                            ),
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Builder(
+                          builder: (_) {
+                            final from = booking.bookingStartTime;
+                            final to = booking.bookingEndTime;
+                            if (from is! DateTime && to is! DateTime) {
+                              return SizedBox();
+                            }
+                            return TitledListTile(
+                              title: "Schedule",
+                              caption: getOnForTime(booking.bookingStartTime!) +
+                                  ", " +
+                                  getProductsDurationString(booking.products!),
+                            );
+                          },
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        TitledListTile(
+                          title: "Services",
+                          secondaryTile: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: servicesChildren,
+                          ),
+                        )
+                      ],
                     ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    Builder(
-                      builder: (_) {
-                        final from = booking.bookingStartTime;
-                        final to = booking.bookingEndTime;
-                        if (from is! DateTime && to is! DateTime) {
-                          return SizedBox();
-                        }
-                        return TitledListTile(
-                          title: "Schedule",
-                          caption: getOnForTime(booking.bookingStartTime!) +
-                              ", " +
-                              getProductsDurationString(booking.products!),
-                        );
-                      },
-                    ),
-                    SizedBox(
-                      height: 20,
-                    ),
-                    TitledListTile(
-                      title: "Services",
-                      secondaryTile: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: servicesChildren,
-                      ),
-                    )
-                  ],
-                ),
+                  );
+                },
               );
             },
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

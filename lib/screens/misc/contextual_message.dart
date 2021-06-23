@@ -2,6 +2,7 @@ import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/screens/home/bapp.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
+import 'package:bapp/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -66,13 +67,15 @@ class _ContextualMessageScreenState extends State<ContextualMessageScreen> {
                 SizedBox(
                   height: 20,
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    "${widget.message}",
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+                loading
+                    ? LoadingWidget()
+                    : Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          "${widget.message}",
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                 SizedBox(
                   height: 20,
                 ),

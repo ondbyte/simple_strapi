@@ -23,9 +23,11 @@ import '../../stores/business_store.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BusinessHome extends StatefulWidget {
+  final int? tab;
   final UserRole forRole;
 
-  const BusinessHome({Key? key, required this.forRole}) : super(key: key);
+  const BusinessHome({Key? key, required this.forRole, this.tab})
+      : super(key: key);
   @override
   _BusinessHomeState createState() => _BusinessHomeState();
 }
@@ -34,6 +36,12 @@ class _BusinessHomeState extends State<BusinessHome> {
   final _selectedPage = 0.obs;
   final _tabs = <Widget>[];
   final bucket = PageStorageBucket();
+
+  @override
+  void initState() {
+    _selectedPage.value = widget.tab ?? 0;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,14 +118,16 @@ class _BusinessHomeState extends State<BusinessHome> {
                     );
                   },
                 ),
-                bottomNavigationBar: BottomNavigationBar(
-                  type: BottomNavigationBarType.fixed,
-                  // selectedFontSize: 14,
-                  onTap: (i) {
-                    _selectedPage.value = i;
-                  },
-                  currentIndex: _selectedPage(),
-                  items: [..._filterBottomNavigations()],
+                bottomNavigationBar: Obx(
+                  () => BottomNavigationBar(
+                    type: BottomNavigationBarType.fixed,
+                    // selectedFontSize: 14,
+                    onTap: (i) {
+                      _selectedPage.value = i;
+                    },
+                    currentIndex: _selectedPage(),
+                    items: [..._filterBottomNavigations()],
+                  ),
                 ),
               );
             }),

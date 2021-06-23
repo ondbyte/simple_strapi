@@ -141,7 +141,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                       BappNavigator.pushAndRemoveAll(
                                         context,
                                         ContextualMessageScreen(
-                                          buttonText: "Back to Home",
+                                          buttonText: "Go to bookings",
                                           init: () async {
                                             await BookingX.i.placeBooking(
                                               user: user!,
@@ -154,7 +154,10 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                           },
                                           onButtonPressed: (context) {
                                             BappNavigator.pushAndRemoveAll(
-                                                context, Bapp());
+                                                context,
+                                                Bapp(
+                                                  goToBookings: true,
+                                                ));
                                           },
                                           message:
                                               "Your booking has been placed, waiting to be accepted by the business, track it the bookings tab",
@@ -277,13 +280,23 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                                 onPressed: () async {
                                                   final user = UserX.i.user();
                                                   !hearted()
-                                                      ? user?.favourites?.add(
-                                                          Favourites(
-                                                            addedOn:
-                                                                DateTime.now(),
-                                                            business: business,
-                                                          ),
-                                                        )
+                                                      ? user is User
+                                                          ? user.favourites
+                                                              ?.add(
+                                                              Favourites(
+                                                                addedOn:
+                                                                    DateTime
+                                                                        .now(),
+                                                                business:
+                                                                    business,
+                                                              ),
+                                                            )
+                                                          : () async {
+                                                              await BappNavigator
+                                                                  .push(context,
+                                                                      LoginScreen());
+                                                              setState(() {});
+                                                            }()
                                                       : user?.favourites
                                                           ?.removeWhere(
                                                           (f) =>

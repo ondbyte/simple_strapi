@@ -19,6 +19,9 @@ import 'business_home.dart';
 import 'customer_home.dart';
 
 class Bapp extends StatefulWidget {
+  final bool goToBookings;
+
+  const Bapp({Key? key, this.goToBookings = false}) : super(key: key);
   @override
   _BappState createState() => _BappState();
 }
@@ -34,15 +37,15 @@ class _BappState extends State<Bapp> {
                 UserX.i.user()?.alterEgoActivated ?? false;
             final role = EnumToString.fromString(
                 UserRole.values, UserX.i.user()?.role?.name ?? "");
-            if (role is! UserRole) {
-              return CustomerHome();
-            }
-            if (alterEgoActivated) {
+            if (role is UserRole && alterEgoActivated) {
               return BusinessHome(
                 forRole: role,
               );
             }
-            return CustomerHome();
+
+            return CustomerHome(
+              tab: widget.goToBookings ? 1 : 0,
+            );
           },
         ),
       ],

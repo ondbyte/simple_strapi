@@ -16,6 +16,9 @@ import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 
 class CustomerHome extends StatefulWidget {
+  final int? tab;
+
+  const CustomerHome({Key? key, this.tab}) : super(key: key);
   @override
   _CustomerHomeState createState() => _CustomerHomeState();
 }
@@ -33,6 +36,7 @@ class _CustomerHomeState extends State<CustomerHome> {
 
   @override
   void initState() {
+    _selectedPage = widget.tab ?? 0;
     super.initState();
   }
 
