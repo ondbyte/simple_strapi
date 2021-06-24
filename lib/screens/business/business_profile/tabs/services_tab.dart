@@ -1,6 +1,7 @@
 import 'package:bapp/classes/firebase_structures/business_services.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/super_strapi/my_strapi/businessX.dart';
+import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
 import 'package:bapp/widgets/firebase_image.dart';
@@ -85,14 +86,13 @@ class _CatlogueWidgetState extends State<CatlogueWidget> {
             widget.catalogue.name ?? "no catalogue name,inform yadu",
             style: Theme.of(context).textTheme.headline1,
           ),
-          Text(widget.catalogue.description ?? "",
-          style: Theme.of(context).textTheme.bodyText1,
+          Text(
+            widget.catalogue.description ?? "",
+            style: Theme.of(context).textTheme.bodyText1,
           ),
           const SizedBox(
             height: 10,
           ),
-          
-          
           ..._getServicesTiles(),
           const SizedBox(
             height: 20,
@@ -219,18 +219,19 @@ class _CatalogueItemWidgetState extends State<CatalogueItemWidget> {
     }
 
     final user = UserX.i.user();
+    final defaultData = DefaultDataX.i.defaultData();
     final currency = user?.city?.country?.englishCurrencySymbol ??
-        "no currency, inform yadu";
+        defaultData?.city?.country?.englishCurrencySymbol ??
+        "AED";
 
-    final s = widget.item.price?.toString() ??
-        "" +
-            " " +
-            currency +
-            ", " +
-            widget.item.duration.toString() +
-            " Minutes" +
-            "\n" +
-            (widget.item.descriptionOverride ?? "");
+    final s = (widget.item.price?.toString() ?? "") +
+        " " +
+        currency +
+        ", " +
+        widget.item.duration.toString() +
+        " Minutes" +
+        "\n" +
+        (widget.item.descriptionOverride ?? "");
     return Text(
       s,
       maxLines: 2,
