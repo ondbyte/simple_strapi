@@ -252,19 +252,15 @@ class Strapi {
   ///as a authentication method, as of now it is the only method which is supported in authenticating with strapi
   Future<StrapiResponse> authenticateWithFirebaseUid({
     required String firebaseUid,
-    required String email,
-    required String name,
   }) async {
-    if (firebaseUid.isEmpty || email.isEmpty || name.isEmpty) {
+    if (firebaseUid.isEmpty) {
       throw StrapiException(
-        msg: "empty string cannot be passed as parameters",
+        msg: "empty string cannot be passed as uid",
       );
     }
 
     final response = await request("/auth/firebase/callback", params: {
       "access_token": "$firebaseUid",
-      "email": email,
-      "name": name,
     });
     if (!response.failed) {
       strapiToken = response.body.first["jwt"];
