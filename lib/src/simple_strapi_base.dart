@@ -268,6 +268,24 @@ class Strapi {
     return response;
   }
 
+  Future<StrapiResponse> authenticateWithFirebase2Uid({
+    required String firebaseUid,
+  }) async {
+    if (firebaseUid.isEmpty) {
+      throw StrapiException(
+        msg: "empty string cannot be passed as uid",
+      );
+    }
+
+    final response = await request("/auth/firebase2/callback", params: {
+      "access_token": "$firebaseUid",
+    });
+    if (!response.failed) {
+      strapiToken = response.body.first["jwt"];
+    }
+    return response;
+  }
+
   ///constructs https or http url from path, params and [StrapiQuery]
   Uri _strapiUri(String unencodedPath,
       {Map<String, String>? params, String? queryString}) {
