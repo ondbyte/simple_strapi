@@ -214,10 +214,6 @@ class _CatalogueItemWidgetState extends State<CatalogueItemWidget> {
   }
 
   Widget _makeSubTitle(BuildContext context) {
-    if (UserX.i.userNotPresent) {
-      return SizedBox();
-    }
-
     final user = UserX.i.user();
     final defaultData = DefaultDataX.i.defaultData();
     final currency = user?.city?.country?.englishCurrencySymbol ??

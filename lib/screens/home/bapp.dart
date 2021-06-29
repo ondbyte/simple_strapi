@@ -14,6 +14,7 @@ import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 import 'business_home.dart';
 import 'customer_home.dart';
@@ -33,11 +34,13 @@ class _BappState extends State<Bapp> {
       children: [
         Obx(
           () {
-            final alterEgoActivated =
-                UserX.i.user()?.alterEgoActivated ?? false;
             final role = EnumToString.fromString(
                 UserRole.values, UserX.i.user()?.role?.name ?? "");
-            if (role is UserRole && alterEgoActivated) {
+            if (role is UserRole &&
+                (UserX.i.user()?.authenticatedUserType ==
+                        AuthenticatedUserType.phoneBusinessSide ||
+                    UserX.i.user()?.authenticatedUserType ==
+                        AuthenticatedUserType.emailBusinessSide)) {
               return BusinessHome(
                 forRole: role,
               );

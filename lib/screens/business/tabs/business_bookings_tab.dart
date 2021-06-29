@@ -3,6 +3,7 @@ import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/business/booking_flow/select_a_professional.dart';
+import 'package:bapp/screens/business/booking_flow/select_time_slot.dart';
 import 'package:bapp/screens/business/booking_flow/services_screen.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/screens/business/toolkit/manage_staff/manage_staff.dart';
@@ -83,12 +84,12 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab>
                     ? SizedBox()
                     : FloatingActionButton(
                         onPressed: () {
-                          BappNavigator.dialog(
+                          /* BappNavigator.dialog(
                             context,
                             BookingsTabAddOptions(
                               business: business,
                             ),
-                          );
+                          ); */
                         },
                         child: Icon(FeatherIcons.plus),
                       );
@@ -225,9 +226,11 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab>
 }
 
 class BookingsTabAddOptions extends StatefulWidget {
+  final Employee selectedEmployee;
   final Business business;
 
-  const BookingsTabAddOptions({Key? key, required this.business})
+  const BookingsTabAddOptions(
+      {Key? key, required this.business, required this.selectedEmployee})
       : super(key: key);
   @override
   _BookingsTabAddOptionsState createState() => _BookingsTabAddOptionsState();
@@ -243,13 +246,52 @@ class _BookingsTabAddOptionsState extends State<BookingsTabAddOptions> {
           ListTile(
             title: Text("Add Walk-In"),
             trailing: Icon(Icons.arrow_forward),
-            onTap: () {
-              BappNavigator.push(
+            onTap: () async {
+              final products = await BappNavigator.push(
                 context,
                 BusinessProfileServicesScreen(
                   business: widget.business,
                 ),
               );
+              if (products is List && products.isNotEmpty) {
+                final ps = products as List<Product>;
+                final timeSlot = await BappNavigator.push(
+                    context,
+                    SelectTimeSlotScreen(
+                        business: widget.business,
+                        employee: widget.selectedEmployee,
+                        durationOfServices: Duration(
+                            minutes: ps.fold(
+                                0, (previousValue, e) => e.duration ?? 0))));
+                /* if (timeSlot is Timing) {
+                                      BappNavigator.pushAndRemoveAll(
+                                        context,
+                                        ContextualMessageScreen(
+                                          buttonText: "Go to bookings",
+                                          init: () async {
+                                            await BookingX.i.placeBooking(
+                                              user: user!,
+                                              business: business,
+                                              booking: booking()!,
+                                              employee: employee,
+                                              timeSlot: timeSlot,
+                                            );
+                                            await BookingX.i.clearCart();
+                                          },
+                                          onButtonPressed: (context) {
+                                            BappNavigator.pushAndRemoveAll(
+                                                context,
+                                                Bapp(
+                                                  goToBookings: true,
+                                                ));
+                                          },
+                                          message:
+                                              "Your booking has been placed, waiting to be accepted by the business, track it the bookings tab",
+                                        ),
+                                      );
+                                    } */
+
+              }
             },
           ),
           ListTile(

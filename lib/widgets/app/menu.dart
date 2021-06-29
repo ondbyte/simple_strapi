@@ -4,6 +4,7 @@ import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/authentication/create_profile.dart';
+import 'package:bapp/screens/authentication/email_login_screen.dart';
 import 'package:bapp/screens/authentication/login_screen.dart';
 import 'package:bapp/screens/business/addbusiness/choose_category.dart';
 import 'package:bapp/screens/settings/settings.dart';
@@ -96,27 +97,43 @@ class _MenuState extends State<Menu> {
     return Obx(
       () {
         var onTap;
-        String title;
+        late String title;
         final user = UserX.i.user();
-        final partner = user?.partner;
-        if (user is! User || partner is! Partner) {
-          bPrint("noo user");
-          return SizedBox();
-        }
-        if (user.alterEgoActivated ?? false) {
+        if (user is! User) {
+          return ListTile(
+            title: Text("Switch to business"),
+            onTap: () async {
+              final response =
+                  await BappNavigator.push(context, EmailLoginScreen());
+              if (user is User) {
+                BappNavigator.pop(context, null);
+              }
+            },
+          );
+        } else if (user.authenticatedUserType ==
+            AuthenticatedUserType.phoneBusinessSide) {
           onTap = () async {
-            final updated = user.copyWIth(alterEgoActivated: false);
+            final updated = user.copyWIth(
+                authenticatedUserType: AuthenticatedUserType.phoneCustomerSide);
             final saved = await Users.update(updated);
             UserX.i.user(saved);
           };
           title = "Switch to customer";
-        } else {
+        } else if (user.authenticatedUserType ==
+            AuthenticatedUserType.phoneCustomerSide) {
           onTap = () async {
-            final updated = user.copyWIth(alterEgoActivated: true);
+            final updated = user.copyWIth(
+                authenticatedUserType: AuthenticatedUserType.phoneBusinessSide);
             final saved = await Users.update(updated);
             UserX.i.user(saved);
           };
           title = "Switch to business";
+        } else if (user.authenticatedUserType ==
+            AuthenticatedUserType.emailBusinessSide) {
+          return SizedBox();
+        } else {
+          throw BappImpossibleException(
+              "set the user's authenticatedUserType in strapi, might be null");
         }
         return Users.listenerWidget(
           strapiObject: user,

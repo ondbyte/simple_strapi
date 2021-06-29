@@ -86,10 +86,10 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "53c8a56976b953f9335703872deecfe0a41b26fe"
+      resolved-ref: "2e017db9c0c5e28ea7a5567883977c8a8683d3d1"
       url: "https://github.com/ondbyte/simple_strapi.git"
     source: git
-    version: "0.9.1-alpha+2"
+    version: "0.9.1-alpha+4"
   sky_engine:
     dependency: transitive
     description: flutter

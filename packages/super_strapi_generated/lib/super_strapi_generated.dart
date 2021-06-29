@@ -1,7 +1,7 @@
-import 'package:flutter/scheduler.dart';
 import 'package:simple_strapi/simple_strapi.dart';
 import 'dart:convert';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/scheduler.dart';
 
 class _StrapiListenerWidget<T> extends StatefulWidget {
   final bool sync;
@@ -83,7 +83,6 @@ class _StrapiListenerWidgetState<T> extends State<_StrapiListenerWidget<T>> {
     return widget.builder(context, _strapiObject, _loading);
   }
 }
-
 class City {
   City.fromID(this.id)
       : _synced = false,
@@ -1294,6 +1293,7 @@ enum BookingStatus {
   ongoing,
   finished,
   noShow,
+  blockTime,
   halfWayThrough
 }
 
@@ -1947,9 +1947,7 @@ class Locality {
       StrapiUtils.parseBool(map["enabled"]),
       StrapiUtils.objFromMap<City>(map["city"], (e) => Cities._fromIDorData(e)),
       StrapiUtils.objFromMap<Coordinates>(
-        map["coordinates"],
-        (e) => Coordinates.fromMap(e),
-      ),
+          map["coordinates"], (e) => Coordinates.fromMap(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -6012,6 +6010,12 @@ class _RoleEmptyFields {
   bool users = false;
 }
 
+enum AuthenticatedUserType {
+  phoneCustomerSide,
+  phoneBusinessSide,
+  emailBusinessSide
+}
+
 class User {
   User.fromID(this.id)
       : _synced = false,
@@ -6032,10 +6036,10 @@ class User {
         city = null,
         bookings = null,
         cart = null,
-        alterEgoActivated = null,
         pickedBusiness = null,
         pickedEmployee = null,
         fcmToken = null,
+        authenticatedUserType = null,
         createdAt = null,
         updatedAt = null;
 
@@ -6057,10 +6061,10 @@ class User {
       this.city,
       this.bookings,
       this.cart,
-      this.alterEgoActivated,
       this.pickedBusiness,
       this.pickedEmployee,
-      this.fcmToken})
+      this.fcmToken,
+      this.authenticatedUserType})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
@@ -6084,10 +6088,10 @@ class User {
       this.city,
       this.bookings,
       this.cart,
-      this.alterEgoActivated,
       this.pickedBusiness,
       this.pickedEmployee,
       this.fcmToken,
+      this.authenticatedUserType,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -6111,10 +6115,10 @@ class User {
       this.city,
       this.bookings,
       this.cart,
-      this.alterEgoActivated,
       this.pickedBusiness,
       this.pickedEmployee,
       this.fcmToken,
+      this.authenticatedUserType,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -6156,13 +6160,13 @@ class User {
 
   final Booking? cart;
 
-  final bool? alterEgoActivated;
-
   final Business? pickedBusiness;
 
   final Employee? pickedEmployee;
 
   final String? fcmToken;
+
+  final AuthenticatedUserType? authenticatedUserType;
 
   final DateTime? createdAt;
 
@@ -6193,10 +6197,10 @@ class User {
           City? city,
           List<Booking>? bookings,
           Booking? cart,
-          bool? alterEgoActivated,
           Business? pickedBusiness,
           Employee? pickedEmployee,
-          String? fcmToken}) =>
+          String? fcmToken,
+          AuthenticatedUserType? authenticatedUserType}) =>
       User._unsynced(
           username ?? this.username,
           email ?? this.email,
@@ -6215,10 +6219,10 @@ class User {
           city ?? this.city,
           bookings ?? this.bookings,
           cart ?? this.cart,
-          alterEgoActivated ?? this.alterEgoActivated,
           pickedBusiness ?? this.pickedBusiness,
           pickedEmployee ?? this.pickedEmployee,
           fcmToken ?? this.fcmToken,
+          authenticatedUserType ?? this.authenticatedUserType,
           this.createdAt,
           this.updatedAt,
           this.id);
@@ -6240,10 +6244,10 @@ class User {
       bool city = false,
       bool bookings = false,
       bool cart = false,
-      bool alterEgoActivated = false,
       bool pickedBusiness = false,
       bool pickedEmployee = false,
-      bool fcmToken = false}) {
+      bool fcmToken = false,
+      bool authenticatedUserType = false}) {
     return User._unsynced(
         username ? null : this.username,
         email ? null : this.email,
@@ -6262,10 +6266,10 @@ class User {
         city ? null : this.city,
         bookings ? null : this.bookings,
         cart ? null : this.cart,
-        alterEgoActivated ? null : this.alterEgoActivated,
         pickedBusiness ? null : this.pickedBusiness,
         pickedEmployee ? null : this.pickedEmployee,
         fcmToken ? null : this.fcmToken,
+        authenticatedUserType ? null : this.authenticatedUserType,
         this.createdAt,
         this.updatedAt,
         this.id)
@@ -6286,10 +6290,10 @@ class User {
       .._emptyFields.city = city
       .._emptyFields.bookings = bookings
       .._emptyFields.cart = cart
-      .._emptyFields.alterEgoActivated = alterEgoActivated
       .._emptyFields.pickedBusiness = pickedBusiness
       .._emptyFields.pickedEmployee = pickedEmployee
-      .._emptyFields.fcmToken = fcmToken;
+      .._emptyFields.fcmToken = fcmToken
+      .._emptyFields.authenticatedUserType = authenticatedUserType;
   }
 
   static User fromSyncedMap(Map<dynamic, dynamic> map) => User._synced(
@@ -6317,12 +6321,13 @@ class User {
           map["bookings"], (e) => Bookings._fromIDorData(e)),
       StrapiUtils.objFromMap<Booking>(
           map["cart"], (e) => Bookings._fromIDorData(e)),
-      StrapiUtils.parseBool(map["alterEgoActivated"]),
       StrapiUtils.objFromMap<Business>(
           map["pickedBusiness"], (e) => Businesses._fromIDorData(e)),
       StrapiUtils.objFromMap<Employee>(
           map["pickedEmployee"], (e) => Employees._fromIDorData(e)),
       map["fcmToken"],
+      StrapiUtils.toEnum<AuthenticatedUserType>(
+          AuthenticatedUserType.values, map["authenticatedUserType"]),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -6351,12 +6356,13 @@ class User {
           map["bookings"], (e) => Bookings._fromIDorData(e)),
       StrapiUtils.objFromMap<Booking>(
           map["cart"], (e) => Bookings._fromIDorData(e)),
-      StrapiUtils.parseBool(map["alterEgoActivated"]),
       StrapiUtils.objFromMap<Business>(
           map["pickedBusiness"], (e) => Businesses._fromIDorData(e)),
       StrapiUtils.objFromMap<Employee>(
           map["pickedEmployee"], (e) => Employees._fromIDorData(e)),
       map["fcmToken"],
+      StrapiUtils.toEnum<AuthenticatedUserType>(
+          AuthenticatedUserType.values, map["authenticatedUserType"]),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -6440,10 +6446,6 @@ class User {
         "cart": null
       else if (!_emptyFields.cart && cart != null)
         "cart": toServer ? cart?.id : cart?._toMap(level: level + level),
-      if (_emptyFields.alterEgoActivated)
-        "alterEgoActivated": null
-      else if (!_emptyFields.alterEgoActivated && alterEgoActivated != null)
-        "alterEgoActivated": alterEgoActivated,
       if (_emptyFields.pickedBusiness)
         "pickedBusiness": null
       else if (!_emptyFields.pickedBusiness && pickedBusiness != null)
@@ -6460,6 +6462,12 @@ class User {
         "fcmToken": null
       else if (!_emptyFields.fcmToken && fcmToken != null)
         "fcmToken": fcmToken,
+      if (_emptyFields.authenticatedUserType)
+        "authenticatedUserType": null
+      else if (!_emptyFields.authenticatedUserType &&
+          authenticatedUserType != null)
+        "authenticatedUserType":
+            StrapiUtils.enumToString(authenticatedUserType),
       "createdAt": createdAt?.toIso8601String(),
       "updatedAt": updatedAt?.toIso8601String(),
       "id": id
@@ -6696,13 +6704,13 @@ class _UserFields {
 
   final cart = StrapiModelField("cart");
 
-  final alterEgoActivated = StrapiLeafField("alterEgoActivated");
-
   final pickedBusiness = StrapiModelField("pickedBusiness");
 
   final pickedEmployee = StrapiModelField("pickedEmployee");
 
   final fcmToken = StrapiLeafField("fcmToken");
+
+  final authenticatedUserType = StrapiLeafField("authenticatedUserType");
 
   final createdAt = StrapiLeafField("createdAt");
 
@@ -6729,10 +6737,10 @@ class _UserFields {
       city,
       bookings,
       cart,
-      alterEgoActivated,
       pickedBusiness,
       pickedEmployee,
       fcmToken,
+      authenticatedUserType,
       createdAt,
       updatedAt,
       id
@@ -6775,13 +6783,13 @@ class _UserEmptyFields {
 
   bool cart = false;
 
-  bool alterEgoActivated = false;
-
   bool pickedBusiness = false;
 
   bool pickedEmployee = false;
 
   bool fcmToken = false;
+
+  bool authenticatedUserType = false;
 }
 
 class Permission {

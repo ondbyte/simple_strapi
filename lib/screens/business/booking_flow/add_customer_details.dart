@@ -105,6 +105,7 @@ class AddCustomerDetails extends StatelessWidget {
         ),
       );
     });
+  
    */
   }
 }

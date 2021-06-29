@@ -5,6 +5,7 @@ import 'package:bapp/screens/business/toolkit/manage_services/manage_services.da
 import 'package:bapp/super_strapi/my_strapi/bookingX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
+import 'package:bapp/widgets/app/bapp_navigator_widget.dart';
 import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/tiles/error.dart';
 import 'package:flutter/material.dart';
@@ -54,7 +55,11 @@ class _BusinessProfileServicesScreenState
                     ? getProductsCostString(_selected)
                     : null,
                 label: "Add",
-                onPressed: _selected.isNotEmpty ? () async {} : null,
+                onPressed: _selected.isNotEmpty
+                    ? () async {
+                        BappNavigator.pop(context, _selected.toList());
+                      }
+                    : null,
               );
             });
           }),

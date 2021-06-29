@@ -52,21 +52,17 @@ class UserX {
     kBus.fire(AppEvents.reboot);
   }
 
-  Future<User?> loginWithFirebase(
+  Future<User> loginWithFirebase(
     String firebaseToken,
-    String email,
-    String name,
     String fcmToken,
   ) async {
     if (userPresent) {
       print("user present");
-      return user.value;
+      return user.value!;
     }
     try {
-      final response = await Strapi.i.authenticateWithFirebaseUid(
+      final response = await Strapi.i.authenticateWithFirebase2Uid(
         firebaseUid: firebaseToken,
-        email: email,
-        name: name,
       );
       if (response.failed) {
         throw StrapiResponseException(
@@ -75,7 +71,9 @@ class UserX {
         );
       }
       final me = await Users.me(asFindOne: true);
-      final copied = me?.copyWIth(fcmToken: fcmToken);
+      final copied = me?.copyWIth(
+          fcmToken: fcmToken,
+          authenticatedUserType: AuthenticatedUserType.phoneCustomerSide);
       final updated = await Users.update(copied!);
       user(updated);
       final token = Strapi.i.strapiToken;
@@ -84,13 +82,54 @@ class UserX {
       }
       _listenForUserObject();
       await _copyDataFromDefault();
-      return user.value;
+      return user.value!;
     } on StrapiResponseException catch (_) {
       print("Unable to Authenticate with firebase for strapi");
       await FirebaseX.i.logOut();
+      rethrow;
     } on StrapiException catch (_) {
       print("user logout");
       await FirebaseX.i.logOut();
+      rethrow;
+    }
+  }
+
+  Future<User> loginWithEmailAndPassword(
+      String email, String passWord, String? fcmToken) async {
+    if (userPresent) {
+      print("user present");
+      return user.value!;
+    }
+    try {
+      final response = await Strapi.i
+          .authenticateWithEmailAndPassword(email: email, passWord: passWord);
+      if (response.failed) {
+        throw StrapiResponseException(
+          "unable to authenticateWithEmailAndPassword",
+          response,
+        );
+      }
+      final me = await Users.me(asFindOne: true);
+      final copied = me?.copyWIth(
+          fcmToken: fcmToken,
+          authenticatedUserType: AuthenticatedUserType.emailBusinessSide);
+      final updated = await Users.update(copied!);
+      user(updated);
+      final token = Strapi.i.strapiToken;
+      if (token.isNotEmpty) {
+        PersistenceX.i.saveValue("token", "$token");
+      }
+      _listenForUserObject();
+      await _copyDataFromDefault();
+      return user.value!;
+    } on StrapiResponseException catch (_) {
+      print("Unable to Authenticate with firebase for strapi");
+      await FirebaseX.i.logOut();
+      rethrow;
+    } on StrapiException catch (_) {
+      print("user logout");
+      await FirebaseX.i.logOut();
+      rethrow;
     }
   }
 
@@ -143,4 +182,25 @@ enum UserRole {
   partner,
   public,
   staff,
+}
+
+extension EmailLogin on Strapi {
+  Future<StrapiResponse> authenticateWithEmailAndPassword({
+    required String email,
+    required String passWord,
+  }) async {
+    if (email.isEmpty || passWord.isEmpty) {
+      throw StrapiException(
+        msg: "empty string cannot be passed as uid",
+      );
+    }
+
+    final response = await request("/auth/local",
+        body: {"identifier": "$email", "password": "$passWord"},
+        method: "POST");
+    if (!response.failed) {
+      strapiToken = response.body.first["jwt"];
+    }
+    return response;
+  }
 }

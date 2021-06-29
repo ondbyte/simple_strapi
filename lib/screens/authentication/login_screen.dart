@@ -14,7 +14,8 @@ import 'package:bapp/widgets/buttons.dart';
 import 'package:bapp/widgets/failed_strapi_response.dart';
 import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/tiles/error.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as fbAuth;
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -53,14 +54,15 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  Future _popOnUser() async {
-    await Future.doWhile(() async {
-      await Future.delayed(const Duration(milliseconds: 400));
-      return UserX.i.userNotPresent;
-    });
+  Future _popOnFirebaseUser(fbAuth.User firebaseUser) async {
+    final token = await FirebaseMessaging.instance.getToken() ?? "";
+    final user = await UserX.i.loginWithFirebase(
+      firebaseUser.uid,
+      token,
+    );
     BappNavigator.pop(
       context,
-      true,
+      user != null,
     );
   }
 
@@ -186,13 +188,17 @@ class _LoginScreenState extends State<LoginScreen> {
                             _loading(false);
                           },
                           onVerified: () async {
-                            if (FirebaseX.i.userPresent &&
-                                (isNullOrEmpty(
-                                        FirebaseX.i.firebaseUser?.email) ||
-                                    isNullOrEmpty(
-                                      FirebaseX.i.firebaseUser?.displayName,
-                                    ))) {
-                              await BappNavigator.pushReplacement(
+                            final user = await fbAuth.FirebaseAuth.instance
+                                .authStateChanges()
+                                .first;
+                            if (user == null) {
+                              throw Exception("User cannot be null");
+                            }
+                            if ((isNullOrEmpty(user.email) ||
+                                isNullOrEmpty(
+                                  user.displayName,
+                                ))) {
+                              final done = await BappNavigator.pushReplacement(
                                 context,
                                 CreateYourProfileScreen(
                                   shouldPop: () async {
@@ -200,9 +206,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                   },
                                 ),
                               );
-                              _popOnUser();
+                              if (done ?? false) {
+                                _popOnFirebaseUser(user);
+                              } else {
+                                FirebaseX.i.logOut();
+                              }
                             } else {
-                              _popOnUser();
+                              _popOnFirebaseUser(user);
                             }
                           },
                         );

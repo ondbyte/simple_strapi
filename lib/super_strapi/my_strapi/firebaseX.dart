@@ -30,17 +30,18 @@ class FirebaseX extends X {
 
   Future<fba.User?> init() async {
     await Firebase.initializeApp();
-    final completer = Completer<fba.User>();
+    return fba.FirebaseAuth.instance.currentUser;
+    /* final completer = Completer<fba.User>();
     _userChangesSubscription =
         fba.FirebaseAuth.instance.userChanges().listen((newUser) async {
       if (newUser is fba.User) {
         _newFirebaseUser(newUser);
       }
       completer.cautiousComplete(newUser);
-    });
+    }); */
   }
 
-  void _newFirebaseUser(fba.User user) async {
+/*   void _newFirebaseUser(fba.User user) async {
     _user = user;
     final uid = user.uid;
     final email = user.email;
@@ -59,7 +60,7 @@ class FirebaseX extends X {
     if (u is! User) {
       bPrint("Unable to login with firebase");
     }
-  }
+  } */
 
   Future updateProfile(
       {required String displayName,
