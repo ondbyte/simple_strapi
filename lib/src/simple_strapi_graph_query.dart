@@ -348,7 +348,7 @@ String _collectionNameToGraphQlName(
 ) {
   final all = collectionName.split(RegExp(r'[\s_-]'));
   final from2nd = all.sublist(1);
-  var returnable = "" + all[0];
+  var returnable = "" + all[0].toLowerCase();
   from2nd.forEach((s) {
     returnable += _capitalizeFirst(s);
   });
