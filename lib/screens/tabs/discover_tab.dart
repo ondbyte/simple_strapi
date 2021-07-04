@@ -67,13 +67,13 @@ class _DiscoverTabState extends State<DiscoverTab> {
                   return SeeAllListTile(
                     padding: EdgeInsets.all(0),
                     seeAllLabel: "See all",
-                    title: "Featured on Bapp",
-                    childPadding: EdgeInsets.symmetric(horizontal: 16),
+                    title: "Featured Partners",
+                    childPadding: EdgeInsets.fromLTRB(15, 0, 0, 0),
                     onSeeAll: () {
                       BappNavigator.push(
                         context,
                         BranchesResultScreen(
-                          title: "Featured Service",
+                          title: "Featured Partners",
                           branchList: data,
                           placeName: UserX.i.userNotPresent
                               ? placeName(
@@ -329,13 +329,13 @@ class _DiscoverTabState extends State<DiscoverTab> {
                           : UserX.i.user()?.locality,
                     ),
                     const SizedBox(
-                      height: 30,
+                      height: 60,
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Text(
-                        "Top services",
-                        style: Theme.of(context).textTheme.headline6,
+                        "Top Services on Bapp",
+                        style: Theme.of(context).textTheme.headline2,
                       ),
                     ),
                     const SizedBox(
@@ -345,7 +345,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     if (UserX.i.userPresent)
                       // ignore: dead_code
                       const SizedBox(
-                        height: 10,
+                        height: 0,
                       ),
                     if (UserX.i.userPresent)
                       CompleteYourBookingTile(
@@ -355,7 +355,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                 ),
               ),
               SliverPadding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                padding: const EdgeInsets.fromLTRB(16, 30, 16, 0),
                 sliver: SliverList(
                   delegate: SliverChildListDelegate(
                     [

@@ -46,7 +46,7 @@ class OnBoardingConfig {
   static List<Slide> slides = [
     ///slide one
     Slide(
-      img: "assets/svg/barber.svg",
+      img: "assets/svg/beauty.svg",
       title: "Welcome to Bapp",
       description: "Bapp helps you  to discover services &\nbook appointments",
     ),

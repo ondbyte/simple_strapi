@@ -1,4 +1,5 @@
 import 'package:bapp/config/constants.dart';
+import 'package:bapp/super_strapi/my_strapi/businessX.dart';
 import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
 import 'package:bapp/widgets/image/strapi_image.dart';
 import 'package:bapp/widgets/loading.dart';
@@ -10,6 +11,7 @@ import '../firebase_image.dart';
 
 class BusinessTileBigWidget extends StatelessWidget {
   final Business business;
+
   final Widget tag;
   final Function()? onTap;
 
@@ -31,15 +33,17 @@ class BusinessTileBigWidget extends StatelessWidget {
                 alignment: Alignment.bottomLeft,
                 children: [
                   if (business.partner is Partner)
-                    Partners.listenerWidget(
-                      strapiObject: business.partner as Partner,
+                    Businesses.listenerWidget(
+                      strapiObject: business,
                       sync: true,
-                      builder: (_, partner, loading) {
-                        final files = partner.logo ?? [];
-                        final logo = files.isNotEmpty ? files.first : null;
-                        return ClipRRect(
-                          borderRadius: BorderRadius.all(Radius.circular(6)),
-                          child: StrapiImage(file: logo),
+                      builder: (_, business, loading) {
+                        final images = business.images ?? [];
+                        final logo = images.isNotEmpty ? images.first : null;
+                        return Center(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.all(Radius.circular(6)),
+                            child: StrapiImage(file: logo),
+                          ),
                         );
                       },
                     ),
@@ -90,7 +94,7 @@ class BusinessTileWidget extends StatelessWidget {
           if (loading) {
             return SizedBox();
           }
-          final images = branch.images ?? [];
+          final images = branch.partner?.logo ?? [];
           final image = images.isNotEmpty ? images.first : null;
           return ListTile(
             onTap: onTap,
@@ -98,11 +102,14 @@ class BusinessTileWidget extends StatelessWidget {
             contentPadding: padding ?? EdgeInsets.zero,
             title: Text(
               branch.name ?? "",
-              style: titleStyle,
+              style: titleStyle ??
+                  titleStyle ??
+                  Theme.of(context).textTheme.headline6,
               maxLines: 1,
             ),
             subtitle: Text(
-              branch.address?.address ?? "",
+              // branch.address?.address ?? "",
+              branch.address?.locality?.name ?? branch.address?.address ?? "",
               maxLines: 1,
             ),
             leading: withImage

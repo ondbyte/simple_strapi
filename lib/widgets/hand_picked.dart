@@ -39,11 +39,10 @@ class _HandPickedScrollerState extends State<HandPickedScroller> {
           height: MediaQuery.of(context).size.height * .15,
           child: GridView.builder(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 1,
-              // crossAxisSpacing: 5,
-              mainAxisSpacing: 15
-            ),
-            shrinkWrap: true,
+                crossAxisCount: 1,
+                // crossAxisSpacing: 5,
+                mainAxisSpacing: 15),
+            // shrinkWrap: true,
             scrollDirection: Axis.horizontal,
             itemCount: list.length,
             padding: EdgeInsets.symmetric(
@@ -98,17 +97,18 @@ class HandPickedBox extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Icon(
-                // FeatherIcons.package,
-                // color: Colors.white,
+              // FeatherIcons.package,
+              // color: Colors.white,
               // ),
               const SizedBox(
                 height: 6,
               ),
               Text(
                 handPicked.name ?? "",
-                style: Theme.of(context).textTheme.headline3?.apply(
-                      color: Theme.of(context).primaryColorLight
-                    ),
+                style: Theme.of(context)
+                    .textTheme
+                    .headline3
+                    ?.apply(color: Theme.of(context).primaryColorLight),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),

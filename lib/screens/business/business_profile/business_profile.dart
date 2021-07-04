@@ -361,6 +361,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                   delegate: SliverChildListDelegate(
                                     [
                                       BusinessTileWidget(
+                                        withImage: true,
                                         titleStyle: Theme.of(context)
                                             .textTheme
                                             .headline1,
@@ -375,7 +376,9 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                             ? getBappTabBar(
                                                 context,
                                                 [
-                                                  const Text("Services"),
+                                                  const Text(
+                                                    "Services",
+                                                  ),
                                                   const Text("About"),
                                                   /* if (false) const Text("Offers"),
                                         if (false) const Text("Packages"), */
