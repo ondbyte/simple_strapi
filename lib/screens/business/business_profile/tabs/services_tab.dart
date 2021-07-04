@@ -79,12 +79,12 @@ class _CatlogueWidgetState extends State<CatlogueWidget> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(
-            height: 10,
-          ),
           Text(
             widget.catalogue.name ?? "no catalogue name,inform yadu",
-            style: Theme.of(context).textTheme.headline1,
+            style: Theme.of(context).textTheme.headline3,
+          ),
+          const SizedBox(
+            height: 5,
           ),
           Text(
             widget.catalogue.description ?? "",
