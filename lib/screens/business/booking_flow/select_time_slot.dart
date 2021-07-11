@@ -176,6 +176,11 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
           return ErrorTile(
               message: "The Business is durationon holiday for the day");
         }
+        if (e is EmployeeNotBookableException) {
+          return ErrorTile(
+              message:
+                  "Selected staff is not bookable,toggle in employee settings");
+        }
         return ErrorTile(message: "Something went wrong, tap to refresh");
       },
       onSucessBuilder: (_, timingsList) {
