@@ -84,12 +84,10 @@ packages:
   simple_strapi:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "2e017db9c0c5e28ea7a5567883977c8a8683d3d1"
-      url: "https://github.com/ondbyte/simple_strapi.git"
-    source: git
-    version: "0.9.1-alpha+4"
+      name: simple_strapi
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.9.1-alpha+5"
   sky_engine:
     dependency: transitive
     description: flutter

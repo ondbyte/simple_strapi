@@ -153,17 +153,6 @@ class BusinessX extends X {
           );
           return returnable;
         }
-        //check for holiday
-        final isHoliday = data["isHoliday"] ?? false;
-        if (isHoliday) {
-          throw BusinessHolidayException(
-              holiday: Holiday.fromMap(data["holiday"]));
-        }
-        //check for employee holiday
-        final isEmployeeHoliday = data["isEmployeeHoliday"] ?? false;
-        if (isEmployeeHoliday) {
-          throw EmployeeHolidayException(employeeId: "");
-        }
       }
       throw EmptyResponseException(response: data);
     });

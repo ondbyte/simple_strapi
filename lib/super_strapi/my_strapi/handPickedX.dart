@@ -14,7 +14,9 @@ class HandPickedX {
   Future init() async {}
 
   Future<List<HandPicked>> getAll(City? city, Locality? locality) async {
-    assert(city is City || locality is Locality);
+    if (city is! City && locality is! Locality) {
+      return [];
+    }
     final q = StrapiCollectionQuery(
       collectionName: HandPicked.collectionName,
       requiredFields: HandPicked.fields(),

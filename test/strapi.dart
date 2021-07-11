@@ -1,15 +1,23 @@
-import 'package:bapp/super_strapi/my_strapi/bookingX.dart';
-import 'package:flutter_test/flutter_test.dart';
-import 'package:simple_strapi/simple_strapi.dart';
-
 Future main() async {
-  test('getNonReviewedBookingsForUser', () async {
-    await run();
-  });
+  print(_collectionNameToGraphQlName("Users"));
 }
 
-Future run() async {
-  Strapi.i.verbose = true;
-  //final r = await i.getNonReviewedBookingsForUser();
-  //print(r);
+String _collectionNameToGraphQlName(
+  String collectionName,
+) {
+  final all = collectionName.split(RegExp(r'[\s_-]'));
+  final from2nd = all.sublist(1);
+  var returnable = "" + all[0];
+  from2nd.forEach((s) {
+    returnable += _capitalizeFirst(s);
+  });
+  return returnable;
+}
+
+String _capitalizeFirst(String s) {
+  final f = s.split("").first;
+  return s.replaceFirst(
+    f,
+    f.toUpperCase(),
+  );
 }

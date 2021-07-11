@@ -37,9 +37,7 @@ dependencies:
   #own
   the_country_number_widgets: any
   the_country_number: any
-  simple_strapi:
-    git:
-      url: https://github.com/ondbyte/simple_strapi.git
+  simple_strapi: 0.9.1-alpha+5
   super_strapi_generated:
     path: ./packages/super_strapi_generated
 

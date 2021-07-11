@@ -35,28 +35,30 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
       appBar: AppBar(
         title: Text("Login"),
       ),
-      bottomNavigationBar: Obx(() => BottomPrimaryButton(
-            label: "Login",
-            onPressed: _disableSubmit()
-                ? null
-                : () async {
-                    if (_formKey.currentState?.validate() ?? false) {
-                      _disableSubmit(true);
-                      final token = await FirebaseMessaging.instance.getToken();
-                      try {
-                        final user = await UserX.i.loginWithEmailAndPassword(
-                            _email, _password, token);
-                        BappNavigator.pop(context, user);
-                      } catch (e) {
-                        await Flushbar(
-                          message: "Unable to login, are the details correct?",
-                          duration: const Duration(seconds: 2),
-                        ).show(context);
-                        _disableSubmit(false);
-                      }
+      bottomNavigationBar: Obx(
+        () => BottomPrimaryButton(
+          label: "Login",
+          onPressed: _disableSubmit()
+              ? null
+              : () async {
+                  if (_formKey.currentState?.validate() ?? false) {
+                    _disableSubmit(true);
+                    final token = await FirebaseMessaging.instance.getToken();
+                    try {
+                      final user = await UserX.i
+                          .loginWithEmailAndPassword(_email, _password, token);
+                      BappNavigator.pop(context, user);
+                    } catch (e) {
+                      await Flushbar(
+                        message: "Unable to login, are the details correct?",
+                        duration: const Duration(seconds: 2),
+                      ).show(context);
+                      _disableSubmit(false);
                     }
-                  },
-          )),
+                  }
+                },
+        ),
+      ),
       body: Padding(
         padding: EdgeInsets.all(16),
         child: LayoutBuilder(builder: (context, cons) {

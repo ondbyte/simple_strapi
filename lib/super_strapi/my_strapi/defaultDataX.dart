@@ -43,7 +43,7 @@ class DefaultDataX extends X {
       return StrapiObjectListener(
         id: id,
         initailData: data as Map<String, dynamic>,
-        listener: (map, losding) {
+        listener: (map, loading) {
           final newDefaultData = DefaultData.fromSyncedMap(map);
           defaultData(newDefaultData);
         },
@@ -85,6 +85,27 @@ class DefaultDataX extends X {
     if (updated is DefaultData) {
       defaultData.value = await DefaultDatas.update(updated);
     }
+  }
+
+  T? getLocation<T>() {
+    if (T is City) {
+      return defaultData.value?.city as T;
+    }
+    if (T is Locality) {
+      return defaultData.value?.locality as T;
+    }
+    throw Exception("No city or locality");
+  }
+
+  Future clear() async {
+    if (defaultData.value == null) {
+      return;
+    }
+    final newDD = defaultData.value!.setNull(
+      city: true,
+      locality: true,
+    );
+    return DefaultDatas.update(newDD);
   }
 
   @override

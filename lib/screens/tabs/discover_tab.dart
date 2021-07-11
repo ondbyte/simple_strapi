@@ -287,13 +287,13 @@ class _DiscoverTabState extends State<DiscoverTab> {
                         builder: (
                           _,
                         ) {
-                          return UserX.i.userNotPresent
-                              ? const SizedBox()
-                              : Obx(
-                                  () => Text(
+                          return Obx(
+                            () => UserX.i.userNotPresent
+                                ? SizedBox()
+                                : Text(
                                     "Hey, " + (UserX.i.user()?.name ?? ""),
                                   ),
-                                );
+                          );
                         },
                       ),
                       const SizedBox(
@@ -320,14 +320,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     const SizedBox(
                       height: 10,
                     ),
-                    HandPickedScroller(
-                      city: UserX.i.userNotPresent
-                          ? DefaultDataX.i.defaultData()?.city
-                          : UserX.i.user()?.city,
-                      locality: UserX.i.userNotPresent
-                          ? DefaultDataX.i.defaultData()?.locality
-                          : UserX.i.user()?.locality,
-                    ),
+                    HandPickedScroller(),
                     const SizedBox(
                       height: 30,
                     ),

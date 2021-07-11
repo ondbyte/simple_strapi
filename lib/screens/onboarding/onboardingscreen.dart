@@ -1,4 +1,6 @@
+import 'package:bapp/screens/home/bapp.dart';
 import 'package:bapp/screens/location/pick_a_place.dart';
+import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/widgets/app/bapp_navigator_widget.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -9,6 +11,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 import '../../config/config.dart';
 import '../../helpers/extensions.dart';
@@ -28,59 +31,64 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   int _selected = 0;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Builder(
-        builder: (
-          _,
-        ) {
-          return Builder(
-            builder: (context) {
-              return Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Spacer(
-                      flex: 4,
-                    ),
-                    CarouselSlider(
-                      items: List.generate(
-                        OnBoardingConfig.slides.length,
-                        (index) => _buildSlide(
-                          context,
-                          index,
+    return WillPopScope(
+      onWillPop: () async {
+        return false;
+      },
+      child: Scaffold(
+        body: Builder(
+          builder: (
+            _,
+          ) {
+            return Builder(
+              builder: (context) {
+                return Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Spacer(
+                        flex: 4,
+                      ),
+                      CarouselSlider(
+                        items: List.generate(
+                          OnBoardingConfig.slides.length,
+                          (index) => _buildSlide(
+                            context,
+                            index,
+                          ),
+                        ),
+                        options: CarouselOptions(
+                          initialPage: 0,
+                          viewportFraction: 1,
+                          autoPlay: false,
+                          aspectRatio: 1,
+                          enableInfiniteScroll: false,
+                          enlargeCenterPage: false,
+                          onPageChanged: (index, reason) {
+                            setState(
+                              () {
+                                //print(index);
+                                _selected = index;
+                              },
+                            );
+                          },
                         ),
                       ),
-                      options: CarouselOptions(
-                        initialPage: 0,
-                        viewportFraction: 1,
-                        autoPlay: false,
-                        aspectRatio: 1,
-                        enableInfiniteScroll: false,
-                        enlargeCenterPage: false,
-                        onPageChanged: (index, reason) {
-                          setState(
-                            () {
-                              //print(index);
-                              _selected = index;
-                            },
-                          );
-                        },
+                      const Spacer(
+                        flex: 2,
                       ),
-                    ),
-                    const Spacer(
-                      flex: 2,
-                    ),
-                    _buildIndicator(context, OnBoardingConfig.slides.length),
-                    const Spacer(
-                      flex: 1,
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
+                      _buildIndicator(context, OnBoardingConfig.slides.length),
+                      const Spacer(
+                        flex: 1,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
@@ -141,10 +149,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
           "Get Started",
           hide: index != OnBoardingConfig.slides.length - 1,
           onPressed: () async {
-            BappNavigator.pushReplacement(
-              context,
-              PickAPlaceScreen(),
-            );
+            BappNavigator.pop(context, true);
           },
         )
       ],

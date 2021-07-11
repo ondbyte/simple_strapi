@@ -57,7 +57,6 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab>
           );
         }
         return Builder(builder: (_) {
-          final usr = user;
           final pickedBusiness = user.pickedBusiness;
           if (pickedBusiness is! Business) {
             return Text("No business selected");

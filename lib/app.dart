@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:bapp/config/theme_config.dart';
+import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/home/bapp.dart';
 import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/screens/init/splash_screen.dart';
+import 'package:bapp/screens/location/pick_a_place.dart';
 import 'package:bapp/screens/onboarding/onboardingscreen.dart';
 import 'package:bapp/super_strapi/my_strapi/bookingX.dart';
 import 'package:bapp/super_strapi/my_strapi/businessX.dart';
@@ -18,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 import 'package:yadunandans_flutter_helpers/themed_app.dart';
 
 import 'config/constants.dart';
@@ -35,43 +40,88 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> {
   final firstScreen = Rx<Widget>(SizedBox());
+  final _initCompleter = Completer();
+
+  Future _init(BuildContext context) async {
+    final h = HandPickedX();
+    final b = BookingX();
+    final bb = BusinessX();
+    final c = CategoryX();
+    final d = DefaultDataX();
+    final fb = FirebaseX();
+    final l = LocalityX();
+    final px = PartnerX();
+    final rx = ReviewX();
+    final u = UserX();
+    final p = PersistenceX();
+    await p.init();
+    final fbUser = await FirebaseX.i.init();
+    await StrapiSettings.i.init();
+    final defaultData = await DefaultDataX.i.init();
+    final user = await UserX.i.init();
+
+    if (await PersistenceX.i
+        .getValue(StorageKeys.isFirstTimeOnDevice, defaultValue: true)) {
+      final firstTimeDone =
+          await BappNavigator.push(context, OnBoardingScreen());
+      if (firstTimeDone == true) {
+        await PersistenceX.i.saveValue(StorageKeys.isFirstTimeOnDevice, false);
+      } else {
+        return BappNavigator.pop(context, null);
+      }
+    }
+    final makeSurePlace = () async {
+      var data;
+      await Future.doWhile(() async {
+        data = await BappNavigator.push(
+          context,
+          PickAPlaceScreen(),
+        );
+        return data == null;
+      });
+      return data;
+    };
+    var data;
+    if (user != null && user.city == null && user.locality == null) {
+      data = await makeSurePlace();
+      if (data is City) {
+        await UserX.i.setLocalityOrCity(city: data);
+      } else {
+        await UserX.i.setLocalityOrCity(locality: data);
+      }
+    } else if (defaultData is DefaultData &&
+        defaultData.city == null &&
+        defaultData.locality == null) {
+      data = await makeSurePlace();
+      if (data is City) {
+        await DefaultDataX.i.setLocalityOrCity(city: data);
+      } else {
+        await DefaultDataX.i.setLocalityOrCity(locality: data);
+      }
+    }
+    firstScreen(Bapp());
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BappReboot(
-      child: ThemedApp(
-        lightTheme: getLightThemeData(),
-        darkTheme: getDarkThemeData(),
-        initializer: () async {
-          final h = HandPickedX();
-          final b = BookingX();
-          final bb = BusinessX();
-          final c = CategoryX();
-          final d = DefaultDataX();
-          final fb = FirebaseX();
-          final l = LocalityX();
-          final px = PartnerX();
-          final rx = ReviewX();
-          final u = UserX();
-          final fbUser = await FirebaseX.i.init();
-          await StrapiSettings.i.init();
-          await DefaultDataX.i.init();
-          final user = await UserX.i.init();
-          if (PersistenceX.i.isFirstTimeOnDevice) {
-            firstScreen(OnBoardingScreen());
-          } else {
-            firstScreen(Bapp());
-          }
-        },
-        builder: (context, initialized) {
-          if (initialized) {
-            return firstScreen();
-          }
-          return Splash();
-        },
-        directoryToPersistData: () {
-          return getApplicationSupportDirectory();
-        },
-      ),
+    return ThemedApp(
+      lightTheme: getLightThemeData(),
+      darkTheme: getDarkThemeData(),
+      initializer: (context) {
+        if (!_initCompleter.isCompleted) {
+          _initCompleter.complete(_init(context));
+        }
+        return _initCompleter.future;
+      },
+      builder: (context, initialized) {
+        if (initialized) {
+          return firstScreen();
+        }
+        return Splash();
+      },
+      directoryToPersistData: () {
+        return getApplicationSupportDirectory();
+      },
     );
   }
 }

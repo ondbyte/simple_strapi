@@ -19,26 +19,12 @@ class PersistenceX {
 
   late final LazyBox _hiveBox;
 
-  bool isFirstTimeOnDevice = true;
-
   Future init() async {
     final path = (isMobile)
         ? (await getApplicationSupportDirectory()).path
         : Directory.current.path;
     Hive.init(path);
-    _hiveBox = await Hive.openLazyBox("default_data");
-    await _doOtherStorageStuffs();
-  }
-
-  Future _doOtherStorageStuffs() async {
-    isFirstTimeOnDevice =
-        await getValue(StorageKeys.isFirstTimeOnDevice, defaultValue: true);
-    if (isFirstTimeOnDevice) {
-      await saveValue(
-        StorageKeys.isFirstTimeOnDevice,
-        false,
-      );
-    }
+    _hiveBox = await Hive.openLazyBox(StorageKeys.storageBox);
   }
 
   Future saveValue(String key, value) async {
@@ -59,13 +45,18 @@ class PersistenceX {
     return value;
   }
 
+  Future clear() async {
+    _hiveBox.deleteFromDisk();
+  }
+
   Future wait50() async {
     await Future.delayed(Duration(milliseconds: 50));
   }
 }
 
 class StorageKeys {
-  static String get isFirstTimeOnDevice => "isFirstTimeOnDevice6";
+  static String get isFirstTimeOnDevice => "isFirstTimeOnDevice20";
   static String get selectedBusinessId => "selectedBusinessId2";
   static String get selectedEmployeeId => "selectedEmployeeId2";
+  static String get storageBox => "storageBox3";
 }

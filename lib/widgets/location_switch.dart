@@ -10,13 +10,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:get/state_manager.dart';
 import 'package:provider/provider.dart';
+import 'package:super_strapi_generated/super_strapi_generated.dart';
 
-class LocationSwitch extends StatelessWidget {
+class LocationSwitch extends StatefulWidget {
+  LocationSwitch({Key? key}) : super(key: key);
+
+  @override
+  _LocationSwitchState createState() => _LocationSwitchState();
+}
+
+class _LocationSwitchState extends State<LocationSwitch> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        BappNavigator.push(context, PickAPlaceScreen());
+      onTap: () async {
+        final data = await BappNavigator.push(context, PickAPlaceScreen());
+        if (data is City) {
+          await DefaultDataX.i.setLocalityOrCity(city: data);
+        } else {
+          await DefaultDataX.i.setLocalityOrCity(locality: data);
+        }
       },
       child: Row(
         children: [
@@ -32,18 +45,20 @@ class LocationSwitch extends StatelessWidget {
             builder: (_) {
               return Obx(
                 () {
+                  final dd = DefaultDataX.i.defaultData();
+                  final user = UserX.i.user();
                   return Text(
-                    UserX.i.userNotPresent
+                    user == null
                         ? placeName(
-                              city: DefaultDataX.i.defaultData()?.city,
-                              locality: DefaultDataX.i.defaultData()?.locality,
+                              city: dd?.city,
+                              locality: dd?.locality,
                             ) ??
-                            "no place,inform yadu.."
+                            ""
                         : placeName(
-                              city: UserX.i.user()?.city,
-                              locality: UserX.i.user()?.locality,
+                              city: user.city,
+                              locality: user.locality,
                             ) ??
-                            "no place,inform yadu",
+                            "",
                     style: Theme.of(context).textTheme.subtitle1,
                   );
                 },

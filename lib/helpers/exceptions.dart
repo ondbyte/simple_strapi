@@ -28,6 +28,12 @@ class EmployeeHolidayException extends BappException {
   EmployeeHolidayException({required this.employeeId});
 }
 
+class EmployeeNotBookableException extends BappException {
+  final String employeeId;
+
+  EmployeeNotBookableException({required this.employeeId});
+}
+
 class ParameterNotCorrectException extends BappException {
   ParameterNotCorrectException();
 }
@@ -58,6 +64,7 @@ const businessNotFoundForId = "business-not-found-for-id";
 const employeeNotFoundForId = "employee-not-found-for-id";
 const businessIsOnHoliday = "business-is-on-holiday";
 const employeeIsOnHoliday = "employee-is-on-holiday";
+const employeeIsNotBookable = "employee-is-not-bookable";
 
 Exception throwExceptionForStrapiResponse(
     String error, Map<dynamic, dynamic> responseData) {
@@ -73,6 +80,9 @@ Exception throwExceptionForStrapiResponse(
           holiday: Holiday.fromMap(responseData["holiday"]));
     case employeeIsOnHoliday:
       return EmployeeHolidayException(employeeId: responseData["employeeId"]);
+    case employeeIsNotBookable:
+      return EmployeeNotBookableException(
+          employeeId: responseData["employeeId"]);
     default:
       return BappException(msg: "unkown-response-from-server");
   }

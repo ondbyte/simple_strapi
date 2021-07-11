@@ -42,19 +42,38 @@ class EmployeeTile extends StatelessWidget {
             );
           },
         ),
-        subtitle: RatingBar.builder(
-          itemSize: 16,
-          itemBuilder: (_, __) {
-            return Icon(
-              FeatherIcons.star,
-              color: Colors.amber,
-            );
-          },
-          allowHalfRating: true,
-          ignoreGestures: true,
-          initialRating: employee.starRating ?? 0,
-          maxRating: 5,
-          onRatingUpdate: (_) {},
+        subtitle: (employee.bookable ?? false)
+            ? RatingBar.builder(
+                itemSize: 16,
+                itemBuilder: (_, __) {
+                  return Icon(
+                    FeatherIcons.star,
+                    color: Colors.amber,
+                  );
+                },
+                allowHalfRating: true,
+                ignoreGestures: true,
+                initialRating: employee.starRating ?? 0,
+                maxRating: 5,
+                onRatingUpdate: (_) {},
+              )
+            : _getUnbookableContainer(context),
+      ),
+    );
+  }
+
+  Widget _getUnbookableContainer(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+          color: Colors.redAccent, borderRadius: BorderRadius.circular(4)),
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Text(
+          "Unavailable for booking",
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.caption?.apply(
+                color: Colors.white,
+              ),
         ),
       ),
     );

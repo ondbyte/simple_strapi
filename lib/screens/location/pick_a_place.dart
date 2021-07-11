@@ -73,12 +73,15 @@ class _PickAPlaceScreenState extends State<PickAPlaceScreen> {
                   trailing: Icon(Icons.arrow_forward_ios),
                   onTap: () async {
                     //cloudStore.getLocationsInCountry(e);
-                    BappNavigator.push(
+                    final data = await BappNavigator.push(
                       context,
                       PickAPlaceScreen(
                         country: e,
                       ),
                     );
+                    if (data != null) {
+                      BappNavigator.pop(context, data);
+                    }
                   },
                 ),
               ),
@@ -127,69 +130,23 @@ class _PickAPlaceScreenState extends State<PickAPlaceScreen> {
         ? Column(
             children: [
               ListTile(
-                trailing: Icon(Icons.arrow_forward_ios),
-                title: Text(
-                  "All of ${city.name}",
-                  style: Theme.of(context).textTheme.subtitle1,
-                ),
-                onTap: () async {
-                  loading(true);
-                  if (UserX.i.userPresent) {
-                    final copied = UserX.i
-                        .user()
-                        ?.copyWIth(city: city)
-                        .setNull(locality: true);
-                    if (copied is User) {
-                      await Users.update(copied);
-                    }
-                  } else {
-                    final copied = DefaultDataX.i
-                        .defaultData()
-                        ?.copyWIth(
-                          city: city,
-                        )
-                        .setNull(locality: true);
-                    if (copied is DefaultData) {
-                      await DefaultDatas.update(copied);
-                    }
-                  }
-                  BappNavigator.pushAndRemoveAll(context, Bapp());
-                },
-              ),
+                  trailing: Icon(Icons.arrow_forward_ios),
+                  title: Text(
+                    "All of ${city.name}",
+                    style: Theme.of(context).textTheme.subtitle1,
+                  ),
+                  onTap: () async {
+                    BappNavigator.pop(context, city);
+                  }),
               ...List.generate(
                 city.localities?.length ?? 0,
                 (index) => ListTile(
-                  trailing: Icon(Icons.arrow_forward_ios),
-                  title: Text(city.localities?[index].name ?? "",
-                      style: Theme.of(context).textTheme.subtitle2),
-                  onTap: () async {
-                    loading(true);
-                    if (UserX.i.userPresent) {
-                      final copied = UserX.i
-                          .user()
-                          ?.copyWIth(
-                            locality: city.localities?[index],
-                          )
-                          .setNull(city: true);
-                      if (copied is User) {
-                        await Users.update(copied);
-                      }
-                    } else {
-                      final copied = DefaultDataX.i
-                          .defaultData()
-                          ?.copyWIth(
-                            locality: city.localities?[index],
-                          )
-                          .setNull(city: true);
-                      if (copied is DefaultData) {
-                        await DefaultDatas.update(copied);
-                      } else {
-                        bPrint("fail");
-                      }
-                    }
-                    BappNavigator.pushAndRemoveAll(context, Bapp());
-                  },
-                ),
+                    trailing: Icon(Icons.arrow_forward_ios),
+                    title: Text(city.localities?[index].name ?? "",
+                        style: Theme.of(context).textTheme.subtitle2),
+                    onTap: () async {
+                      BappNavigator.pop(context, city.localities?[index]);
+                    }),
               ),
             ],
           )

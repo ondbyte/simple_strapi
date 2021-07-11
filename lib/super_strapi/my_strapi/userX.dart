@@ -45,10 +45,20 @@ class UserX {
     }
   }
 
+  Future setLocalityOrCity({Locality? locality, City? city}) async {
+    final updated = user()?.copyWIth(
+      locality: locality,
+      city: city,
+    );
+    if (updated is User) {
+      user.value = await Users.update(updated);
+    }
+  }
+
   Future logout() async {
     await FirebaseX.i.logOut();
-    await PersistenceX.i.saveValue("token", "");
-    Strapi.i.strapiToken = "";
+    await PersistenceX.i.clear();
+    await DefaultDataX.i.clear();
     kBus.fire(AppEvents.reboot);
   }
 
@@ -172,6 +182,24 @@ class UserX {
       }
     }
     return otherUser;
+  }
+
+  Future<User?> getOtherUserFromUserName(String userName) async {
+    final q = StrapiCollectionQuery(
+      collectionName: User.collectionName,
+      requiredFields: [
+        User.fields.id,
+      ],
+    );
+    q.whereField(
+      field: User.fields.username,
+      query: StrapiFieldQuery.equalTo,
+      value: "$userName",
+    );
+    final users = await Users.executeQuery(q);
+    if (users.isNotEmpty) {
+      return users.first;
+    }
   }
 }
 

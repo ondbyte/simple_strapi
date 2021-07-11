@@ -83,6 +83,7 @@ class _StrapiListenerWidgetState<T> extends State<_StrapiListenerWidget<T>> {
     return widget.builder(context, _strapiObject, _loading);
   }
 }
+
 class City {
   City.fromID(this.id)
       : _synced = false,
@@ -203,8 +204,6 @@ class City {
         "localities": localities
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
-      "createdAt": createdAt?.toIso8601String(),
-      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -421,6 +420,7 @@ class HandPicked {
         locality = null,
         city = null,
         description = null,
+        image = null,
         createdAt = null,
         updatedAt = null;
 
@@ -431,7 +431,8 @@ class HandPicked {
       this.validTo,
       this.locality,
       this.city,
-      this.description})
+      this.description,
+      this.image})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
@@ -445,6 +446,7 @@ class HandPicked {
       this.locality,
       this.city,
       this.description,
+      this.image,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -458,6 +460,7 @@ class HandPicked {
       this.locality,
       this.city,
       this.description,
+      this.image,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -479,6 +482,8 @@ class HandPicked {
 
   final String? description;
 
+  final List<StrapiFile>? image;
+
   final DateTime? createdAt;
 
   final DateTime? updatedAt;
@@ -497,7 +502,8 @@ class HandPicked {
           DateTime? validTo,
           Locality? locality,
           City? city,
-          String? description}) =>
+          String? description,
+          List<StrapiFile>? image}) =>
       HandPicked._unsynced(
           businesses ?? this.businesses,
           name ?? this.name,
@@ -506,6 +512,7 @@ class HandPicked {
           locality ?? this.locality,
           city ?? this.city,
           description ?? this.description,
+          image ?? this.image,
           this.createdAt,
           this.updatedAt,
           this.id);
@@ -516,7 +523,8 @@ class HandPicked {
       bool validTo = false,
       bool locality = false,
       bool city = false,
-      bool description = false}) {
+      bool description = false,
+      bool image = false}) {
     return HandPicked._unsynced(
         businesses ? null : this.businesses,
         name ? null : this.name,
@@ -525,6 +533,7 @@ class HandPicked {
         locality ? null : this.locality,
         city ? null : this.city,
         description ? null : this.description,
+        image ? null : this.image,
         this.createdAt,
         this.updatedAt,
         this.id)
@@ -534,7 +543,8 @@ class HandPicked {
       .._emptyFields.validTo = validTo
       .._emptyFields.locality = locality
       .._emptyFields.city = city
-      .._emptyFields.description = description;
+      .._emptyFields.description = description
+      .._emptyFields.image = image;
   }
 
   static HandPicked fromSyncedMap(Map<dynamic, dynamic> map) =>
@@ -549,6 +559,8 @@ class HandPicked {
           StrapiUtils.objFromMap<City>(
               map["city"], (e) => Cities._fromIDorData(e)),
           map["description"],
+          StrapiUtils.objFromListOfMap<StrapiFile>(
+              map["image"], (e) => StrapiFiles._fromIDorData(e)),
           StrapiUtils.parseDateTime(map["createdAt"]),
           StrapiUtils.parseDateTime(map["updatedAt"]),
           map["id"]);
@@ -562,6 +574,8 @@ class HandPicked {
           map["locality"], (e) => Localities._fromIDorData(e)),
       StrapiUtils.objFromMap<City>(map["city"], (e) => Cities._fromIDorData(e)),
       map["description"],
+      StrapiUtils.objFromListOfMap<StrapiFile>(
+          map["image"], (e) => StrapiFiles._fromIDorData(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -600,8 +614,12 @@ class HandPicked {
         "description": null
       else if (!_emptyFields.description && description != null)
         "description": description,
-      "createdAt": createdAt?.toIso8601String(),
-      "updatedAt": updatedAt?.toIso8601String(),
+      if (_emptyFields.image)
+        "image": []
+      else if (!_emptyFields.image && image != null)
+        "image": image
+            ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
+            .toList(),
       "id": id
     };
   }
@@ -794,6 +812,8 @@ class _HandPickedFields {
 
   final description = StrapiLeafField("description");
 
+  final image = StrapiCollectionField("image");
+
   final createdAt = StrapiLeafField("createdAt");
 
   final updatedAt = StrapiLeafField("updatedAt");
@@ -809,6 +829,7 @@ class _HandPickedFields {
       locality,
       city,
       description,
+      image,
       createdAt,
       updatedAt,
       id
@@ -830,6 +851,8 @@ class _HandPickedEmptyFields {
   bool city = false;
 
   bool description = false;
+
+  bool image = false;
 }
 
 class Employee {
@@ -837,7 +860,7 @@ class Employee {
       : _synced = false,
         name = null,
         image = null,
-        enabled = null,
+        bookable = null,
         user = null,
         bookings = null,
         holidays = null,
@@ -849,7 +872,7 @@ class Employee {
   Employee.fresh(
       {this.name,
       this.image,
-      this.enabled,
+      this.bookable,
       this.user,
       this.bookings,
       this.holidays,
@@ -863,7 +886,7 @@ class Employee {
   Employee._synced(
       this.name,
       this.image,
-      this.enabled,
+      this.bookable,
       this.user,
       this.bookings,
       this.holidays,
@@ -877,7 +900,7 @@ class Employee {
   Employee._unsynced(
       this.name,
       this.image,
-      this.enabled,
+      this.bookable,
       this.user,
       this.bookings,
       this.holidays,
@@ -894,7 +917,7 @@ class Employee {
 
   final List<StrapiFile>? image;
 
-  final bool? enabled;
+  final bool? bookable;
 
   final User? user;
 
@@ -920,7 +943,7 @@ class Employee {
   Employee copyWIth(
           {String? name,
           List<StrapiFile>? image,
-          bool? enabled,
+          bool? bookable,
           User? user,
           List<Booking>? bookings,
           List<Holiday>? holidays,
@@ -929,7 +952,7 @@ class Employee {
       Employee._unsynced(
           name ?? this.name,
           image ?? this.image,
-          enabled ?? this.enabled,
+          bookable ?? this.bookable,
           user ?? this.user,
           bookings ?? this.bookings,
           holidays ?? this.holidays,
@@ -941,7 +964,7 @@ class Employee {
   Employee setNull(
       {bool name = false,
       bool image = false,
-      bool enabled = false,
+      bool bookable = false,
       bool user = false,
       bool bookings = false,
       bool holidays = false,
@@ -950,7 +973,7 @@ class Employee {
     return Employee._unsynced(
         name ? null : this.name,
         image ? null : this.image,
-        enabled ? null : this.enabled,
+        bookable ? null : this.bookable,
         user ? null : this.user,
         bookings ? null : this.bookings,
         holidays ? null : this.holidays,
@@ -961,7 +984,7 @@ class Employee {
         this.id)
       .._emptyFields.name = name
       .._emptyFields.image = image
-      .._emptyFields.enabled = enabled
+      .._emptyFields.bookable = bookable
       .._emptyFields.user = user
       .._emptyFields.bookings = bookings
       .._emptyFields.holidays = holidays
@@ -973,7 +996,7 @@ class Employee {
       map["name"],
       StrapiUtils.objFromListOfMap<StrapiFile>(
           map["image"], (e) => StrapiFiles._fromIDorData(e)),
-      StrapiUtils.parseBool(map["enabled"]),
+      StrapiUtils.parseBool(map["bookable"]),
       StrapiUtils.objFromMap<User>(map["user"], (e) => Users._fromIDorData(e)),
       StrapiUtils.objFromListOfMap<Booking>(
           map["bookings"], (e) => Bookings._fromIDorData(e)),
@@ -989,7 +1012,7 @@ class Employee {
       map["name"],
       StrapiUtils.objFromListOfMap<StrapiFile>(
           map["image"], (e) => StrapiFiles._fromIDorData(e)),
-      StrapiUtils.parseBool(map["enabled"]),
+      StrapiUtils.parseBool(map["bookable"]),
       StrapiUtils.objFromMap<User>(map["user"], (e) => Users._fromIDorData(e)),
       StrapiUtils.objFromListOfMap<Booking>(
           map["bookings"], (e) => Bookings._fromIDorData(e)),
@@ -1015,10 +1038,10 @@ class Employee {
         "image": image
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
-      if (_emptyFields.enabled)
-        "enabled": null
-      else if (!_emptyFields.enabled && enabled != null)
-        "enabled": enabled,
+      if (_emptyFields.bookable)
+        "bookable": null
+      else if (!_emptyFields.bookable && bookable != null)
+        "bookable": bookable,
       if (_emptyFields.user)
         "user": null
       else if (!_emptyFields.user && user != null)
@@ -1043,8 +1066,6 @@ class Employee {
         "starRating": null
       else if (!_emptyFields.starRating && starRating != null)
         "starRating": starRating,
-      "createdAt": createdAt?.toIso8601String(),
-      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -1227,7 +1248,7 @@ class _EmployeeFields {
 
   final image = StrapiCollectionField("image");
 
-  final enabled = StrapiLeafField("enabled");
+  final bookable = StrapiLeafField("bookable");
 
   final user = StrapiModelField("user");
 
@@ -1249,7 +1270,7 @@ class _EmployeeFields {
     return [
       name,
       image,
-      enabled,
+      bookable,
       user,
       bookings,
       holidays,
@@ -1267,7 +1288,7 @@ class _EmployeeEmptyFields {
 
   bool image = false;
 
-  bool enabled = false;
+  bool bookable = false;
 
   bool user = false;
 
@@ -1603,8 +1624,6 @@ class Booking {
         "images": images
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
-      "createdAt": createdAt?.toIso8601String(),
-      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -1980,8 +1999,6 @@ class Locality {
         "coordinates": null
       else if (!_emptyFields.coordinates && coordinates != null)
         "coordinates": coordinates?._toMap(level: level + level),
-      "createdAt": createdAt?.toIso8601String(),
-      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -2282,8 +2299,6 @@ class PushNotification {
         "user": null
       else if (!_emptyFields.user && user != null)
         "user": toServer ? user?.id : user?._toMap(level: level + level),
-      "createdAt": createdAt?.toIso8601String(),
-      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -2693,8 +2708,6 @@ class Country {
         "cities": cities
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
-      "createdAt": createdAt?.toIso8601String(),
-      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -2935,7 +2948,6 @@ class Business {
       : _synced = false,
         name = null,
         address = null,
-        enabled = null,
         partner = null,
         packages = null,
         businessFeatures = null,
@@ -2957,7 +2969,6 @@ class Business {
   Business.fresh(
       {this.name,
       this.address,
-      this.enabled,
       this.partner,
       this.packages,
       this.businessFeatures,
@@ -2981,7 +2992,6 @@ class Business {
   Business._synced(
       this.name,
       this.address,
-      this.enabled,
       this.partner,
       this.packages,
       this.businessFeatures,
@@ -3005,7 +3015,6 @@ class Business {
   Business._unsynced(
       this.name,
       this.address,
-      this.enabled,
       this.partner,
       this.packages,
       this.businessFeatures,
@@ -3031,8 +3040,6 @@ class Business {
   final String? name;
 
   final Address? address;
-
-  final bool? enabled;
 
   final Partner? partner;
 
@@ -3078,7 +3085,6 @@ class Business {
   Business copyWIth(
           {String? name,
           Address? address,
-          bool? enabled,
           Partner? partner,
           List<Package>? packages,
           List<BusinessFeature>? businessFeatures,
@@ -3097,7 +3103,6 @@ class Business {
       Business._unsynced(
           name ?? this.name,
           address ?? this.address,
-          enabled ?? this.enabled,
           partner ?? this.partner,
           packages ?? this.packages,
           businessFeatures ?? this.businessFeatures,
@@ -3119,7 +3124,6 @@ class Business {
   Business setNull(
       {bool name = false,
       bool address = false,
-      bool enabled = false,
       bool partner = false,
       bool packages = false,
       bool businessFeatures = false,
@@ -3138,7 +3142,6 @@ class Business {
     return Business._unsynced(
         name ? null : this.name,
         address ? null : this.address,
-        enabled ? null : this.enabled,
         partner ? null : this.partner,
         packages ? null : this.packages,
         businessFeatures ? null : this.businessFeatures,
@@ -3159,7 +3162,6 @@ class Business {
         this.id)
       .._emptyFields.name = name
       .._emptyFields.address = address
-      .._emptyFields.enabled = enabled
       .._emptyFields.partner = partner
       .._emptyFields.packages = packages
       .._emptyFields.businessFeatures = businessFeatures
@@ -3181,7 +3183,6 @@ class Business {
       map["name"],
       StrapiUtils.objFromMap<Address>(
           map["address"], (e) => Address.fromMap(e)),
-      StrapiUtils.parseBool(map["enabled"]),
       StrapiUtils.objFromMap<Partner>(
           map["partner"], (e) => Partners._fromIDorData(e)),
       StrapiUtils.objFromListOfMap<Package>(
@@ -3213,7 +3214,6 @@ class Business {
       map["name"],
       StrapiUtils.objFromMap<Address>(
           map["address"], (e) => Address.fromMap(e)),
-      StrapiUtils.parseBool(map["enabled"]),
       StrapiUtils.objFromMap<Partner>(
           map["partner"], (e) => Partners._fromIDorData(e)),
       StrapiUtils.objFromListOfMap<Package>(
@@ -3253,10 +3253,6 @@ class Business {
         "address": null
       else if (!_emptyFields.address && address != null)
         "address": address?._toMap(level: level + level),
-      if (_emptyFields.enabled)
-        "enabled": null
-      else if (!_emptyFields.enabled && enabled != null)
-        "enabled": enabled,
       if (_emptyFields.partner)
         "partner": null
       else if (!_emptyFields.partner && partner != null)
@@ -3330,8 +3326,6 @@ class Business {
         "type": null
       else if (!_emptyFields.type && type != null)
         "type": type,
-      "createdAt": createdAt?.toIso8601String(),
-      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -3514,8 +3508,6 @@ class _BusinessFields {
 
   final address = StrapiComponentField("address");
 
-  final enabled = StrapiLeafField("enabled");
-
   final partner = StrapiModelField("partner");
 
   final packages = StrapiComponentField("packages");
@@ -3556,7 +3548,6 @@ class _BusinessFields {
     return [
       name,
       address,
-      enabled,
       partner,
       packages,
       businessFeatures,
@@ -3583,8 +3574,6 @@ class _BusinessEmptyFields {
   bool name = false;
 
   bool address = false;
-
-  bool enabled = false;
 
   bool partner = false;
 
@@ -3720,8 +3709,6 @@ class BusinessCategory {
         "image": null
       else if (!_emptyFields.image && image != null)
         "image": toServer ? image?.id : image?._toMap(level: level + level),
-      "createdAt": createdAt?.toIso8601String(),
-      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -4065,8 +4052,6 @@ class Partner {
         "about": null
       else if (!_emptyFields.about && about != null)
         "about": about,
-      "createdAt": createdAt?.toIso8601String(),
-      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -4374,8 +4359,6 @@ class DefaultData {
         "customId": null
       else if (!_emptyFields.customId && customId != null)
         "customId": customId,
-      "createdAt": createdAt?.toIso8601String(),
-      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -4678,8 +4661,6 @@ class MasterProduct {
         "image": null
       else if (!_emptyFields.image && image != null)
         "image": toServer ? image?.id : image?._toMap(level: level + level),
-      "createdAt": createdAt?.toIso8601String(),
-      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -5004,8 +4985,6 @@ class BusinessFeature {
       else if (!_emptyFields.business && business != null)
         "business":
             toServer ? business?.id : business?._toMap(level: level + level),
-      "createdAt": createdAt?.toIso8601String(),
-      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -5416,8 +5395,6 @@ class Review {
       else if (!_emptyFields.booking && booking != null)
         "booking":
             toServer ? booking?.id : booking?._toMap(level: level + level),
-      "createdAt": createdAt?.toIso8601String(),
-      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -5789,8 +5766,6 @@ class Role {
         "users": users
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
-      "createdAt": createdAt?.toIso8601String(),
-      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -6468,8 +6443,6 @@ class User {
           authenticatedUserType != null)
         "authenticatedUserType":
             StrapiUtils.enumToString(authenticatedUserType),
-      "createdAt": createdAt?.toIso8601String(),
-      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -6942,8 +6915,6 @@ class Permission {
         "role": null
       else if (!_emptyFields.role && role != null)
         "role": toServer ? role?.id : role?._toMap(level: level + level),
-      "createdAt": createdAt?.toIso8601String(),
-      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -7486,8 +7457,6 @@ class StrapiFile {
         "related": []
       else if (!_emptyFields.related && related != null)
         "related": related,
-      "createdAt": createdAt?.toIso8601String(),
-      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }

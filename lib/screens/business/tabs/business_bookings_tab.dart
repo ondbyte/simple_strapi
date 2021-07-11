@@ -2,11 +2,13 @@ import 'package:bapp/classes/firebase_structures/staff_time_off.dart';
 import 'package:bapp/config/config_data_types.dart';
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/screens/business/booking_flow/add_customer_details.dart';
 import 'package:bapp/screens/business/booking_flow/select_a_professional.dart';
 import 'package:bapp/screens/business/booking_flow/select_time_slot.dart';
 import 'package:bapp/screens/business/booking_flow/services_screen.dart';
 import 'package:bapp/screens/business/toolkit/manage_services/add_a_service.dart';
 import 'package:bapp/screens/business/toolkit/manage_staff/manage_staff.dart';
+import 'package:bapp/screens/misc/contextual_message.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:bapp/stores/business_store.dart';
 import 'package:bapp/super_strapi/my_strapi/bookingX.dart';
@@ -84,12 +86,13 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab>
                     ? SizedBox()
                     : FloatingActionButton(
                         onPressed: () {
-                          /* BappNavigator.dialog(
+                          BappNavigator.dialog(
                             context,
                             BookingsTabAddOptions(
                               business: business,
+                              selectedEmployee: _pickedEmployee()!,
                             ),
-                          ); */
+                          );
                         },
                         child: Icon(FeatherIcons.plus),
                       );
@@ -134,19 +137,14 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab>
                                     enabled: true,
                                     onTap: employeeSelector,
                                   );
-                                }
-                                return SizedBox();
-                              }),
-                              Obx(() {
-                                if (_pickedEmployee() is! Employee) {
-                                  ListTile(
+                                } else {
+                                  return ListTile(
                                     onTap: employeeSelector,
                                     title: Text("Staff"),
                                     subtitle: Text("Select a staff"),
                                     trailing: Icon(FeatherIcons.arrowRight),
                                   );
                                 }
-                                return SizedBox();
                               }),
                               BappRowCalender(
                                 bookings: bookingsAsCalendarEvents(list),
@@ -237,82 +235,83 @@ class BookingsTabAddOptions extends StatefulWidget {
 }
 
 class _BookingsTabAddOptionsState extends State<BookingsTabAddOptions> {
+  final _loading = Rx<bool>(false);
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            title: Text("Add Walk-In"),
-            trailing: Icon(Icons.arrow_forward),
-            onTap: () async {
-              final products = await BappNavigator.push(
-                context,
-                BusinessProfileServicesScreen(
-                  business: widget.business,
-                ),
-              );
-              if (products is List && products.isNotEmpty) {
-                final ps = products as List<Product>;
-                final timeSlot = await BappNavigator.push(
-                    context,
-                    SelectTimeSlotScreen(
+      content: Obx(() {
+        if (_loading.value) {
+          return LoadingWidget();
+        }
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text("Add Walk-In"),
+              trailing: Icon(Icons.arrow_forward),
+              onTap: () async {
+                final products = await BappNavigator.push(
+                  context,
+                  BusinessProfileServicesScreen(
+                    business: widget.business,
+                  ),
+                );
+                if (products is List && products.isNotEmpty) {
+                  final ps = products as List<Product>;
+                  final timeSlot = await BappNavigator.push(
+                      context,
+                      SelectTimeSlotScreen(
+                          business: widget.business,
+                          employee: widget.selectedEmployee,
+                          durationOfServices: Duration(
+                              minutes: ps.fold(
+                                  0, (previousValue, e) => e.duration ?? 0))));
+                  if (timeSlot is Timing) {
+                    final user = await BappNavigator.push<User>(
+                      context,
+                      AddCustomerDetails(),
+                    );
+                    if (user is User) {
+                      _loading.value = true;
+                      final booking = Booking.fresh(products: products);
+                      await BookingX.i.placeBooking(
+                        booking: booking,
                         business: widget.business,
+                        user: user,
                         employee: widget.selectedEmployee,
-                        durationOfServices: Duration(
-                            minutes: ps.fold(
-                                0, (previousValue, e) => e.duration ?? 0))));
-                /* if (timeSlot is Timing) {
-                                      BappNavigator.pushAndRemoveAll(
-                                        context,
-                                        ContextualMessageScreen(
-                                          buttonText: "Go to bookings",
-                                          init: () async {
-                                            await BookingX.i.placeBooking(
-                                              user: user!,
-                                              business: business,
-                                              booking: booking()!,
-                                              employee: employee,
-                                              timeSlot: timeSlot,
-                                            );
-                                            await BookingX.i.clearCart();
-                                          },
-                                          onButtonPressed: (context) {
-                                            BappNavigator.pushAndRemoveAll(
-                                                context,
-                                                Bapp(
-                                                  goToBookings: true,
-                                                ));
-                                          },
-                                          message:
-                                              "Your booking has been placed, waiting to be accepted by the business, track it the bookings tab",
-                                        ),
-                                      );
-                                    } */
-
-              }
-            },
-          ),
-          ListTile(
-            title: Text("Add Booking"),
-            trailing: Icon(Icons.arrow_forward),
-            onTap: () {},
-          ),
-          ListTile(
-            title: Text("Block time"),
-            trailing: Icon(Icons.arrow_forward),
-            enabled: false,
-            onTap: null,
-          ),
-          ListTile(
-            title: Text("Time off"),
-            trailing: Icon(Icons.arrow_forward),
-            enabled: false,
-            onTap: null,
-          ),
-        ],
-      ),
+                        timeSlot: timeSlot,
+                        status: BookingStatus.walkin,
+                      );
+                      await Businesses.findOne(widget.business.id!);
+                      _loading.value = false;
+                      Flushbar(
+                        message: "Walkin added successfully",
+                      ).show(context);
+                    }
+                  }
+                }
+              },
+            ),
+            ListTile(
+              title: Text("Add Booking"),
+              trailing: Icon(Icons.arrow_forward),
+              onTap: () {},
+            ),
+            ListTile(
+              title: Text("Block time"),
+              trailing: Icon(Icons.arrow_forward),
+              enabled: false,
+              onTap: null,
+            ),
+            ListTile(
+              title: Text("Time off"),
+              trailing: Icon(Icons.arrow_forward),
+              enabled: false,
+              onTap: null,
+            ),
+          ],
+        );
+      }),
     );
   }
 }
