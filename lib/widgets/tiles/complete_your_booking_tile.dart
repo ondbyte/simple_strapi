@@ -45,13 +45,13 @@ class CompleteYourBookingTile extends StatelessWidget {
               return SizedBox();
             }
             return Container(
-              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              margin: EdgeInsets.fromLTRB(16, 10, 16, 0),
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.all(Radius.circular(6)),
                   color: Theme.of(context).accentColor.withAlpha(30)),
               child: ListTile(
                 contentPadding:
-                    EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                    EdgeInsets.symmetric(horizontal: 15, vertical: 0),
                 onTap: () {
                   BappNavigator.push(
                     context,

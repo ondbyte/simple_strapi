@@ -28,6 +28,7 @@ class StrapiImage extends StatelessWidget {
           }
           return BoxFit.fitWidth;
         }();
+
     if (url is! String) {
       return LoadingWidget();
     }

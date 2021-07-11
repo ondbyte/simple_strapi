@@ -32,7 +32,7 @@ class SeeAllListTile extends StatelessWidget {
           i--;
           list.add(
             SizedBox(
-              width: cons.maxWidth - (itemCount > 1 ? 48 : 0),
+              width: cons.maxWidth - (itemCount > 1 ? 120 : 0),
               child: Padding(
                 padding: (childPadding ?? EdgeInsets.zero),
                 child: itemBuilder?.call(context, i),
@@ -45,8 +45,9 @@ class SeeAllListTile extends StatelessWidget {
           children: [
             ListTile(
               contentPadding: titlePadding ??
-                  const EdgeInsets.only(left: 16, right: 16, top: 0, bottom: 0),
-              title: Text(title, style: Theme.of(context).textTheme.headline6),
+                  const EdgeInsets.only(
+                      left: 16, right: 16, top: 10, bottom: 0),
+              title: Text(title, style: Theme.of(context).textTheme.headline2),
               trailing: GestureDetector(
                 onTap: onSeeAll,
                 child: Text(

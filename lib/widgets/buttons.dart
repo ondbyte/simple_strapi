@@ -18,7 +18,7 @@ class _PrimaryButtonState extends State<PrimaryButton> {
   @override
   Widget build(BuildContext context) {
     return !widget.hide
-        ? FlatButton(
+        ? MaterialButton(
             minWidth: widget.fullWidth ? double.maxFinite : double.minPositive,
             disabledColor: Theme.of(context).disabledColor,
             color: Theme.of(context).primaryColor,

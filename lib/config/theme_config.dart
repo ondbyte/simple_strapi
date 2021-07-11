@@ -38,7 +38,7 @@ ThemeData getLightThemeData() {
     ),
     textTheme: TextTheme(
       headline1: TextStyle(
-        fontSize: 22,
+        fontSize: 24,
         color: Colors.grey[900],
         letterSpacing: 0,
         height: 1.1,
@@ -50,7 +50,7 @@ ThemeData getLightThemeData() {
         color: Colors.grey[900],
         letterSpacing: 0,
         height: 1.1,
-        fontWeight: FontWeight.w800,
+        fontWeight: FontWeight.w900,
         fontFamily: 'Lato',
       ),
       headline3: TextStyle(

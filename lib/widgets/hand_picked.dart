@@ -42,6 +42,7 @@ class _HandPickedScrollerState extends State<HandPickedScroller> {
           bPrint(e);
           bPrint(s);
           return SizedBox();
+<<<<<<< HEAD
           return ErrorTile(message: "Something wentwrong, please tap to retry");
         },
         onSucessBuilder: (context, list) {
@@ -79,6 +80,21 @@ class _HandPickedScrollerState extends State<HandPickedScroller> {
                   },
                 );
               },
+=======
+        }
+        return SizedBox(
+          height: MediaQuery.of(context).size.height * .15,
+          child: GridView.builder(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 1,
+                // crossAxisSpacing: 5,
+                mainAxisSpacing: 15),
+            // shrinkWrap: true,
+            scrollDirection: Axis.horizontal,
+            itemCount: list.length,
+            padding: EdgeInsets.symmetric(
+              horizontal: 16,
+>>>>>>> 461852e313f3144dfccc46c779bb77679aebc727
             ),
           );
         },

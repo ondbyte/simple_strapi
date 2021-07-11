@@ -50,7 +50,7 @@ class AskToLoginWidget extends StatelessWidget {
                   width: 20,
                 ),
                 PrimaryButton(
-                  "Sign In or Sign Up",
+                  "Continue with mobile number",
                   fullWidth: false,
                   onPressed: () {
                     BappNavigator.push(context, LoginScreen());
