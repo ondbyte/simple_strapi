@@ -91,21 +91,27 @@ class City {
         enabled = null,
         country = null,
         localities = null,
+        business_category = null,
         createdAt = null,
         updatedAt = null;
 
-  City.fresh({this.name, this.enabled, this.country, this.localities})
+  City.fresh(
+      {this.name,
+      this.enabled,
+      this.country,
+      this.localities,
+      this.business_category})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
         id = null;
 
   City._synced(this.name, this.enabled, this.country, this.localities,
-      this.createdAt, this.updatedAt, this.id)
+      this.business_category, this.createdAt, this.updatedAt, this.id)
       : _synced = true;
 
   City._unsynced(this.name, this.enabled, this.country, this.localities,
-      this.createdAt, this.updatedAt, this.id)
+      this.business_category, this.createdAt, this.updatedAt, this.id)
       : _synced = false;
 
   final bool _synced;
@@ -117,6 +123,8 @@ class City {
   final Country? country;
 
   final List<Locality>? localities;
+
+  final BusinessCategory? business_category;
 
   final DateTime? createdAt;
 
@@ -133,12 +141,14 @@ class City {
           {String? name,
           bool? enabled,
           Country? country,
-          List<Locality>? localities}) =>
+          List<Locality>? localities,
+          BusinessCategory? business_category}) =>
       City._unsynced(
           name ?? this.name,
           enabled ?? this.enabled,
           country ?? this.country,
           localities ?? this.localities,
+          business_category ?? this.business_category,
           this.createdAt,
           this.updatedAt,
           this.id);
@@ -146,19 +156,22 @@ class City {
       {bool name = false,
       bool enabled = false,
       bool country = false,
-      bool localities = false}) {
+      bool localities = false,
+      bool business_category = false}) {
     return City._unsynced(
         name ? null : this.name,
         enabled ? null : this.enabled,
         country ? null : this.country,
         localities ? null : this.localities,
+        business_category ? null : this.business_category,
         this.createdAt,
         this.updatedAt,
         this.id)
       .._emptyFields.name = name
       .._emptyFields.enabled = enabled
       .._emptyFields.country = country
-      .._emptyFields.localities = localities;
+      .._emptyFields.localities = localities
+      .._emptyFields.business_category = business_category;
   }
 
   static City fromSyncedMap(Map<dynamic, dynamic> map) => City._synced(
@@ -168,6 +181,8 @@ class City {
           map["country"], (e) => Countries._fromIDorData(e)),
       StrapiUtils.objFromListOfMap<Locality>(
           map["localities"], (e) => Localities._fromIDorData(e)),
+      StrapiUtils.objFromMap<BusinessCategory>(
+          map["business_category"], (e) => BusinessCategories._fromIDorData(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -178,6 +193,8 @@ class City {
           map["country"], (e) => Countries._fromIDorData(e)),
       StrapiUtils.objFromListOfMap<Locality>(
           map["localities"], (e) => Localities._fromIDorData(e)),
+      StrapiUtils.objFromMap<BusinessCategory>(
+          map["business_category"], (e) => BusinessCategories._fromIDorData(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -204,6 +221,12 @@ class City {
         "localities": localities
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
+      if (_emptyFields.business_category)
+        "business_category": null
+      else if (!_emptyFields.business_category && business_category != null)
+        "business_category": toServer
+            ? business_category?.id
+            : business_category?._toMap(level: level + level),
       "id": id
     };
   }
@@ -226,7 +249,7 @@ class City {
 
   static _CityFields get fields => _CityFields.i;
   @override
-  String toString() => "[Strapi Collection Type City]\n" + _toMap().toString();
+  String toString() => "[Strapi Collection Type City]n" + _toMap().toString();
 }
 
 class Cities {
@@ -389,6 +412,8 @@ class _CityFields {
 
   final localities = StrapiCollectionField("localities");
 
+  final business_category = StrapiModelField("business_category");
+
   final createdAt = StrapiLeafField("createdAt");
 
   final updatedAt = StrapiLeafField("updatedAt");
@@ -396,7 +421,16 @@ class _CityFields {
   final id = StrapiLeafField("id");
 
   List<StrapiField> call() {
-    return [name, enabled, country, localities, createdAt, updatedAt, id];
+    return [
+      name,
+      enabled,
+      country,
+      localities,
+      business_category,
+      createdAt,
+      updatedAt,
+      id
+    ];
   }
 }
 
@@ -408,6 +442,8 @@ class _CityEmptyFields {
   bool country = false;
 
   bool localities = false;
+
+  bool business_category = false;
 }
 
 class HandPicked {
@@ -482,7 +518,7 @@ class HandPicked {
 
   final String? description;
 
-  final List<StrapiFile>? image;
+  final StrapiFile? image;
 
   final DateTime? createdAt;
 
@@ -503,7 +539,7 @@ class HandPicked {
           Locality? locality,
           City? city,
           String? description,
-          List<StrapiFile>? image}) =>
+          StrapiFile? image}) =>
       HandPicked._unsynced(
           businesses ?? this.businesses,
           name ?? this.name,
@@ -559,7 +595,7 @@ class HandPicked {
           StrapiUtils.objFromMap<City>(
               map["city"], (e) => Cities._fromIDorData(e)),
           map["description"],
-          StrapiUtils.objFromListOfMap<StrapiFile>(
+          StrapiUtils.objFromMap<StrapiFile>(
               map["image"], (e) => StrapiFiles._fromIDorData(e)),
           StrapiUtils.parseDateTime(map["createdAt"]),
           StrapiUtils.parseDateTime(map["updatedAt"]),
@@ -574,7 +610,7 @@ class HandPicked {
           map["locality"], (e) => Localities._fromIDorData(e)),
       StrapiUtils.objFromMap<City>(map["city"], (e) => Cities._fromIDorData(e)),
       map["description"],
-      StrapiUtils.objFromListOfMap<StrapiFile>(
+      StrapiUtils.objFromMap<StrapiFile>(
           map["image"], (e) => StrapiFiles._fromIDorData(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
@@ -615,11 +651,9 @@ class HandPicked {
       else if (!_emptyFields.description && description != null)
         "description": description,
       if (_emptyFields.image)
-        "image": []
+        "image": null
       else if (!_emptyFields.image && image != null)
-        "image": image
-            ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
-            .toList(),
+        "image": toServer ? image?.id : image?._toMap(level: level + level),
       "id": id
     };
   }
@@ -643,7 +677,7 @@ class HandPicked {
   static _HandPickedFields get fields => _HandPickedFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type HandPicked]\n" + _toMap().toString();
+      "[Strapi Collection Type HandPicked]n" + _toMap().toString();
 }
 
 class HandPickeds {
@@ -812,7 +846,7 @@ class _HandPickedFields {
 
   final description = StrapiLeafField("description");
 
-  final image = StrapiCollectionField("image");
+  final image = StrapiModelField("image");
 
   final createdAt = StrapiLeafField("createdAt");
 
@@ -1089,7 +1123,7 @@ class Employee {
   static _EmployeeFields get fields => _EmployeeFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type Employee]\n" + _toMap().toString();
+      "[Strapi Collection Type Employee]n" + _toMap().toString();
 }
 
 class Employees {
@@ -1647,7 +1681,7 @@ class Booking {
   static _BookingFields get fields => _BookingFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type Booking]\n" + _toMap().toString();
+      "[Strapi Collection Type Booking]n" + _toMap().toString();
 }
 
 class Bookings {
@@ -2022,7 +2056,7 @@ class Locality {
   static _LocalityFields get fields => _LocalityFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type Locality]\n" + _toMap().toString();
+      "[Strapi Collection Type Locality]n" + _toMap().toString();
 }
 
 class Localities {
@@ -2206,6 +2240,423 @@ class _LocalityEmptyFields {
   bool coordinates = false;
 }
 
+class Update {
+  Update.fromID(this.id)
+      : _synced = false,
+        title = null,
+        descriptiom = null,
+        users_permissions_roles = null,
+        image = null,
+        cta = null,
+        start = null,
+        end = null,
+        createdAt = null,
+        updatedAt = null;
+
+  Update.fresh(
+      {this.title,
+      this.descriptiom,
+      this.users_permissions_roles,
+      this.image,
+      this.cta,
+      this.start,
+      this.end})
+      : _synced = false,
+        createdAt = null,
+        updatedAt = null,
+        id = null;
+
+  Update._synced(
+      this.title,
+      this.descriptiom,
+      this.users_permissions_roles,
+      this.image,
+      this.cta,
+      this.start,
+      this.end,
+      this.createdAt,
+      this.updatedAt,
+      this.id)
+      : _synced = true;
+
+  Update._unsynced(
+      this.title,
+      this.descriptiom,
+      this.users_permissions_roles,
+      this.image,
+      this.cta,
+      this.start,
+      this.end,
+      this.createdAt,
+      this.updatedAt,
+      this.id)
+      : _synced = false;
+
+  final bool _synced;
+
+  final String? title;
+
+  final String? descriptiom;
+
+  final List<Role>? users_permissions_roles;
+
+  final StrapiFile? image;
+
+  final String? cta;
+
+  final DateTime? start;
+
+  final DateTime? end;
+
+  final DateTime? createdAt;
+
+  final DateTime? updatedAt;
+
+  final String? id;
+
+  static final collectionName = "updates";
+
+  _UpdateEmptyFields _emptyFields = _UpdateEmptyFields();
+
+  bool get synced => _synced;
+  Update copyWIth(
+          {String? title,
+          String? descriptiom,
+          List<Role>? users_permissions_roles,
+          StrapiFile? image,
+          String? cta,
+          DateTime? start,
+          DateTime? end}) =>
+      Update._unsynced(
+          title ?? this.title,
+          descriptiom ?? this.descriptiom,
+          users_permissions_roles ?? this.users_permissions_roles,
+          image ?? this.image,
+          cta ?? this.cta,
+          start ?? this.start,
+          end ?? this.end,
+          this.createdAt,
+          this.updatedAt,
+          this.id);
+  Update setNull(
+      {bool title = false,
+      bool descriptiom = false,
+      bool users_permissions_roles = false,
+      bool image = false,
+      bool cta = false,
+      bool start = false,
+      bool end = false}) {
+    return Update._unsynced(
+        title ? null : this.title,
+        descriptiom ? null : this.descriptiom,
+        users_permissions_roles ? null : this.users_permissions_roles,
+        image ? null : this.image,
+        cta ? null : this.cta,
+        start ? null : this.start,
+        end ? null : this.end,
+        this.createdAt,
+        this.updatedAt,
+        this.id)
+      .._emptyFields.title = title
+      .._emptyFields.descriptiom = descriptiom
+      .._emptyFields.users_permissions_roles = users_permissions_roles
+      .._emptyFields.image = image
+      .._emptyFields.cta = cta
+      .._emptyFields.start = start
+      .._emptyFields.end = end;
+  }
+
+  static Update fromSyncedMap(Map<dynamic, dynamic> map) => Update._synced(
+      map["title"],
+      map["descriptiom"],
+      StrapiUtils.objFromListOfMap<Role>(
+          map["users_permissions_roles"], (e) => Roles._fromIDorData(e)),
+      StrapiUtils.objFromMap<StrapiFile>(
+          map["image"], (e) => StrapiFiles._fromIDorData(e)),
+      map["cta"],
+      StrapiUtils.parseDateTime(map["start"]),
+      StrapiUtils.parseDateTime(map["end"]),
+      StrapiUtils.parseDateTime(map["createdAt"]),
+      StrapiUtils.parseDateTime(map["updatedAt"]),
+      map["id"]);
+  static Update? fromMap(Map<String, dynamic> map) => Update._unsynced(
+      map["title"],
+      map["descriptiom"],
+      StrapiUtils.objFromListOfMap<Role>(
+          map["users_permissions_roles"], (e) => Roles._fromIDorData(e)),
+      StrapiUtils.objFromMap<StrapiFile>(
+          map["image"], (e) => StrapiFiles._fromIDorData(e)),
+      map["cta"],
+      StrapiUtils.parseDateTime(map["start"]),
+      StrapiUtils.parseDateTime(map["end"]),
+      StrapiUtils.parseDateTime(map["createdAt"]),
+      StrapiUtils.parseDateTime(map["updatedAt"]),
+      map["id"]);
+  Map<String, dynamic> toMap() => _toMap(level: -1);
+  Map<String, dynamic> _toMap({int level = 0}) {
+    final toServer = level == 0;
+    return {
+      if (_emptyFields.title)
+        "title": null
+      else if (!_emptyFields.title && title != null)
+        "title": title,
+      if (_emptyFields.descriptiom)
+        "descriptiom": null
+      else if (!_emptyFields.descriptiom && descriptiom != null)
+        "descriptiom": descriptiom,
+      if (_emptyFields.users_permissions_roles)
+        "users_permissions_roles": []
+      else if (!_emptyFields.users_permissions_roles &&
+          users_permissions_roles != null)
+        "users_permissions_roles": users_permissions_roles
+            ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
+            .toList(),
+      if (_emptyFields.image)
+        "image": null
+      else if (!_emptyFields.image && image != null)
+        "image": toServer ? image?.id : image?._toMap(level: level + level),
+      if (_emptyFields.cta)
+        "cta": null
+      else if (!_emptyFields.cta && cta != null)
+        "cta": cta,
+      if (_emptyFields.start)
+        "start": null
+      else if (!_emptyFields.start && start != null)
+        "start": start?.toIso8601String(),
+      if (_emptyFields.end)
+        "end": null
+      else if (!_emptyFields.end && end != null)
+        "end": end?.toIso8601String(),
+      "id": id
+    };
+  }
+
+  Future<Update> sync() async {
+    if (!synced) {
+      return this;
+    }
+    final _id = this.id;
+    if (_id is! String) {
+      return this;
+    }
+    final response = await Updates.findOne(_id);
+    if (response is Update) {
+      return response;
+    } else {
+      return this;
+    }
+  }
+
+  static _UpdateFields get fields => _UpdateFields.i;
+  @override
+  String toString() => "[Strapi Collection Type Update]n" + _toMap().toString();
+}
+
+class Updates {
+  static const collectionName = "updates";
+
+  static List<Update?> fromIDs(List<String> ids) {
+    if (ids.isEmpty) {
+      return [];
+    }
+    return ids.map((id) => Update.fromID(id)).toList();
+  }
+
+  static Future<Update?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return Update.fromSyncedMap(mapResponse);
+    }
+  }
+
+  static Future<List<Update>> findMultiple({int limit = 16}) async {
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => Update.fromSyncedMap(map)).toList();
+    }
+    return [];
+  }
+
+  static Future<Update?> create(Update update) async {
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: update._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return Update.fromSyncedMap(map);
+    }
+  }
+
+  static Future<Update?> update(Update update) async {
+    final id = update.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
+        collection: collectionName,
+        id: id,
+        data: update._toMap(level: 0),
+      );
+      if (map.isNotEmpty) {
+        return Update.fromSyncedMap(map);
+      }
+    } else {
+      sPrint("id is null while updating");
+    }
+  }
+
+  static Future<int> count() async {
+    return await StrapiCollection.count(collectionName);
+  }
+
+  static Future<Update?> delete(Update update) async {
+    final id = update.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return Update.fromSyncedMap(map);
+      }
+    } else {
+      sPrint("id is null while deleting");
+    }
+  }
+
+  static Update? _fromIDorData(idOrData) {
+    if (idOrData is String) {
+      return Update.fromID(idOrData);
+    }
+    if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return Update.fromID(id);
+      }
+      return Update.fromSyncedMap(idOrData);
+    }
+    return null;
+  }
+
+  static Future<List<Update>> executeQuery(StrapiCollectionQuery query,
+      {int maxTimeOutInMillis = 15000}) async {
+    final queryString = query.query(
+      collectionName: collectionName,
+    );
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <Update>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
+              if (o is Update) {
+                list.add(o);
+              }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is Update) {
+              return [o];
+            }
+          }
+        }
+      }
+    }
+    return [];
+  }
+
+  static Widget listenerWidget({
+    Key? key,
+    required Update strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      Update,
+      bool,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<Update>(
+      key: key,
+      strapiObject: strapiObject,
+      generator: Update.fromMap,
+      builder: builder,
+      sync: sync,
+    );
+  }
+}
+
+class _UpdateFields {
+  _UpdateFields._i();
+
+  static final _UpdateFields i = _UpdateFields._i();
+
+  final title = StrapiLeafField("title");
+
+  final descriptiom = StrapiLeafField("descriptiom");
+
+  final users_permissions_roles =
+      StrapiCollectionField("users_permissions_roles");
+
+  final image = StrapiModelField("image");
+
+  final cta = StrapiLeafField("cta");
+
+  final start = StrapiLeafField("start");
+
+  final end = StrapiLeafField("end");
+
+  final createdAt = StrapiLeafField("createdAt");
+
+  final updatedAt = StrapiLeafField("updatedAt");
+
+  final id = StrapiLeafField("id");
+
+  List<StrapiField> call() {
+    return [
+      title,
+      descriptiom,
+      users_permissions_roles,
+      image,
+      cta,
+      start,
+      end,
+      createdAt,
+      updatedAt,
+      id
+    ];
+  }
+}
+
+class _UpdateEmptyFields {
+  bool title = false;
+
+  bool descriptiom = false;
+
+  bool users_permissions_roles = false;
+
+  bool image = false;
+
+  bool cta = false;
+
+  bool start = false;
+
+  bool end = false;
+}
+
 class PushNotification {
   PushNotification.fromID(this.id)
       : _synced = false,
@@ -2322,7 +2773,7 @@ class PushNotification {
   static _PushNotificationFields get fields => _PushNotificationFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type PushNotification]\n" + _toMap().toString();
+      "[Strapi Collection Type PushNotification]n" + _toMap().toString();
 }
 
 class PushNotifications {
@@ -2731,7 +3182,7 @@ class Country {
   static _CountryFields get fields => _CountryFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type Country]\n" + _toMap().toString();
+      "[Strapi Collection Type Country]n" + _toMap().toString();
 }
 
 class Countries {
@@ -2943,6 +3394,8 @@ class _CountryEmptyFields {
   bool cities = false;
 }
 
+enum CustomerType { Male, Female, Unisex, Kids }
+
 class Business {
   Business.fromID(this.id)
       : _synced = false,
@@ -2963,6 +3416,7 @@ class Business {
         images = null,
         tag = null,
         type = null,
+        customer_type = null,
         createdAt = null,
         updatedAt = null;
 
@@ -2983,7 +3437,8 @@ class Business {
       this.employees,
       this.images,
       this.tag,
-      this.type})
+      this.type,
+      this.customer_type})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
@@ -3007,6 +3462,7 @@ class Business {
       this.images,
       this.tag,
       this.type,
+      this.customer_type,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -3030,6 +3486,7 @@ class Business {
       this.images,
       this.tag,
       this.type,
+      this.customer_type,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -3071,6 +3528,8 @@ class Business {
 
   final String? type;
 
+  final CustomerType? customer_type;
+
   final DateTime? createdAt;
 
   final DateTime? updatedAt;
@@ -3099,7 +3558,8 @@ class Business {
           List<Employee>? employees,
           List<StrapiFile>? images,
           String? tag,
-          String? type}) =>
+          String? type,
+          CustomerType? customer_type}) =>
       Business._unsynced(
           name ?? this.name,
           address ?? this.address,
@@ -3118,6 +3578,7 @@ class Business {
           images ?? this.images,
           tag ?? this.tag,
           type ?? this.type,
+          customer_type ?? this.customer_type,
           this.createdAt,
           this.updatedAt,
           this.id);
@@ -3138,7 +3599,8 @@ class Business {
       bool employees = false,
       bool images = false,
       bool tag = false,
-      bool type = false}) {
+      bool type = false,
+      bool customer_type = false}) {
     return Business._unsynced(
         name ? null : this.name,
         address ? null : this.address,
@@ -3157,6 +3619,7 @@ class Business {
         images ? null : this.images,
         tag ? null : this.tag,
         type ? null : this.type,
+        customer_type ? null : this.customer_type,
         this.createdAt,
         this.updatedAt,
         this.id)
@@ -3176,7 +3639,8 @@ class Business {
       .._emptyFields.employees = employees
       .._emptyFields.images = images
       .._emptyFields.tag = tag
-      .._emptyFields.type = type;
+      .._emptyFields.type = type
+      .._emptyFields.customer_type = customer_type;
   }
 
   static Business fromSyncedMap(Map<dynamic, dynamic> map) => Business._synced(
@@ -3207,6 +3671,8 @@ class Business {
           map["images"], (e) => StrapiFiles._fromIDorData(e)),
       map["tag"],
       map["type"],
+      StrapiUtils.toEnum<CustomerType>(
+          CustomerType.values, map["customer_type"]),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -3238,6 +3704,8 @@ class Business {
           map["images"], (e) => StrapiFiles._fromIDorData(e)),
       map["tag"],
       map["type"],
+      StrapiUtils.toEnum<CustomerType>(
+          CustomerType.values, map["customer_type"]),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -3326,6 +3794,10 @@ class Business {
         "type": null
       else if (!_emptyFields.type && type != null)
         "type": type,
+      if (_emptyFields.customer_type)
+        "customer_type": null
+      else if (!_emptyFields.customer_type && customer_type != null)
+        "customer_type": StrapiUtils.enumToString(customer_type),
       "id": id
     };
   }
@@ -3349,7 +3821,7 @@ class Business {
   static _BusinessFields get fields => _BusinessFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type Business]\n" + _toMap().toString();
+      "[Strapi Collection Type Business]n" + _toMap().toString();
 }
 
 class Businesses {
@@ -3538,6 +4010,8 @@ class _BusinessFields {
 
   final type = StrapiLeafField("type");
 
+  final customer_type = StrapiLeafField("customer_type");
+
   final createdAt = StrapiLeafField("createdAt");
 
   final updatedAt = StrapiLeafField("updatedAt");
@@ -3563,6 +4037,7 @@ class _BusinessFields {
       images,
       tag,
       type,
+      customer_type,
       createdAt,
       updatedAt,
       id
@@ -3604,6 +4079,8 @@ class _BusinessEmptyFields {
   bool tag = false;
 
   bool type = false;
+
+  bool customer_type = false;
 }
 
 class BusinessCategory {
@@ -3612,21 +4089,22 @@ class BusinessCategory {
         name = null,
         businesses = null,
         image = null,
+        cities = null,
         createdAt = null,
         updatedAt = null;
 
-  BusinessCategory.fresh({this.name, this.businesses, this.image})
+  BusinessCategory.fresh({this.name, this.businesses, this.image, this.cities})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
         id = null;
 
-  BusinessCategory._synced(this.name, this.businesses, this.image,
+  BusinessCategory._synced(this.name, this.businesses, this.image, this.cities,
       this.createdAt, this.updatedAt, this.id)
       : _synced = true;
 
   BusinessCategory._unsynced(this.name, this.businesses, this.image,
-      this.createdAt, this.updatedAt, this.id)
+      this.cities, this.createdAt, this.updatedAt, this.id)
       : _synced = false;
 
   final bool _synced;
@@ -3636,6 +4114,8 @@ class BusinessCategory {
   final List<Business>? businesses;
 
   final StrapiFile? image;
+
+  final List<City>? cities;
 
   final DateTime? createdAt;
 
@@ -3649,26 +4129,35 @@ class BusinessCategory {
 
   bool get synced => _synced;
   BusinessCategory copyWIth(
-          {String? name, List<Business>? businesses, StrapiFile? image}) =>
+          {String? name,
+          List<Business>? businesses,
+          StrapiFile? image,
+          List<City>? cities}) =>
       BusinessCategory._unsynced(
           name ?? this.name,
           businesses ?? this.businesses,
           image ?? this.image,
+          cities ?? this.cities,
           this.createdAt,
           this.updatedAt,
           this.id);
   BusinessCategory setNull(
-      {bool name = false, bool businesses = false, bool image = false}) {
+      {bool name = false,
+      bool businesses = false,
+      bool image = false,
+      bool cities = false}) {
     return BusinessCategory._unsynced(
         name ? null : this.name,
         businesses ? null : this.businesses,
         image ? null : this.image,
+        cities ? null : this.cities,
         this.createdAt,
         this.updatedAt,
         this.id)
       .._emptyFields.name = name
       .._emptyFields.businesses = businesses
-      .._emptyFields.image = image;
+      .._emptyFields.image = image
+      .._emptyFields.cities = cities;
   }
 
   static BusinessCategory fromSyncedMap(Map<dynamic, dynamic> map) =>
@@ -3678,6 +4167,8 @@ class BusinessCategory {
               map["businesses"], (e) => Businesses._fromIDorData(e)),
           StrapiUtils.objFromMap<StrapiFile>(
               map["image"], (e) => StrapiFiles._fromIDorData(e)),
+          StrapiUtils.objFromListOfMap<City>(
+              map["cities"], (e) => Cities._fromIDorData(e)),
           StrapiUtils.parseDateTime(map["createdAt"]),
           StrapiUtils.parseDateTime(map["updatedAt"]),
           map["id"]);
@@ -3688,6 +4179,8 @@ class BusinessCategory {
               map["businesses"], (e) => Businesses._fromIDorData(e)),
           StrapiUtils.objFromMap<StrapiFile>(
               map["image"], (e) => StrapiFiles._fromIDorData(e)),
+          StrapiUtils.objFromListOfMap<City>(
+              map["cities"], (e) => Cities._fromIDorData(e)),
           StrapiUtils.parseDateTime(map["createdAt"]),
           StrapiUtils.parseDateTime(map["updatedAt"]),
           map["id"]);
@@ -3709,6 +4202,12 @@ class BusinessCategory {
         "image": null
       else if (!_emptyFields.image && image != null)
         "image": toServer ? image?.id : image?._toMap(level: level + level),
+      if (_emptyFields.cities)
+        "cities": []
+      else if (!_emptyFields.cities && cities != null)
+        "cities": cities
+            ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
+            .toList(),
       "id": id
     };
   }
@@ -3732,7 +4231,7 @@ class BusinessCategory {
   static _BusinessCategoryFields get fields => _BusinessCategoryFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type BusinessCategory]\n" + _toMap().toString();
+      "[Strapi Collection Type BusinessCategory]n" + _toMap().toString();
 }
 
 class BusinessCategories {
@@ -3897,6 +4396,8 @@ class _BusinessCategoryFields {
 
   final image = StrapiModelField("image");
 
+  final cities = StrapiCollectionField("cities");
+
   final createdAt = StrapiLeafField("createdAt");
 
   final updatedAt = StrapiLeafField("updatedAt");
@@ -3904,7 +4405,7 @@ class _BusinessCategoryFields {
   final id = StrapiLeafField("id");
 
   List<StrapiField> call() {
-    return [name, businesses, image, createdAt, updatedAt, id];
+    return [name, businesses, image, cities, createdAt, updatedAt, id];
   }
 }
 
@@ -3914,6 +4415,8 @@ class _BusinessCategoryEmptyFields {
   bool businesses = false;
 
   bool image = false;
+
+  bool cities = false;
 }
 
 class Partner {
@@ -4075,7 +4578,7 @@ class Partner {
   static _PartnerFields get fields => _PartnerFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type Partner]\n" + _toMap().toString();
+      "[Strapi Collection Type Partner]n" + _toMap().toString();
 }
 
 class Partners {
@@ -4382,7 +4885,7 @@ class DefaultData {
   static _DefaultDataFields get fields => _DefaultDataFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type DefaultData]\n" + _toMap().toString();
+      "[Strapi Collection Type DefaultData]n" + _toMap().toString();
 }
 
 class DefaultDatas {
@@ -4684,7 +5187,7 @@ class MasterProduct {
   static _MasterProductFields get fields => _MasterProductFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type MasterProduct]\n" + _toMap().toString();
+      "[Strapi Collection Type MasterProduct]n" + _toMap().toString();
 }
 
 class MasterProducts {
@@ -5008,7 +5511,7 @@ class BusinessFeature {
   static _BusinessFeatureFields get fields => _BusinessFeatureFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type BusinessFeature]\n" + _toMap().toString();
+      "[Strapi Collection Type BusinessFeature]n" + _toMap().toString();
 }
 
 class BusinessFeatures {
@@ -5417,8 +5920,7 @@ class Review {
 
   static _ReviewFields get fields => _ReviewFields.i;
   @override
-  String toString() =>
-      "[Strapi Collection Type Review]\n" + _toMap().toString();
+  String toString() => "[Strapi Collection Type Review]n" + _toMap().toString();
 }
 
 class Reviews {
@@ -5788,7 +6290,7 @@ class Role {
 
   static _RoleFields get fields => _RoleFields.i;
   @override
-  String toString() => "[Strapi Collection Type Role]\n" + _toMap().toString();
+  String toString() => "[Strapi Collection Type Role]n" + _toMap().toString();
 }
 
 class Roles {
@@ -6465,7 +6967,7 @@ class User {
 
   static _UserFields get fields => _UserFields.i;
   @override
-  String toString() => "[Strapi Collection Type User]\n" + _toMap().toString();
+  String toString() => "[Strapi Collection Type User]n" + _toMap().toString();
 }
 
 class Users {
@@ -6938,7 +7440,7 @@ class Permission {
   static _PermissionFields get fields => _PermissionFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type Permission]\n" + _toMap().toString();
+      "[Strapi Collection Type Permission]n" + _toMap().toString();
 }
 
 class Permissions {
@@ -7480,7 +7982,7 @@ class StrapiFile {
   static _StrapiFileFields get fields => _StrapiFileFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type StrapiFile]\n" + _toMap().toString();
+      "[Strapi Collection Type StrapiFile]n" + _toMap().toString();
 }
 
 class StrapiFiles {
@@ -7775,7 +8277,7 @@ class ProductCategory {
   static _ProductCategoryFields get fields => _ProductCategoryFields.i;
   @override
   String toString() =>
-      "[Strapi Component Type ProductCategory]: \n" + _toMap().toString();
+      "[Strapi Component Type ProductCategory]: n" + _toMap().toString();
 }
 
 class _ProductCategoryFields {
@@ -7868,7 +8370,7 @@ class Product {
   static _ProductFields get fields => _ProductFields.i;
   @override
   String toString() =>
-      "[Strapi Component Type Product]: \n" + _toMap().toString();
+      "[Strapi Component Type Product]: n" + _toMap().toString();
 }
 
 class _ProductFields {
@@ -7942,7 +8444,7 @@ class Address {
   static _AddressFields get fields => _AddressFields.i;
   @override
   String toString() =>
-      "[Strapi Component Type Address]: \n" + _toMap().toString();
+      "[Strapi Component Type Address]: n" + _toMap().toString();
 }
 
 class _AddressFields {
@@ -8016,7 +8518,7 @@ class Package {
   static _PackageFields get fields => _PackageFields.i;
   @override
   String toString() =>
-      "[Strapi Component Type Package]: \n" + _toMap().toString();
+      "[Strapi Component Type Package]: n" + _toMap().toString();
 }
 
 class _PackageFields {
@@ -8083,7 +8585,7 @@ class Timing {
   static _TimingFields get fields => _TimingFields.i;
   @override
   String toString() =>
-      "[Strapi Component Type Timing]: \n" + _toMap().toString();
+      "[Strapi Component Type Timing]: n" + _toMap().toString();
 }
 
 class _TimingFields {
@@ -8137,7 +8639,7 @@ class DayTiming {
   static _DayTimingFields get fields => _DayTimingFields.i;
   @override
   String toString() =>
-      "[Strapi Component Type DayTiming]: \n" + _toMap().toString();
+      "[Strapi Component Type DayTiming]: n" + _toMap().toString();
 }
 
 class _DayTimingFields {
@@ -8186,7 +8688,7 @@ class Favourites {
   static _FavouritesFields get fields => _FavouritesFields.i;
   @override
   String toString() =>
-      "[Strapi Component Type Favourites]: \n" + _toMap().toString();
+      "[Strapi Component Type Favourites]: n" + _toMap().toString();
 }
 
 class _FavouritesFields {
@@ -8232,7 +8734,7 @@ class Holiday {
   static _HolidayFields get fields => _HolidayFields.i;
   @override
   String toString() =>
-      "[Strapi Component Type Holiday]: \n" + _toMap().toString();
+      "[Strapi Component Type Holiday]: n" + _toMap().toString();
 }
 
 class _HolidayFields {
@@ -8276,7 +8778,7 @@ class Coordinates {
   static _CoordinatesFields get fields => _CoordinatesFields.i;
   @override
   String toString() =>
-      "[Strapi Component Type Coordinates]: \n" + _toMap().toString();
+      "[Strapi Component Type Coordinates]: n" + _toMap().toString();
 }
 
 class _CoordinatesFields {

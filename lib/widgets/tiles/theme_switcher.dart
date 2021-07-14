@@ -1,6 +1,6 @@
-import 'package:bapp/widgets/app/bapp_themed_app.dart';
+import 'package:bapp/classes/themed_app.dart';
 import 'package:flutter/material.dart';
-import 'package:yadunandans_flutter_helpers/themed_app.dart';
+// import 'package:yadunandans_flutter_helpers/themed_app.dart';
 
 class ThemeSwitcherTile extends StatefulWidget {
   @override

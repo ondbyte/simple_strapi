@@ -105,7 +105,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                           );
                         },
                         tag: Chip(
-                          backgroundColor: CardsColor.colors["lightGreen"],
+                          backgroundColor: Theme.of(context).primaryColorDark,
                           label: Text(
                             "Featured",
                             style: Theme.of(context).textTheme.overline?.apply(
@@ -243,21 +243,22 @@ class _DiscoverTabState extends State<DiscoverTab> {
       child: RRShape(
         child: Container(
           padding: EdgeInsets.all(10),
-          width: 120,
-          height: 80,
+          width: 180,
+          height: 120,
           decoration: BoxDecoration(
             image: DecorationImage(
-              colorFilter: ColorFilter.mode(Colors.black54, BlendMode.multiply),
-              image: CachedNetworkImageProvider(
-                c.image?.url,
-              ),
-            ),
+                colorFilter:
+                    ColorFilter.mode(Colors.black26, BlendMode.multiply),
+                image: CachedNetworkImageProvider(
+                  c.image?.url,
+                ),
+                fit: BoxFit.cover),
           ),
           child: Align(
             alignment: Alignment.bottomLeft,
             child: Text(
               c.name ?? "no cat name, inform yadu",
-              style: Theme.of(context).textTheme.bodyText1?.apply(
+              style: Theme.of(context).textTheme.headline4?.apply(
                     color: Theme.of(context).primaryColorLight,
                   ),
             ),

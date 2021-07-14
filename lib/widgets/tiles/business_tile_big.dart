@@ -1,12 +1,8 @@
-import 'package:bapp/config/constants.dart';
-import 'package:bapp/super_strapi/my_strapi/businessX.dart';
 import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
 import 'package:bapp/widgets/image/strapi_image.dart';
-import 'package:bapp/widgets/loading.dart';
 import 'package:flutter/material.dart';
-import 'package:simple_strapi/simple_strapi.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
-
+import 'package:enum_to_string/enum_to_string.dart';
 import '../firebase_image.dart';
 
 class BusinessTileBigWidget extends StatelessWidget {
@@ -48,7 +44,7 @@ class BusinessTileBigWidget extends StatelessWidget {
                       },
                     ),
                   Padding(
-                    padding: const EdgeInsets.only(left: 16, bottom: 8),
+                    padding: const EdgeInsets.only(left: 4, bottom: 0),
                     child: tag,
                   )
                 ],
@@ -107,10 +103,25 @@ class BusinessTileWidget extends StatelessWidget {
                   Theme.of(context).textTheme.headline6,
               maxLines: 1,
             ),
-            subtitle: Text(
-              // branch.address?.address ?? "",
-              branch.address?.locality?.name ?? branch.address?.address ?? "",
-              maxLines: 1,
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                    // branch.address?.address ?? "",
+                    branch.address?.locality?.name ??
+                        branch.address?.address ??
+                        "",
+                    maxLines: 1,
+                    style: Theme.of(context).textTheme.bodyText1),
+                const SizedBox(
+                  height: 2,
+                ),
+                Text(
+                    // branch.address?.address ?? "",
+                    "For ${EnumToString.convertToString(branch.customer_type)}",
+                    maxLines: 1,
+                    style: Theme.of(context).textTheme.button)
+              ],
             ),
             leading: withImage
                 ? StrapiListTileImageWidget(

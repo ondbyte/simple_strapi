@@ -45,7 +45,9 @@ class _CustomerHomeState extends State<CustomerHome> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: _getPageTitle(_selectedPage),
+        title: _getPageTitle(
+          _selectedPage,
+        ),
         centerTitle: false,
       ),
       endDrawer: Menu(),
@@ -89,15 +91,24 @@ class _CustomerHomeState extends State<CustomerHome> {
         }
       case 1:
         {
-          return Text("Your Bookings");
+          return Text(
+            "Your Bookings",
+            style: Theme.of(context).textTheme.headline1,
+          );
         }
       case 2:
         {
-          return Text("Your Favorites");
+          return Text(
+            "Your Favorites",
+            style: Theme.of(context).textTheme.headline1,
+          );
         }
       case 3:
         {
-          return Text("Updates for you");
+          return Text(
+            "Updates & Notifications",
+            style: Theme.of(context).textTheme.headline1,
+          );
         }
       default:
         {
