@@ -77,13 +77,12 @@ class _RateTheBookingScreenState extends State<RateTheBookingScreen> {
                   label: "Send feedback",
                   onPressed: () async {
                     if (review is Review) {
-                      BappNavigator.pushAndRemoveAll(
-                        context,
+                      Get.offAll(
                         ContextualMessageScreen(
                           message: "Thank you for your rating",
                           buttonText: "Go to Home",
                           onButtonPressed: (context) {
-                            BappNavigator.pushAndRemoveAll(context, Bapp());
+                            Get.offAll(Bapp());
                           },
                           init: () async {
                             await Reviews.update(review!);
@@ -314,8 +313,7 @@ class HowWasYourExperienceTile extends StatelessWidget {
                             )
                           : GestureDetector(
                               onTap: () {
-                                BappNavigator.push(
-                                  context,
+                                Get.to(
                                   RateTheBookingScreen(
                                     booking: booking,
                                   ),

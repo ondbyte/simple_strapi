@@ -17,7 +17,8 @@ import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:get/state_manager.dart';
+import 'package:get/get.dart';
+
 import 'package:provider/provider.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
@@ -41,7 +42,7 @@ class _MenuState extends State<Menu> {
             IconButton(
               icon: Icon(FeatherIcons.xCircle),
               onPressed: () {
-                BappNavigator.pop(context, null);
+                Get.back();
               },
             )
           ],
@@ -77,7 +78,7 @@ class _MenuState extends State<Menu> {
         return ListTile(
           title: Text("Login"),
           onTap: () {
-            BappNavigator.push(context, LoginScreen());
+            Get.to(LoginScreen());
           },
         );
       } else {
@@ -103,10 +104,9 @@ class _MenuState extends State<Menu> {
           return ListTile(
             title: Text("Switch to business"),
             onTap: () async {
-              final response =
-                  await BappNavigator.push(context, EmailLoginScreen());
+              final response = await Get.to(EmailLoginScreen());
               if (user is User) {
-                BappNavigator.pop(context, null);
+                Get.back();
               }
             },
           );

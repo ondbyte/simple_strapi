@@ -11,6 +11,7 @@ import 'package:bapp/widgets/loading_stack.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
@@ -37,7 +38,7 @@ class _BusinessManageStaffScreenState extends State<BusinessManageStaffScreen> {
           color: Theme.of(context).indicatorColor,
         ),
         onPressed: () {
-          BappNavigator.push(context, BusinessAddAStaffScreen());
+          Get.to(BusinessAddAStaffScreen());
         },
       ),
       body: Builder(

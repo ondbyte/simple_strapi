@@ -75,8 +75,7 @@ class _FavoritesTabState extends State<FavoritesTab> {
                                                 final business =
                                                     favBranches[i].business;
                                                 if (business is Business) {
-                                                  BappNavigator.push(
-                                                    context,
+                                                  Get.to(
                                                     BusinessProfileScreen(
                                                       business: business,
                                                     ),

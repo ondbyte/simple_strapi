@@ -43,7 +43,7 @@ class AddCustomerDetails extends StatelessWidget {
                         username: _userName()!.internationalNumber,
                       );
                     }
-                    BappNavigator.pop(context, user);
+                    Get.back(result: user);
                   }
                 }
               : null,

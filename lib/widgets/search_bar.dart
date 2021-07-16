@@ -3,6 +3,7 @@ import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/route_manager.dart';
 import 'package:bapp/screens/search/search_inside_bapp.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class SearchBarWidget extends StatelessWidget {
   final List<String> possibilities;
@@ -14,7 +15,7 @@ class SearchBarWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        BappNavigator.push(context, SearchInsideBappScreen());
+        Get.to(SearchInsideBappScreen());
       },
       child: Container(
           height: 50,

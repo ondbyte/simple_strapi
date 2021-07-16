@@ -1,5 +1,6 @@
 import 'package:bapp/helpers/extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class CancellationConfirm {
   final bool confirm;
@@ -37,7 +38,7 @@ class _CancellationConfirmDialogState extends State<CancellationConfirmDialog> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        BappNavigator.pop(context, CancellationConfirm());
+        Get.back(result: CancellationConfirm());
         return false;
       },
       child: AlertDialog(
@@ -71,9 +72,8 @@ class _CancellationConfirmDialogState extends State<CancellationConfirmDialog> {
               if (!(_formKey.currentState?.validate() ?? false)) {
                 return;
               }
-              BappNavigator.pop(
-                context,
-                CancellationConfirm(
+              Get.back(
+                result: CancellationConfirm(
                   confirm: true,
                   reason: widget.needReason ? "" : _controller.text,
                 ),
@@ -83,9 +83,8 @@ class _CancellationConfirmDialogState extends State<CancellationConfirmDialog> {
           ),
           TextButton(
             onPressed: () {
-              BappNavigator.pop(
-                context,
-                CancellationConfirm(),
+              Get.back(
+                result: CancellationConfirm(),
               );
             },
             child: Text("No"),

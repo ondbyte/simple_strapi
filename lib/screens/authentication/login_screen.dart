@@ -54,18 +54,6 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  Future _popOnFirebaseUser(fbAuth.User firebaseUser) async {
-    final token = await FirebaseMessaging.instance.getToken() ?? "";
-    final user = await UserX.i.loginWithFirebase(
-      firebaseUser.uid,
-      token,
-    );
-    BappNavigator.pop(
-      context,
-      user != null,
-    );
-  }
-
   final _key = GlobalKey();
   @override
   Widget build(BuildContext context) {
@@ -73,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         leading: CloseButton(
           onPressed: () {
-            BappNavigator.pop(context, null);
+            Get.back(result: null);
           },
         ),
       ),
@@ -188,32 +176,20 @@ class _LoginScreenState extends State<LoginScreen> {
                             _loading(false);
                           },
                           onVerified: () async {
+                            Get.to(PopResistLoadingScreen());
                             final user = await fbAuth.FirebaseAuth.instance
                                 .authStateChanges()
                                 .first;
                             if (user == null) {
+                              Get.back();
                               throw Exception("User cannot be null");
                             }
-                            if ((isNullOrEmpty(user.email) ||
-                                isNullOrEmpty(
-                                  user.displayName,
-                                ))) {
-                              final done = await BappNavigator.pushReplacement(
-                                context,
-                                CreateYourProfileScreen(
-                                  shouldPop: () async {
-                                    return UserX.i.userPresent;
-                                  },
-                                ),
-                              );
-                              if (done ?? false) {
-                                _popOnFirebaseUser(user);
-                              } else {
-                                FirebaseX.i.logOut();
-                              }
-                            } else {
-                              _popOnFirebaseUser(user);
-                            }
+                            await FirebaseX.i
+                                .forceUpdateUserDetailsIfDoesntExist();
+                            final sUser = await UserX.i.loginWithFirebase(
+                              user.uid,
+                            );
+                            Get.back(result: sUser);
                           },
                         );
                       }

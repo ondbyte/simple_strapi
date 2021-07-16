@@ -12,6 +12,7 @@ import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:bapp/widgets/tiles/error.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Action;
+import 'package:get/get.dart';
 import "package:provider/provider.dart";
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
@@ -52,9 +53,8 @@ class BranchChooserScreen extends StatelessWidget {
                   withImage: true,
                   branch: businesses[i],
                   onTap: () async {
-                    BappNavigator.pop(
-                      context,
-                      businesses[i],
+                    Get.back(
+                      result: businesses[i],
                     );
                   },
                 );

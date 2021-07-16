@@ -56,7 +56,7 @@ class _SelectTimeSlotScreenState extends State<SelectTimeSlotScreen> {
                 onPressed: (_selected() is! Timing)
                     ? null
                     : () async {
-                        BappNavigator.pop(context, _selected() as Timing);
+                        Get.back(result: _selected() as Timing);
                       }
                 /* () async {
                       await BappNavigator.pushAndRemoveAll(

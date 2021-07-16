@@ -57,7 +57,7 @@ class _BusinessProfileServicesScreenState
                 label: "Add",
                 onPressed: _selected.isNotEmpty
                     ? () async {
-                        BappNavigator.pop(context, _selected.toList());
+                        Get.back(result: _selected.toList());
                       }
                     : null,
               );

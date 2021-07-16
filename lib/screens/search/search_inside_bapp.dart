@@ -13,6 +13,7 @@ import 'package:bapp/widgets/choose_category.dart';
 import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/tiles/error.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
@@ -65,8 +66,7 @@ class _SearchInsideBappScreenState extends State<SearchInsideBappScreen> {
                                     locality: UserX.i.user()?.locality,
                                   ) ??
                                   "no place,inform yadu";
-                          BappNavigator.push(
-                            context,
+                          Get.to(
                             BranchesResultScreen(
                               placeName: pn,
                               title: c.name ?? "",

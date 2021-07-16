@@ -3,6 +3,7 @@ import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/init/splash_screen.dart';
 import 'package:bapp/screens/misc/error.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 enum AppEvents {
   reboot,
@@ -153,11 +154,7 @@ class _BappNavigatorState extends State<BappNavigator> {
           case AppEvents.unHandledError:
             {
               Helper.bPrint("ERROR Showing error screen");
-              BappNavigator.pushAndRemoveAll(
-                _navKey.currentContext ?? context,
-                NoInternet(),
-              );
-              break;
+              throw Exception("check this");
             }
         }
       },

@@ -10,6 +10,7 @@ import 'package:bapp/widgets/firebase_image.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 class BusinessProductsPricingScreen extends StatefulWidget {
@@ -38,7 +39,7 @@ class _BusinessProductsPricingScreenState
               if (selected == 0) {
                 //BappNavigator.push(context, BusinessAddAServiceScreen());
               } else if (selected == 1) {
-                BappNavigator.push(context, BusinessAddServiceCategoryScreen());
+                Get.to(BusinessAddServiceCategoryScreen());
               }
             },
           ),

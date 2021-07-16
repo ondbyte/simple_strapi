@@ -5,6 +5,7 @@ import 'package:bapp/screens/init/initiating_widget.dart';
 import 'package:bapp/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 
 class ContextualMessageScreen extends StatefulWidget {
   final Function? init;
@@ -87,7 +88,7 @@ class _ContextualMessageScreenState extends State<ContextualMessageScreen> {
                             if (widget.onButtonPressed != null) {
                               widget.onButtonPressed?.call(context);
                             } else {
-                              BappNavigator.pushAndRemoveAll(context, Bapp());
+                              Get.offAll(Bapp());
                             }
                           },
                     child: Text(widget.buttonText),

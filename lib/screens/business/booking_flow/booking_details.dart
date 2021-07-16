@@ -147,7 +147,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                         await BookingX.i.cancel(booking,
                                             status:
                                                 BookingStatus.cancelledByUser);
-                                        BappNavigator.pop(context, null);
+                                        Get.back(result: null);
                                       }
                                     : null,
                               )
@@ -158,7 +158,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                     rejectLabel: "Reject",
                                     onConfirm: () async {
                                       await BookingX.i.accept(booking);
-                                      BappNavigator.pop(context, null);
+                                      Get.back(result: null);
                                     },
                                     onReject: () async {
                                       final confirm = await BappNavigator
@@ -176,7 +176,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                         return;
                                       }
                                       await BookingX.i.cancel(booking);
-                                      BappNavigator.pop(context, null);
+                                      Get.back(result: null);
                                     },
                                   )
                                 : booking.bookingStatus ==
@@ -206,15 +206,14 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                                             });
                                             await BookingX.i.cancel(booking,
                                                 status: BookingStatus.noShow);
-                                            BappNavigator.pop(context, null);
+                                            Get.back(result: null);
                                           },
                                           onStart: canBeginJob()
                                               ? () async {
                                                   await BookingX.i.startJob(
                                                     booking,
                                                   );
-                                                  BappNavigator.pop(
-                                                      context, null);
+                                                  Get.back(result: null);
                                                 }
                                               : null,
                                         ))

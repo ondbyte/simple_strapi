@@ -5,6 +5,7 @@ import 'package:bapp/screens/business/booking_flow/booking_details.dart';
 import 'package:bapp/stores/booking_flow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_week_view/flutter_week_view.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
@@ -73,8 +74,7 @@ class _BookingTimeLineWidgetState extends State<BookingTimeLineWidget> {
                 return Text(event.title);
               },
               onTap: () {
-                BappNavigator.push(
-                  context,
+                Get.to(
                   BookingDetailsScreen(
                     booking: list[index],
                     isCustomerView: false,

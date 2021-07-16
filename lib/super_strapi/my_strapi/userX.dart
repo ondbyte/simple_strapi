@@ -8,6 +8,9 @@ import 'package:bapp/super_strapi/my_strapi/firebaseX.dart';
 import 'package:bapp/super_strapi/my_strapi/persistenceX.dart';
 import 'package:bapp/widgets/app/bapp_navigator_widget.dart';
 import 'package:bapp/widgets/app/bapp_themed_app.dart';
+import 'package:bapp/widgets/loading.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:get/get.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:simple_strapi/simple_strapi.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
@@ -62,10 +65,12 @@ class UserX {
     kBus.fire(AppEvents.reboot);
   }
 
-  Future<User> loginWithFirebase(
+  Future<User?> loginWithFirebase(
     String firebaseToken,
-    String fcmToken,
   ) async {
+    Get.to(PopResistLoadingScreen());
+
+    final fcmToken = await FirebaseMessaging.instance.getToken();
     if (userPresent) {
       print("user present");
       return user.value!;
@@ -92,16 +97,12 @@ class UserX {
       }
       _listenForUserObject();
       await _copyDataFromDefault();
-      return user.value!;
-    } on StrapiResponseException catch (_) {
-      print("Unable to Authenticate with firebase for strapi");
-      await FirebaseX.i.logOut();
-      rethrow;
-    } on StrapiException catch (_) {
-      print("user logout");
-      await FirebaseX.i.logOut();
-      rethrow;
+    } catch (e, s) {
+      bPrint(s);
+      bPrint(s);
     }
+    Get.back();
+    return user.value;
   }
 
   Future<User> loginWithEmailAndPassword(

@@ -8,7 +8,7 @@ import 'package:bapp/super_strapi/my_strapi/x.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:get/state_manager.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
@@ -24,7 +24,7 @@ class _LocationSwitchState extends State<LocationSwitch> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        final data = await BappNavigator.push(context, PickAPlaceScreen());
+        final data = await Get.to(PickAPlaceScreen());
         if (data is City) {
           await DefaultDataX.i.setLocalityOrCity(city: data);
         } else {

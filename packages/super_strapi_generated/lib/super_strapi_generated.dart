@@ -91,21 +91,27 @@ class City {
         enabled = null,
         country = null,
         localities = null,
+        business_category = null,
         createdAt = null,
         updatedAt = null;
 
-  City.fresh({this.name, this.enabled, this.country, this.localities})
+  City.fresh(
+      {this.name,
+      this.enabled,
+      this.country,
+      this.localities,
+      this.business_category})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
         id = null;
 
   City._synced(this.name, this.enabled, this.country, this.localities,
-      this.createdAt, this.updatedAt, this.id)
+      this.business_category, this.createdAt, this.updatedAt, this.id)
       : _synced = true;
 
   City._unsynced(this.name, this.enabled, this.country, this.localities,
-      this.createdAt, this.updatedAt, this.id)
+      this.business_category, this.createdAt, this.updatedAt, this.id)
       : _synced = false;
 
   final bool _synced;
@@ -117,6 +123,8 @@ class City {
   final Country? country;
 
   final List<Locality>? localities;
+
+  final BusinessCategory? business_category;
 
   final DateTime? createdAt;
 
@@ -133,12 +141,14 @@ class City {
           {String? name,
           bool? enabled,
           Country? country,
-          List<Locality>? localities}) =>
+          List<Locality>? localities,
+          BusinessCategory? business_category}) =>
       City._unsynced(
           name ?? this.name,
           enabled ?? this.enabled,
           country ?? this.country,
           localities ?? this.localities,
+          business_category ?? this.business_category,
           this.createdAt,
           this.updatedAt,
           this.id);
@@ -146,19 +156,22 @@ class City {
       {bool name = false,
       bool enabled = false,
       bool country = false,
-      bool localities = false}) {
+      bool localities = false,
+      bool business_category = false}) {
     return City._unsynced(
         name ? null : this.name,
         enabled ? null : this.enabled,
         country ? null : this.country,
         localities ? null : this.localities,
+        business_category ? null : this.business_category,
         this.createdAt,
         this.updatedAt,
         this.id)
       .._emptyFields.name = name
       .._emptyFields.enabled = enabled
       .._emptyFields.country = country
-      .._emptyFields.localities = localities;
+      .._emptyFields.localities = localities
+      .._emptyFields.business_category = business_category;
   }
 
   static City fromSyncedMap(Map<dynamic, dynamic> map) => City._synced(
@@ -168,6 +181,8 @@ class City {
           map["country"], (e) => Countries._fromIDorData(e)),
       StrapiUtils.objFromListOfMap<Locality>(
           map["localities"], (e) => Localities._fromIDorData(e)),
+      StrapiUtils.objFromMap<BusinessCategory>(
+          map["business_category"], (e) => BusinessCategories._fromIDorData(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -178,6 +193,8 @@ class City {
           map["country"], (e) => Countries._fromIDorData(e)),
       StrapiUtils.objFromListOfMap<Locality>(
           map["localities"], (e) => Localities._fromIDorData(e)),
+      StrapiUtils.objFromMap<BusinessCategory>(
+          map["business_category"], (e) => BusinessCategories._fromIDorData(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -204,6 +221,14 @@ class City {
         "localities": localities
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
+      if (_emptyFields.business_category)
+        "business_category": null
+      else if (!_emptyFields.business_category && business_category != null)
+        "business_category": toServer
+            ? business_category?.id
+            : business_category?._toMap(level: level + level),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -389,6 +414,8 @@ class _CityFields {
 
   final localities = StrapiCollectionField("localities");
 
+  final business_category = StrapiModelField("business_category");
+
   final createdAt = StrapiLeafField("createdAt");
 
   final updatedAt = StrapiLeafField("updatedAt");
@@ -396,7 +423,16 @@ class _CityFields {
   final id = StrapiLeafField("id");
 
   List<StrapiField> call() {
-    return [name, enabled, country, localities, createdAt, updatedAt, id];
+    return [
+      name,
+      enabled,
+      country,
+      localities,
+      business_category,
+      createdAt,
+      updatedAt,
+      id
+    ];
   }
 }
 
@@ -408,6 +444,8 @@ class _CityEmptyFields {
   bool country = false;
 
   bool localities = false;
+
+  bool business_category = false;
 }
 
 class HandPicked {
@@ -482,7 +520,7 @@ class HandPicked {
 
   final String? description;
 
-  final List<StrapiFile>? image;
+  final StrapiFile? image;
 
   final DateTime? createdAt;
 
@@ -503,7 +541,7 @@ class HandPicked {
           Locality? locality,
           City? city,
           String? description,
-          List<StrapiFile>? image}) =>
+          StrapiFile? image}) =>
       HandPicked._unsynced(
           businesses ?? this.businesses,
           name ?? this.name,
@@ -559,7 +597,7 @@ class HandPicked {
           StrapiUtils.objFromMap<City>(
               map["city"], (e) => Cities._fromIDorData(e)),
           map["description"],
-          StrapiUtils.objFromListOfMap<StrapiFile>(
+          StrapiUtils.objFromMap<StrapiFile>(
               map["image"], (e) => StrapiFiles._fromIDorData(e)),
           StrapiUtils.parseDateTime(map["createdAt"]),
           StrapiUtils.parseDateTime(map["updatedAt"]),
@@ -574,7 +612,7 @@ class HandPicked {
           map["locality"], (e) => Localities._fromIDorData(e)),
       StrapiUtils.objFromMap<City>(map["city"], (e) => Cities._fromIDorData(e)),
       map["description"],
-      StrapiUtils.objFromListOfMap<StrapiFile>(
+      StrapiUtils.objFromMap<StrapiFile>(
           map["image"], (e) => StrapiFiles._fromIDorData(e)),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
@@ -615,11 +653,11 @@ class HandPicked {
       else if (!_emptyFields.description && description != null)
         "description": description,
       if (_emptyFields.image)
-        "image": []
+        "image": null
       else if (!_emptyFields.image && image != null)
-        "image": image
-            ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
-            .toList(),
+        "image": toServer ? image?.id : image?._toMap(level: level + level),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -812,7 +850,7 @@ class _HandPickedFields {
 
   final description = StrapiLeafField("description");
 
-  final image = StrapiCollectionField("image");
+  final image = StrapiModelField("image");
 
   final createdAt = StrapiLeafField("createdAt");
 
@@ -1066,6 +1104,8 @@ class Employee {
         "starRating": null
       else if (!_emptyFields.starRating && starRating != null)
         "starRating": starRating,
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -1624,6 +1664,8 @@ class Booking {
         "images": images
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -1884,6 +1926,425 @@ class _BookingEmptyFields {
   bool images = false;
 }
 
+enum Type { instant, scheduled }
+
+class Message {
+  Message.fromID(this.id)
+      : _synced = false,
+        subject = null,
+        body = null,
+        cta = null,
+        image = null,
+        recipients = null,
+        type = null,
+        sendAt = null,
+        createdAt = null,
+        updatedAt = null;
+
+  Message.fresh(
+      {this.subject,
+      this.body,
+      this.cta,
+      this.image,
+      this.recipients,
+      this.type,
+      this.sendAt})
+      : _synced = false,
+        createdAt = null,
+        updatedAt = null,
+        id = null;
+
+  Message._synced(
+      this.subject,
+      this.body,
+      this.cta,
+      this.image,
+      this.recipients,
+      this.type,
+      this.sendAt,
+      this.createdAt,
+      this.updatedAt,
+      this.id)
+      : _synced = true;
+
+  Message._unsynced(
+      this.subject,
+      this.body,
+      this.cta,
+      this.image,
+      this.recipients,
+      this.type,
+      this.sendAt,
+      this.createdAt,
+      this.updatedAt,
+      this.id)
+      : _synced = false;
+
+  final bool _synced;
+
+  final String? subject;
+
+  final String? body;
+
+  final String? cta;
+
+  final StrapiFile? image;
+
+  final List<Recipients>? recipients;
+
+  final Type? type;
+
+  final DateTime? sendAt;
+
+  final DateTime? createdAt;
+
+  final DateTime? updatedAt;
+
+  final String? id;
+
+  static final collectionName = "messages";
+
+  _MessageEmptyFields _emptyFields = _MessageEmptyFields();
+
+  bool get synced => _synced;
+  Message copyWIth(
+          {String? subject,
+          String? body,
+          String? cta,
+          StrapiFile? image,
+          List<Recipients>? recipients,
+          Type? type,
+          DateTime? sendAt}) =>
+      Message._unsynced(
+          subject ?? this.subject,
+          body ?? this.body,
+          cta ?? this.cta,
+          image ?? this.image,
+          recipients ?? this.recipients,
+          type ?? this.type,
+          sendAt ?? this.sendAt,
+          this.createdAt,
+          this.updatedAt,
+          this.id);
+  Message setNull(
+      {bool subject = false,
+      bool body = false,
+      bool cta = false,
+      bool image = false,
+      bool recipients = false,
+      bool type = false,
+      bool sendAt = false}) {
+    return Message._unsynced(
+        subject ? null : this.subject,
+        body ? null : this.body,
+        cta ? null : this.cta,
+        image ? null : this.image,
+        recipients ? null : this.recipients,
+        type ? null : this.type,
+        sendAt ? null : this.sendAt,
+        this.createdAt,
+        this.updatedAt,
+        this.id)
+      .._emptyFields.subject = subject
+      .._emptyFields.body = body
+      .._emptyFields.cta = cta
+      .._emptyFields.image = image
+      .._emptyFields.recipients = recipients
+      .._emptyFields.type = type
+      .._emptyFields.sendAt = sendAt;
+  }
+
+  static Message fromSyncedMap(Map<dynamic, dynamic> map) => Message._synced(
+      map["subject"],
+      map["body"],
+      map["cta"],
+      StrapiUtils.objFromMap<StrapiFile>(
+          map["image"], (e) => StrapiFiles._fromIDorData(e)),
+      StrapiUtils.objFromListOfMap<Recipients>(
+          map["recipients"], (e) => Recipients.fromMap(e)),
+      StrapiUtils.toEnum<Type>(Type.values, map["type"]),
+      StrapiUtils.parseDateTime(map["sendAt"]),
+      StrapiUtils.parseDateTime(map["createdAt"]),
+      StrapiUtils.parseDateTime(map["updatedAt"]),
+      map["id"]);
+  static Message? fromMap(Map<String, dynamic> map) => Message._unsynced(
+      map["subject"],
+      map["body"],
+      map["cta"],
+      StrapiUtils.objFromMap<StrapiFile>(
+          map["image"], (e) => StrapiFiles._fromIDorData(e)),
+      StrapiUtils.objFromListOfMap<Recipients>(
+          map["recipients"], (e) => Recipients.fromMap(e)),
+      StrapiUtils.toEnum<Type>(Type.values, map["type"]),
+      StrapiUtils.parseDateTime(map["sendAt"]),
+      StrapiUtils.parseDateTime(map["createdAt"]),
+      StrapiUtils.parseDateTime(map["updatedAt"]),
+      map["id"]);
+  Map<String, dynamic> toMap() => _toMap(level: -1);
+  Map<String, dynamic> _toMap({int level = 0}) {
+    final toServer = level == 0;
+    return {
+      if (_emptyFields.subject)
+        "subject": null
+      else if (!_emptyFields.subject && subject != null)
+        "subject": subject,
+      if (_emptyFields.body)
+        "body": null
+      else if (!_emptyFields.body && body != null)
+        "body": body,
+      if (_emptyFields.cta)
+        "cta": null
+      else if (!_emptyFields.cta && cta != null)
+        "cta": cta,
+      if (_emptyFields.image)
+        "image": null
+      else if (!_emptyFields.image && image != null)
+        "image": toServer ? image?.id : image?._toMap(level: level + level),
+      if (_emptyFields.recipients)
+        "recipients": []
+      else if (!_emptyFields.recipients && recipients != null)
+        "recipients":
+            recipients?.map((e) => e._toMap(level: level + level)).toList(),
+      if (_emptyFields.type)
+        "type": null
+      else if (!_emptyFields.type && type != null)
+        "type": StrapiUtils.enumToString(type),
+      if (_emptyFields.sendAt)
+        "sendAt": null
+      else if (!_emptyFields.sendAt && sendAt != null)
+        "sendAt": sendAt?.toIso8601String(),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
+      "id": id
+    };
+  }
+
+  Future<Message> sync() async {
+    if (!synced) {
+      return this;
+    }
+    final _id = this.id;
+    if (_id is! String) {
+      return this;
+    }
+    final response = await Messages.findOne(_id);
+    if (response is Message) {
+      return response;
+    } else {
+      return this;
+    }
+  }
+
+  static _MessageFields get fields => _MessageFields.i;
+  @override
+  String toString() =>
+      "[Strapi Collection Type Message]\n" + _toMap().toString();
+}
+
+class Messages {
+  static const collectionName = "messages";
+
+  static List<Message?> fromIDs(List<String> ids) {
+    if (ids.isEmpty) {
+      return [];
+    }
+    return ids.map((id) => Message.fromID(id)).toList();
+  }
+
+  static Future<Message?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return Message.fromSyncedMap(mapResponse);
+    }
+  }
+
+  static Future<List<Message>> findMultiple({int limit = 16}) async {
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => Message.fromSyncedMap(map)).toList();
+    }
+    return [];
+  }
+
+  static Future<Message?> create(Message message) async {
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: message._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return Message.fromSyncedMap(map);
+    }
+  }
+
+  static Future<Message?> update(Message message) async {
+    final id = message.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
+        collection: collectionName,
+        id: id,
+        data: message._toMap(level: 0),
+      );
+      if (map.isNotEmpty) {
+        return Message.fromSyncedMap(map);
+      }
+    } else {
+      sPrint("id is null while updating");
+    }
+  }
+
+  static Future<int> count() async {
+    return await StrapiCollection.count(collectionName);
+  }
+
+  static Future<Message?> delete(Message message) async {
+    final id = message.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return Message.fromSyncedMap(map);
+      }
+    } else {
+      sPrint("id is null while deleting");
+    }
+  }
+
+  static Message? _fromIDorData(idOrData) {
+    if (idOrData is String) {
+      return Message.fromID(idOrData);
+    }
+    if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return Message.fromID(id);
+      }
+      return Message.fromSyncedMap(idOrData);
+    }
+    return null;
+  }
+
+  static Future<List<Message>> executeQuery(StrapiCollectionQuery query,
+      {int maxTimeOutInMillis = 15000}) async {
+    final queryString = query.query(
+      collectionName: collectionName,
+    );
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <Message>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
+              if (o is Message) {
+                list.add(o);
+              }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is Message) {
+              return [o];
+            }
+          }
+        }
+      }
+    }
+    return [];
+  }
+
+  static Widget listenerWidget({
+    Key? key,
+    required Message strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      Message,
+      bool,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<Message>(
+      key: key,
+      strapiObject: strapiObject,
+      generator: Message.fromMap,
+      builder: builder,
+      sync: sync,
+    );
+  }
+}
+
+class _MessageFields {
+  _MessageFields._i();
+
+  static final _MessageFields i = _MessageFields._i();
+
+  final subject = StrapiLeafField("subject");
+
+  final body = StrapiLeafField("body");
+
+  final cta = StrapiLeafField("cta");
+
+  final image = StrapiModelField("image");
+
+  final recipients = StrapiComponentField("recipients");
+
+  final type = StrapiLeafField("type");
+
+  final sendAt = StrapiLeafField("sendAt");
+
+  final createdAt = StrapiLeafField("createdAt");
+
+  final updatedAt = StrapiLeafField("updatedAt");
+
+  final id = StrapiLeafField("id");
+
+  List<StrapiField> call() {
+    return [
+      subject,
+      body,
+      cta,
+      image,
+      recipients,
+      type,
+      sendAt,
+      createdAt,
+      updatedAt,
+      id
+    ];
+  }
+}
+
+class _MessageEmptyFields {
+  bool subject = false;
+
+  bool body = false;
+
+  bool cta = false;
+
+  bool image = false;
+
+  bool recipients = false;
+
+  bool type = false;
+
+  bool sendAt = false;
+}
+
 class Locality {
   Locality.fromID(this.id)
       : _synced = false,
@@ -1999,6 +2460,8 @@ class Locality {
         "coordinates": null
       else if (!_emptyFields.coordinates && coordinates != null)
         "coordinates": coordinates?._toMap(level: level + level),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -2206,6 +2669,426 @@ class _LocalityEmptyFields {
   bool coordinates = false;
 }
 
+class Update {
+  Update.fromID(this.id)
+      : _synced = false,
+        title = null,
+        descriptiom = null,
+        users_permissions_roles = null,
+        image = null,
+        cta = null,
+        start = null,
+        end = null,
+        createdAt = null,
+        updatedAt = null;
+
+  Update.fresh(
+      {this.title,
+      this.descriptiom,
+      this.users_permissions_roles,
+      this.image,
+      this.cta,
+      this.start,
+      this.end})
+      : _synced = false,
+        createdAt = null,
+        updatedAt = null,
+        id = null;
+
+  Update._synced(
+      this.title,
+      this.descriptiom,
+      this.users_permissions_roles,
+      this.image,
+      this.cta,
+      this.start,
+      this.end,
+      this.createdAt,
+      this.updatedAt,
+      this.id)
+      : _synced = true;
+
+  Update._unsynced(
+      this.title,
+      this.descriptiom,
+      this.users_permissions_roles,
+      this.image,
+      this.cta,
+      this.start,
+      this.end,
+      this.createdAt,
+      this.updatedAt,
+      this.id)
+      : _synced = false;
+
+  final bool _synced;
+
+  final String? title;
+
+  final String? descriptiom;
+
+  final List<Role>? users_permissions_roles;
+
+  final StrapiFile? image;
+
+  final String? cta;
+
+  final DateTime? start;
+
+  final DateTime? end;
+
+  final DateTime? createdAt;
+
+  final DateTime? updatedAt;
+
+  final String? id;
+
+  static final collectionName = "updates";
+
+  _UpdateEmptyFields _emptyFields = _UpdateEmptyFields();
+
+  bool get synced => _synced;
+  Update copyWIth(
+          {String? title,
+          String? descriptiom,
+          List<Role>? users_permissions_roles,
+          StrapiFile? image,
+          String? cta,
+          DateTime? start,
+          DateTime? end}) =>
+      Update._unsynced(
+          title ?? this.title,
+          descriptiom ?? this.descriptiom,
+          users_permissions_roles ?? this.users_permissions_roles,
+          image ?? this.image,
+          cta ?? this.cta,
+          start ?? this.start,
+          end ?? this.end,
+          this.createdAt,
+          this.updatedAt,
+          this.id);
+  Update setNull(
+      {bool title = false,
+      bool descriptiom = false,
+      bool users_permissions_roles = false,
+      bool image = false,
+      bool cta = false,
+      bool start = false,
+      bool end = false}) {
+    return Update._unsynced(
+        title ? null : this.title,
+        descriptiom ? null : this.descriptiom,
+        users_permissions_roles ? null : this.users_permissions_roles,
+        image ? null : this.image,
+        cta ? null : this.cta,
+        start ? null : this.start,
+        end ? null : this.end,
+        this.createdAt,
+        this.updatedAt,
+        this.id)
+      .._emptyFields.title = title
+      .._emptyFields.descriptiom = descriptiom
+      .._emptyFields.users_permissions_roles = users_permissions_roles
+      .._emptyFields.image = image
+      .._emptyFields.cta = cta
+      .._emptyFields.start = start
+      .._emptyFields.end = end;
+  }
+
+  static Update fromSyncedMap(Map<dynamic, dynamic> map) => Update._synced(
+      map["title"],
+      map["descriptiom"],
+      StrapiUtils.objFromListOfMap<Role>(
+          map["users_permissions_roles"], (e) => Roles._fromIDorData(e)),
+      StrapiUtils.objFromMap<StrapiFile>(
+          map["image"], (e) => StrapiFiles._fromIDorData(e)),
+      map["cta"],
+      StrapiUtils.parseDateTime(map["start"]),
+      StrapiUtils.parseDateTime(map["end"]),
+      StrapiUtils.parseDateTime(map["createdAt"]),
+      StrapiUtils.parseDateTime(map["updatedAt"]),
+      map["id"]);
+  static Update? fromMap(Map<String, dynamic> map) => Update._unsynced(
+      map["title"],
+      map["descriptiom"],
+      StrapiUtils.objFromListOfMap<Role>(
+          map["users_permissions_roles"], (e) => Roles._fromIDorData(e)),
+      StrapiUtils.objFromMap<StrapiFile>(
+          map["image"], (e) => StrapiFiles._fromIDorData(e)),
+      map["cta"],
+      StrapiUtils.parseDateTime(map["start"]),
+      StrapiUtils.parseDateTime(map["end"]),
+      StrapiUtils.parseDateTime(map["createdAt"]),
+      StrapiUtils.parseDateTime(map["updatedAt"]),
+      map["id"]);
+  Map<String, dynamic> toMap() => _toMap(level: -1);
+  Map<String, dynamic> _toMap({int level = 0}) {
+    final toServer = level == 0;
+    return {
+      if (_emptyFields.title)
+        "title": null
+      else if (!_emptyFields.title && title != null)
+        "title": title,
+      if (_emptyFields.descriptiom)
+        "descriptiom": null
+      else if (!_emptyFields.descriptiom && descriptiom != null)
+        "descriptiom": descriptiom,
+      if (_emptyFields.users_permissions_roles)
+        "users_permissions_roles": []
+      else if (!_emptyFields.users_permissions_roles &&
+          users_permissions_roles != null)
+        "users_permissions_roles": users_permissions_roles
+            ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
+            .toList(),
+      if (_emptyFields.image)
+        "image": null
+      else if (!_emptyFields.image && image != null)
+        "image": toServer ? image?.id : image?._toMap(level: level + level),
+      if (_emptyFields.cta)
+        "cta": null
+      else if (!_emptyFields.cta && cta != null)
+        "cta": cta,
+      if (_emptyFields.start)
+        "start": null
+      else if (!_emptyFields.start && start != null)
+        "start": start?.toIso8601String(),
+      if (_emptyFields.end)
+        "end": null
+      else if (!_emptyFields.end && end != null)
+        "end": end?.toIso8601String(),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
+      "id": id
+    };
+  }
+
+  Future<Update> sync() async {
+    if (!synced) {
+      return this;
+    }
+    final _id = this.id;
+    if (_id is! String) {
+      return this;
+    }
+    final response = await Updates.findOne(_id);
+    if (response is Update) {
+      return response;
+    } else {
+      return this;
+    }
+  }
+
+  static _UpdateFields get fields => _UpdateFields.i;
+  @override
+  String toString() =>
+      "[Strapi Collection Type Update]\n" + _toMap().toString();
+}
+
+class Updates {
+  static const collectionName = "updates";
+
+  static List<Update?> fromIDs(List<String> ids) {
+    if (ids.isEmpty) {
+      return [];
+    }
+    return ids.map((id) => Update.fromID(id)).toList();
+  }
+
+  static Future<Update?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return Update.fromSyncedMap(mapResponse);
+    }
+  }
+
+  static Future<List<Update>> findMultiple({int limit = 16}) async {
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => Update.fromSyncedMap(map)).toList();
+    }
+    return [];
+  }
+
+  static Future<Update?> create(Update update) async {
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: update._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return Update.fromSyncedMap(map);
+    }
+  }
+
+  static Future<Update?> update(Update update) async {
+    final id = update.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
+        collection: collectionName,
+        id: id,
+        data: update._toMap(level: 0),
+      );
+      if (map.isNotEmpty) {
+        return Update.fromSyncedMap(map);
+      }
+    } else {
+      sPrint("id is null while updating");
+    }
+  }
+
+  static Future<int> count() async {
+    return await StrapiCollection.count(collectionName);
+  }
+
+  static Future<Update?> delete(Update update) async {
+    final id = update.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return Update.fromSyncedMap(map);
+      }
+    } else {
+      sPrint("id is null while deleting");
+    }
+  }
+
+  static Update? _fromIDorData(idOrData) {
+    if (idOrData is String) {
+      return Update.fromID(idOrData);
+    }
+    if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return Update.fromID(id);
+      }
+      return Update.fromSyncedMap(idOrData);
+    }
+    return null;
+  }
+
+  static Future<List<Update>> executeQuery(StrapiCollectionQuery query,
+      {int maxTimeOutInMillis = 15000}) async {
+    final queryString = query.query(
+      collectionName: collectionName,
+    );
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <Update>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
+              if (o is Update) {
+                list.add(o);
+              }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is Update) {
+              return [o];
+            }
+          }
+        }
+      }
+    }
+    return [];
+  }
+
+  static Widget listenerWidget({
+    Key? key,
+    required Update strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      Update,
+      bool,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<Update>(
+      key: key,
+      strapiObject: strapiObject,
+      generator: Update.fromMap,
+      builder: builder,
+      sync: sync,
+    );
+  }
+}
+
+class _UpdateFields {
+  _UpdateFields._i();
+
+  static final _UpdateFields i = _UpdateFields._i();
+
+  final title = StrapiLeafField("title");
+
+  final descriptiom = StrapiLeafField("descriptiom");
+
+  final users_permissions_roles =
+      StrapiCollectionField("users_permissions_roles");
+
+  final image = StrapiModelField("image");
+
+  final cta = StrapiLeafField("cta");
+
+  final start = StrapiLeafField("start");
+
+  final end = StrapiLeafField("end");
+
+  final createdAt = StrapiLeafField("createdAt");
+
+  final updatedAt = StrapiLeafField("updatedAt");
+
+  final id = StrapiLeafField("id");
+
+  List<StrapiField> call() {
+    return [
+      title,
+      descriptiom,
+      users_permissions_roles,
+      image,
+      cta,
+      start,
+      end,
+      createdAt,
+      updatedAt,
+      id
+    ];
+  }
+}
+
+class _UpdateEmptyFields {
+  bool title = false;
+
+  bool descriptiom = false;
+
+  bool users_permissions_roles = false;
+
+  bool image = false;
+
+  bool cta = false;
+
+  bool start = false;
+
+  bool end = false;
+}
+
 class PushNotification {
   PushNotification.fromID(this.id)
       : _synced = false,
@@ -2299,6 +3182,8 @@ class PushNotification {
         "user": null
       else if (!_emptyFields.user && user != null)
         "user": toServer ? user?.id : user?._toMap(level: level + level),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -2708,6 +3593,8 @@ class Country {
         "cities": cities
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -2943,6 +3830,8 @@ class _CountryEmptyFields {
   bool cities = false;
 }
 
+enum CustomerType { Male, Female, Unisex, Kids }
+
 class Business {
   Business.fromID(this.id)
       : _synced = false,
@@ -2963,6 +3852,7 @@ class Business {
         images = null,
         tag = null,
         type = null,
+        customer_type = null,
         createdAt = null,
         updatedAt = null;
 
@@ -2983,7 +3873,8 @@ class Business {
       this.employees,
       this.images,
       this.tag,
-      this.type})
+      this.type,
+      this.customer_type})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
@@ -3007,6 +3898,7 @@ class Business {
       this.images,
       this.tag,
       this.type,
+      this.customer_type,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -3030,6 +3922,7 @@ class Business {
       this.images,
       this.tag,
       this.type,
+      this.customer_type,
       this.createdAt,
       this.updatedAt,
       this.id)
@@ -3071,6 +3964,8 @@ class Business {
 
   final String? type;
 
+  final CustomerType? customer_type;
+
   final DateTime? createdAt;
 
   final DateTime? updatedAt;
@@ -3099,7 +3994,8 @@ class Business {
           List<Employee>? employees,
           List<StrapiFile>? images,
           String? tag,
-          String? type}) =>
+          String? type,
+          CustomerType? customer_type}) =>
       Business._unsynced(
           name ?? this.name,
           address ?? this.address,
@@ -3118,6 +4014,7 @@ class Business {
           images ?? this.images,
           tag ?? this.tag,
           type ?? this.type,
+          customer_type ?? this.customer_type,
           this.createdAt,
           this.updatedAt,
           this.id);
@@ -3138,7 +4035,8 @@ class Business {
       bool employees = false,
       bool images = false,
       bool tag = false,
-      bool type = false}) {
+      bool type = false,
+      bool customer_type = false}) {
     return Business._unsynced(
         name ? null : this.name,
         address ? null : this.address,
@@ -3157,6 +4055,7 @@ class Business {
         images ? null : this.images,
         tag ? null : this.tag,
         type ? null : this.type,
+        customer_type ? null : this.customer_type,
         this.createdAt,
         this.updatedAt,
         this.id)
@@ -3176,7 +4075,8 @@ class Business {
       .._emptyFields.employees = employees
       .._emptyFields.images = images
       .._emptyFields.tag = tag
-      .._emptyFields.type = type;
+      .._emptyFields.type = type
+      .._emptyFields.customer_type = customer_type;
   }
 
   static Business fromSyncedMap(Map<dynamic, dynamic> map) => Business._synced(
@@ -3207,6 +4107,8 @@ class Business {
           map["images"], (e) => StrapiFiles._fromIDorData(e)),
       map["tag"],
       map["type"],
+      StrapiUtils.toEnum<CustomerType>(
+          CustomerType.values, map["customer_type"]),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -3238,6 +4140,8 @@ class Business {
           map["images"], (e) => StrapiFiles._fromIDorData(e)),
       map["tag"],
       map["type"],
+      StrapiUtils.toEnum<CustomerType>(
+          CustomerType.values, map["customer_type"]),
       StrapiUtils.parseDateTime(map["createdAt"]),
       StrapiUtils.parseDateTime(map["updatedAt"]),
       map["id"]);
@@ -3326,6 +4230,12 @@ class Business {
         "type": null
       else if (!_emptyFields.type && type != null)
         "type": type,
+      if (_emptyFields.customer_type)
+        "customer_type": null
+      else if (!_emptyFields.customer_type && customer_type != null)
+        "customer_type": StrapiUtils.enumToString(customer_type),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -3538,6 +4448,8 @@ class _BusinessFields {
 
   final type = StrapiLeafField("type");
 
+  final customer_type = StrapiLeafField("customer_type");
+
   final createdAt = StrapiLeafField("createdAt");
 
   final updatedAt = StrapiLeafField("updatedAt");
@@ -3563,6 +4475,7 @@ class _BusinessFields {
       images,
       tag,
       type,
+      customer_type,
       createdAt,
       updatedAt,
       id
@@ -3604,6 +4517,8 @@ class _BusinessEmptyFields {
   bool tag = false;
 
   bool type = false;
+
+  bool customer_type = false;
 }
 
 class BusinessCategory {
@@ -3612,21 +4527,22 @@ class BusinessCategory {
         name = null,
         businesses = null,
         image = null,
+        cities = null,
         createdAt = null,
         updatedAt = null;
 
-  BusinessCategory.fresh({this.name, this.businesses, this.image})
+  BusinessCategory.fresh({this.name, this.businesses, this.image, this.cities})
       : _synced = false,
         createdAt = null,
         updatedAt = null,
         id = null;
 
-  BusinessCategory._synced(this.name, this.businesses, this.image,
+  BusinessCategory._synced(this.name, this.businesses, this.image, this.cities,
       this.createdAt, this.updatedAt, this.id)
       : _synced = true;
 
   BusinessCategory._unsynced(this.name, this.businesses, this.image,
-      this.createdAt, this.updatedAt, this.id)
+      this.cities, this.createdAt, this.updatedAt, this.id)
       : _synced = false;
 
   final bool _synced;
@@ -3636,6 +4552,8 @@ class BusinessCategory {
   final List<Business>? businesses;
 
   final StrapiFile? image;
+
+  final List<City>? cities;
 
   final DateTime? createdAt;
 
@@ -3649,26 +4567,35 @@ class BusinessCategory {
 
   bool get synced => _synced;
   BusinessCategory copyWIth(
-          {String? name, List<Business>? businesses, StrapiFile? image}) =>
+          {String? name,
+          List<Business>? businesses,
+          StrapiFile? image,
+          List<City>? cities}) =>
       BusinessCategory._unsynced(
           name ?? this.name,
           businesses ?? this.businesses,
           image ?? this.image,
+          cities ?? this.cities,
           this.createdAt,
           this.updatedAt,
           this.id);
   BusinessCategory setNull(
-      {bool name = false, bool businesses = false, bool image = false}) {
+      {bool name = false,
+      bool businesses = false,
+      bool image = false,
+      bool cities = false}) {
     return BusinessCategory._unsynced(
         name ? null : this.name,
         businesses ? null : this.businesses,
         image ? null : this.image,
+        cities ? null : this.cities,
         this.createdAt,
         this.updatedAt,
         this.id)
       .._emptyFields.name = name
       .._emptyFields.businesses = businesses
-      .._emptyFields.image = image;
+      .._emptyFields.image = image
+      .._emptyFields.cities = cities;
   }
 
   static BusinessCategory fromSyncedMap(Map<dynamic, dynamic> map) =>
@@ -3678,6 +4605,8 @@ class BusinessCategory {
               map["businesses"], (e) => Businesses._fromIDorData(e)),
           StrapiUtils.objFromMap<StrapiFile>(
               map["image"], (e) => StrapiFiles._fromIDorData(e)),
+          StrapiUtils.objFromListOfMap<City>(
+              map["cities"], (e) => Cities._fromIDorData(e)),
           StrapiUtils.parseDateTime(map["createdAt"]),
           StrapiUtils.parseDateTime(map["updatedAt"]),
           map["id"]);
@@ -3688,6 +4617,8 @@ class BusinessCategory {
               map["businesses"], (e) => Businesses._fromIDorData(e)),
           StrapiUtils.objFromMap<StrapiFile>(
               map["image"], (e) => StrapiFiles._fromIDorData(e)),
+          StrapiUtils.objFromListOfMap<City>(
+              map["cities"], (e) => Cities._fromIDorData(e)),
           StrapiUtils.parseDateTime(map["createdAt"]),
           StrapiUtils.parseDateTime(map["updatedAt"]),
           map["id"]);
@@ -3709,6 +4640,14 @@ class BusinessCategory {
         "image": null
       else if (!_emptyFields.image && image != null)
         "image": toServer ? image?.id : image?._toMap(level: level + level),
+      if (_emptyFields.cities)
+        "cities": []
+      else if (!_emptyFields.cities && cities != null)
+        "cities": cities
+            ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
+            .toList(),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -3897,6 +4836,8 @@ class _BusinessCategoryFields {
 
   final image = StrapiModelField("image");
 
+  final cities = StrapiCollectionField("cities");
+
   final createdAt = StrapiLeafField("createdAt");
 
   final updatedAt = StrapiLeafField("updatedAt");
@@ -3904,7 +4845,7 @@ class _BusinessCategoryFields {
   final id = StrapiLeafField("id");
 
   List<StrapiField> call() {
-    return [name, businesses, image, createdAt, updatedAt, id];
+    return [name, businesses, image, cities, createdAt, updatedAt, id];
   }
 }
 
@@ -3914,6 +4855,8 @@ class _BusinessCategoryEmptyFields {
   bool businesses = false;
 
   bool image = false;
+
+  bool cities = false;
 }
 
 class Partner {
@@ -4052,6 +4995,8 @@ class Partner {
         "about": null
       else if (!_emptyFields.about && about != null)
         "about": about,
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -4359,6 +5304,8 @@ class DefaultData {
         "customId": null
       else if (!_emptyFields.customId && customId != null)
         "customId": customId,
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -4661,6 +5608,8 @@ class MasterProduct {
         "image": null
       else if (!_emptyFields.image && image != null)
         "image": toServer ? image?.id : image?._toMap(level: level + level),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -4985,6 +5934,8 @@ class BusinessFeature {
       else if (!_emptyFields.business && business != null)
         "business":
             toServer ? business?.id : business?._toMap(level: level + level),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -5395,6 +6346,8 @@ class Review {
       else if (!_emptyFields.booking && booking != null)
         "booking":
             toServer ? booking?.id : booking?._toMap(level: level + level),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -5766,6 +6719,8 @@ class Role {
         "users": users
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -6443,6 +7398,8 @@ class User {
           authenticatedUserType != null)
         "authenticatedUserType":
             StrapiUtils.enumToString(authenticatedUserType),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -6915,6 +7872,8 @@ class Permission {
         "role": null
       else if (!_emptyFields.role && role != null)
         "role": toServer ? role?.id : role?._toMap(level: level + level),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -7457,6 +8416,8 @@ class StrapiFile {
         "related": []
       else if (!_emptyFields.related && related != null)
         "related": related,
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -8297,4 +9258,62 @@ class _CoordinatesEmptyFields {
   bool latitude = false;
 
   bool longitude = false;
+}
+
+class Recipients {
+  Recipients._unsynced(this.users_permissions_user, this.read, this.readOn);
+
+  Recipients({this.users_permissions_user, this.read, this.readOn});
+
+  final User? users_permissions_user;
+
+  final bool? read;
+
+  final DateTime? readOn;
+
+  static Recipients? fromMap(Map<String, dynamic> map) => Recipients._unsynced(
+      StrapiUtils.objFromMap<User>(
+          map["users_permissions_user"], (e) => Users._fromIDorData(e)),
+      StrapiUtils.parseBool(map["read"]),
+      StrapiUtils.parseDateTime(map["readOn"]));
+  Map<String, dynamic> toMap() => _toMap(level: -1);
+  Map<String, dynamic> _toMap({int level = 0}) {
+    final toServer = level == 0;
+    return {
+      "users_permissions_user": toServer
+          ? users_permissions_user?.id
+          : users_permissions_user?._toMap(level: level + level),
+      "read": read,
+      "readOn": readOn?.toIso8601String()
+    };
+  }
+
+  static _RecipientsFields get fields => _RecipientsFields.i;
+  @override
+  String toString() =>
+      "[Strapi Component Type Recipients]: \n" + _toMap().toString();
+}
+
+class _RecipientsFields {
+  _RecipientsFields._i();
+
+  static final _RecipientsFields i = _RecipientsFields._i();
+
+  final users_permissions_user = StrapiModelField("users_permissions_user");
+
+  final read = StrapiLeafField("read");
+
+  final readOn = StrapiLeafField("readOn");
+
+  String call() {
+    return "{users_permissions_user{id},read,readOn}";
+  }
+}
+
+class _RecipientsEmptyFields {
+  bool users_permissions_user = false;
+
+  bool read = false;
+
+  bool readOn = false;
 }

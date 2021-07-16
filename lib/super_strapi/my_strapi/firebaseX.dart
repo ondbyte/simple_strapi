@@ -2,13 +2,19 @@ import 'dart:async';
 
 import 'package:bapp/helpers/extensions.dart';
 import 'package:bapp/helpers/helper.dart';
+import 'package:bapp/screens/authentication/create_profile.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x.dart';
+import 'package:bapp/widgets/dialogs.dart';
+import 'package:bapp/widgets/loading.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart' as fba;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:the_country_number/the_country_number.dart';
 
 class FirebaseX extends X {
@@ -61,6 +67,60 @@ class FirebaseX extends X {
       bPrint("Unable to login with firebase");
     }
   } */
+
+  Future forceUpdateUserDetailsIfDoesntExist() async {
+    if ((firebaseUser?.email?.isNotEmpty ?? false) &&
+        (firebaseUser?.displayName?.isNotEmpty ?? false)) {
+      return;
+    }
+    var name = "", email = "";
+
+    await Future.doWhile(() async {
+      final data = await Get.to(
+        CreateYourProfileScreen(name: name, email: email),
+      );
+
+      if (data is! Map) {
+        await Get.dialog(
+          RequiredDialog(message: "We need your email and name"),
+        );
+        return true;
+      }
+      email = data["email"] as String;
+      name = data["name"] as String;
+
+      if (isValidEmail(email) && name.isNotEmpty) {
+        Get.to(
+          PopResistLoadingScreen(),
+        );
+
+        await updateDisplayName(name);
+
+        ///shouldnt throw as its the first time
+        await updateEmail(email);
+        Get.back();
+      } else {
+        if (!isValidEmail(email)) {
+          await Get.dialog(
+            RequiredDialog(message: "Email is not valid"),
+          );
+        } else if (name.isEmpty) {
+          await Get.dialog(
+            RequiredDialog(message: "We need your name"),
+          );
+        }
+      }
+      return !(isValidEmail(email) && name.isNotEmpty);
+    });
+  }
+
+  Future updateDisplayName(String name) async {
+    return fba.FirebaseAuth.instance.currentUser?.updateDisplayName(name);
+  }
+
+  Future updateEmail(String email) async {
+    return fba.FirebaseAuth.instance.currentUser?.updateEmail(email);
+  }
 
   Future updateProfile(
       {required String displayName,

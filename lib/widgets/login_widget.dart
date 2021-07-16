@@ -4,6 +4,7 @@ import 'package:bapp/screens/authentication/login_screen.dart';
 import 'package:bapp/widgets/buttons.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 
 class AskToLoginWidget extends StatelessWidget {
   final String loginReason, secondaryReason;
@@ -52,8 +53,8 @@ class AskToLoginWidget extends StatelessWidget {
                 PrimaryButton(
                   "Continue with mobile number",
                   fullWidth: false,
-                  onPressed: () {
-                    BappNavigator.push(context, LoginScreen());
+                  onPressed: () async {
+                    await Get.to(LoginScreen());
                   },
                 ),
               ],

@@ -7,6 +7,7 @@ import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
@@ -105,8 +106,7 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
                                 branch: data[i],
                                 onTap: () async {
                                   //flow.branch = snap.data[i];
-                                  BappNavigator.push(
-                                    context,
+                                  Get.to(
                                     BusinessProfileScreen(business: data[i]),
                                   );
                                 },

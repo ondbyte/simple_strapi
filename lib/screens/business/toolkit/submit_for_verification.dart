@@ -13,6 +13,7 @@ import 'package:bapp/widgets/loading_stack.dart';
 import 'package:bapp/widgets/padded_text.dart';
 import 'package:bapp/widgets/tiles/add_image_sliver.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -47,7 +48,7 @@ class _BusinessSubmitBranchForVerificationScreenState
                       message:
                           "Your selected branch is disabled or in process of verification",
                       onButtonPressed: (context) {
-                        BappNavigator.pop(context, null);
+                        Get.back(result: null);
                       },
                     )
                   : CustomScrollView(
@@ -261,17 +262,15 @@ class _BusinessSubmitBranchForVerificationScreenState
       //await uploadBusinessBranchApprovalPDF(fileToUpload: theFileToUpload);
     }
 
-    BappNavigator.pushReplacement(
-        context,
-        ContextualMessageScreen(
-          init: () {
-            act(
-              () {},
-            );
-          },
-          message:
-              "Thank you for sending the documents, we will contact you on your registered number to update you the status.",
-        ));
+    Get.off(ContextualMessageScreen(
+      init: () {
+        act(
+          () {},
+        );
+      },
+      message:
+          "Thank you for sending the documents, we will contact you on your registered number to update you the status.",
+    ));
     act(() {
       kLoading.value = true;
     });

@@ -4,6 +4,7 @@ import 'package:bapp/super_strapi/my_strapi/x.dart';
 import 'package:bapp/widgets/tiles/customer_booking_tile.dart';
 import 'package:bapp/widgets/tiles/see_all_tile.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import 'booking_details.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
@@ -32,8 +33,7 @@ class BookingsSeeAllTile extends StatelessWidget {
       title: title,
       seeAllLabel: "See All",
       onSeeAll: () {
-        BappNavigator.push(
-          context,
+        Get.to(
           AllBookingsScreen(
             bookings: bookings,
           ),
@@ -77,8 +77,7 @@ class _AllBookingsScreenState extends State<AllBookingsScreen> {
             booking: widget.bookings[i],
             isCustomerView: false,
             onTap: (booking) {
-              BappNavigator.push(
-                context,
+              Get.to(
                 BookingDetailsScreen(
                   booking: booking,
                   isCustomerView: false,

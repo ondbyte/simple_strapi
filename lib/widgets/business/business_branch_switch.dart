@@ -9,6 +9,7 @@ import 'package:bapp/super_strapi/my_strapi/persistenceX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
@@ -30,8 +31,7 @@ class BusinessBranchSwitchWidget extends StatelessWidget {
     }
     return GestureDetector(
       onTap: () async {
-        final picked = await BappNavigator.push(
-          context,
+        final picked = await Get.to(
           BranchChooserScreen(
             partner: partner,
           ),

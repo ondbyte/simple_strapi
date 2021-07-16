@@ -6,6 +6,7 @@ import 'package:bapp/widgets/tiles/add_image_sliver.dart';
 import 'package:flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:get/get.dart';
 import 'package:mobx/mobx.dart';
 import 'package:provider/provider.dart';
 
@@ -41,7 +42,7 @@ class _BusinessManageMediaScreenState extends State<BusinessManageMediaScreen> {
                   ? () async {}
                   : () async {
                       if (_images.isEmpty) {
-                        BappNavigator.pop(context, null);
+                        Get.back(result: null);
                         return;
                       }
                       act(() {
@@ -51,7 +52,7 @@ class _BusinessManageMediaScreenState extends State<BusinessManageMediaScreen> {
                         message: "Updating images..",
                         duration: const Duration(seconds: 2),
                       ).show(context);
-                      BappNavigator.pop(context, null);
+                      Get.back(result: null);
                       act(() {
                         kLoading.value = false;
                       });

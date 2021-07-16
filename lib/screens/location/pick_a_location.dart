@@ -9,6 +9,7 @@ import 'package:bapp/super_strapi/my_strapi/userX.dart';
 
 import 'package:flutter/material.dart';
 import 'package:geocoder/geocoder.dart' as g;
+import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_place/google_place.dart';
 import 'package:provider/provider.dart';
@@ -35,7 +36,7 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
         leading: IconButton(
           icon: Icon(Icons.close),
           onPressed: () {
-            BappNavigator.pop(context, null);
+            Get.back(result: null);
           },
         ),
         actions: [
@@ -70,7 +71,7 @@ class _PickAPlaceLocationScreenState extends State<PickAPlaceLocationScreen> {
                       ),
                     );
 
-                    BappNavigator.pop(context, _pickedLocation);
+                    Get.back(result: _pickedLocation);
                   }
                 : null,
             child: Text(

@@ -12,6 +12,7 @@ import 'package:bapp/widgets/tiles/rr_list_tile.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:get/get.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class SelectAProfessionalScreen extends StatefulWidget {
@@ -105,9 +106,8 @@ class _SelectAProfessionalScreenState extends State<SelectAProfessionalScreen> {
                   employee: availableEmplyees[index],
                   enabled: true,
                   onTap: () {
-                    BappNavigator.pop(
-                      context,
-                      availableEmplyees[index],
+                    Get.back(
+                      result: availableEmplyees[index],
                     );
                   },
                 ),

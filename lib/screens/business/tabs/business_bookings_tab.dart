@@ -86,8 +86,7 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab>
                     ? SizedBox()
                     : FloatingActionButton(
                         onPressed: () {
-                          BappNavigator.dialog(
-                            context,
+                          Get.dialog(
                             BookingsTabAddOptions(
                               business: business,
                               selectedEmployee: _pickedEmployee()!,
@@ -102,8 +101,7 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab>
                 FloatingActionButtonLocation.centerFloat,
             body: Builder(builder: (_) {
               final employeeSelector = () async {
-                final e = await BappNavigator.push(
-                  context,
+                final e = await Get.to(
                   SelectAProfessionalScreen(
                     forDay: DateTime.now(),
                     business: business,
@@ -250,25 +248,21 @@ class _BookingsTabAddOptionsState extends State<BookingsTabAddOptions> {
               title: Text("Add Walk-In"),
               trailing: Icon(Icons.arrow_forward),
               onTap: () async {
-                final products = await BappNavigator.push(
-                  context,
+                final products = await Get.to(
                   BusinessProfileServicesScreen(
                     business: widget.business,
                   ),
                 );
                 if (products is List && products.isNotEmpty) {
                   final ps = products as List<Product>;
-                  final timeSlot = await BappNavigator.push(
-                      context,
-                      SelectTimeSlotScreen(
-                          business: widget.business,
-                          employee: widget.selectedEmployee,
-                          durationOfServices: Duration(
-                              minutes: ps.fold(
-                                  0, (previousValue, e) => e.duration ?? 0))));
+                  final timeSlot = await Get.to(SelectTimeSlotScreen(
+                      business: widget.business,
+                      employee: widget.selectedEmployee,
+                      durationOfServices: Duration(
+                          minutes: ps.fold(
+                              0, (previousValue, e) => e.duration ?? 0))));
                   if (timeSlot is Timing) {
-                    final user = await BappNavigator.push<User>(
-                      context,
+                    final user = await Get.to(
                       AddCustomerDetails(),
                     );
                     if (user is User) {

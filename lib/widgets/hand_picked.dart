@@ -65,8 +65,7 @@ class _HandPickedScrollerState extends State<HandPickedScroller> {
                 return HandPickedBox(
                   handPicked: list[i],
                   onPicked: () {
-                    BappNavigator.push(
-                      context,
+                    Get.to(
                       BranchesResultScreen(
                         branchList: list[i].businesses,
                         title: list[i].name ?? "",

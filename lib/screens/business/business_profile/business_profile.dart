@@ -20,7 +20,8 @@ import 'package:bapp/widgets/tiles/error.dart';
 import 'package:bapp/widgets/tiles/viewable_rating_tile.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:get/state_manager.dart';
+import 'package:get/get.dart';
+
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class BusinessProfileScreen extends StatefulWidget {
@@ -109,8 +110,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                   }
                                   screenLoading(true);
                                   await _saveScreenData(booking()!);
-                                  final employee = await BappNavigator.push(
-                                    context,
+                                  final employee = await Get.to(
                                     SelectAProfessionalScreen(
                                       business: business,
                                       forDay: DateTime.now(),
@@ -119,8 +119,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                     ),
                                   );
                                   if (employee is Employee) {
-                                    final timeSlot = await BappNavigator.push(
-                                      context,
+                                    final timeSlot = await Get.to(
                                       SelectTimeSlotScreen(
                                         business: widget.business,
                                         employee: employee,
@@ -138,8 +137,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                       ),
                                     );
                                     if (timeSlot is Timing) {
-                                      BappNavigator.pushAndRemoveAll(
-                                        context,
+                                      Get.offAll(
                                         ContextualMessageScreen(
                                           buttonText: "Go to bookings",
                                           init: () async {
@@ -153,11 +151,9 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                             await BookingX.i.clearCart();
                                           },
                                           onButtonPressed: (context) {
-                                            BappNavigator.pushAndRemoveAll(
-                                                context,
-                                                Bapp(
-                                                  goToBookings: true,
-                                                ));
+                                            Get.offAll(Bapp(
+                                              goToBookings: true,
+                                            ));
                                           },
                                           message:
                                               "Your booking has been placed, waiting to be accepted by the business, track it the bookings tab",
@@ -175,8 +171,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                 title: title,
                                 subTitle: subTitle,
                                 onPressed: () async {
-                                  await BappNavigator.push(
-                                    context,
+                                  await Get.to(
                                     LoginScreen(),
                                   );
                                   user = UserX.i.user();
@@ -185,8 +180,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                   }
                                   screenLoading(true);
                                   await _saveScreenData(booking()!);
-                                  final employee = await BappNavigator.push(
-                                    context,
+                                  final employee = await Get.to(
                                     SelectAProfessionalScreen(
                                       business: business,
                                       forDay: DateTime.now(),
@@ -195,8 +189,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                     ),
                                   );
                                   if (employee is Employee) {
-                                    final timeSlot = await BappNavigator.push(
-                                      context,
+                                    final timeSlot = await Get.to(
                                       SelectTimeSlotScreen(
                                         business: widget.business,
                                         employee: employee,
@@ -214,8 +207,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                       ),
                                     );
                                     if (timeSlot is Timing) {
-                                      BappNavigator.pushAndRemoveAll(
-                                        context,
+                                      Get.offAll(
                                         ContextualMessageScreen(
                                           buttonText: "Back to Home",
                                           init: () async {
@@ -229,8 +221,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                             await BookingX.i.clearCart();
                                           },
                                           onButtonPressed: (context) {
-                                            BappNavigator.pushAndRemoveAll(
-                                                context, Bapp());
+                                            Get.offAll(Bapp());
                                           },
                                           message:
                                               "Your booking has been placed, waiting to be accepted by the business, track it the bookings tab",
@@ -292,9 +283,8 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                                               ),
                                                             )
                                                           : () async {
-                                                              await BappNavigator
-                                                                  .push(context,
-                                                                      LoginScreen());
+                                                              await Get.to(
+                                                                  LoginScreen());
                                                               setState(() {});
                                                             }()
                                                       : user?.favourites
@@ -331,8 +321,7 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                             business.images!.isNotEmpty
                                         ? GestureDetector(
                                             onTap: () {
-                                              BappNavigator.push(
-                                                context,
+                                              Get.to(
                                                 Gallery(
                                                     images: business.images!),
                                               );

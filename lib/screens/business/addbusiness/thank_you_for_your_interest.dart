@@ -10,6 +10,7 @@ import 'package:bapp/widgets/wheres_it_located.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:the_country_number/the_country_number.dart';
 import 'package:the_country_number_widgets/the_country_number_widgets.dart';
@@ -201,8 +202,7 @@ class _ThankYouForYourInterestScreenState
         onPressed: () {
           if (_key.currentState?.validate() ?? false) {
             if (_pickedLocation != null) {
-              BappNavigator.pushAndRemoveAll(
-                context,
+              Get.offAll(
                 ContextualMessageScreen(
                   message: widget.onBoard
                       ? "Business added to draft"

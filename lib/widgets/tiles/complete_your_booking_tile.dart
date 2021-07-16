@@ -7,6 +7,7 @@ import 'package:bapp/widgets/tiles/rr_list_tile.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
@@ -53,8 +54,7 @@ class CompleteYourBookingTile extends StatelessWidget {
                 contentPadding:
                     EdgeInsets.symmetric(horizontal: 15, vertical: 0),
                 onTap: () {
-                  BappNavigator.push(
-                    context,
+                  Get.to(
                     BusinessProfileScreen(business: business),
                   );
                 },

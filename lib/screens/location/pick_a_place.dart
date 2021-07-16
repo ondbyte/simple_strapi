@@ -12,7 +12,7 @@ import 'package:bapp/widgets/loading.dart';
 import 'package:bapp/widgets/tiles/error.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
-import 'package:get/state_manager.dart';
+import 'package:get/get.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class PickAPlaceScreen extends StatefulWidget {
@@ -73,14 +73,13 @@ class _PickAPlaceScreenState extends State<PickAPlaceScreen> {
                   trailing: Icon(Icons.arrow_forward_ios),
                   onTap: () async {
                     //cloudStore.getLocationsInCountry(e);
-                    final data = await BappNavigator.push(
-                      context,
+                    final data = await Get.to(
                       PickAPlaceScreen(
                         country: e,
                       ),
                     );
                     if (data != null) {
-                      BappNavigator.pop(context, data);
+                      Get.back(result: data);
                     }
                   },
                 ),
@@ -136,7 +135,7 @@ class _PickAPlaceScreenState extends State<PickAPlaceScreen> {
                     style: Theme.of(context).textTheme.subtitle1,
                   ),
                   onTap: () async {
-                    BappNavigator.pop(context, city);
+                    Get.back(result: city);
                   }),
               ...List.generate(
                 city.localities?.length ?? 0,
@@ -145,7 +144,7 @@ class _PickAPlaceScreenState extends State<PickAPlaceScreen> {
                     title: Text(city.localities?[index].name ?? "",
                         style: Theme.of(context).textTheme.subtitle2),
                     onTap: () async {
-                      BappNavigator.pop(context, city.localities?[index]);
+                      Get.back(result: city.localities?[index]);
                     }),
               ),
             ],

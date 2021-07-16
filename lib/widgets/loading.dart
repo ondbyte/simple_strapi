@@ -20,3 +20,20 @@ class LoadingWidget extends StatelessWidget {
     );
   }
 }
+
+class PopResistLoadingScreen extends StatefulWidget {
+  PopResistLoadingScreen({Key? key}) : super(key: key);
+
+  @override
+  _PopResistLoadingScreenState createState() => _PopResistLoadingScreenState();
+}
+
+class _PopResistLoadingScreenState extends State<PopResistLoadingScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: () async => false,
+      child: LoadingWidget(),
+    );
+  }
+}

@@ -47,7 +47,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                     try {
                       final user = await UserX.i
                           .loginWithEmailAndPassword(_email, _password, token);
-                      BappNavigator.pop(context, user);
+                      Get.back(result: user);
                     } catch (e) {
                       await Flushbar(
                         message: "Unable to login, are the details correct?",

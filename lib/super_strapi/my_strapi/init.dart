@@ -7,8 +7,8 @@ class StrapiSettings {
   StrapiSettings._i();
 
   Future init() async {
-    Strapi.i.shouldUseHttps = true;
-    Strapi.i.host = "api.thebapp.app";
+    Strapi.i.shouldUseHttps = false;
+    Strapi.i.host = "192.168.29.212:1337";
     Strapi.i.verbose = true;
     Strapi.i.maxListenersForAnObject = 8;
     Strapi.i.maxTimeOutInMillis = 60000;

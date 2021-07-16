@@ -27,7 +27,7 @@ import 'package:bapp/widgets/tiles/rr_list_tile.dart';
 import 'package:bapp/widgets/tiles/see_all_tile.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:get/state_manager.dart';
+import 'package:get/get.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
 class DiscoverTab extends StatefulWidget {
@@ -70,8 +70,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     title: "Featured Partners",
                     childPadding: EdgeInsets.fromLTRB(15, 0, 0, 0),
                     onSeeAll: () {
-                      BappNavigator.push(
-                        context,
+                      Get.to(
                         BranchesResultScreen(
                           title: "Featured Partners",
                           branchList: data,
@@ -97,8 +96,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                         onTap: () {
                           //Provider.of<BookingFlow>(context, listen: false)
                           //.branch = snap.data[i];
-                          BappNavigator.push(
-                            context,
+                          Get.to(
                             BusinessProfileScreen(
                               business: data[i],
                             ),
@@ -151,7 +149,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
       child: ListTile(
         dense: true,
         onTap: () {
-          BappNavigator.push(context, ChooseYourBusinessCategoryScreen());
+          Get.to(ChooseYourBusinessCategoryScreen());
         },
         title: Text("Own a business",
             style: Theme.of(context).textTheme.subtitle1),
@@ -223,8 +221,7 @@ class _DiscoverTabState extends State<DiscoverTab> {
                 locality: UserX.i.user()?.locality,
               );
         if (place is String) {
-          BappNavigator.push(
-            context,
+          Get.to(
             BranchesResultScreen(
               placeName: place,
               title: c.name ?? "",

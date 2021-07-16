@@ -208,8 +208,7 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab>
                                     horizontal: 8,
                                   ),
                                   onSelected: (booking) async {
-                                    await BappNavigator.push(
-                                      context,
+                                    await Get.to(
                                       BookingDetailsScreen(
                                         booking: booking,
                                         isCustomerView: false,
@@ -243,8 +242,7 @@ class _BusinessDashboardTabState extends State<BusinessDashboardTab>
                                     horizontal: 8,
                                   ),
                                   onSelected: (booking) async {
-                                    await BappNavigator.push(
-                                      context,
+                                    await Get.to(
                                       BookingDetailsScreen(
                                         booking: booking,
                                         isCustomerView: false,

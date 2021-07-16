@@ -10,6 +10,7 @@ import 'package:flushbar/flushbar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
 
@@ -149,7 +150,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
           "Get Started",
           hide: index != OnBoardingConfig.slides.length - 1,
           onPressed: () async {
-            BappNavigator.pop(context, true);
+            Get.back(result: true);
           },
         )
       ],

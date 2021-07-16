@@ -112,8 +112,7 @@ class _BookingsTabState extends State<BookingsTab> {
             itemBuilder: (_, i) {
               return BookingTile(
                 onTap: (booking) {
-                  BappNavigator.push(
-                    context,
+                  Get.to(
                     BookingDetailsScreen(
                       booking: booking,
                     ),
