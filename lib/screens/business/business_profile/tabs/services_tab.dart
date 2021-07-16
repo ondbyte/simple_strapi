@@ -170,8 +170,11 @@ class _CatalogueItemWidgetState extends State<CatalogueItemWidget> {
     final image =
         images.isNotEmpty ? images.first : widget.item.productReference?.image;
     return ListTile(
+      isThreeLine: true,
+      dense: true,
       contentPadding: const EdgeInsets.symmetric(vertical: 8),
-      title: Text(widget.item.nameOverride ?? "no name, inform yadu"),
+      title: Text(widget.item.nameOverride ?? "no name, inform yadu",
+          style: Theme.of(context).textTheme.headline5),
       subtitle: _makeSubTitle(context),
       trailing: _selected ? cancelBookingButton() : bookButton(),
       leading: image is StrapiFile
@@ -231,6 +234,7 @@ class _CatalogueItemWidgetState extends State<CatalogueItemWidget> {
     return Text(
       s,
       maxLines: 2,
+      style: Theme.of(context).textTheme.bodyText1,
     );
   }
 }

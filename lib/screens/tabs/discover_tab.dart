@@ -240,30 +240,25 @@ class _DiscoverTabState extends State<DiscoverTab> {
           );
         }
       },
-      child: RRShape(
-        child: Container(
-          padding: EdgeInsets.all(10),
-          width: 180,
-          height: 120,
-          decoration: BoxDecoration(
-            image: DecorationImage(
-                colorFilter:
-                    ColorFilter.mode(Colors.black26, BlendMode.multiply),
-                image: CachedNetworkImageProvider(
-                  c.image?.url,
-                ),
-                fit: BoxFit.cover),
-          ),
-          child: Align(
-            alignment: Alignment.bottomLeft,
-            child: Text(
-              c.name ?? "no cat name, inform yadu",
-              style: Theme.of(context).textTheme.headline4?.apply(
-                    color: Theme.of(context).primaryColorLight,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: EdgeInsets.all(10),
+            width: 180,
+            height: 120,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(6)),
+              image: DecorationImage(
+                  image: CachedNetworkImageProvider(
+                    c.image?.url,
                   ),
+                  fit: BoxFit.cover),
             ),
           ),
-        ),
+          Text(c.name ?? "no cat name, inform yadu",
+              style: Theme.of(context).textTheme.subtitle1),
+        ],
       ),
     );
   }
@@ -328,8 +323,8 @@ class _DiscoverTabState extends State<DiscoverTab> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Text(
-                        "Top Services on Bapp",
-                        style: Theme.of(context).textTheme.headline2,
+                        "Top Services",
+                        style: Theme.of(context).textTheme.headline3,
                       ),
                     ),
                     const SizedBox(

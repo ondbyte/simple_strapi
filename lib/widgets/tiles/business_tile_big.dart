@@ -94,7 +94,7 @@ class BusinessTileWidget extends StatelessWidget {
           final image = images.isNotEmpty ? images.first : null;
           return ListTile(
             onTap: onTap,
-            dense: true,
+            isThreeLine: true,
             contentPadding: padding ?? EdgeInsets.zero,
             title: Text(
               branch.name ?? "",
@@ -106,6 +106,9 @@ class BusinessTileWidget extends StatelessWidget {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(
+                  height: 3,
+                ),
                 Text(
                     // branch.address?.address ?? "",
                     branch.address?.locality?.name ??
@@ -114,7 +117,7 @@ class BusinessTileWidget extends StatelessWidget {
                     maxLines: 1,
                     style: Theme.of(context).textTheme.bodyText1),
                 const SizedBox(
-                  height: 2,
+                  height: 5,
                 ),
                 Text(
                     // branch.address?.address ?? "",

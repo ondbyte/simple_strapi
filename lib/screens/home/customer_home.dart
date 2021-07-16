@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:bapp/config/config.dart';
 import 'package:bapp/config/constants.dart';
 import 'package:bapp/helpers/helper.dart';
@@ -14,6 +13,7 @@ import 'package:bapp/widgets/app/menu.dart';
 import 'package:bapp/widgets/size_provider.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
+import 'package:badges/badges.dart';
 
 class CustomerHome extends StatefulWidget {
   final int? tab;
@@ -148,23 +148,17 @@ class _PendingUpdatesIconState extends State<PendingUpdatesIcon> {
             builder: (_) {
               final totalUpdates = 2;
               return totalUpdates > 0
-                  ? SizedBox.fromSize(
-                      size: _childSize,
-                      child: Align(
-                        alignment: Alignment.topRight,
-                        child: Container(
-                          width: _childSize?.width ?? 0 / 2,
-                          height: _childSize?.width ?? 0 / 2,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle, color: Colors.redAccent),
-                          alignment: Alignment.center,
-                          child: Text(
-                            "${totalUpdates < 10 ? totalUpdates : 9}",
-                            style: Theme.of(context).textTheme.caption?.apply(
-                                  color: Colors.white,
-                                ),
-                          ),
-                        ),
+                  ? Badge(
+                      badgeColor: Theme.of(context).errorColor,
+                      position: BadgePosition.topEnd(top: -10, end: -10),
+                      badgeContent:
+                          Text("${totalUpdates < 10 ? totalUpdates : 9}",
+                              style: Theme.of(context).textTheme.caption?.apply(
+                                    color: Colors.white,
+                                  )),
+                      child: SizedBox(
+                        height: 20,
+                        width: 20,
                       ),
                     )
                   : SizedBox();

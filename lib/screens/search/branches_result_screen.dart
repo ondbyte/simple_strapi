@@ -98,7 +98,7 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
                             itemBuilder: (_, i) {
                               return BusinessTileWidget(
                                 titleStyle:
-                                    Theme.of(context).textTheme.subtitle1 ??
+                                    Theme.of(context).textTheme.headline5 ??
                                         TextStyle(),
                                 withImage: true,
                                 padding: const EdgeInsets.symmetric(

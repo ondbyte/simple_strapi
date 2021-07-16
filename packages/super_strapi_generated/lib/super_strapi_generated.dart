@@ -227,6 +227,8 @@ class City {
         "business_category": toServer
             ? business_category?.id
             : business_category?._toMap(level: level + level),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -249,7 +251,7 @@ class City {
 
   static _CityFields get fields => _CityFields.i;
   @override
-  String toString() => "[Strapi Collection Type City]n" + _toMap().toString();
+  String toString() => "[Strapi Collection Type City]\n" + _toMap().toString();
 }
 
 class Cities {
@@ -654,6 +656,8 @@ class HandPicked {
         "image": null
       else if (!_emptyFields.image && image != null)
         "image": toServer ? image?.id : image?._toMap(level: level + level),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -677,7 +681,7 @@ class HandPicked {
   static _HandPickedFields get fields => _HandPickedFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type HandPicked]n" + _toMap().toString();
+      "[Strapi Collection Type HandPicked]\n" + _toMap().toString();
 }
 
 class HandPickeds {
@@ -1100,6 +1104,8 @@ class Employee {
         "starRating": null
       else if (!_emptyFields.starRating && starRating != null)
         "starRating": starRating,
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -1123,7 +1129,7 @@ class Employee {
   static _EmployeeFields get fields => _EmployeeFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type Employee]n" + _toMap().toString();
+      "[Strapi Collection Type Employee]\n" + _toMap().toString();
 }
 
 class Employees {
@@ -1658,6 +1664,8 @@ class Booking {
         "images": images
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -1681,7 +1689,7 @@ class Booking {
   static _BookingFields get fields => _BookingFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type Booking]n" + _toMap().toString();
+      "[Strapi Collection Type Booking]\n" + _toMap().toString();
 }
 
 class Bookings {
@@ -1918,6 +1926,425 @@ class _BookingEmptyFields {
   bool images = false;
 }
 
+enum Type { instant, scheduled }
+
+class Message {
+  Message.fromID(this.id)
+      : _synced = false,
+        subject = null,
+        body = null,
+        cta = null,
+        image = null,
+        recipients = null,
+        type = null,
+        sendAt = null,
+        createdAt = null,
+        updatedAt = null;
+
+  Message.fresh(
+      {this.subject,
+      this.body,
+      this.cta,
+      this.image,
+      this.recipients,
+      this.type,
+      this.sendAt})
+      : _synced = false,
+        createdAt = null,
+        updatedAt = null,
+        id = null;
+
+  Message._synced(
+      this.subject,
+      this.body,
+      this.cta,
+      this.image,
+      this.recipients,
+      this.type,
+      this.sendAt,
+      this.createdAt,
+      this.updatedAt,
+      this.id)
+      : _synced = true;
+
+  Message._unsynced(
+      this.subject,
+      this.body,
+      this.cta,
+      this.image,
+      this.recipients,
+      this.type,
+      this.sendAt,
+      this.createdAt,
+      this.updatedAt,
+      this.id)
+      : _synced = false;
+
+  final bool _synced;
+
+  final String? subject;
+
+  final String? body;
+
+  final String? cta;
+
+  final StrapiFile? image;
+
+  final List<Recipients>? recipients;
+
+  final Type? type;
+
+  final DateTime? sendAt;
+
+  final DateTime? createdAt;
+
+  final DateTime? updatedAt;
+
+  final String? id;
+
+  static final collectionName = "messages";
+
+  _MessageEmptyFields _emptyFields = _MessageEmptyFields();
+
+  bool get synced => _synced;
+  Message copyWIth(
+          {String? subject,
+          String? body,
+          String? cta,
+          StrapiFile? image,
+          List<Recipients>? recipients,
+          Type? type,
+          DateTime? sendAt}) =>
+      Message._unsynced(
+          subject ?? this.subject,
+          body ?? this.body,
+          cta ?? this.cta,
+          image ?? this.image,
+          recipients ?? this.recipients,
+          type ?? this.type,
+          sendAt ?? this.sendAt,
+          this.createdAt,
+          this.updatedAt,
+          this.id);
+  Message setNull(
+      {bool subject = false,
+      bool body = false,
+      bool cta = false,
+      bool image = false,
+      bool recipients = false,
+      bool type = false,
+      bool sendAt = false}) {
+    return Message._unsynced(
+        subject ? null : this.subject,
+        body ? null : this.body,
+        cta ? null : this.cta,
+        image ? null : this.image,
+        recipients ? null : this.recipients,
+        type ? null : this.type,
+        sendAt ? null : this.sendAt,
+        this.createdAt,
+        this.updatedAt,
+        this.id)
+      .._emptyFields.subject = subject
+      .._emptyFields.body = body
+      .._emptyFields.cta = cta
+      .._emptyFields.image = image
+      .._emptyFields.recipients = recipients
+      .._emptyFields.type = type
+      .._emptyFields.sendAt = sendAt;
+  }
+
+  static Message fromSyncedMap(Map<dynamic, dynamic> map) => Message._synced(
+      map["subject"],
+      map["body"],
+      map["cta"],
+      StrapiUtils.objFromMap<StrapiFile>(
+          map["image"], (e) => StrapiFiles._fromIDorData(e)),
+      StrapiUtils.objFromListOfMap<Recipients>(
+          map["recipients"], (e) => Recipients.fromMap(e)),
+      StrapiUtils.toEnum<Type>(Type.values, map["type"]),
+      StrapiUtils.parseDateTime(map["sendAt"]),
+      StrapiUtils.parseDateTime(map["createdAt"]),
+      StrapiUtils.parseDateTime(map["updatedAt"]),
+      map["id"]);
+  static Message? fromMap(Map<String, dynamic> map) => Message._unsynced(
+      map["subject"],
+      map["body"],
+      map["cta"],
+      StrapiUtils.objFromMap<StrapiFile>(
+          map["image"], (e) => StrapiFiles._fromIDorData(e)),
+      StrapiUtils.objFromListOfMap<Recipients>(
+          map["recipients"], (e) => Recipients.fromMap(e)),
+      StrapiUtils.toEnum<Type>(Type.values, map["type"]),
+      StrapiUtils.parseDateTime(map["sendAt"]),
+      StrapiUtils.parseDateTime(map["createdAt"]),
+      StrapiUtils.parseDateTime(map["updatedAt"]),
+      map["id"]);
+  Map<String, dynamic> toMap() => _toMap(level: -1);
+  Map<String, dynamic> _toMap({int level = 0}) {
+    final toServer = level == 0;
+    return {
+      if (_emptyFields.subject)
+        "subject": null
+      else if (!_emptyFields.subject && subject != null)
+        "subject": subject,
+      if (_emptyFields.body)
+        "body": null
+      else if (!_emptyFields.body && body != null)
+        "body": body,
+      if (_emptyFields.cta)
+        "cta": null
+      else if (!_emptyFields.cta && cta != null)
+        "cta": cta,
+      if (_emptyFields.image)
+        "image": null
+      else if (!_emptyFields.image && image != null)
+        "image": toServer ? image?.id : image?._toMap(level: level + level),
+      if (_emptyFields.recipients)
+        "recipients": []
+      else if (!_emptyFields.recipients && recipients != null)
+        "recipients":
+            recipients?.map((e) => e._toMap(level: level + level)).toList(),
+      if (_emptyFields.type)
+        "type": null
+      else if (!_emptyFields.type && type != null)
+        "type": StrapiUtils.enumToString(type),
+      if (_emptyFields.sendAt)
+        "sendAt": null
+      else if (!_emptyFields.sendAt && sendAt != null)
+        "sendAt": sendAt?.toIso8601String(),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
+      "id": id
+    };
+  }
+
+  Future<Message> sync() async {
+    if (!synced) {
+      return this;
+    }
+    final _id = this.id;
+    if (_id is! String) {
+      return this;
+    }
+    final response = await Messages.findOne(_id);
+    if (response is Message) {
+      return response;
+    } else {
+      return this;
+    }
+  }
+
+  static _MessageFields get fields => _MessageFields.i;
+  @override
+  String toString() =>
+      "[Strapi Collection Type Message]\n" + _toMap().toString();
+}
+
+class Messages {
+  static const collectionName = "messages";
+
+  static List<Message?> fromIDs(List<String> ids) {
+    if (ids.isEmpty) {
+      return [];
+    }
+    return ids.map((id) => Message.fromID(id)).toList();
+  }
+
+  static Future<Message?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return Message.fromSyncedMap(mapResponse);
+    }
+  }
+
+  static Future<List<Message>> findMultiple({int limit = 16}) async {
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => Message.fromSyncedMap(map)).toList();
+    }
+    return [];
+  }
+
+  static Future<Message?> create(Message message) async {
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: message._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return Message.fromSyncedMap(map);
+    }
+  }
+
+  static Future<Message?> update(Message message) async {
+    final id = message.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
+        collection: collectionName,
+        id: id,
+        data: message._toMap(level: 0),
+      );
+      if (map.isNotEmpty) {
+        return Message.fromSyncedMap(map);
+      }
+    } else {
+      sPrint("id is null while updating");
+    }
+  }
+
+  static Future<int> count() async {
+    return await StrapiCollection.count(collectionName);
+  }
+
+  static Future<Message?> delete(Message message) async {
+    final id = message.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return Message.fromSyncedMap(map);
+      }
+    } else {
+      sPrint("id is null while deleting");
+    }
+  }
+
+  static Message? _fromIDorData(idOrData) {
+    if (idOrData is String) {
+      return Message.fromID(idOrData);
+    }
+    if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return Message.fromID(id);
+      }
+      return Message.fromSyncedMap(idOrData);
+    }
+    return null;
+  }
+
+  static Future<List<Message>> executeQuery(StrapiCollectionQuery query,
+      {int maxTimeOutInMillis = 15000}) async {
+    final queryString = query.query(
+      collectionName: collectionName,
+    );
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <Message>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
+              if (o is Message) {
+                list.add(o);
+              }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is Message) {
+              return [o];
+            }
+          }
+        }
+      }
+    }
+    return [];
+  }
+
+  static Widget listenerWidget({
+    Key? key,
+    required Message strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      Message,
+      bool,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<Message>(
+      key: key,
+      strapiObject: strapiObject,
+      generator: Message.fromMap,
+      builder: builder,
+      sync: sync,
+    );
+  }
+}
+
+class _MessageFields {
+  _MessageFields._i();
+
+  static final _MessageFields i = _MessageFields._i();
+
+  final subject = StrapiLeafField("subject");
+
+  final body = StrapiLeafField("body");
+
+  final cta = StrapiLeafField("cta");
+
+  final image = StrapiModelField("image");
+
+  final recipients = StrapiComponentField("recipients");
+
+  final type = StrapiLeafField("type");
+
+  final sendAt = StrapiLeafField("sendAt");
+
+  final createdAt = StrapiLeafField("createdAt");
+
+  final updatedAt = StrapiLeafField("updatedAt");
+
+  final id = StrapiLeafField("id");
+
+  List<StrapiField> call() {
+    return [
+      subject,
+      body,
+      cta,
+      image,
+      recipients,
+      type,
+      sendAt,
+      createdAt,
+      updatedAt,
+      id
+    ];
+  }
+}
+
+class _MessageEmptyFields {
+  bool subject = false;
+
+  bool body = false;
+
+  bool cta = false;
+
+  bool image = false;
+
+  bool recipients = false;
+
+  bool type = false;
+
+  bool sendAt = false;
+}
+
 class Locality {
   Locality.fromID(this.id)
       : _synced = false,
@@ -2033,6 +2460,8 @@ class Locality {
         "coordinates": null
       else if (!_emptyFields.coordinates && coordinates != null)
         "coordinates": coordinates?._toMap(level: level + level),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -2056,7 +2485,7 @@ class Locality {
   static _LocalityFields get fields => _LocalityFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type Locality]n" + _toMap().toString();
+      "[Strapi Collection Type Locality]\n" + _toMap().toString();
 }
 
 class Localities {
@@ -2427,6 +2856,8 @@ class Update {
         "end": null
       else if (!_emptyFields.end && end != null)
         "end": end?.toIso8601String(),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -2449,7 +2880,8 @@ class Update {
 
   static _UpdateFields get fields => _UpdateFields.i;
   @override
-  String toString() => "[Strapi Collection Type Update]n" + _toMap().toString();
+  String toString() =>
+      "[Strapi Collection Type Update]\n" + _toMap().toString();
 }
 
 class Updates {
@@ -2750,6 +3182,8 @@ class PushNotification {
         "user": null
       else if (!_emptyFields.user && user != null)
         "user": toServer ? user?.id : user?._toMap(level: level + level),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -2773,7 +3207,7 @@ class PushNotification {
   static _PushNotificationFields get fields => _PushNotificationFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type PushNotification]n" + _toMap().toString();
+      "[Strapi Collection Type PushNotification]\n" + _toMap().toString();
 }
 
 class PushNotifications {
@@ -3159,6 +3593,8 @@ class Country {
         "cities": cities
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -3182,7 +3618,7 @@ class Country {
   static _CountryFields get fields => _CountryFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type Country]n" + _toMap().toString();
+      "[Strapi Collection Type Country]\n" + _toMap().toString();
 }
 
 class Countries {
@@ -3798,6 +4234,8 @@ class Business {
         "customer_type": null
       else if (!_emptyFields.customer_type && customer_type != null)
         "customer_type": StrapiUtils.enumToString(customer_type),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -3821,7 +4259,7 @@ class Business {
   static _BusinessFields get fields => _BusinessFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type Business]n" + _toMap().toString();
+      "[Strapi Collection Type Business]\n" + _toMap().toString();
 }
 
 class Businesses {
@@ -4208,6 +4646,8 @@ class BusinessCategory {
         "cities": cities
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -4231,7 +4671,7 @@ class BusinessCategory {
   static _BusinessCategoryFields get fields => _BusinessCategoryFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type BusinessCategory]n" + _toMap().toString();
+      "[Strapi Collection Type BusinessCategory]\n" + _toMap().toString();
 }
 
 class BusinessCategories {
@@ -4555,6 +4995,8 @@ class Partner {
         "about": null
       else if (!_emptyFields.about && about != null)
         "about": about,
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -4578,7 +5020,7 @@ class Partner {
   static _PartnerFields get fields => _PartnerFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type Partner]n" + _toMap().toString();
+      "[Strapi Collection Type Partner]\n" + _toMap().toString();
 }
 
 class Partners {
@@ -4862,6 +5304,8 @@ class DefaultData {
         "customId": null
       else if (!_emptyFields.customId && customId != null)
         "customId": customId,
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -4885,7 +5329,7 @@ class DefaultData {
   static _DefaultDataFields get fields => _DefaultDataFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type DefaultData]n" + _toMap().toString();
+      "[Strapi Collection Type DefaultData]\n" + _toMap().toString();
 }
 
 class DefaultDatas {
@@ -5164,6 +5608,8 @@ class MasterProduct {
         "image": null
       else if (!_emptyFields.image && image != null)
         "image": toServer ? image?.id : image?._toMap(level: level + level),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -5187,7 +5633,7 @@ class MasterProduct {
   static _MasterProductFields get fields => _MasterProductFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type MasterProduct]n" + _toMap().toString();
+      "[Strapi Collection Type MasterProduct]\n" + _toMap().toString();
 }
 
 class MasterProducts {
@@ -5488,6 +5934,8 @@ class BusinessFeature {
       else if (!_emptyFields.business && business != null)
         "business":
             toServer ? business?.id : business?._toMap(level: level + level),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -5511,7 +5959,7 @@ class BusinessFeature {
   static _BusinessFeatureFields get fields => _BusinessFeatureFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type BusinessFeature]n" + _toMap().toString();
+      "[Strapi Collection Type BusinessFeature]\n" + _toMap().toString();
 }
 
 class BusinessFeatures {
@@ -5898,6 +6346,8 @@ class Review {
       else if (!_emptyFields.booking && booking != null)
         "booking":
             toServer ? booking?.id : booking?._toMap(level: level + level),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -5920,7 +6370,8 @@ class Review {
 
   static _ReviewFields get fields => _ReviewFields.i;
   @override
-  String toString() => "[Strapi Collection Type Review]n" + _toMap().toString();
+  String toString() =>
+      "[Strapi Collection Type Review]\n" + _toMap().toString();
 }
 
 class Reviews {
@@ -6268,6 +6719,8 @@ class Role {
         "users": users
             ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
             .toList(),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -6290,7 +6743,7 @@ class Role {
 
   static _RoleFields get fields => _RoleFields.i;
   @override
-  String toString() => "[Strapi Collection Type Role]n" + _toMap().toString();
+  String toString() => "[Strapi Collection Type Role]\n" + _toMap().toString();
 }
 
 class Roles {
@@ -6945,6 +7398,8 @@ class User {
           authenticatedUserType != null)
         "authenticatedUserType":
             StrapiUtils.enumToString(authenticatedUserType),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -6967,7 +7422,7 @@ class User {
 
   static _UserFields get fields => _UserFields.i;
   @override
-  String toString() => "[Strapi Collection Type User]n" + _toMap().toString();
+  String toString() => "[Strapi Collection Type User]\n" + _toMap().toString();
 }
 
 class Users {
@@ -7417,6 +7872,8 @@ class Permission {
         "role": null
       else if (!_emptyFields.role && role != null)
         "role": toServer ? role?.id : role?._toMap(level: level + level),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -7440,7 +7897,7 @@ class Permission {
   static _PermissionFields get fields => _PermissionFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type Permission]n" + _toMap().toString();
+      "[Strapi Collection Type Permission]\n" + _toMap().toString();
 }
 
 class Permissions {
@@ -7959,6 +8416,8 @@ class StrapiFile {
         "related": []
       else if (!_emptyFields.related && related != null)
         "related": related,
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
       "id": id
     };
   }
@@ -7982,7 +8441,7 @@ class StrapiFile {
   static _StrapiFileFields get fields => _StrapiFileFields.i;
   @override
   String toString() =>
-      "[Strapi Collection Type StrapiFile]n" + _toMap().toString();
+      "[Strapi Collection Type StrapiFile]\n" + _toMap().toString();
 }
 
 class StrapiFiles {
@@ -8277,7 +8736,7 @@ class ProductCategory {
   static _ProductCategoryFields get fields => _ProductCategoryFields.i;
   @override
   String toString() =>
-      "[Strapi Component Type ProductCategory]: n" + _toMap().toString();
+      "[Strapi Component Type ProductCategory]: \n" + _toMap().toString();
 }
 
 class _ProductCategoryFields {
@@ -8370,7 +8829,7 @@ class Product {
   static _ProductFields get fields => _ProductFields.i;
   @override
   String toString() =>
-      "[Strapi Component Type Product]: n" + _toMap().toString();
+      "[Strapi Component Type Product]: \n" + _toMap().toString();
 }
 
 class _ProductFields {
@@ -8444,7 +8903,7 @@ class Address {
   static _AddressFields get fields => _AddressFields.i;
   @override
   String toString() =>
-      "[Strapi Component Type Address]: n" + _toMap().toString();
+      "[Strapi Component Type Address]: \n" + _toMap().toString();
 }
 
 class _AddressFields {
@@ -8518,7 +8977,7 @@ class Package {
   static _PackageFields get fields => _PackageFields.i;
   @override
   String toString() =>
-      "[Strapi Component Type Package]: n" + _toMap().toString();
+      "[Strapi Component Type Package]: \n" + _toMap().toString();
 }
 
 class _PackageFields {
@@ -8585,7 +9044,7 @@ class Timing {
   static _TimingFields get fields => _TimingFields.i;
   @override
   String toString() =>
-      "[Strapi Component Type Timing]: n" + _toMap().toString();
+      "[Strapi Component Type Timing]: \n" + _toMap().toString();
 }
 
 class _TimingFields {
@@ -8639,7 +9098,7 @@ class DayTiming {
   static _DayTimingFields get fields => _DayTimingFields.i;
   @override
   String toString() =>
-      "[Strapi Component Type DayTiming]: n" + _toMap().toString();
+      "[Strapi Component Type DayTiming]: \n" + _toMap().toString();
 }
 
 class _DayTimingFields {
@@ -8688,7 +9147,7 @@ class Favourites {
   static _FavouritesFields get fields => _FavouritesFields.i;
   @override
   String toString() =>
-      "[Strapi Component Type Favourites]: n" + _toMap().toString();
+      "[Strapi Component Type Favourites]: \n" + _toMap().toString();
 }
 
 class _FavouritesFields {
@@ -8734,7 +9193,7 @@ class Holiday {
   static _HolidayFields get fields => _HolidayFields.i;
   @override
   String toString() =>
-      "[Strapi Component Type Holiday]: n" + _toMap().toString();
+      "[Strapi Component Type Holiday]: \n" + _toMap().toString();
 }
 
 class _HolidayFields {
@@ -8778,7 +9237,7 @@ class Coordinates {
   static _CoordinatesFields get fields => _CoordinatesFields.i;
   @override
   String toString() =>
-      "[Strapi Component Type Coordinates]: n" + _toMap().toString();
+      "[Strapi Component Type Coordinates]: \n" + _toMap().toString();
 }
 
 class _CoordinatesFields {
@@ -8799,4 +9258,62 @@ class _CoordinatesEmptyFields {
   bool latitude = false;
 
   bool longitude = false;
+}
+
+class Recipients {
+  Recipients._unsynced(this.users_permissions_user, this.read, this.readOn);
+
+  Recipients({this.users_permissions_user, this.read, this.readOn});
+
+  final User? users_permissions_user;
+
+  final bool? read;
+
+  final DateTime? readOn;
+
+  static Recipients? fromMap(Map<String, dynamic> map) => Recipients._unsynced(
+      StrapiUtils.objFromMap<User>(
+          map["users_permissions_user"], (e) => Users._fromIDorData(e)),
+      StrapiUtils.parseBool(map["read"]),
+      StrapiUtils.parseDateTime(map["readOn"]));
+  Map<String, dynamic> toMap() => _toMap(level: -1);
+  Map<String, dynamic> _toMap({int level = 0}) {
+    final toServer = level == 0;
+    return {
+      "users_permissions_user": toServer
+          ? users_permissions_user?.id
+          : users_permissions_user?._toMap(level: level + level),
+      "read": read,
+      "readOn": readOn?.toIso8601String()
+    };
+  }
+
+  static _RecipientsFields get fields => _RecipientsFields.i;
+  @override
+  String toString() =>
+      "[Strapi Component Type Recipients]: \n" + _toMap().toString();
+}
+
+class _RecipientsFields {
+  _RecipientsFields._i();
+
+  static final _RecipientsFields i = _RecipientsFields._i();
+
+  final users_permissions_user = StrapiModelField("users_permissions_user");
+
+  final read = StrapiLeafField("read");
+
+  final readOn = StrapiLeafField("readOn");
+
+  String call() {
+    return "{users_permissions_user{id},read,readOn}";
+  }
+}
+
+class _RecipientsEmptyFields {
+  bool users_permissions_user = false;
+
+  bool read = false;
+
+  bool readOn = false;
 }
