@@ -82,7 +82,7 @@ class _EmailLoginScreenState extends State<EmailLoginScreen> {
                   },
                   decoration: InputDecoration(labelText: "Email"),
                   validator: (s) =>
-                      isValidEmail(s) ? null : "Enter a valid email",
+                      GetUtils.isEmail(s ?? "") ? null : "Enter a valid email",
                 ),
                 SizedBox(
                   height: 16,

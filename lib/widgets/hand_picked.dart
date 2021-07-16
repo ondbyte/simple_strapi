@@ -7,6 +7,7 @@ import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
 import 'package:bapp/widgets/app/bapp_navigator_widget.dart';
 import 'package:bapp/widgets/loading.dart';
+import 'package:bapp/widgets/location_switch.dart';
 import 'package:bapp/widgets/tiles/error.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
 import 'package:flutter/material.dart';
@@ -26,12 +27,17 @@ class _HandPickedScrollerState extends State<HandPickedScroller> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      final city = UserX.i.userNotPresent
-          ? DefaultDataX.i.defaultData()?.city
-          : UserX.i.user()?.city;
-      final locality = UserX.i.userNotPresent
-          ? DefaultDataX.i.defaultData()?.locality
-          : UserX.i.user()?.locality;
+      UserX.i.user();
+      DefaultDataX.i.defaultData();
+      final location = getLocation();
+      City? city;
+      Locality? locality;
+      if (location is City) {
+        city = location;
+      }
+      if (location is Locality) {
+        locality = location;
+      }
       return TapToReFetch<List<HandPicked>>(
         fetcher: () => HandPickedX.i.getAll(
           city,

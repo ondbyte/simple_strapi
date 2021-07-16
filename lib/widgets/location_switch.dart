@@ -3,6 +3,7 @@ import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/location/pick_a_place.dart';
 import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
+import 'package:bapp/super_strapi/my_strapi/localityX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x.dart';
 import 'package:feather_icons_flutter/feather_icons_flutter.dart';
@@ -25,10 +26,10 @@ class _LocationSwitchState extends State<LocationSwitch> {
     return GestureDetector(
       onTap: () async {
         final data = await Get.to(PickAPlaceScreen());
-        if (data is City) {
-          await DefaultDataX.i.setLocalityOrCity(city: data);
+        if (data != null) {
+          setLocation(data);
         } else {
-          await DefaultDataX.i.setLocalityOrCity(locality: data);
+          bPrint("No location is picked");
         }
       },
       child: Row(
@@ -68,5 +69,33 @@ class _LocationSwitchState extends State<LocationSwitch> {
         ],
       ),
     );
+  }
+}
+
+Future setLocation(cityOrLocality) async {
+  if (UserX.i.user() == null) {
+    if (cityOrLocality is City) {
+      await DefaultDataX.i.setLocalityOrCity(city: cityOrLocality);
+    } else {
+      await DefaultDataX.i.setLocalityOrCity(locality: cityOrLocality);
+    }
+  } else {
+    if (cityOrLocality is Locality) {
+      await UserX.i.setLocalityOrCity(locality: cityOrLocality);
+    } else {
+      await UserX.i.setLocalityOrCity(city: cityOrLocality);
+    }
+  }
+}
+
+dynamic getLocation() {
+  if (UserX.i.user() == null) {
+    final city = DefaultDataX.i.defaultData()?.city;
+    final locality = DefaultDataX.i.defaultData()?.locality;
+    return city ?? locality;
+  } else {
+    final city = UserX.i.user()?.city;
+    final locality = UserX.i.user()?.locality;
+    return city ?? locality;
   }
 }

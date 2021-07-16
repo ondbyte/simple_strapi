@@ -13,12 +13,14 @@ import 'package:bapp/stores/cloud_store.dart';
 import 'package:bapp/super_strapi/my_strapi/businessX.dart';
 import 'package:bapp/super_strapi/my_strapi/categoryX.dart';
 import 'package:bapp/super_strapi/my_strapi/defaultDataX.dart';
+import 'package:bapp/super_strapi/my_strapi/featuredX.dart';
 import 'package:bapp/super_strapi/my_strapi/localityX.dart';
 import 'package:bapp/super_strapi/my_strapi/userX.dart';
 import 'package:bapp/super_strapi/my_strapi/x_helpers.dart';
 import 'package:bapp/super_strapi/my_strapi/x_widgets/x_widgets.dart';
 import 'package:bapp/widgets/hand_picked.dart';
 import 'package:bapp/widgets/loading.dart';
+import 'package:bapp/widgets/location_switch.dart';
 import 'package:bapp/widgets/search_bar.dart';
 import 'package:bapp/widgets/tiles/business_tile_big.dart';
 import 'package:bapp/widgets/tiles/complete_your_booking_tile.dart';
@@ -42,11 +44,9 @@ class _DiscoverTabState extends State<DiscoverTab> {
   Widget _getNearestFeatured(BuildContext context) {
     return Builder(
       builder: (_) {
-        return TapToReFetch<List<Business>>(
+        return TapToReFetch<List<Featured>>(
           fetcher: () {
-            return BusinessX.i.getNearestBusinesses(
-              key: nearestFeaturedKey,
-            );
+            return FeaturedX.i.getFeatured(getLocation());
           },
           onTap: () => nearestFeaturedKey = ValueKey(
             DateTime.now(),
@@ -59,8 +59,10 @@ class _DiscoverTabState extends State<DiscoverTab> {
           onLoadBuilder: (_) {
             return LoadingWidget();
           },
-          onSucessBuilder: (_, businesses) {
-            final data = businesses;
+          onSucessBuilder: (_, featureds) {
+            final data = featureds.isNotEmpty
+                ? featureds.first.businesses ?? []
+                : <Business>[];
             return LayoutBuilder(
               builder: (_, cons) {
                 if (data.isNotEmpty) {

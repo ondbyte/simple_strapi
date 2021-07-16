@@ -5208,6 +5208,427 @@ class _PartnerEmptyFields {
   bool about = false;
 }
 
+class Featured {
+  Featured.fromID(this.id)
+      : _synced = false,
+        businesses = null,
+        name = null,
+        validFrom = null,
+        validTo = null,
+        locality = null,
+        city = null,
+        image = null,
+        createdAt = null,
+        updatedAt = null;
+
+  Featured.fresh(
+      {this.businesses,
+      this.name,
+      this.validFrom,
+      this.validTo,
+      this.locality,
+      this.city,
+      this.image})
+      : _synced = false,
+        createdAt = null,
+        updatedAt = null,
+        id = null;
+
+  Featured._synced(
+      this.businesses,
+      this.name,
+      this.validFrom,
+      this.validTo,
+      this.locality,
+      this.city,
+      this.image,
+      this.createdAt,
+      this.updatedAt,
+      this.id)
+      : _synced = true;
+
+  Featured._unsynced(
+      this.businesses,
+      this.name,
+      this.validFrom,
+      this.validTo,
+      this.locality,
+      this.city,
+      this.image,
+      this.createdAt,
+      this.updatedAt,
+      this.id)
+      : _synced = false;
+
+  final bool _synced;
+
+  final List<Business>? businesses;
+
+  final String? name;
+
+  final DateTime? validFrom;
+
+  final DateTime? validTo;
+
+  final Locality? locality;
+
+  final City? city;
+
+  final StrapiFile? image;
+
+  final DateTime? createdAt;
+
+  final DateTime? updatedAt;
+
+  final String? id;
+
+  static final collectionName = "featureds";
+
+  _FeaturedEmptyFields _emptyFields = _FeaturedEmptyFields();
+
+  bool get synced => _synced;
+  Featured copyWIth(
+          {List<Business>? businesses,
+          String? name,
+          DateTime? validFrom,
+          DateTime? validTo,
+          Locality? locality,
+          City? city,
+          StrapiFile? image}) =>
+      Featured._unsynced(
+          businesses ?? this.businesses,
+          name ?? this.name,
+          validFrom ?? this.validFrom,
+          validTo ?? this.validTo,
+          locality ?? this.locality,
+          city ?? this.city,
+          image ?? this.image,
+          this.createdAt,
+          this.updatedAt,
+          this.id);
+  Featured setNull(
+      {bool businesses = false,
+      bool name = false,
+      bool validFrom = false,
+      bool validTo = false,
+      bool locality = false,
+      bool city = false,
+      bool image = false}) {
+    return Featured._unsynced(
+        businesses ? null : this.businesses,
+        name ? null : this.name,
+        validFrom ? null : this.validFrom,
+        validTo ? null : this.validTo,
+        locality ? null : this.locality,
+        city ? null : this.city,
+        image ? null : this.image,
+        this.createdAt,
+        this.updatedAt,
+        this.id)
+      .._emptyFields.businesses = businesses
+      .._emptyFields.name = name
+      .._emptyFields.validFrom = validFrom
+      .._emptyFields.validTo = validTo
+      .._emptyFields.locality = locality
+      .._emptyFields.city = city
+      .._emptyFields.image = image;
+  }
+
+  static Featured fromSyncedMap(Map<dynamic, dynamic> map) => Featured._synced(
+      StrapiUtils.objFromListOfMap<Business>(
+          map["businesses"], (e) => Businesses._fromIDorData(e)),
+      map["name"],
+      StrapiUtils.parseDateTime(map["validFrom"]),
+      StrapiUtils.parseDateTime(map["validTo"]),
+      StrapiUtils.objFromMap<Locality>(
+          map["locality"], (e) => Localities._fromIDorData(e)),
+      StrapiUtils.objFromMap<City>(map["city"], (e) => Cities._fromIDorData(e)),
+      StrapiUtils.objFromMap<StrapiFile>(
+          map["image"], (e) => StrapiFiles._fromIDorData(e)),
+      StrapiUtils.parseDateTime(map["createdAt"]),
+      StrapiUtils.parseDateTime(map["updatedAt"]),
+      map["id"]);
+  static Featured? fromMap(Map<String, dynamic> map) => Featured._unsynced(
+      StrapiUtils.objFromListOfMap<Business>(
+          map["businesses"], (e) => Businesses._fromIDorData(e)),
+      map["name"],
+      StrapiUtils.parseDateTime(map["validFrom"]),
+      StrapiUtils.parseDateTime(map["validTo"]),
+      StrapiUtils.objFromMap<Locality>(
+          map["locality"], (e) => Localities._fromIDorData(e)),
+      StrapiUtils.objFromMap<City>(map["city"], (e) => Cities._fromIDorData(e)),
+      StrapiUtils.objFromMap<StrapiFile>(
+          map["image"], (e) => StrapiFiles._fromIDorData(e)),
+      StrapiUtils.parseDateTime(map["createdAt"]),
+      StrapiUtils.parseDateTime(map["updatedAt"]),
+      map["id"]);
+  Map<String, dynamic> toMap() => _toMap(level: -1);
+  Map<String, dynamic> _toMap({int level = 0}) {
+    final toServer = level == 0;
+    return {
+      if (_emptyFields.businesses)
+        "businesses": []
+      else if (!_emptyFields.businesses && businesses != null)
+        "businesses": businesses
+            ?.map((e) => toServer ? e.id : e._toMap(level: level + level))
+            .toList(),
+      if (_emptyFields.name)
+        "name": null
+      else if (!_emptyFields.name && name != null)
+        "name": name,
+      if (_emptyFields.validFrom)
+        "validFrom": null
+      else if (!_emptyFields.validFrom && validFrom != null)
+        "validFrom": validFrom?.toIso8601String(),
+      if (_emptyFields.validTo)
+        "validTo": null
+      else if (!_emptyFields.validTo && validTo != null)
+        "validTo": validTo?.toIso8601String(),
+      if (_emptyFields.locality)
+        "locality": null
+      else if (!_emptyFields.locality && locality != null)
+        "locality":
+            toServer ? locality?.id : locality?._toMap(level: level + level),
+      if (_emptyFields.city)
+        "city": null
+      else if (!_emptyFields.city && city != null)
+        "city": toServer ? city?.id : city?._toMap(level: level + level),
+      if (_emptyFields.image)
+        "image": null
+      else if (!_emptyFields.image && image != null)
+        "image": toServer ? image?.id : image?._toMap(level: level + level),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
+      "id": id
+    };
+  }
+
+  Future<Featured> sync() async {
+    if (!synced) {
+      return this;
+    }
+    final _id = this.id;
+    if (_id is! String) {
+      return this;
+    }
+    final response = await Featureds.findOne(_id);
+    if (response is Featured) {
+      return response;
+    } else {
+      return this;
+    }
+  }
+
+  static _FeaturedFields get fields => _FeaturedFields.i;
+  @override
+  String toString() =>
+      "[Strapi Collection Type Featured]\n" + _toMap().toString();
+}
+
+class Featureds {
+  static const collectionName = "featureds";
+
+  static List<Featured?> fromIDs(List<String> ids) {
+    if (ids.isEmpty) {
+      return [];
+    }
+    return ids.map((id) => Featured.fromID(id)).toList();
+  }
+
+  static Future<Featured?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return Featured.fromSyncedMap(mapResponse);
+    }
+  }
+
+  static Future<List<Featured>> findMultiple({int limit = 16}) async {
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => Featured.fromSyncedMap(map)).toList();
+    }
+    return [];
+  }
+
+  static Future<Featured?> create(Featured featured) async {
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: featured._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return Featured.fromSyncedMap(map);
+    }
+  }
+
+  static Future<Featured?> update(Featured featured) async {
+    final id = featured.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
+        collection: collectionName,
+        id: id,
+        data: featured._toMap(level: 0),
+      );
+      if (map.isNotEmpty) {
+        return Featured.fromSyncedMap(map);
+      }
+    } else {
+      sPrint("id is null while updating");
+    }
+  }
+
+  static Future<int> count() async {
+    return await StrapiCollection.count(collectionName);
+  }
+
+  static Future<Featured?> delete(Featured featured) async {
+    final id = featured.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return Featured.fromSyncedMap(map);
+      }
+    } else {
+      sPrint("id is null while deleting");
+    }
+  }
+
+  static Featured? _fromIDorData(idOrData) {
+    if (idOrData is String) {
+      return Featured.fromID(idOrData);
+    }
+    if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return Featured.fromID(id);
+      }
+      return Featured.fromSyncedMap(idOrData);
+    }
+    return null;
+  }
+
+  static Future<List<Featured>> executeQuery(StrapiCollectionQuery query,
+      {int maxTimeOutInMillis = 15000}) async {
+    final queryString = query.query(
+      collectionName: collectionName,
+    );
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <Featured>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
+              if (o is Featured) {
+                list.add(o);
+              }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is Featured) {
+              return [o];
+            }
+          }
+        }
+      }
+    }
+    return [];
+  }
+
+  static Widget listenerWidget({
+    Key? key,
+    required Featured strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      Featured,
+      bool,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<Featured>(
+      key: key,
+      strapiObject: strapiObject,
+      generator: Featured.fromMap,
+      builder: builder,
+      sync: sync,
+    );
+  }
+}
+
+class _FeaturedFields {
+  _FeaturedFields._i();
+
+  static final _FeaturedFields i = _FeaturedFields._i();
+
+  final businesses = StrapiCollectionField("businesses");
+
+  final name = StrapiLeafField("name");
+
+  final validFrom = StrapiLeafField("validFrom");
+
+  final validTo = StrapiLeafField("validTo");
+
+  final locality = StrapiModelField("locality");
+
+  final city = StrapiModelField("city");
+
+  final image = StrapiModelField("image");
+
+  final createdAt = StrapiLeafField("createdAt");
+
+  final updatedAt = StrapiLeafField("updatedAt");
+
+  final id = StrapiLeafField("id");
+
+  List<StrapiField> call() {
+    return [
+      businesses,
+      name,
+      validFrom,
+      validTo,
+      locality,
+      city,
+      image,
+      createdAt,
+      updatedAt,
+      id
+    ];
+  }
+}
+
+class _FeaturedEmptyFields {
+  bool businesses = false;
+
+  bool name = false;
+
+  bool validFrom = false;
+
+  bool validTo = false;
+
+  bool locality = false;
+
+  bool city = false;
+
+  bool image = false;
+}
+
 class DefaultData {
   DefaultData.fromID(this.id)
       : _synced = false,

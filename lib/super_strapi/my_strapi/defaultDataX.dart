@@ -78,10 +78,15 @@ class DefaultDataX extends X {
   }
 
   Future setLocalityOrCity({Locality? locality, City? city}) async {
-    final updated = defaultData()?.copyWIth(
+    var updated = defaultData()?.copyWIth(
       locality: locality,
       city: city,
     );
+    if (locality == null) {
+      updated = updated?.setNull(locality: true);
+    } else if (city == null) {
+      updated = updated?.setNull(city: true);
+    }
     if (updated is DefaultData) {
       defaultData.value = await DefaultDatas.update(updated);
     }

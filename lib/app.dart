@@ -10,6 +10,7 @@ import 'package:bapp/screens/onboarding/onboardingscreen.dart';
 import 'package:bapp/super_strapi/my_strapi/bookingX.dart';
 import 'package:bapp/super_strapi/my_strapi/businessX.dart';
 import 'package:bapp/super_strapi/my_strapi/categoryX.dart';
+import 'package:bapp/super_strapi/my_strapi/featuredX.dart';
 import 'package:bapp/super_strapi/my_strapi/handPickedX.dart';
 import 'package:bapp/super_strapi/my_strapi/localityX.dart';
 import 'package:bapp/super_strapi/my_strapi/partnerX.dart';
@@ -52,6 +53,7 @@ class _AppState extends State<App> {
 
   Future _init(BuildContext context) async {
     try {
+      await Future.delayed(const Duration(seconds: 1));
       final h = HandPickedX();
       final b = BookingX();
       final bb = BusinessX();
@@ -63,6 +65,7 @@ class _AppState extends State<App> {
       final rx = ReviewX();
       final u = UserX();
       final p = PersistenceX();
+      final f = FeaturedX();
       await p.init();
       final fbUser = await FirebaseX.i.init();
       await StrapiSettings.i.init();
@@ -82,9 +85,8 @@ class _AppState extends State<App> {
       final makeSurePlace = () async {
         var data;
         await Future.doWhile(() async {
-          data = await Get.to(
-            PickAPlaceScreen(),
-          );
+          data = await Get.to(PickAPlaceScreen());
+
           return data == null;
         });
         return data;
@@ -111,9 +113,22 @@ class _AppState extends State<App> {
       bPrint(e);
       bPrint(s);
     }
-    setState(() {
-      _loaded = true;
-    });
+    Get.offAll(Bapp());
+  }
+
+  Widget _rootRoute() {
+    return Init(
+      onInitDone: (_) {},
+      initialization: (context) async {
+        if (!_initCompleter.isCompleted) {
+          _initCompleter.complete(_init(context));
+        }
+        return _initCompleter.future;
+      },
+      builder: (context, initDone) {
+        return initDone ? Bapp() : Splash();
+      },
+    );
   }
 
   @override
@@ -122,18 +137,12 @@ class _AppState extends State<App> {
       theme: getLightThemeData(),
       darkTheme: getDarkThemeData(),
       themeMode: ThemeMode.system,
-      home: Init(
-        onInitDone: (_) {},
-        initialization: (context) async {
-          if (!_initCompleter.isCompleted) {
-            _initCompleter.complete(_init(context));
-          }
-          return _initCompleter.future;
-        },
-        builder: (context, initDone) {
-          return initDone ? Bapp() : Splash();
-        },
-      ),
+      initialRoute: "/",
+      onGenerateRoute: (_) {
+        if (_.name == "/") {
+          return GetPageRoute(page: () => Splash());
+        }
+      },
     );
   }
 

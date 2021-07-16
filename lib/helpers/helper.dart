@@ -428,12 +428,3 @@ String readableEnum(enumerator) {
   final s = EnumToString.convertToString(enumerator);
   return ReCase("$s").sentenceCase;
 }
-
-bool isValidEmail(String? s) {
-  if (s is! String) {
-    return false;
-  }
-  return RegExp(
-          r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$')
-      .hasMatch(s);
-}

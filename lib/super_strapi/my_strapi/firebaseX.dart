@@ -89,7 +89,7 @@ class FirebaseX extends X {
       email = data["email"] as String;
       name = data["name"] as String;
 
-      if (isValidEmail(email) && name.isNotEmpty) {
+      if (GetUtils.isEmail(email) && name.isNotEmpty) {
         Get.to(
           PopResistLoadingScreen(),
         );
@@ -100,7 +100,7 @@ class FirebaseX extends X {
         await updateEmail(email);
         Get.back();
       } else {
-        if (!isValidEmail(email)) {
+        if (!GetUtils.isEmail(email)) {
           await Get.dialog(
             RequiredDialog(message: "Email is not valid"),
           );
@@ -110,7 +110,7 @@ class FirebaseX extends X {
           );
         }
       }
-      return !(isValidEmail(email) && name.isNotEmpty);
+      return !(GetUtils.isEmail(email) && name.isNotEmpty);
     });
   }
 

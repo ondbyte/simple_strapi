@@ -72,11 +72,11 @@ class _PickAPlaceScreenState extends State<PickAPlaceScreen> {
                   title: Text(e.name ?? "no name inform yadu"),
                   trailing: Icon(Icons.arrow_forward_ios),
                   onTap: () async {
-                    //cloudStore.getLocationsInCountry(e);
                     final data = await Get.to(
                       PickAPlaceScreen(
                         country: e,
                       ),
+                      preventDuplicates: false,
                     );
                     if (data != null) {
                       Get.back(result: data);
