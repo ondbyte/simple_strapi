@@ -92,17 +92,18 @@ class _BranchesResultScreenState extends State<BranchesResultScreen> {
                     final data = snap.data ?? [];
                     return data.isNotEmpty
                         ? ListView.builder(
-                            padding: EdgeInsets.fromLTRB(0, 16, 0, 0),
+                            padding: EdgeInsets.fromLTRB(0, 16, 0, 100),
                             shrinkWrap: true,
                             itemCount: data.length,
+                            physics: ClampingScrollPhysics(),
                             itemBuilder: (_, i) {
                               return BusinessTileWidget(
                                 titleStyle:
-                                    Theme.of(context).textTheme.subtitle1 ??
+                                    Theme.of(context).textTheme.headline5 ??
                                         TextStyle(),
                                 withImage: true,
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 0),
+                                    horizontal: 16, vertical: 5),
                                 branch: data[i],
                                 onTap: () async {
                                   //flow.branch = snap.data[i];

@@ -50,8 +50,7 @@ class BusinessBranchSwitchWidget extends StatelessWidget {
             ) {
               if (business is Business) {
                 return Text(
-                  (business?.address?.locality?.name ?? "no address")
-                      .substring(0, 9),
+                  (business?.address?.locality?.name ?? "no address"),
                   style: Theme.of(context).textTheme.subtitle1,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

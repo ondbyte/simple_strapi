@@ -360,15 +360,22 @@ class _BusinessProfileScreenState extends State<BusinessProfileScreen> {
                                             horizontal: 16, vertical: 10),
                                         onTrailingTapped: () {},
                                       ),
+                                      SizedBox(
+                                        height: 16,
+                                      ),
                                       Builder(builder: (_) {
                                         return !_showReviews
                                             ? getBappTabBar(
                                                 context,
                                                 [
-                                                  const Text(
-                                                    "Services",
-                                                  ),
-                                                  const Text("About"),
+                                                  Text("Services",
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .headline6),
+                                                  Text("About",
+                                                      style: Theme.of(context)
+                                                          .textTheme
+                                                          .headline6),
                                                   /* if (false) const Text("Offers"),
                                         if (false) const Text("Packages"), */
                                                 ],

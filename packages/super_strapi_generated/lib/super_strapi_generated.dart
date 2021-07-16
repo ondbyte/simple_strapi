@@ -2669,6 +2669,749 @@ class _LocalityEmptyFields {
   bool coordinates = false;
 }
 
+enum Type { instant, scheduled }
+
+class Message {
+  Message.fromID(this.id)
+      : _synced = false,
+        subject = null,
+        body = null,
+        cta = null,
+        image = null,
+        recipients = null,
+        type = null,
+        sendAt = null,
+        createdAt = null,
+        updatedAt = null;
+
+  Message.fresh(
+      {this.subject,
+      this.body,
+      this.cta,
+      this.image,
+      this.recipients,
+      this.type,
+      this.sendAt})
+      : _synced = false,
+        createdAt = null,
+        updatedAt = null,
+        id = null;
+
+  Message._synced(
+      this.subject,
+      this.body,
+      this.cta,
+      this.image,
+      this.recipients,
+      this.type,
+      this.sendAt,
+      this.createdAt,
+      this.updatedAt,
+      this.id)
+      : _synced = true;
+
+  Message._unsynced(
+      this.subject,
+      this.body,
+      this.cta,
+      this.image,
+      this.recipients,
+      this.type,
+      this.sendAt,
+      this.createdAt,
+      this.updatedAt,
+      this.id)
+      : _synced = false;
+
+  final bool _synced;
+
+  final String? subject;
+
+  final String? body;
+
+  final String? cta;
+
+  final StrapiFile? image;
+
+  final List<Recipients>? recipients;
+
+  final Type? type;
+
+  final DateTime? sendAt;
+
+  final DateTime? createdAt;
+
+  final DateTime? updatedAt;
+
+  final String? id;
+
+  static final collectionName = "messages";
+
+  _MessageEmptyFields _emptyFields = _MessageEmptyFields();
+
+  bool get synced => _synced;
+  Message copyWIth(
+          {String? subject,
+          String? body,
+          String? cta,
+          StrapiFile? image,
+          List<Recipients>? recipients,
+          Type? type,
+          DateTime? sendAt}) =>
+      Message._unsynced(
+          subject ?? this.subject,
+          body ?? this.body,
+          cta ?? this.cta,
+          image ?? this.image,
+          recipients ?? this.recipients,
+          type ?? this.type,
+          sendAt ?? this.sendAt,
+          this.createdAt,
+          this.updatedAt,
+          this.id);
+  Message setNull(
+      {bool subject = false,
+      bool body = false,
+      bool cta = false,
+      bool image = false,
+      bool recipients = false,
+      bool type = false,
+      bool sendAt = false}) {
+    return Message._unsynced(
+        subject ? null : this.subject,
+        body ? null : this.body,
+        cta ? null : this.cta,
+        image ? null : this.image,
+        recipients ? null : this.recipients,
+        type ? null : this.type,
+        sendAt ? null : this.sendAt,
+        this.createdAt,
+        this.updatedAt,
+        this.id)
+      .._emptyFields.subject = subject
+      .._emptyFields.body = body
+      .._emptyFields.cta = cta
+      .._emptyFields.image = image
+      .._emptyFields.recipients = recipients
+      .._emptyFields.type = type
+      .._emptyFields.sendAt = sendAt;
+  }
+
+  static Message fromSyncedMap(Map<dynamic, dynamic> map) => Message._synced(
+      map["subject"],
+      map["body"],
+      map["cta"],
+      StrapiUtils.objFromMap<StrapiFile>(
+          map["image"], (e) => StrapiFiles._fromIDorData(e)),
+      StrapiUtils.objFromListOfMap<Recipients>(
+          map["recipients"], (e) => Recipients.fromMap(e)),
+      StrapiUtils.toEnum<Type>(Type.values, map["type"]),
+      StrapiUtils.parseDateTime(map["sendAt"]),
+      StrapiUtils.parseDateTime(map["createdAt"]),
+      StrapiUtils.parseDateTime(map["updatedAt"]),
+      map["id"]);
+  static Message? fromMap(Map<String, dynamic> map) => Message._unsynced(
+      map["subject"],
+      map["body"],
+      map["cta"],
+      StrapiUtils.objFromMap<StrapiFile>(
+          map["image"], (e) => StrapiFiles._fromIDorData(e)),
+      StrapiUtils.objFromListOfMap<Recipients>(
+          map["recipients"], (e) => Recipients.fromMap(e)),
+      StrapiUtils.toEnum<Type>(Type.values, map["type"]),
+      StrapiUtils.parseDateTime(map["sendAt"]),
+      StrapiUtils.parseDateTime(map["createdAt"]),
+      StrapiUtils.parseDateTime(map["updatedAt"]),
+      map["id"]);
+  Map<String, dynamic> toMap() => _toMap(level: -1);
+  Map<String, dynamic> _toMap({int level = 0}) {
+    final toServer = level == 0;
+    return {
+      if (_emptyFields.subject)
+        "subject": null
+      else if (!_emptyFields.subject && subject != null)
+        "subject": subject,
+      if (_emptyFields.body)
+        "body": null
+      else if (!_emptyFields.body && body != null)
+        "body": body,
+      if (_emptyFields.cta)
+        "cta": null
+      else if (!_emptyFields.cta && cta != null)
+        "cta": cta,
+      if (_emptyFields.image)
+        "image": null
+      else if (!_emptyFields.image && image != null)
+        "image": toServer ? image?.id : image?._toMap(level: level + level),
+      if (_emptyFields.recipients)
+        "recipients": []
+      else if (!_emptyFields.recipients && recipients != null)
+        "recipients":
+            recipients?.map((e) => e._toMap(level: level + level)).toList(),
+      if (_emptyFields.type)
+        "type": null
+      else if (!_emptyFields.type && type != null)
+        "type": StrapiUtils.enumToString(type),
+      if (_emptyFields.sendAt)
+        "sendAt": null
+      else if (!_emptyFields.sendAt && sendAt != null)
+        "sendAt": sendAt?.toIso8601String(),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
+      "id": id
+    };
+  }
+
+  Future<Message> sync() async {
+    if (!synced) {
+      return this;
+    }
+    final _id = this.id;
+    if (_id is! String) {
+      return this;
+    }
+    final response = await Messages.findOne(_id);
+    if (response is Message) {
+      return response;
+    } else {
+      return this;
+    }
+  }
+
+  static _MessageFields get fields => _MessageFields.i;
+  @override
+  String toString() =>
+      "[Strapi Collection Type Message]\n" + _toMap().toString();
+}
+
+class Messages {
+  static const collectionName = "messages";
+
+  static List<Message?> fromIDs(List<String> ids) {
+    if (ids.isEmpty) {
+      return [];
+    }
+    return ids.map((id) => Message.fromID(id)).toList();
+  }
+
+  static Future<Message?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return Message.fromSyncedMap(mapResponse);
+    }
+  }
+
+  static Future<List<Message>> findMultiple({int limit = 16}) async {
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => Message.fromSyncedMap(map)).toList();
+    }
+    return [];
+  }
+
+  static Future<Message?> create(Message message) async {
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: message._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return Message.fromSyncedMap(map);
+    }
+  }
+
+  static Future<Message?> update(Message message) async {
+    final id = message.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
+        collection: collectionName,
+        id: id,
+        data: message._toMap(level: 0),
+      );
+      if (map.isNotEmpty) {
+        return Message.fromSyncedMap(map);
+      }
+    } else {
+      sPrint("id is null while updating");
+    }
+  }
+
+  static Future<int> count() async {
+    return await StrapiCollection.count(collectionName);
+  }
+
+  static Future<Message?> delete(Message message) async {
+    final id = message.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return Message.fromSyncedMap(map);
+      }
+    } else {
+      sPrint("id is null while deleting");
+    }
+  }
+
+  static Message? _fromIDorData(idOrData) {
+    if (idOrData is String) {
+      return Message.fromID(idOrData);
+    }
+    if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return Message.fromID(id);
+      }
+      return Message.fromSyncedMap(idOrData);
+    }
+    return null;
+  }
+
+  static Future<List<Message>> executeQuery(StrapiCollectionQuery query,
+      {int maxTimeOutInMillis = 15000}) async {
+    final queryString = query.query(
+      collectionName: collectionName,
+    );
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <Message>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
+              if (o is Message) {
+                list.add(o);
+              }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is Message) {
+              return [o];
+            }
+          }
+        }
+      }
+    }
+    return [];
+  }
+
+  static Widget listenerWidget({
+    Key? key,
+    required Message strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      Message,
+      bool,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<Message>(
+      key: key,
+      strapiObject: strapiObject,
+      generator: Message.fromMap,
+      builder: builder,
+      sync: sync,
+    );
+  }
+}
+
+class _MessageFields {
+  _MessageFields._i();
+
+  static final _MessageFields i = _MessageFields._i();
+
+  final subject = StrapiLeafField("subject");
+
+  final body = StrapiLeafField("body");
+
+  final cta = StrapiLeafField("cta");
+
+  final image = StrapiModelField("image");
+
+  final recipients = StrapiComponentField("recipients");
+
+  final type = StrapiLeafField("type");
+
+  final sendAt = StrapiLeafField("sendAt");
+
+  final createdAt = StrapiLeafField("createdAt");
+
+  final updatedAt = StrapiLeafField("updatedAt");
+
+  final id = StrapiLeafField("id");
+
+  List<StrapiField> call() {
+    return [
+      subject,
+      body,
+      cta,
+      image,
+      recipients,
+      type,
+      sendAt,
+      createdAt,
+      updatedAt,
+      id
+    ];
+  }
+}
+
+class _MessageEmptyFields {
+  bool subject = false;
+
+  bool body = false;
+
+  bool cta = false;
+
+  bool image = false;
+
+  bool recipients = false;
+
+  bool type = false;
+
+  bool sendAt = false;
+}
+
+class Locality {
+  Locality.fromID(this.id)
+      : _synced = false,
+        name = null,
+        enabled = null,
+        city = null,
+        coordinates = null,
+        createdAt = null,
+        updatedAt = null;
+
+  Locality.fresh({this.name, this.enabled, this.city, this.coordinates})
+      : _synced = false,
+        createdAt = null,
+        updatedAt = null,
+        id = null;
+
+  Locality._synced(this.name, this.enabled, this.city, this.coordinates,
+      this.createdAt, this.updatedAt, this.id)
+      : _synced = true;
+
+  Locality._unsynced(this.name, this.enabled, this.city, this.coordinates,
+      this.createdAt, this.updatedAt, this.id)
+      : _synced = false;
+
+  final bool _synced;
+
+  final String? name;
+
+  final bool? enabled;
+
+  final City? city;
+
+  final Coordinates? coordinates;
+
+  final DateTime? createdAt;
+
+  final DateTime? updatedAt;
+
+  final String? id;
+
+  static final collectionName = "localities";
+
+  _LocalityEmptyFields _emptyFields = _LocalityEmptyFields();
+
+  bool get synced => _synced;
+  Locality copyWIth(
+          {String? name,
+          bool? enabled,
+          City? city,
+          Coordinates? coordinates}) =>
+      Locality._unsynced(
+          name ?? this.name,
+          enabled ?? this.enabled,
+          city ?? this.city,
+          coordinates ?? this.coordinates,
+          this.createdAt,
+          this.updatedAt,
+          this.id);
+  Locality setNull(
+      {bool name = false,
+      bool enabled = false,
+      bool city = false,
+      bool coordinates = false}) {
+    return Locality._unsynced(
+        name ? null : this.name,
+        enabled ? null : this.enabled,
+        city ? null : this.city,
+        coordinates ? null : this.coordinates,
+        this.createdAt,
+        this.updatedAt,
+        this.id)
+      .._emptyFields.name = name
+      .._emptyFields.enabled = enabled
+      .._emptyFields.city = city
+      .._emptyFields.coordinates = coordinates;
+  }
+
+  static Locality fromSyncedMap(Map<dynamic, dynamic> map) => Locality._synced(
+      map["name"],
+      StrapiUtils.parseBool(map["enabled"]),
+      StrapiUtils.objFromMap<City>(map["city"], (e) => Cities._fromIDorData(e)),
+      StrapiUtils.objFromMap<Coordinates>(
+          map["coordinates"], (e) => Coordinates.fromMap(e)),
+      StrapiUtils.parseDateTime(map["createdAt"]),
+      StrapiUtils.parseDateTime(map["updatedAt"]),
+      map["id"]);
+  static Locality? fromMap(Map<String, dynamic> map) => Locality._unsynced(
+      map["name"],
+      StrapiUtils.parseBool(map["enabled"]),
+      StrapiUtils.objFromMap<City>(map["city"], (e) => Cities._fromIDorData(e)),
+      StrapiUtils.objFromMap<Coordinates>(
+          map["coordinates"], (e) => Coordinates.fromMap(e)),
+      StrapiUtils.parseDateTime(map["createdAt"]),
+      StrapiUtils.parseDateTime(map["updatedAt"]),
+      map["id"]);
+  Map<String, dynamic> toMap() => _toMap(level: -1);
+  Map<String, dynamic> _toMap({int level = 0}) {
+    final toServer = level == 0;
+    return {
+      if (_emptyFields.name)
+        "name": null
+      else if (!_emptyFields.name && name != null)
+        "name": name,
+      if (_emptyFields.enabled)
+        "enabled": null
+      else if (!_emptyFields.enabled && enabled != null)
+        "enabled": enabled,
+      if (_emptyFields.city)
+        "city": null
+      else if (!_emptyFields.city && city != null)
+        "city": toServer ? city?.id : city?._toMap(level: level + level),
+      if (_emptyFields.coordinates)
+        "coordinates": null
+      else if (!_emptyFields.coordinates && coordinates != null)
+        "coordinates": coordinates?._toMap(level: level + level),
+      "createdAt": createdAt?.toIso8601String(),
+      "updatedAt": updatedAt?.toIso8601String(),
+      "id": id
+    };
+  }
+
+  Future<Locality> sync() async {
+    if (!synced) {
+      return this;
+    }
+    final _id = this.id;
+    if (_id is! String) {
+      return this;
+    }
+    final response = await Localities.findOne(_id);
+    if (response is Locality) {
+      return response;
+    } else {
+      return this;
+    }
+  }
+
+  static _LocalityFields get fields => _LocalityFields.i;
+  @override
+  String toString() =>
+      "[Strapi Collection Type Locality]\n" + _toMap().toString();
+}
+
+class Localities {
+  static const collectionName = "localities";
+
+  static List<Locality?> fromIDs(List<String> ids) {
+    if (ids.isEmpty) {
+      return [];
+    }
+    return ids.map((id) => Locality.fromID(id)).toList();
+  }
+
+  static Future<Locality?> findOne(
+    String id,
+  ) async {
+    final mapResponse = await StrapiCollection.findOne(
+      collection: collectionName,
+      id: id,
+    );
+    if (mapResponse.isNotEmpty) {
+      return Locality.fromSyncedMap(mapResponse);
+    }
+  }
+
+  static Future<List<Locality>> findMultiple({int limit = 16}) async {
+    final list = await StrapiCollection.findMultiple(
+      collection: collectionName,
+      limit: limit,
+    );
+    if (list.isNotEmpty) {
+      return list.map((map) => Locality.fromSyncedMap(map)).toList();
+    }
+    return [];
+  }
+
+  static Future<Locality?> create(Locality locality) async {
+    final map = await StrapiCollection.create(
+      collection: collectionName,
+      data: locality._toMap(level: 0),
+    );
+    if (map.isNotEmpty) {
+      return Locality.fromSyncedMap(map);
+    }
+  }
+
+  static Future<Locality?> update(Locality locality) async {
+    final id = locality.id;
+    if (id is String) {
+      final map = await StrapiCollection.update(
+        collection: collectionName,
+        id: id,
+        data: locality._toMap(level: 0),
+      );
+      if (map.isNotEmpty) {
+        return Locality.fromSyncedMap(map);
+      }
+    } else {
+      sPrint("id is null while updating");
+    }
+  }
+
+  static Future<int> count() async {
+    return await StrapiCollection.count(collectionName);
+  }
+
+  static Future<Locality?> delete(Locality locality) async {
+    final id = locality.id;
+    if (id is String) {
+      final map =
+          await StrapiCollection.delete(collection: collectionName, id: id);
+      if (map.isNotEmpty) {
+        return Locality.fromSyncedMap(map);
+      }
+    } else {
+      sPrint("id is null while deleting");
+    }
+  }
+
+  static Locality? _fromIDorData(idOrData) {
+    if (idOrData is String) {
+      return Locality.fromID(idOrData);
+    }
+    if (idOrData is Map) {
+      if ((idOrData.containsKey("createdAt") ||
+              idOrData.containsKey("updatedAt")) &&
+          (idOrData["createdAt"] == null || idOrData["updatedAt"] == null)) {
+        final id = idOrData["id"];
+        return Locality.fromID(id);
+      }
+      return Locality.fromSyncedMap(idOrData);
+    }
+    return null;
+  }
+
+  static Future<List<Locality>> executeQuery(StrapiCollectionQuery query,
+      {int maxTimeOutInMillis = 15000}) async {
+    final queryString = query.query(
+      collectionName: collectionName,
+    );
+    final response = await Strapi.i
+        .graphRequest(queryString, maxTimeOutInMillis: maxTimeOutInMillis);
+    if (response.body.isNotEmpty) {
+      final object = response.body.first;
+      if (object is Map && object.containsKey("data")) {
+        final data = object["data"];
+        if (data is Map && data.containsKey(query.collectionName)) {
+          final myList = data[query.collectionName];
+          if (myList is List) {
+            final list = <Locality>[];
+            myList.forEach((e) {
+              final o = _fromIDorData(e);
+              if (o is Locality) {
+                list.add(o);
+              }
+            });
+            return list;
+          } else if (myList is Map && myList.containsKey("id")) {
+            final o = _fromIDorData(myList);
+            if (o is Locality) {
+              return [o];
+            }
+          }
+        }
+      }
+    }
+    return [];
+  }
+
+  static Widget listenerWidget({
+    Key? key,
+    required Locality strapiObject,
+    bool sync = false,
+    required Widget Function(
+      BuildContext,
+      Locality,
+      bool,
+    )
+        builder,
+  }) {
+    return _StrapiListenerWidget<Locality>(
+      key: key,
+      strapiObject: strapiObject,
+      generator: Locality.fromMap,
+      builder: builder,
+      sync: sync,
+    );
+  }
+}
+
+class _LocalityFields {
+  _LocalityFields._i();
+
+  static final _LocalityFields i = _LocalityFields._i();
+
+  final name = StrapiLeafField("name");
+
+  final enabled = StrapiLeafField("enabled");
+
+  final city = StrapiModelField("city");
+
+  final coordinates = StrapiComponentField("coordinates");
+
+  final createdAt = StrapiLeafField("createdAt");
+
+  final updatedAt = StrapiLeafField("updatedAt");
+
+  final id = StrapiLeafField("id");
+
+  List<StrapiField> call() {
+    return [name, enabled, city, coordinates, createdAt, updatedAt, id];
+  }
+}
+
+class _LocalityEmptyFields {
+  bool name = false;
+
+  bool enabled = false;
+
+  bool city = false;
+
+  bool coordinates = false;
+}
+
 class Update {
   Update.fromID(this.id)
       : _synced = false,
@@ -4555,6 +5298,8 @@ class BusinessCategory {
 
   final List<City>? cities;
 
+  final CustomerType? customer_type;
+
   final DateTime? createdAt;
 
   final DateTime? updatedAt;
@@ -4838,6 +5583,8 @@ class _BusinessCategoryFields {
 
   final cities = StrapiCollectionField("cities");
 
+  final customer_type = StrapiLeafField("customer_type");
+
   final createdAt = StrapiLeafField("createdAt");
 
   final updatedAt = StrapiLeafField("updatedAt");
@@ -4896,6 +5643,8 @@ class Partner {
   final List<Business>? businesses;
 
   final String? about;
+
+  final List<City>? cities;
 
   final DateTime? createdAt;
 
@@ -5184,6 +5933,8 @@ class _PartnerFields {
   final businesses = StrapiCollectionField("businesses");
 
   final about = StrapiLeafField("about");
+
+  final cities = StrapiCollectionField("cities");
 
   final createdAt = StrapiLeafField("createdAt");
 

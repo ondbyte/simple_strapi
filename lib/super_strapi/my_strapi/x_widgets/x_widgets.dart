@@ -127,7 +127,7 @@ class _StrapiListTileImageWidgetState extends State<StrapiListTileImageWidget> {
           borderRadius: BorderRadius.all(Radius.circular(8)),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.all(Radius.circular(8)),
+          borderRadius: BorderRadius.all(Radius.circular(7)),
           child: StrapiImageWidget(
             file: widget.file,
             format: widget.file?.thumbNail,

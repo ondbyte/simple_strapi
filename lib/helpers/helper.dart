@@ -202,10 +202,10 @@ PreferredSizeWidget getBappTabBar(BuildContext context, List<Widget> tabs) {
     labelColor: Theme.of(context).primaryColor,
     unselectedLabelColor: Theme.of(context).colorScheme.onSurface,
     indicatorColor: Theme.of(context).primaryColor,
-    indicatorPadding: const EdgeInsets.all(16),
+    // indicatorPadding: const EdgeInsets.all(16),
     indicatorWeight: 6,
     indicatorSize: TabBarIndicatorSize.tab,
-    labelPadding: const EdgeInsets.only(bottom: 16, top: 8),
+    labelPadding: const EdgeInsets.only(bottom: 8, top: 8),
     tabs: tabs,
   );
 }

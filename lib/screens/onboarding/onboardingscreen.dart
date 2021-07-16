@@ -132,14 +132,14 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
         ),
         Text(
           slide.title,
-          style: Theme.of(context).textTheme.headline2,
+          style: Theme.of(context).textTheme.headline1,
         ),
         const SizedBox(
           height: 10,
         ),
         Text(
           slide.description,
-          style: Theme.of(context).textTheme.bodyText1,
+          style: Theme.of(context).textTheme.subtitle2,
           maxLines: 3,
           textAlign: TextAlign.center,
         ),

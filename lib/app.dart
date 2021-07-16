@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:bapp/config/theme_config.dart';
 import 'package:bapp/helpers/helper.dart';
 import 'package:bapp/screens/home/bapp.dart';
@@ -16,17 +15,17 @@ import 'package:bapp/super_strapi/my_strapi/localityX.dart';
 import 'package:bapp/super_strapi/my_strapi/partnerX.dart';
 import 'package:bapp/super_strapi/my_strapi/persistenceX.dart';
 import 'package:bapp/super_strapi/my_strapi/reviewX.dart';
+import 'package:bapp/super_strapi/my_strapi/updateX.dart';
 import 'package:bapp/widgets/app/bapp_navigator_widget.dart';
-import 'package:bapp/widgets/app/bapp_provider_initializer.dart';
-import 'package:bapp/widgets/app/bapp_themed_app.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:super_strapi_generated/super_strapi_generated.dart';
-import 'package:yadunandans_flutter_helpers/themed_app.dart';
-
+// import 'package:yadunandans_flutter_helpers/themed_app.dart';
+import 'package:bapp/classes/themed_app.dart';
 import 'config/constants.dart';
 import 'super_strapi/my_strapi/defaultDataX.dart';
 import 'super_strapi/my_strapi/firebaseX.dart';
