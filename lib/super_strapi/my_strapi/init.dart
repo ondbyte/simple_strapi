@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:simple_strapi/simple_strapi.dart';
 
 class StrapiSettings {
