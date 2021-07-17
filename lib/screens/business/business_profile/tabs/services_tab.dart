@@ -28,6 +28,8 @@ class BusinessProfileServicesTab extends StatefulWidget {
 
 class _BusinessProfileServicesTabState extends State<BusinessProfileServicesTab>
     with AutomaticKeepAliveClientMixin {
+  final Map<String, List<Product>> _selectedServices = {};
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -44,7 +46,7 @@ class _BusinessProfileServicesTabState extends State<BusinessProfileServicesTab>
         return CatlogueWidget(
           cart: widget.cart,
           catalogue: catalogs[i],
-          onServicesSelected: widget.onServicesSelected,
+          onServicesSelected: (ss) {},
         );
       },
     );

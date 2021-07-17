@@ -69,8 +69,10 @@ class FirebaseX extends X {
   } */
 
   Future forceUpdateUserDetailsIfDoesntExist() async {
-    if ((firebaseUser?.email?.isNotEmpty ?? false) &&
-        (firebaseUser?.displayName?.isNotEmpty ?? false)) {
+    final fUser = fba.FirebaseAuth.instance.currentUser;
+    final existingEmail = fUser?.email ?? "";
+    final existingName = fUser?.displayName ?? "";
+    if (existingName.isNotEmpty && existingEmail.isNotEmpty) {
       return;
     }
     var name = "", email = "";
