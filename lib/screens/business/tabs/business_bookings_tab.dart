@@ -86,7 +86,7 @@ class _BusinessBookingsTabState extends State<BusinessBookingsTab>
                     ? SizedBox()
                     : FloatingActionButton(
                         onPressed: () {
-                          Get.dialog(
+                          Get.bottomSheet(
                             BookingsTabAddOptions(
                               business: business,
                               selectedEmployee: _pickedEmployee()!,

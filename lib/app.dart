@@ -17,6 +17,7 @@ import 'package:bapp/super_strapi/my_strapi/persistenceX.dart';
 import 'package:bapp/super_strapi/my_strapi/reviewX.dart';
 import 'package:bapp/super_strapi/my_strapi/updateX.dart';
 import 'package:bapp/widgets/app/bapp_navigator_widget.dart';
+import 'package:bapp/widgets/dialogs.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -40,17 +41,13 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  final firstScreen = Rx<Widget>(SizedBox());
-  final _initCompleter = Completer();
-  var _loaded = false;
-
   @override
   void initState() {
     super.initState();
-    _init(context);
+    _init();
   }
 
-  Future _init(BuildContext context) async {
+  Future _init() async {
     try {
       await Future.delayed(const Duration(seconds: 1));
       final h = HandPickedX();
@@ -65,6 +62,7 @@ class _AppState extends State<App> {
       final u = UserX();
       final p = PersistenceX();
       final f = FeaturedX();
+      final up = UpdateX();
       await p.init();
       final fbUser = await FirebaseX.i.init();
       await StrapiSettings.i.init();
@@ -115,7 +113,7 @@ class _AppState extends State<App> {
     Get.offAll(Bapp());
   }
 
-  Widget _rootRoute() {
+/*   Widget _rootRoute() {
     return Init(
       onInitDone: (_) {},
       initialization: (context) async {
@@ -128,7 +126,7 @@ class _AppState extends State<App> {
         return initDone ? Bapp() : Splash();
       },
     );
-  }
+  } */
 
   @override
   Widget build(context) {

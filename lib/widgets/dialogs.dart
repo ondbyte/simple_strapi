@@ -7,15 +7,28 @@ class RequiredDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      title: Text("Required"),
-      content: Text(message),
-      actions: [
-        TextButton(
-          onPressed: Get.back,
-          child: Text("OK"),
-        )
-      ],
+    return BottomSheet(
+      onClosing: () {},
+      builder: (_) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Required",
+                style: Theme.of(context).textTheme.subtitle1,
+              ),
+              Text("$message"),
+              OutlinedButton(
+                onPressed: Get.back,
+                child: Text("OK"),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

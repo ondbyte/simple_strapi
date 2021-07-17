@@ -64,6 +64,8 @@ class UserX {
   }
 
   Future logout() async {
+    Get.to(PopResistLoadingScreen());
+    Strapi.i.strapiToken = "";
     await FirebaseX.i.logOut();
     await PersistenceX.i.clear();
     await DefaultDataX.i.clear();

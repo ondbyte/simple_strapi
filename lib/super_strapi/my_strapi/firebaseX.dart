@@ -81,7 +81,7 @@ class FirebaseX extends X {
       );
 
       if (data is! Map) {
-        await Get.dialog(
+        await Get.bottomSheet(
           RequiredDialog(message: "We need your email and name"),
         );
         return true;
@@ -96,16 +96,29 @@ class FirebaseX extends X {
 
         await updateDisplayName(name);
 
-        ///shouldnt throw as its the first time
-        await updateEmail(email);
+        try {
+          await updateEmail(email);
+        } on fba.FirebaseAuthException catch (e) {
+          if (e.code == "email-already-in-use") {
+            await Get.bottomSheet(
+              RequiredDialog(
+                message:
+                    "The email $email is already in use, please enter a new one",
+              ),
+            );
+            email = "";
+          } else {
+            rethrow;
+          }
+        }
         Get.back();
       } else {
         if (!GetUtils.isEmail(email)) {
-          await Get.dialog(
+          await Get.bottomSheet(
             RequiredDialog(message: "Email is not valid"),
           );
         } else if (name.isEmpty) {
-          await Get.dialog(
+          await Get.bottomSheet(
             RequiredDialog(message: "We need your name"),
           );
         }

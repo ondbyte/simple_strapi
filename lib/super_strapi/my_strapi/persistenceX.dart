@@ -46,7 +46,8 @@ class PersistenceX {
   }
 
   Future clear() async {
-    _hiveBox.deleteFromDisk();
+    await _hiveBox.deleteFromDisk();
+    return;
   }
 
   Future wait50() async {
@@ -58,5 +59,5 @@ class StorageKeys {
   static String get isFirstTimeOnDevice => "isFirstTimeOnDevice20";
   static String get selectedBusinessId => "selectedBusinessId2";
   static String get selectedEmployeeId => "selectedEmployeeId2";
-  static String get storageBox => "storageBox3";
+  static String get storageBox => "storageBox4";
 }

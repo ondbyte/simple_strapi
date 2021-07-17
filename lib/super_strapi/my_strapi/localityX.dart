@@ -23,82 +23,67 @@ class LocalityX extends X {
 
   Future<List<Country>> getCountries(
       {Key key = const ValueKey("getCountries")}) async {
-    return memoize(
-      key,
-      () async {
-        final countries = await Countries.findMultiple();
-        return countries;
-      },
-    );
+    final countries = await Countries.findMultiple();
+    return countries;
   }
 
   Future<List<City>> getCitiesOfCountry(Country country, {Key? key}) async {
-    return memoize(
-      key ?? ValueKey("getCitiesOfCountry"),
-      () async {
-        final query = StrapiCollectionQuery(
-          collectionName: City.collectionName,
-          requiredFields: City.fields(),
-        )
-          ..whereModelField(
-            field: City.fields.country,
-            query: StrapiModelQuery(
-              requiredFields: Country.fields(),
-            )..whereField(
-                field: Country.fields.id,
-                query: StrapiFieldQuery.equalTo,
-                value: country.id,
-              ),
-          )
-          ..whereCollectionField(
-            field: City.fields.localities,
-            query: StrapiCollectionQuery(
-              collectionName: Locality.collectionName,
-              requiredFields: Locality.fields(),
-            ),
-          );
+    final query = StrapiCollectionQuery(
+      collectionName: City.collectionName,
+      requiredFields: City.fields(),
+    )
+      ..whereModelField(
+        field: City.fields.country,
+        query: StrapiModelQuery(
+          requiredFields: Country.fields(),
+        )..whereField(
+            field: Country.fields.id,
+            query: StrapiFieldQuery.equalTo,
+            value: country.id,
+          ),
+      )
+      ..whereCollectionField(
+        field: City.fields.localities,
+        query: StrapiCollectionQuery(
+          collectionName: Locality.collectionName,
+          requiredFields: Locality.fields(),
+        ),
+      );
 
-        final cities =
-            Cities.executeQuery(query); //await Cities.getForListOfIDs(ids);
-        return cities;
-      },
-    );
+    final cities =
+        Cities.executeQuery(query); //await Cities.getForListOfIDs(ids);
+    return cities;
   }
 
   Future<Country?> getCountryFor(
       {Locality? locality, City? city, Key? key}) async {
-    return memoize(
-      key ?? ValueKey("getCountryFor"),
-      () async {
-        final targetCity = city ?? locality?.city;
-        final id = targetCity?.id;
-        late final query;
-        if (id is String) {
-          final subQuery = StrapiCollectionQuery(
-            collectionName: City.collectionName,
-            requiredFields: City.fields(),
-          )..whereField(
-              field: City.fields.id,
-              query: StrapiFieldQuery.equalTo,
-              value: id,
-            );
-          query = StrapiCollectionQuery(
-            collectionName: Country.collectionName,
-            requiredFields: Country.fields(),
-          )..whereCollectionField(
-              field: Country.fields.cities,
-              query: subQuery,
-            );
-        } else {
-          throw BappException(msg: "target city id is null");
-        }
-        final all = await Countries.executeQuery(query);
-        if (all.isNotEmpty) {
-          print(all);
-          return all.first;
-        }
-      },
-    );
+    final targetCity = city ?? locality?.city;
+    final id = targetCity?.id;
+    late final query;
+    if (id is String) {
+      final subQuery = StrapiCollectionQuery(
+        collectionName: City.collectionName,
+        requiredFields: City.fields(),
+      )..whereField(
+          field: City.fields.id,
+          query: StrapiFieldQuery.equalTo,
+          value: id,
+        );
+      query = StrapiCollectionQuery(
+        collectionName: Country.collectionName,
+        requiredFields: Country.fields(),
+      )..whereCollectionField(
+          field: Country.fields.cities,
+          query: subQuery,
+        );
+    } else {
+      throw BappException(msg: "target city id is null");
+    }
+    final all = await Countries.executeQuery(query);
+    if (all.isNotEmpty) {
+      print(all);
+      return all.first;
+    }
   }
 
   @override

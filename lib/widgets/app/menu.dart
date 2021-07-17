@@ -85,6 +85,7 @@ class _MenuState extends State<Menu> {
         return ListTile(
           title: Text("Logout"),
           onTap: () async {
+            Get.back();
             await UserX.i.logout();
           },
         );
